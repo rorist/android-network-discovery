@@ -60,6 +60,7 @@ public class SmbPoc extends Activity
     private String                    hMsg= "";
     private InetAddress               hIp = null;
     protected ProgressDialog          progress; 
+    protected Runnable                runnable;
 
 
     @Override
@@ -74,7 +75,6 @@ public class SmbPoc extends Activity
         adapter = new ArrayAdapter<String>(this, R.layout.list, model);
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
-
 //        addText(Integer.toString(getIpByStr("0.255.255.255").hashCode()));
 
         wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
@@ -109,6 +109,7 @@ public class SmbPoc extends Activity
         });
         
         messageHandler = new Handler() {
+            /*
             @Override
             public void handleMessage(Message msg) {
                 switch(msg.what){
@@ -136,6 +137,7 @@ public class SmbPoc extends Activity
                     hIp = getIp(msg.what);
                 }
             }
+            */
         };
     }
     
