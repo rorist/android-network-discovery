@@ -9,8 +9,14 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
     	android:layout_marginTop="5dip"
-    	android:layout_marginLeft="5dip"
-    	android:layout_marginRight="5dip">
+    	android:layout_marginLeft="2dip"
+    	android:layout_marginRight="2dip">
+	    
+        <Button android:id="@+id/btn"
+	        android:layout_width="100dip"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:text="Send"/>
         
         <EditText
             android:id="@+id/ip"
@@ -19,12 +25,6 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:text=""/>
-
-	    <Button android:id="@+id/btn"
-	        android:layout_width="100dip"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="Send"/>
 
 	    <Button android:id="@+id/btn1"
 	        android:layout_width="40dip"
@@ -45,10 +45,5 @@
 	   	android:layout_width="fill_parent"
 	   	android:layout_height="fill_parent"
 	   	android:layout_weight="1"/>
-    	
-	<ProgressBar android:id="@+id/progress"
-	  	style="?android:attr/progressBarStyleHorizontal"
-	  	android:layout_width="fill_parent"
-	  	android:layout_height="wrap_content"/>
 
 </LinearLayout>
