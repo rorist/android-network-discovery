@@ -7,13 +7,10 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:gravity="center_vertical"
-            android:text="IP: "/>
+        android:layout_height="wrap_content"
+    	android:layout_marginTop="5dip"
+    	android:layout_marginLeft="5dip"
+    	android:layout_marginRight="5dip">
         
         <EditText
             android:id="@+id/ip"
@@ -24,23 +21,34 @@
             android:text=""/>
 
 	    <Button android:id="@+id/btn"
-	        android:layout_width="wrap_content"
+	        android:layout_width="100dip"
 	        android:layout_height="wrap_content"
-	        android:text=" Hack This! "/>
+	        android:layout_gravity="center_horizontal"
+	        android:text="Send"/>
+
+	    <Button android:id="@+id/btn1"
+	        android:layout_width="40dip"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:text="X"/>
    
     </LinearLayout>
-    
-    <ScrollView
+        
+    <TextView
+        android:id="@+id/info"
         android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+    	android:textSize="12dip"/>
 
-	    <TextView
-	    	android:id="@+id/output"
-	        android:layout_width="fill_parent"
-	        android:layout_height="fill_parent"
-	        android:text=""/>
-	        
-    </ScrollView>
+        
+	<ListView android:id="@+id/output"
+	   	android:layout_width="fill_parent"
+	   	android:layout_height="fill_parent"
+	   	android:layout_weight="1"/>
+    	
+	<ProgressBar android:id="@+id/progress"
+	  	style="?android:attr/progressBarStyleHorizontal"
+	  	android:layout_width="fill_parent"
+	  	android:layout_height="wrap_content"/>
 
 </LinearLayout>
