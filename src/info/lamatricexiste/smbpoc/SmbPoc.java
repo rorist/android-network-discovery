@@ -3,6 +3,7 @@ package info.lamatricexiste.smbpoc;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.InterruptedException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -26,7 +27,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.app.ProgressDialog;
 
 
 public class SmbPoc extends Activity
@@ -59,9 +59,6 @@ public class SmbPoc extends Activity
     private Handler        messageHandler = null;
     private String                    hMsg= "";
     private InetAddress               hIp = null;
-    protected ProgressDialog          progress; 
-    protected Runnable                runnable;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -89,8 +86,8 @@ public class SmbPoc extends Activity
 //            host_id = getIpByStr("0.0.255.255");
             
             info.setText("IP: " + getIp(dhcp.ipAddress).getHostAddress() +
-            		"  Network: " + ip_net.getHostAddress()+
-                    "  Broadcast: "+ ip_bc.getHostAddress());
+            		"\nNetwork: " + ip_net.getHostAddress()+
+                    "\nBroadcast: "+ ip_bc.getHostAddress());
         }
         else {
             addText("No available network");
@@ -109,13 +106,17 @@ public class SmbPoc extends Activity
         });
         
         messageHandler = new Handler() {
-            /*
             @Override
             public void handleMessage(Message msg) {
                 switch(msg.what){
                 case 0:
-                    addText(hIp.getHostAddress() + " " + hMsg);
-                    hIp = null;
+                    if(hIp!=null) {
+                        addText(hIp.getHostAddress() + " " + hMsg);
+                        hIp = null;
+                    }
+                    else {
+                        addText(hMsg);
+                    }
                     hMsg = "";
                     break;
                 case 1:
@@ -137,7 +138,6 @@ public class SmbPoc extends Activity
                     hIp = getIp(msg.what);
                 }
             }
-            */
         };
     }
     
@@ -273,8 +273,8 @@ public class SmbPoc extends Activity
  * Thread
  */  
     public void launchThreadAttack(){
-        progress = ProgressDialog.show(SmbPoc.this, "", "Chargement", true);
         for(final InetAddress h : hosts){
+
             Thread t = new Thread() {
                 public void run(){
                     messageHandler.sendMessage(Message.obtain(messageHandler, 5)); 
@@ -290,9 +290,10 @@ public class SmbPoc extends Activity
                 }
             });
             t.setDaemon(true);
+            try { t.sleep(200); }
+            catch (java.lang.InterruptedException e) {addText(h.getHostAddress() + " " + e.getMessage());}
             t.start();
         }
-        progress.dismiss();
     }
     
     public void hackthis(InetAddress h) {
