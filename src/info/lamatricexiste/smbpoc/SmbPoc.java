@@ -58,34 +58,4 @@ public class SmbPoc implements Runnable
         out.close();
         s.close();
     }
-
-/**
- * Thread
- */  
-//    public void launchThreadAttack(){
-//        for(final InetAddress h : hosts){
-//
-//            Thread t = new Thread() {
-//                public void run(){
-//                    messageHandler.sendMessage(Message.obtain(messageHandler, 5)); 
-//                    hackthis(h);
-//                    messageHandler.sendMessage(Message.obtain(messageHandler, getIpInt(h))); 
-//                    messageHandler.sendMessage(Message.obtain(messageHandler, 0)); 
-//                }
-//            };
-//            t.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-//                @Override
-//                public void uncaughtException(Thread thread, Throwable ex) {
-//                    messageHandler.sendMessage(Message.obtain(messageHandler, 3)); 
-//                }
-//            });
-//            t.setDaemon(true);
-//            try { t.sleep(200); }
-//            catch (java.lang.InterruptedException e) {addText(h.getHostAddress() + " " + e.getMessage());}
-//            t.start();
-//        }
-//    }    
-/*
- * End Thread
- **/
 }
