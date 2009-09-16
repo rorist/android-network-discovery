@@ -2,31 +2,34 @@ package info.lamatricexiste.smbpoc;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Service;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
-import android.os.IBinder;
 import android.os.DeadObjectException;
+import android.os.Handler;
+import android.os.IBinder;
 
 public class Network extends Service
 {
-    private final String TAG      = "Network Service";
-    private final int    TIMEOUT  = 300;
-    private WifiManager  wifi     = null;
-    private DhcpInfo     dhcp     = null;
-    public InetAddress   ip_net   = null;
-    public InetAddress   ip_bc    = null;
-    public InetAddress   host_id  = null;
-    private Timer        timer    = new Timer();
-    private final long UPDATE_INTERVAL = 5000;
-    private List<InetAddress>     hosts   = new ArrayList<InetAddress>();
+    private final   String          TAG             =  "Network Service";
+    private final   int             TIMEOUT_REACH   =  600;
+    private final   int             SLEEP           =  125;
+    private final   long            UPDATE_INTERVAL =  60000; //1mn
+    private         WifiManager     wifi            =  null;
+    private         DhcpInfo        dhcp            =  null;
+    public          InetAddress     ip_net          =  null;
+    public          InetAddress     ip_bc           =  null;
+    public          InetAddress     host_id         =  null;
+    private         Timer           timer           =  new Timer();
+    private         List<InetAddress> hosts         =  new ArrayList<InetAddress>();
+    private         Handler         handler         =  null;
 
     @Override
     public void onCreate()
@@ -39,13 +42,14 @@ public class Network extends Service
         //ip_net = getIpByStr("10.0.2.0");
         //host_id = getIpByStr("0.0.0.255");
         
-        //startService();
+//        startService();
+        handler = new Handler();
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         stopService();
+        super.onDestroy();
     }
 
     @Override
@@ -68,7 +72,7 @@ public class Network extends Service
     
     private void onUpdate(){
         getAllHosts();
-        checkHosts();
+//        checkHosts();
     }
 
 /**
@@ -92,6 +96,22 @@ public class Network extends Service
 
         public String inGetIpBc() throws DeadObjectException  {
             return ip_bc.getHostAddress();
+        }
+
+        public List<String> SendPacket() {
+            List<String> ret = new ArrayList<String>();
+            for(InetAddress h : hosts){
+                handler.post(getRunnable(h));
+            }
+            return ret;
+        }
+        
+        private Runnable getRunnable(InetAddress host){
+            
+            SmbPoc run = new SmbPoc();
+            
+            run.setHost(host);
+            return (Runnable)run;
         }
 
     };
@@ -167,7 +187,7 @@ public class Network extends Service
     private void checkHosts(){
         for(InetAddress h : hosts){
             try {
-                if(!h.isReachable(TIMEOUT)){
+                if(!h.isReachable(TIMEOUT_REACH)){
                     hosts.remove(h);
                 }
             } catch (IOException e) {

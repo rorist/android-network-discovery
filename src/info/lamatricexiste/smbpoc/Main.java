@@ -1,28 +1,27 @@
 package info.lamatricexiste.smbpoc;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.List;
-import java.lang.NullPointerException;
 import java.util.ConcurrentModificationException;
+import java.util.List;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.content.Context;
-import android.content.ServiceConnection;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class Main extends Activity {
     
-    //    private final String TAG = "Network hardening";
+    //    private final String TAG = "Network Discovering";
     private List<String>          hosts = new ArrayList<String>();
     private NetworkInterface      netInterface = null;
     private ArrayAdapter<String>  adapter;
@@ -43,17 +42,18 @@ public class Main extends Activity {
 
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                sendPacket();
             }
         });
         btn1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 try {
                     hosts = netInterface.inGetReachableHosts();
+                    updateList();
                 }
                 catch(RemoteException e){
                     addText(e.getMessage());
                 }
-                updateList();
             }
         });
         
@@ -62,13 +62,19 @@ public class Main extends Activity {
         list.setAdapter(adapter);
         
         this.bindService(new Intent(this, Network.class), mConnection, Context.BIND_AUTO_CREATE);
-        addText("Main started");
+        startService(new Intent(this, Network.class));
     }
     
     @Override
     public void onResume(){
         super.onResume();
-        startService(new Intent(this, Network.class));
+        this.bindService(new Intent(this, Network.class), mConnection, Context.BIND_AUTO_CREATE);
+    }
+    
+    @Override
+    public void onPause(){
+        super.onPause();
+        this.unbindService(mConnection);
     }
     
     @Override
@@ -77,15 +83,33 @@ public class Main extends Activity {
         stopService(new Intent(this, Network.class));
     }
     
+    private void sendPacket(){
+        try {
+            List<String> result = netInterface.SendPacket();
+            for(String r : result){
+                addText(r);
+            }
+            makeToast("Sending Packets ...");
+        } catch (RemoteException e) {
+            addText(e.getMessage());
+        }
+        
+    }
+    
     private void updateList(){
-        //adapter.clear();
+        adapter.clear();
         listHosts();
+        makeToast("List Updated ...");
     }
     
     private void listHosts(){
         for(String h : hosts){
             addText(h);
         }
+    }
+    
+    private void makeToast(String txt){
+        Toast.makeText(getApplicationContext(), (CharSequence)txt, Toast.LENGTH_SHORT).show();
     }
 
     private void addText(String text){
@@ -112,22 +136,21 @@ public class Main extends Activity {
     private ServiceConnection mConnection = new ServiceConnection()
     {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            addText("Service connected");
+            btn1.setEnabled(true);
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
             try {
-                addTextInfo("IP: " + netInterface.inGetIp() + 
-                            "\nNT: " + netInterface.inGetIpNet() +
-                            "\nBC: " + netInterface.inGetIpBc());
+                btn1.setEnabled(false);
+                addTextInfo("IP: " + netInterface.inGetIp() + "\nNT: " + netInterface.inGetIpNet() + "\nBC: " + netInterface.inGetIpBc());
                 hosts = netInterface.inGetReachableHosts();
             }
             catch (RemoteException e){
                 addText(e.getMessage());
             }
             updateList();
+            btn1.setEnabled(true);
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            addText("Service disconnected");
             netInterface = null;
         }
     };
