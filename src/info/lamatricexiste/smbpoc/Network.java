@@ -2,6 +2,7 @@ package info.lamatricexiste.smbpoc;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,6 +13,7 @@ import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.os.DeadObjectException;
 
 public class Network extends Service
 {
@@ -23,33 +25,21 @@ public class Network extends Service
     public InetAddress   ip_bc    = null;
     public InetAddress   host_id  = null;
     private Timer        timer    = new Timer();
-    public static Main   MAIN     = null;
-    private static final long UPDATE_INTERVAL = 5000;
-
-//    public Network(Context ctxt) {
-//        this.ctxt = ctxt;
-
-//    }
+    private final long UPDATE_INTERVAL = 5000;
+    private List<InetAddress>     hosts   = new ArrayList<InetAddress>();
 
     @Override
     public void onCreate()
     {
         super.onCreate();
 
-//        wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-//        if(wifi.isWifiEnabled()) {
-//            dhcp = wifi.getDhcpInfo();
-//            ip_bc = getBroadcastIP();
-//            ip_net = getNetIP();
-//            host_id = getHostId();
-//            updateInfo();
-//        }
-
-        ip_bc = getIpByStr("10.0.2.255");
-        ip_net = getIpByStr("10.0.2.0");
-        host_id = getIpByStr("0.0.0.255");
-        startService();
-        updateInfo();
+        wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        dhcpInfo();
+        //ip_bc = getIpByStr("10.0.2.255");
+        //ip_net = getIpByStr("10.0.2.0");
+        //host_id = getIpByStr("0.0.0.255");
+        
+        //startService();
     }
 
     @Override
@@ -58,18 +48,12 @@ public class Network extends Service
         stopService();
     }
 
-    public static void setMainActivity(Main activity){
-        MAIN = activity;
-    }
-
-    private void updateInfo(){
-        MAIN.addTextInfo(//"IP: " + getIp(dhcp.ipAddress).getHostAddress() +
-            "\nNetwork: " + ip_net.getHostAddress()+
-            "\nBroadcast: "+ ip_bc.getHostAddress());
+    @Override
+    public IBinder onBind(Intent intent){
+        return mBinder;
     }
     
     private void startService(){
-        MAIN.addText("Start service");
         timer.scheduleAtFixedRate(
             new TimerTask() {
                 public void run() {
@@ -83,13 +67,57 @@ public class Network extends Service
     }
     
     private void onUpdate(){
-        getAllHosts(); //FIXME: remove from here
-//        checkHosts();
-        MAIN.updateList();
+        getAllHosts();
+        checkHosts();
+    }
+
+/**
+ * Interface binder
+ */
+
+    private final NetworkInterface.Stub mBinder = new NetworkInterface.Stub() {
+
+        public List<String> inGetReachableHosts() throws DeadObjectException  {
+            onUpdate();
+            return hostsToStr();
+        }
+
+        public String inGetIp() throws DeadObjectException  {
+            return getIp(dhcp.ipAddress).getHostAddress();
+        }
+
+        public String inGetIpNet() throws DeadObjectException  {
+            return ip_net.getHostAddress();
+        }
+
+        public String inGetIpBc() throws DeadObjectException  {
+            return ip_bc.getHostAddress();
+        }
+
+    };
+
+/**
+ * Network Logic
+ */
+    private void dhcpInfo(){
+        if(wifi.isWifiEnabled()) {
+            dhcp = wifi.getDhcpInfo();
+            ip_bc = getBroadcastIP();
+            ip_net = getNetIP();
+            host_id = getHostId();
+        }
+    }
+
+    private List<String> hostsToStr(){
+        List<String> hosts_str = new ArrayList<String>();
+        for(InetAddress h : hosts){
+            hosts_str.add(h.getHostAddress());
+        }
+        return hosts_str;
     }
     
     private void getAllHosts(){
-      MAIN.hosts = new ArrayList<InetAddress>();
+      hosts = new ArrayList<InetAddress>();
         
       String ip_net_str = ip_net.getHostAddress();
       String[] ip_net_split = ip_net.getHostAddress().split("\\.");
@@ -107,7 +135,7 @@ public class Network extends Service
               Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)])+1;
               String ip_start = ip_net_str.substring(0, ip_net_str.lastIndexOf("."));
               for(int i=start; i<end; i++){
-                  MAIN.hosts.add(InetAddress.getByName(ip_start+"."+i));
+                  hosts.add(InetAddress.getByName(ip_start+"."+i));
               }
               break;
               
@@ -133,18 +161,16 @@ public class Network extends Service
               
           }
       } catch (IOException e) {
-          MAIN.addText(e.getMessage());
       }
     }
     
     private void checkHosts(){
-        for(InetAddress h : MAIN.hosts){
+        for(InetAddress h : hosts){
             try {
                 if(!h.isReachable(TIMEOUT)){
-                    MAIN.hosts.remove(h);
+                    hosts.remove(h);
                 }
             } catch (IOException e) {
-                MAIN.addText(e.getMessage());
             }
         }
     }
@@ -194,10 +220,5 @@ public class Network extends Service
                 Integer.parseInt(a[1])*256 +
                 Integer.parseInt(a[0])
         );
-    }
-
-    @Override
-    public IBinder onBind(Intent intent){
-        return null;
     }
 }

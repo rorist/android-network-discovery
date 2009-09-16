@@ -18,19 +18,19 @@
 	        android:layout_gravity="center_horizontal"
 	        android:text="Send"/>
         
-        <EditText
+<!--        <EditText
             android:id="@+id/ip"
             android:layout_width="0dip"
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:singleLine="true"
             android:text=""/>
-
+-->
 	    <Button android:id="@+id/btn1"
-	        android:layout_width="30dip"
+	        android:layout_width="100dip"
 	        android:layout_height="wrap_content"
 	        android:layout_gravity="center_horizontal"
-	        android:text="R"/>
+	        android:text="Update"/>
    
     </LinearLayout>
         
