@@ -26,11 +26,11 @@
             android:singleLine="true"
             android:text=""/>
 
-	    <!--<Button android:id="@+id/btn1"
-	        android:layout_width="40dip"
+	    <Button android:id="@+id/btn1"
+	        android:layout_width="30dip"
 	        android:layout_height="wrap_content"
 	        android:layout_gravity="center_horizontal"
-	        android:text="X"/>-->
+	        android:text="R"/>
    
     </LinearLayout>
         
