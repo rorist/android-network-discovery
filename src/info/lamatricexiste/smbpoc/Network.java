@@ -23,8 +23,8 @@ import android.util.Log;
 public class Network extends Service
 {
     private final   String          TAG             =  "NetworkService";
-    public  final static String     BROADCAST_ACTION=  "info.lamatricexiste.smbpoc.Network.uiThreadCallback";
-    private final   int             TIMEOUT_REACH   =  600;
+    public  final static String     ACTION_GETHOSTS =  "info.lamatricexiste.smbpoc.Network.uiThreadCallback.GETHOSTS";
+    private final   int             TIMEOUT_REACH   =  1000;
     private final   int             SLEEP           =  125;
     private final   long            UPDATE_INTERVAL =  60000; //1mn
     private         WifiManager     wifi            =  null;
@@ -40,21 +40,18 @@ public class Network extends Service
     public void onCreate()
     {
         super.onCreate();
-
         wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        handler = new Handler(){
+            @Override public void handleMessage(Message msg){
+                Log.v(TAG, "handleMessage");
+                sendBroadcast(new Intent(ACTION_GETHOSTS));
+            }
+        };
+        
         dhcpInfo();
         //ip_bc = getIpByStr("10.0.2.255");
         //ip_net = getIpByStr("10.0.2.0");
         //host_id = getIpByStr("0.0.0.255");
-        
-//        startService();
-        handler = new Handler(){
-            @Override public void handleMessage(Message msg){
-                Log.v(TAG, "handleMessage");
-                sendBroadcast(new Intent(BROADCAST_ACTION));
-                //Main.singleton.uiThreadCallback.sendMessage(Main.singleton.uiThreadCallback.obtainMessage());
-            }
-        };
     }
 
     @Override
@@ -95,6 +92,7 @@ public class Network extends Service
             for(InetAddress h : hosts){
                 handler.postDelayed(getRunnable(h), SLEEP);
             }
+            sendBroadcast(new Intent(ACTION_GETHOSTS));
         }
     }
     
@@ -237,6 +235,7 @@ public class Network extends Service
                     for(int i=start; i<end; i++){
                         hosts.add(InetAddress.getByName(ip_start+"."+i));
                     }
+                    hosts.remove(getIp(dhcp.ipAddress));
                     break;
                   
         //      case 65535:

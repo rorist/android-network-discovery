@@ -6,16 +6,14 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.BroadcastReceiver;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -37,8 +35,7 @@ final public class Main extends Activity {
     private Button                btn;
     private Button                btn1;
     private CheckBox              cb;
-    private ProgressDialog        progress;
-    static  Main                  singleton;
+    private ProgressDialog        progress = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,18 +64,17 @@ final public class Main extends Activity {
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
 
-        registerReceiver(receiver, new IntentFilter(Network.BROADCAST_ACTION));
-        
-        Intent intent = new Intent(this, Network.class);
-        this.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        startService(intent);
+        registerReceiver(receiver, new IntentFilter(Network.ACTION_GETHOSTS));
+        startService(new Intent(this, Network.class));
     }
 
     private BroadcastReceiver receiver = new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
             Log.v(TAG, "Received broadcast intent");
             updateList();
-            //TODO: Get the List<String> hosts object here
+            setButtonOn(btn);
+            setButtonOn(btn1);
+            makeToast("Done.");
         }
     };
     
@@ -102,9 +98,9 @@ final public class Main extends Activity {
 
     private void getUpdate(){
         try {
-            progress = ProgressDialog.show(this, "Working..", "Update List", true, false);
+            setButtonOff(btn1);
+            makeToast("Updating list ...");
             netInterface.inSearchReachableHosts();
-            progress.dismiss();
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -142,6 +138,16 @@ final public class Main extends Activity {
             Log.e(TAG, e.getMessage());
         }
     }
+    
+    private void setButtonOff(Button b){
+        b.setClickable(false);
+        b.setEnabled(false);
+    }
+    
+    private void setButtonOn(Button b){
+        b.setClickable(true);
+        b.setEnabled(true);
+    }
 
 /**
  * Service connection
@@ -150,9 +156,9 @@ final public class Main extends Activity {
     private void sendPacket(){
         boolean repeat = cb.isChecked();
         try {
-            progress = ProgressDialog.show(this, "Working..", "Update List", true, false);
+            setButtonOff(btn);
+            makeToast("Sending request ...");
             netInterface.inSendPacket(repeat);
-            progress.dismiss();
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -172,6 +178,7 @@ final public class Main extends Activity {
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
             try {
                 addTextInfo("IP: " + netInterface.inGetIp() + "\nNT: " + netInterface.inGetIpNet() + "\nBC: " + netInterface.inGetIpBc());
+                getUpdate();
             }
             catch (RemoteException e){
                 Log.e(TAG, e.getMessage());
