@@ -11,6 +11,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".Test"/>
         <service android:name=".Network" android:process=":remote"/>
     </application>
     <uses-sdk android:minSdkVersion="3" />

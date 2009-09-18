@@ -5,13 +5,17 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.BroadcastReceiver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -24,7 +28,7 @@ import android.widget.Toast;
 
 final public class Main extends Activity {
     
-    private final String TAG = "NetworkMain";
+    private final String          TAG = "NetworkMain";
     private List<String>          hosts = new ArrayList<String>();
     private NetworkInterface      netInterface = null;
     private ArrayAdapter<String>  adapter;
@@ -33,12 +37,12 @@ final public class Main extends Activity {
     private Button                btn;
     private Button                btn1;
     private CheckBox              cb;
+    private ProgressDialog        progress;
     static  Main                  singleton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = this;
         setContentView(R.layout.main);
         
         info = (TextView) findViewById(R.id.info); 
@@ -55,25 +59,28 @@ final public class Main extends Activity {
         btn1 = (Button) findViewById(R.id.btn1);
         btn1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    btn1.setClickable(false);
-                    netInterface.inSearchReachableHosts();
-                    updateList();
-                    btn1.setClickable(true);
-                } catch (RemoteException e) {
-                    Log.e(TAG, e.getMessage());
-                }
+                getUpdate();
             }
         });
         
         adapter = new ArrayAdapter<String>(this, R.layout.list);
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
+
+        registerReceiver(receiver, new IntentFilter(Network.BROADCAST_ACTION));
         
         Intent intent = new Intent(this, Network.class);
         this.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         startService(intent);
     }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver(){
+        public void onReceive(Context ctxt, Intent intent){
+            Log.v(TAG, "Received broadcast intent");
+            updateList();
+            //TODO: Get the List<String> hosts object here
+        }
+    };
     
     @Override
     public void onResume(){
@@ -92,12 +99,21 @@ final public class Main extends Activity {
         super.onDestroy();
         stopService(new Intent(this, Network.class));
     }
+
+    private void getUpdate(){
+        try {
+            progress = ProgressDialog.show(this, "Working..", "Update List", true, false);
+            netInterface.inSearchReachableHosts();
+            progress.dismiss();
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
     
     private void updateList(){
         getHosts();
         adapter.clear();
         listHosts();
-        makeToast("Updating Hosts ...");
     }
     
     private void listHosts(){
@@ -134,8 +150,9 @@ final public class Main extends Activity {
     private void sendPacket(){
         boolean repeat = cb.isChecked();
         try {
+            progress = ProgressDialog.show(this, "Working..", "Update List", true, false);
             netInterface.inSendPacket(repeat);
-            makeToast("Sending Packets ...");
+            progress.dismiss();
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -149,29 +166,12 @@ final public class Main extends Activity {
         }
     }
     
-    public final Handler uiThreadCallback = new Handler();
-    
-    public final Runnable runInUiThread = new Runnable(){
-        @Override public void run(){
-            updateList();
-            Log.v(TAG, "RuninUiThread");
-        }
-    };
-
     private ServiceConnection mConnection = new ServiceConnection()
     {
         public void onServiceConnected(ComponentName className, IBinder service) {
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
             try {
-                btn1.setClickable(false);
                 addTextInfo("IP: " + netInterface.inGetIp() + "\nNT: " + netInterface.inGetIpNet() + "\nBC: " + netInterface.inGetIpBc());
-//                try {
-//                    netInterface.inSearchReachableHosts();
-                    updateList();
-//                } catch (RemoteException e) {
-//                    Log.e(TAG, e.getMessage());
-//                }
-                btn1.setClickable(true);
             }
             catch (RemoteException e){
                 Log.e(TAG, e.getMessage());

@@ -16,23 +16,25 @@ import android.net.wifi.WifiManager;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
 public class Network extends Service
 {
     private final   String          TAG             =  "NetworkService";
+    public  final static String     BROADCAST_ACTION=  "info.lamatricexiste.smbpoc.Network.uiThreadCallback";
     private final   int             TIMEOUT_REACH   =  600;
     private final   int             SLEEP           =  125;
     private final   long            UPDATE_INTERVAL =  60000; //1mn
     private         WifiManager     wifi            =  null;
     private         DhcpInfo        dhcp            =  null;
-    public          InetAddress     ip_net          =  null;
-    public          InetAddress     ip_bc           =  null;
-    public          InetAddress     host_id         =  null;
     private         Timer           timer           =  new Timer();
     private         List<InetAddress> hosts         =  new ArrayList<InetAddress>();
     private         Handler         handler         =  null;
+    private         InetAddress     ip_net          =  null;
+    private         InetAddress     ip_bc           =  null;
+    private         InetAddress     host_id         =  null;
 
     @Override
     public void onCreate()
@@ -46,7 +48,13 @@ public class Network extends Service
         //host_id = getIpByStr("0.0.0.255");
         
 //        startService();
-        handler = new Handler();
+        handler = new Handler(){
+            @Override public void handleMessage(Message msg){
+                Log.v(TAG, "handleMessage");
+                sendBroadcast(new Intent(BROADCAST_ACTION));
+                //Main.singleton.uiThreadCallback.sendMessage(Main.singleton.uiThreadCallback.obtainMessage());
+            }
+        };
     }
 
     @Override
@@ -76,7 +84,6 @@ public class Network extends Service
     private void onUpdate(){
         getAllHosts();
         checkHosts();
-        Main.singleton.uiThreadCallback.post(Main.singleton.runInUiThread);
     }
     
 /**
@@ -84,8 +91,10 @@ public class Network extends Service
  */
     
     private void launchRequest(){
-        for(InetAddress h : hosts){
-            handler.postDelayed(getRunnable(h), SLEEP);
+        if(wifi.isWifiEnabled()){
+            for(InetAddress h : hosts){
+                handler.postDelayed(getRunnable(h), SLEEP);
+            }
         }
     }
     
@@ -127,15 +136,30 @@ public class Network extends Service
         }
 
         public String inGetIp() throws DeadObjectException  {
-            return getIp(dhcp.ipAddress).getHostAddress();
+            if(wifi.isWifiEnabled()){
+                return getIp(dhcp.ipAddress).getHostAddress();
+            }
+            else {
+                return "0.0.0.0";
+            }
         }
 
         public String inGetIpNet() throws DeadObjectException  {
-            return ip_net.getHostAddress();
+            if(wifi.isWifiEnabled()){
+                return ip_net.getHostAddress();
+            }
+            else {
+                return "0.0.0.0";
+            }
         }
 
         public String inGetIpBc() throws DeadObjectException  {
-            return ip_bc.getHostAddress();
+            if(wifi.isWifiEnabled()){
+                return ip_bc.getHostAddress();
+            }
+            else {
+                return "0.0.0.0";
+            }
         }
 
     };
@@ -161,69 +185,84 @@ public class Network extends Service
     }
     
     private void checkHosts(){
-        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
-        for(InetAddress h : hosts){
-            try {
-                if(h.isReachable(TIMEOUT_REACH)){
-                    hosts_new.add(h);
+        handler.post(
+            new Runnable(){
+                @Override public void run(){
+                    if(wifi.isWifiEnabled()) {
+                        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
+                        for(InetAddress h : hosts){
+                            try {
+                                if(h.isReachable(TIMEOUT_REACH)){
+                                    hosts_new.add(h);
+                                }
+                            }
+                            catch (ConcurrentModificationException e){
+                                Log.e(TAG, "CheckHosts Concurrent Modification");
+                            }
+                            catch (IOException e) {
+                                hosts_new.add(h);
+                            }
+                        }
+                        hosts = hosts_new;
+                        
+                        // notify to update ui thread
+                        handler.sendMessage(handler.obtainMessage());
+                    }
+                    handler.sendMessage(handler.obtainMessage());
+                    Log.v(TAG, "checkHostsRunnable");
                 }
-            }
-            catch (ConcurrentModificationException e){
-                Log.e(TAG, "CheckHosts Concurrent Modification");
-            }
-            catch (IOException e) {
-                hosts_new.add(h);
-            }
-        }
-        hosts = hosts_new;
+            });
+        Log.v(TAG, "CheckHosts");
     }
     
     private void getAllHosts(){
-        hosts = new ArrayList<InetAddress>();
+        if(wifi.isWifiEnabled()) {
+            hosts = new ArrayList<InetAddress>();
+            
+            String ip_net_str = ip_net.getHostAddress();
+            String[] ip_net_split = ip_net.getHostAddress().split("\\.");
+            String[] ip_bc_split = ip_bc.getHostAddress().split("\\.");
         
-        String ip_net_str = ip_net.getHostAddress();
-        String[] ip_net_split = ip_net.getHostAddress().split("\\.");
-        String[] ip_bc_split = ip_bc.getHostAddress().split("\\.");
-    
-        try {
-            switch (host_id.hashCode()) {
-          
-            case 7:
-            case 255:
-            case 65535:
-            case 16777215:
-              //    1.0.0.1 to 126.255.255.254 255.255.255.0
-                Integer start = Integer.parseInt(ip_net_split[(ip_net_split.length-1)])+1;
-                Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)])+1;
-                String ip_start = ip_net_str.substring(0, ip_net_str.lastIndexOf("."));
-                for(int i=start; i<end; i++){
-                    hosts.add(InetAddress.getByName(ip_start+"."+i));
+            try {
+                switch (host_id.hashCode()) {
+              
+                case 7:
+                case 255:
+                case 65535:
+                case 16777215:
+                  //    1.0.0.1 to 126.255.255.254 255.255.255.0
+                    Integer start = Integer.parseInt(ip_net_split[(ip_net_split.length-1)])+1;
+                    Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)])+1;
+                    String ip_start = ip_net_str.substring(0, ip_net_str.lastIndexOf("."));
+                    for(int i=start; i<end; i++){
+                        hosts.add(InetAddress.getByName(ip_start+"."+i));
+                    }
+                    break;
+                  
+        //      case 65535:
+        //          // 128.1.0.1 to 191.255.255.254 255.255.0.0
+        //          Integer s1 = Integer.parseInt(ip_net_split[(ip_net_split.length-2)]);
+        //          Integer e1 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-2)]);
+        //          Integer s2 = Integer.parseInt(ip_net_split[(ip_net_split.length-1)]);
+        //          Integer e2 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
+        //          String ip1 = ip_net_str.substring(0, ip_net_str.indexOf(".", 4));
+        //          for(int i=s1; i<=e1; i++){
+        //              for(int j=s2; j<=e2; j++){
+        //                  ip_host = InetAddress.getByName(ip1+"."+i+"."+j);
+        //                  hosts.add(ip_host);
+        //              }
+        //          }
+        ////          launchThreadAttack();
+        //          break;
+        //          
+        //      case 16777215:
+        //          // 192.0.1.1 to 223.255.254.254 255.0.0.0
+        //          break;
+                  
                 }
-                break;
-              
-    //      case 65535:
-    //          // 128.1.0.1 to 191.255.255.254 255.255.0.0
-    //          Integer s1 = Integer.parseInt(ip_net_split[(ip_net_split.length-2)]);
-    //          Integer e1 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-2)]);
-    //          Integer s2 = Integer.parseInt(ip_net_split[(ip_net_split.length-1)]);
-    //          Integer e2 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
-    //          String ip1 = ip_net_str.substring(0, ip_net_str.indexOf(".", 4));
-    //          for(int i=s1; i<=e1; i++){
-    //              for(int j=s2; j<=e2; j++){
-    //                  ip_host = InetAddress.getByName(ip1+"."+i+"."+j);
-    //                  hosts.add(ip_host);
-    //              }
-    //          }
-    ////          launchThreadAttack();
-    //          break;
-    //          
-    //      case 16777215:
-    //          // 192.0.1.1 to 223.255.254.254 255.0.0.0
-    //          break;
-              
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
             }
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
         }
     }
     
