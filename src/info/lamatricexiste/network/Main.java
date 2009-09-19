@@ -1,11 +1,10 @@
-package info.lamatricexiste.smbpoc;
+package info.lamatricexiste.network;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,7 +34,6 @@ final public class Main extends Activity {
     private Button                btn;
     private Button                btn1;
     private CheckBox              cb;
-    private ProgressDialog        progress = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -159,7 +157,11 @@ final public class Main extends Activity {
             setButtonOff(btn);
             makeToast("Sending request ...");
             netInterface.inSendPacket(repeat);
-        } catch (RemoteException e) {
+        }
+        catch (IllegalStateException e){
+            Log.e(TAG, e.getMessage());
+        }
+        catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
         }
     }

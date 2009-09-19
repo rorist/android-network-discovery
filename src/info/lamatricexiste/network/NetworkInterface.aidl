@@ -1,4 +1,4 @@
-package info.lamatricexiste.smbpoc;
+package info.lamatricexiste.network;
 
 interface NetworkInterface {
     List<String> inGetHosts();

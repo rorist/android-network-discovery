@@ -1,9 +1,8 @@
-package info.lamatricexiste.smbpoc;
+package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,9 +22,9 @@ import android.util.Log;
 public class Network extends Service
 {
     private final   String          TAG             =  "NetworkService";
-    public  final static String     ACTION_GETHOSTS =  "info.lamatricexiste.smbpoc.Network.uiThreadCallback.GETHOSTS";
-    private final   int             TIMEOUT_REACH   =  1000;
-    private final   int             SLEEP           =  125;
+    public  final static String     ACTION_GETHOSTS =  "info.lamatricexiste.network.uiThreadCallback.GETHOSTS";
+    private final   int             TIMEOUT_REACH   =  500;
+    private final   int             SLEEP           =  50;
     private final   long            UPDATE_INTERVAL =  60000; //1mn
     private         WifiManager     wifi            =  null;
     private         DhcpInfo        dhcp            =  null;
@@ -66,6 +65,7 @@ public class Network extends Service
     }
 
     private void startService(){
+        stopService();
         timer.scheduleAtFixedRate(
             new TimerTask() {
                 public void run() {
@@ -183,34 +183,32 @@ public class Network extends Service
     }
     
     private void checkHosts(){
+        Log.v(TAG, "CheckHosts");
         handler.post(
             new Runnable(){
                 @Override public void run(){
+                    Log.v(TAG, "checkHostsRunnable");
+                    List<InetAddress> hosts_new = new ArrayList<InetAddress>();
                     if(wifi.isWifiEnabled()) {
-                        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
+                        Reachable r = new Reachable();
                         for(InetAddress h : hosts){
                             try {
-                                if(h.isReachable(TIMEOUT_REACH)){
+                                if(h.isReachable(TIMEOUT_REACH) || r.request(h)){
                                     hosts_new.add(h);
                                 }
                             }
-                            catch (ConcurrentModificationException e){
-                                Log.e(TAG, "CheckHosts Concurrent Modification");
-                            }
                             catch (IOException e) {
-                                hosts_new.add(h);
+                                Log.e(TAG, e.getMessage());
+                            }
+                            catch (IllegalArgumentException e){
+                                Log.e(TAG, e.getMessage());
                             }
                         }
-                        hosts = hosts_new;
-                        
-                        // notify to update ui thread
-                        handler.sendMessage(handler.obtainMessage());
                     }
+                    hosts = hosts_new;
                     handler.sendMessage(handler.obtainMessage());
-                    Log.v(TAG, "checkHostsRunnable");
                 }
             });
-        Log.v(TAG, "CheckHosts");
     }
     
     private void getAllHosts(){
@@ -279,16 +277,6 @@ public class Network extends Service
         int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
         return getIp(broadcast);
     }
-
-    private InetAddress getIpByStr(String ip) {
-        try {
-            return InetAddress.getByName(ip);
-        }
-        catch (java.net.UnknownHostException e) {
-            Log.e(TAG, e.getMessage());
-            return null;
-        }
-    }
     
     private InetAddress getIp(int ip_int){
         byte[] quads = new byte[4];
@@ -302,15 +290,5 @@ public class Network extends Service
             Log.e(TAG, e.getMessage());
             return null;
         }
-    }
-
-    private int getIpInt(InetAddress ip_addr) {
-        String[] a = ip_addr.getHostAddress().split("\\.");
-        return (
-                Integer.parseInt(a[3])*16777216 + 
-                Integer.parseInt(a[2])*65536 +
-                Integer.parseInt(a[1])*256 +
-                Integer.parseInt(a[0])
-        );
     }
 }
