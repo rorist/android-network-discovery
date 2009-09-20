@@ -2,6 +2,7 @@ package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -11,6 +12,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.DhcpInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -23,8 +25,8 @@ public class Network extends Service
 {
     private final   String          TAG             =  "NetworkService";
     public  final static String     ACTION_GETHOSTS =  "info.lamatricexiste.network.uiThreadCallback.GETHOSTS";
-    private final   int             TIMEOUT_REACH   =  500;
-    private final   int             SLEEP           =  50;
+    private final   int             TIMEOUT_REACH   =  200;
+    private final   int             SLEEP           =  20;
     private final   long            UPDATE_INTERVAL =  60000; //1mn
     private         WifiManager     wifi            =  null;
     private         DhcpInfo        dhcp            =  null;
@@ -35,32 +37,32 @@ public class Network extends Service
     private         InetAddress     ip_bc           =  null;
     private         InetAddress     host_id         =  null;
 
-    @Override
-    public void onCreate()
+    @Override public void onCreate()
     {
         super.onCreate();
-        wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         handler = new Handler(){
             @Override public void handleMessage(Message msg){
                 Log.v(TAG, "handleMessage");
                 sendBroadcast(new Intent(ACTION_GETHOSTS));
             }
         };
-        
-        dhcpInfo();
-        //ip_bc = getIpByStr("10.0.2.255");
-        //ip_net = getIpByStr("10.0.2.0");
-        //host_id = getIpByStr("0.0.0.255");
     }
 
-    @Override
-    public void onDestroy() {
+    @Override public void onDestroy() {
         stopService();
         super.onDestroy();
     }
 
-    @Override
-    public IBinder onBind(Intent intent){
+    @Override public IBinder onBind(Intent intent){
+        wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        dhcpInfo();
+//        try {
+//            ip_bc = InetAddress.getByName("192.168.1.50");
+//            ip_net = InetAddress.getByName("192.168.1.0");
+//            host_id = InetAddress.getByName("0.0.0.255");
+//        } catch (UnknownHostException e) {
+//            Log.e(TAG, e.getMessage());
+//        }
         return mBinder;
     }
 
@@ -69,7 +71,7 @@ public class Network extends Service
         timer.scheduleAtFixedRate(
             new TimerTask() {
                 public void run() {
-                    launchRequest();
+                    launchRequest(hosts);
                 }
             }, 0, UPDATE_INTERVAL);
     }
@@ -78,18 +80,26 @@ public class Network extends Service
         if(timer!=null) timer.cancel();
     }
     
-    private void onUpdate(){
-        getAllHosts();
-        checkHosts();
-    }
-    
 /**
- * Runnable request
+ * Runnable requests
  */
     
-    private void launchRequest(){
+    private void onUpdate(){
+        handler.post(
+        new Runnable(){
+            @Override public void run(){
+                if(wifi.isWifiEnabled()) {
+                    hosts = getAllHosts();
+                    hosts = checkHosts(hosts);
+                }
+                handler.sendMessage(handler.obtainMessage());
+            }
+        });
+    }
+    
+    private void launchRequest(List<InetAddress> hosts_send){
         if(wifi.isWifiEnabled()){
-            for(InetAddress h : hosts){
+            for(InetAddress h : hosts_send){
                 handler.postDelayed(getRunnable(h), SLEEP);
             }
             sendBroadcast(new Intent(ACTION_GETHOSTS));
@@ -120,7 +130,7 @@ public class Network extends Service
             return hostsToStr();
         }
 
-        public void inSendPacket(boolean repeat) {
+        public void inSendPacket(List<String> hosts_send, boolean repeat) {
             Log.v(TAG, "inSendPacket");
             if(wifi.isWifiEnabled()){
                 if(repeat){
@@ -129,37 +139,21 @@ public class Network extends Service
                 else {
                     stopService();
                 }
-                launchRequest();
+                launchRequest(hostsFromStr(hosts_send));
             }
         }
 
-        public String inGetIp() throws DeadObjectException  {
+        public String inNetInfo() throws DeadObjectException {
             if(wifi.isWifiEnabled()){
-                return getIp(dhcp.ipAddress).getHostAddress();
+                WifiInfo wifiInfo = wifi.getConnectionInfo();
+                return  "ip: " + getIp(dhcp.ipAddress).getHostAddress() + "\tbssid: " + wifiInfo.getBSSID() +"\n"+
+                        "nt: " + ip_net.getHostAddress() + "\tssid: " + wifiInfo.getSSID() +"\n"+
+                        "bc: " + ip_bc.getHostAddress();
             }
             else {
-                return "0.0.0.0";
+                return "Wifi is disabled !";
             }
         }
-
-        public String inGetIpNet() throws DeadObjectException  {
-            if(wifi.isWifiEnabled()){
-                return ip_net.getHostAddress();
-            }
-            else {
-                return "0.0.0.0";
-            }
-        }
-
-        public String inGetIpBc() throws DeadObjectException  {
-            if(wifi.isWifiEnabled()){
-                return ip_bc.getHostAddress();
-            }
-            else {
-                return "0.0.0.0";
-            }
-        }
-
     };
 
 /**
@@ -181,86 +175,83 @@ public class Network extends Service
         }
         return hosts_str;
     }
-    
-    private void checkHosts(){
-        Log.v(TAG, "CheckHosts");
-        handler.post(
-            new Runnable(){
-                @Override public void run(){
-                    Log.v(TAG, "checkHostsRunnable");
-                    List<InetAddress> hosts_new = new ArrayList<InetAddress>();
-                    if(wifi.isWifiEnabled()) {
-                        Reachable r = new Reachable();
-                        for(InetAddress h : hosts){
-                            try {
-                                if(h.isReachable(TIMEOUT_REACH) || r.request(h)){
-                                    hosts_new.add(h);
-                                }
-                            }
-                            catch (IOException e) {
-                                Log.e(TAG, e.getMessage());
-                            }
-                            catch (IllegalArgumentException e){
-                                Log.e(TAG, e.getMessage());
-                            }
-                        }
-                    }
-                    hosts = hosts_new;
-                    handler.sendMessage(handler.obtainMessage());
-                }
-            });
-    }
-    
-    private void getAllHosts(){
-        if(wifi.isWifiEnabled()) {
-            hosts = new ArrayList<InetAddress>();
-            
-            String ip_net_str = ip_net.getHostAddress();
-            String[] ip_net_split = ip_net.getHostAddress().split("\\.");
-            String[] ip_bc_split = ip_bc.getHostAddress().split("\\.");
-        
+
+    private List<InetAddress> hostsFromStr(List<String> hosts_str){
+        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
+        for(String h : hosts_str){
             try {
-                switch (host_id.hashCode()) {
-              
-                case 7:
-                case 255:
-                case 65535:
-                case 16777215:
-                  //    1.0.0.1 to 126.255.255.254 255.255.255.0
-                    Integer start = Integer.parseInt(ip_net_split[(ip_net_split.length-1)])+1;
-                    Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)])+1;
-                    String ip_start = ip_net_str.substring(0, ip_net_str.lastIndexOf("."));
-                    for(int i=start; i<end; i++){
-                        hosts.add(InetAddress.getByName(ip_start+"."+i));
-                    }
-                    hosts.remove(getIp(dhcp.ipAddress));
-                    break;
-                  
-        //      case 65535:
-        //          // 128.1.0.1 to 191.255.255.254 255.255.0.0
-        //          Integer s1 = Integer.parseInt(ip_net_split[(ip_net_split.length-2)]);
-        //          Integer e1 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-2)]);
-        //          Integer s2 = Integer.parseInt(ip_net_split[(ip_net_split.length-1)]);
-        //          Integer e2 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
-        //          String ip1 = ip_net_str.substring(0, ip_net_str.indexOf(".", 4));
-        //          for(int i=s1; i<=e1; i++){
-        //              for(int j=s2; j<=e2; j++){
-        //                  ip_host = InetAddress.getByName(ip1+"."+i+"."+j);
-        //                  hosts.add(ip_host);
-        //              }
-        //          }
-        ////          launchThreadAttack();
-        //          break;
-        //          
-        //      case 16777215:
-        //          // 192.0.1.1 to 223.255.254.254 255.0.0.0
-        //          break;
-                  
-                }
-            } catch (IOException e) {
+                hosts_new.add(InetAddress.getByName(h));
+            } catch (UnknownHostException e) {
                 Log.e(TAG, e.getMessage());
             }
         }
+        return hosts_new;
+    }
+    
+    private List<InetAddress> checkHosts(List<InetAddress> hosts){
+        Log.v(TAG, "checkHostsRunnable");
+        Reachable r = new Reachable();
+        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
+        for(InetAddress h : hosts){
+            try {
+                if(h.isReachable(TIMEOUT_REACH) || r.request(h)){
+                    hosts_new.add(h);
+                }
+            }
+            catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+        return hosts_new;
+    }
+
+    private List<InetAddress> getAllHosts(){
+        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
+        String ip_net_str = ip_net.getHostAddress();
+        String[] ip_net_split = ip_net.getHostAddress().split("\\.");
+        String[] ip_bc_split = ip_bc.getHostAddress().split("\\.");
+    
+        try {
+            switch (host_id.hashCode()) {
+          
+            case 7:
+            case 255:
+            case 65535:
+            case 16777215:
+              //    1.0.0.1 to 126.255.255.254 255.255.255.0
+                Integer start = Integer.parseInt(ip_net_split[(ip_net_split.length-1)])+1;
+                Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
+                String ip_start = ip_net_str.substring(0, ip_net_str.lastIndexOf("."));
+                for(int i=start; i<end; i++){
+                    hosts_new.add(InetAddress.getByName(ip_start+"."+i));
+                }
+                hosts_new.remove(getIp(dhcp.ipAddress));
+                break;
+              
+    //      case 65535:
+    //          // 128.1.0.1 to 191.255.255.254 255.255.0.0
+    //          Integer s1 = Integer.parseInt(ip_net_split[(ip_net_split.length-2)]);
+    //          Integer e1 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-2)]);
+    //          Integer s2 = Integer.parseInt(ip_net_split[(ip_net_split.length-1)]);
+    //          Integer e2 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
+    //          String ip1 = ip_net_str.substring(0, ip_net_str.indexOf(".", 4));
+    //          for(int i=s1; i<=e1; i++){
+    //              for(int j=s2; j<=e2; j++){
+    //                  ip_host = InetAddress.getByName(ip1+"."+i+"."+j);
+    //                  hosts.add(ip_host);
+    //              }
+    //          }
+    //          break;
+    //          
+    //      case 16777215:
+    //          // 192.0.1.1 to 223.255.254.254 255.0.0.0
+    //          break;
+              
+            }
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return hosts_new;
     }
     
     private InetAddress getHostId(){

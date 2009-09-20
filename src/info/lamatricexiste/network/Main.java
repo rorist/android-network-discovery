@@ -14,6 +14,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -34,15 +35,22 @@ final public class Main extends Activity {
     private Button                btn;
     private Button                btn1;
     private CheckBox              cb;
+    private BroadcastReceiver     receiver = new BroadcastReceiver(){
+        public void onReceive(Context ctxt, Intent intent){
+            Log.v(TAG, "Received broadcast intent");
+            updateList();
+            setButtonOn(btn);
+            setButtonOn(btn1);
+            makeToast("Done.");
+        }
+    };
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
         info = (TextView) findViewById(R.id.info); 
         cb = (CheckBox) findViewById(R.id.repeat);
-//        EditText ipedit = (EditText) findViewById(R.id.ip);
         
         btn = (Button) findViewById(R.id.btn);
         btn.setOnClickListener(new View.OnClickListener() {
@@ -58,40 +66,49 @@ final public class Main extends Activity {
             }
         });
         
-        adapter = new ArrayAdapter<String>(this, R.layout.list);
+        Button btn2 = (Button) findViewById(R.id.btn2);
+        btn2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            }
+        });
+        
+        Button btn3 = (Button) findViewById(R.id.btn3);
+        btn3.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setSelectedHosts(true);
+            }
+        });
+        
+        Button btn4 = (Button) findViewById(R.id.btn4);
+        btn4.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setSelectedHosts(false);
+            }
+        });
+        
+        adapter = new ArrayAdapter<String>(this, R.layout.list, R.id.list);
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
 
         registerReceiver(receiver, new IntentFilter(Network.ACTION_GETHOSTS));
         startService(new Intent(this, Network.class));
     }
-
-    private BroadcastReceiver receiver = new BroadcastReceiver(){
-        public void onReceive(Context ctxt, Intent intent){
-            Log.v(TAG, "Received broadcast intent");
-            updateList();
-            setButtonOn(btn);
-            setButtonOn(btn1);
-            makeToast("Done.");
-        }
-    };
     
-    @Override
-    public void onResume(){
+    @Override public void onResume(){
         super.onResume();
         this.bindService(new Intent(this, Network.class), mConnection, Context.BIND_AUTO_CREATE);
     }
     
-    @Override
-    public void onPause(){
+    @Override public void onPause(){
         super.onPause();
         this.unbindService(mConnection);
     }
     
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    @Override protected void onStop() {
+        super.onStop();
         stopService(new Intent(this, Network.class));
+        unregisterReceiver(receiver);
     }
 
     private void getUpdate(){
@@ -114,6 +131,31 @@ final public class Main extends Activity {
         for(String h : hosts){
             addText(h);
         }
+        list.setSelection(View.FOCUS_DOWN);
+    }
+    
+    private List<String> getSelectedHosts(){
+        List<String> hosts_s = new ArrayList<String>();
+        int listCount = list.getChildCount();
+        for(int i=0; i<listCount; i++){
+            CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
+            if(cb.isChecked()){
+                hosts_s.add(hosts.get(i));
+            }
+        }
+        return hosts_s;
+    }
+    
+    private void setSelectedHosts(Boolean all){
+        int listCount = list.getChildCount();
+        for(int i=0; i<listCount; i++){
+            CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
+            if(all){
+                cb.setChecked(true);
+            } else {
+                cb.setChecked(false);
+            }
+        }
     }
     
     private void makeToast(String txt){
@@ -122,7 +164,6 @@ final public class Main extends Activity {
 
     private void addText(String text){
         adapter.add(text);
-        list.setSelection(View.FOCUS_DOWN);
     }
     
     private void addTextInfo(String text){
@@ -156,7 +197,7 @@ final public class Main extends Activity {
         try {
             setButtonOff(btn);
             makeToast("Sending request ...");
-            netInterface.inSendPacket(repeat);
+            netInterface.inSendPacket(getSelectedHosts(), repeat);
         }
         catch (IllegalStateException e){
             Log.e(TAG, e.getMessage());
@@ -177,20 +218,19 @@ final public class Main extends Activity {
     private ServiceConnection mConnection = new ServiceConnection()
     {
         public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.v(TAG, "Service binded");
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
             try {
-                addTextInfo("IP: " + netInterface.inGetIp() + "\nNT: " + netInterface.inGetIpNet() + "\nBC: " + netInterface.inGetIpBc());
-                getUpdate();
-            }
-            catch (RemoteException e){
-                Log.e(TAG, e.getMessage());
-            }
-            catch (NullPointerException e){
+                addTextInfo(netInterface.inNetInfo());
+                hosts = netInterface.inGetHosts();
+                updateList();
+            } catch (RemoteException e) {
                 Log.e(TAG, e.getMessage());
             }
         }
 
         public void onServiceDisconnected(ComponentName className) {
+            Log.v(TAG, "Service unbinded");
             netInterface = null;
         }
     };
