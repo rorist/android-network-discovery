@@ -35,13 +35,21 @@ final public class Main extends Activity {
     private Button                btn;
     private Button                btn1;
     private CheckBox              cb;
+//    private ProgressDialog        progress = null;
     private BroadcastReceiver     receiver = new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
-            Log.v(TAG, "Received broadcast intent");
-            updateList();
-            setButtonOn(btn);
-            setButtonOn(btn1);
-            makeToast("Done.");
+            String a = intent.getAction();
+            Log.v(TAG, "Receive broadcasted "+a);
+            if(a.equals(Network.ACTION_GETHOSTS)){
+                updateList();
+            }
+            else if(a.equals(Network.ACTION_FINISH)){
+                setButtonOn(btn);
+                setButtonOn(btn1);
+//                if(progress!=null) {
+//                    progress.dismiss();
+//                }
+            }
         }
     };
 
@@ -51,7 +59,7 @@ final public class Main extends Activity {
         
         info = (TextView) findViewById(R.id.info); 
         cb = (CheckBox) findViewById(R.id.repeat);
-        
+
         btn = (Button) findViewById(R.id.btn);
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -90,8 +98,11 @@ final public class Main extends Activity {
         adapter = new ArrayAdapter<String>(this, R.layout.list, R.id.list);
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
-
-        registerReceiver(receiver, new IntentFilter(Network.ACTION_GETHOSTS));
+        
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Network.ACTION_GETHOSTS);
+        filter.addAction(Network.ACTION_FINISH);
+        registerReceiver(receiver, filter);
         startService(new Intent(this, Network.class));
     }
     
@@ -113,6 +124,7 @@ final public class Main extends Activity {
 
     private void getUpdate(){
         try {
+//          progress = ProgressDialog.show(ctxt, "Reload", "Updating clients ..", true);
             setButtonOff(btn1);
             makeToast("Updating list ...");
             netInterface.inSearchReachableHosts();
@@ -195,8 +207,9 @@ final public class Main extends Activity {
     private void sendPacket(){
         boolean repeat = cb.isChecked();
         try {
-            setButtonOff(btn);
+//          progress = ProgressDialog.show(ctxt, "Send", "Sending packets ..", true);
             makeToast("Sending request ...");
+            setButtonOff(btn);
             netInterface.inSendPacket(getSelectedHosts(), repeat);
         }
         catch (IllegalStateException e){
@@ -222,8 +235,7 @@ final public class Main extends Activity {
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
             try {
                 addTextInfo(netInterface.inNetInfo());
-                hosts = netInterface.inGetHosts();
-                updateList();
+                getUpdate();
             } catch (RemoteException e) {
                 Log.e(TAG, e.getMessage());
             }

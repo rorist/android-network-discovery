@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import android.util.Log;
+//import android.util.Log;
 
 public class Reachable {
         
@@ -23,7 +23,7 @@ public class Reachable {
                 return true;
             }
             catch (IOException e) {
-                Log.v("Reachable", e.getMessage());
+//                Log.e("Reachable", e.getMessage());
             }
         }
         return false;

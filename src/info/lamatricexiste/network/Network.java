@@ -25,8 +25,9 @@ public class Network extends Service
 {
     private final   String          TAG             =  "NetworkService";
     public  final static String     ACTION_GETHOSTS =  "info.lamatricexiste.network.uiThreadCallback.GETHOSTS";
-    private final   int             TIMEOUT_REACH   =  200;
-    private final   int             SLEEP           =  20;
+    public  final static String     ACTION_FINISH   =  "info.lamatricexiste.network.uiThreadCallback.FINISH";
+    private final   int             TIMEOUT_REACH   =  600;
+    private final   int             SLEEP           =  100;
     private final   long            UPDATE_INTERVAL =  60000; //1mn
     private         WifiManager     wifi            =  null;
     private         DhcpInfo        dhcp            =  null;
@@ -42,8 +43,17 @@ public class Network extends Service
         super.onCreate();
         handler = new Handler(){
             @Override public void handleMessage(Message msg){
-                Log.v(TAG, "handleMessage");
-                sendBroadcast(new Intent(ACTION_GETHOSTS));
+                Log.v(TAG, "handleMessage="+msg.what);
+                int message = msg.what;
+                if(message>0){
+                    InetAddress ip = getIp(message);
+                    if(ip!=null){
+                        hosts.add(getIp(message));
+                        sendBroadcast(new Intent(ACTION_GETHOSTS));
+                    }
+                } else if(message==0){
+                    sendBroadcast(new Intent(ACTION_FINISH));
+                }
             }
         };
     }
@@ -57,8 +67,8 @@ public class Network extends Service
         wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         dhcpInfo();
 //        try {
-//            ip_bc = InetAddress.getByName("192.168.1.50");
-//            ip_net = InetAddress.getByName("192.168.1.0");
+//            ip_bc = InetAddress.getByName("10.0.10.50");
+//            ip_net = InetAddress.getByName("10.0.10.0");
 //            host_id = InetAddress.getByName("0.0.0.255");
 //        } catch (UnknownHostException e) {
 //            Log.e(TAG, e.getMessage());
@@ -85,16 +95,49 @@ public class Network extends Service
  */
     
     private void onUpdate(){
-        handler.post(
-        new Runnable(){
-            @Override public void run(){
-                if(wifi.isWifiEnabled()) {
-                    hosts = getAllHosts();
-                    hosts = checkHosts(hosts);
+        hosts = new ArrayList<InetAddress>();
+        
+        final List<InetAddress> hosts_all = getAllHosts();
+        int len = hosts_all.size();
+        int pos = hosts_all.indexOf(getIp(dhcp.ipAddress));     
+        
+        for(int i=pos-1; i>=0; i--){
+            final int mod = i;
+            final InetAddress host = hosts_all.get(mod);
+            Thread t = new Thread() {
+                public void run(){
+                    if(wifi.isWifiEnabled()) {
+                        Message message = new Message();
+                        message.what = checkHost(host);
+                        handler.sendMessage(message);
+                    }
                 }
-                handler.sendMessage(handler.obtainMessage());
-            }
-        });
+            };
+            t.start();
+        }
+        
+        for(int i=pos+1; i<len; i++){
+            final int mod = i;
+            final InetAddress host = hosts_all.get(mod);
+            Thread t = new Thread() {
+                public void run(){
+                    handler.postDelayed(new Runnable(){
+                        public void run(){
+                            if(wifi.isWifiEnabled()) {
+                                Message message = new Message();
+                                message.what = checkHost(host);
+                                handler.sendMessage(message);
+                            }
+                        }
+                    }, SLEEP*mod);
+                }
+            };
+            t.setDaemon(true);
+            t.start();
+        }
+        Message msg = new Message();
+        msg.what = 0;
+        handler.sendMessage(msg);
     }
     
     private void launchRequest(List<InetAddress> hosts_send){
@@ -102,7 +145,7 @@ public class Network extends Service
             for(InetAddress h : hosts_send){
                 handler.postDelayed(getRunnable(h), SLEEP);
             }
-            sendBroadcast(new Intent(ACTION_GETHOSTS));
+            sendBroadcast(new Intent(ACTION_FINISH));
         }
     }
     
@@ -188,21 +231,17 @@ public class Network extends Service
         return hosts_new;
     }
     
-    private List<InetAddress> checkHosts(List<InetAddress> hosts){
-        Log.v(TAG, "checkHostsRunnable");
+    private int checkHost(InetAddress host){
         Reachable r = new Reachable();
-        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
-        for(InetAddress h : hosts){
-            try {
-                if(h.isReachable(TIMEOUT_REACH) || r.request(h)){
-                    hosts_new.add(h);
-                }
-            }
-            catch (IOException e) {
-                Log.e(TAG, e.getMessage());
+        try {
+            if(host.isReachable(TIMEOUT_REACH) || r.request(host)){
+                return getIpInt(host);
             }
         }
-        return hosts_new;
+        catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return 0;
     }
 
     private List<InetAddress> getAllHosts(){
@@ -225,7 +264,7 @@ public class Network extends Service
                 for(int i=start; i<end; i++){
                     hosts_new.add(InetAddress.getByName(ip_start+"."+i));
                 }
-                hosts_new.remove(getIp(dhcp.ipAddress));
+//                hosts_new.remove(getIp(dhcp.ipAddress));
                 break;
               
     //      case 65535:
@@ -282,4 +321,15 @@ public class Network extends Service
             return null;
         }
     }
+    
+    private int getIpInt(InetAddress ip_addr) {
+        String[] a = ip_addr.getHostAddress().split("\\.");
+        return (
+                Integer.parseInt(a[3])*16777216 + 
+                Integer.parseInt(a[2])*65536 +
+                Integer.parseInt(a[1])*256 +
+                Integer.parseInt(a[0])
+        );
+    }
+
 }
