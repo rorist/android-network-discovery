@@ -15,47 +15,30 @@ import android.net.DhcpInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.DeadObjectException;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
 public class Network extends Service
 {
-    private final   String          TAG             =  "NetworkService";
-    public  final static String     ACTION_GETHOSTS =  "info.lamatricexiste.network.uiThreadCallback.GETHOSTS";
-    public  final static String     ACTION_FINISH   =  "info.lamatricexiste.network.uiThreadCallback.FINISH";
-    private final   int             TIMEOUT_REACH   =  600;
-    private final   int             SLEEP           =  100;
-    private final   long            UPDATE_INTERVAL =  60000; //1mn
-    private         WifiManager     wifi            =  null;
-    private         DhcpInfo        dhcp            =  null;
-    private         Timer           timer           =  new Timer();
-    private         List<InetAddress> hosts         =  new ArrayList<InetAddress>();
-    private         Handler         handler         =  null;
-    private         InetAddress     ip_net          =  null;
-    private         InetAddress     ip_bc           =  null;
-    private         InetAddress     host_id         =  null;
+    private final   String          TAG               =  "NetworkService";
+    public  final static String     ACTION_SENDHOST   =  "info.lamatricexiste.network.SENDHOST";
+    public  final static String     ACTION_FINISH     =  "info.lamatricexiste.network.FINISH";
+    public  final static String     ACTION_UPDATELIST =  "info.lamatricexiste.network.UPDATELIST";
+    public  final static String     ACTION_WIFI       =  "info.lamatricexiste.network.WIFI";
+    private final   int             TIMEOUT_REACH     =  600;
+    private final   long            UPDATE_INTERVAL   =  60000; //1mn
+    private         WifiManager     wifi              =  null;
+    private         DhcpInfo        dhcp              =  null;
+    private         Timer           timer             =  new Timer();
+    private         List<InetAddress> hosts           =  new ArrayList<InetAddress>();
+    private         InetAddress     ip_net            =  null;
+    private         InetAddress     ip_bc             =  null;
+    private         InetAddress     host_id           =  null;
+    private         InetAddress     net_id            =  null;
 
-    @Override public void onCreate()
-    {
+    @Override public void onCreate(){
         super.onCreate();
-        handler = new Handler(){
-            @Override public void handleMessage(Message msg){
-                Log.v(TAG, "handleMessage="+msg.what);
-                int message = msg.what;
-                if(message>0){
-                    InetAddress ip = getIp(message);
-                    if(ip!=null){
-                        hosts.add(getIp(message));
-                        sendBroadcast(new Intent(ACTION_GETHOSTS));
-                    }
-                } else if(message==0){
-                    sendBroadcast(new Intent(ACTION_FINISH));
-                }
-            }
-        };
     }
 
     @Override public void onDestroy() {
@@ -64,8 +47,12 @@ public class Network extends Service
     }
 
     @Override public IBinder onBind(Intent intent){
-        wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-        dhcpInfo();
+        getWifi();
+        if(hosts.isEmpty()){
+            Log.v(TAG, "HOSTS IS EMPTY");
+            onUpdate();
+        }
+        sendBroadcast(new Intent(ACTION_UPDATELIST));
 //        try {
 //            ip_bc = InetAddress.getByName("10.0.10.50");
 //            ip_net = InetAddress.getByName("10.0.10.0");
@@ -76,12 +63,11 @@ public class Network extends Service
         return mBinder;
     }
 
-    private void startService(){
-        stopService();
+    private void startService(final List<InetAddress> hosts_send, final int request){
         timer.scheduleAtFixedRate(
             new TimerTask() {
                 public void run() {
-                    launchRequest(hosts);
+                    launchRequest(hosts_send, request);
                 }
             }, 0, UPDATE_INTERVAL);
     }
@@ -99,18 +85,21 @@ public class Network extends Service
         
         final List<InetAddress> hosts_all = getAllHosts();
         int len = hosts_all.size();
-        int pos = hosts_all.indexOf(getIp(dhcp.ipAddress));     
-        
+        int pos = hosts_all.indexOf(getIp(dhcp.ipAddress));
+
         for(int i=pos-1; i>=0; i--){
             final int mod = i;
             final InetAddress host = hosts_all.get(mod);
             Thread t = new Thread() {
                 public void run(){
-                    if(wifi.isWifiEnabled()) {
-                        Message message = new Message();
-                        message.what = checkHost(host);
-                        handler.sendMessage(message);
+                    int msg = checkHost(host);
+                    if(msg!=0){
+                        hosts.add(host);
+                        Intent i = new Intent(ACTION_SENDHOST);
+                        i.putExtra("addr", host.getHostAddress());
+                        sendBroadcast(i);
                     }
+                    Thread.currentThread().interrupt(); //FIXME Ceci est un test
                 }
             };
             t.start();
@@ -121,40 +110,45 @@ public class Network extends Service
             final InetAddress host = hosts_all.get(mod);
             Thread t = new Thread() {
                 public void run(){
-                    handler.postDelayed(new Runnable(){
-                        public void run(){
-                            if(wifi.isWifiEnabled()) {
-                                Message message = new Message();
-                                message.what = checkHost(host);
-                                handler.sendMessage(message);
-                            }
-                        }
-                    }, SLEEP*mod);
+                    int msg = checkHost(host);
+                    if(msg!=0){
+                        hosts.add(host);
+                        Intent i = new Intent(ACTION_SENDHOST);
+                        i.putExtra("addr", host.getHostAddress());
+                        sendBroadcast(i);
+                    }
+                    Thread.currentThread().interrupt(); //FIXME Ceci est un test
                 }
             };
-            t.setDaemon(true);
             t.start();
         }
-        Message msg = new Message();
-        msg.what = 0;
-        handler.sendMessage(msg);
+        sendBroadcast(new Intent(ACTION_FINISH));
     }
     
-    private void launchRequest(List<InetAddress> hosts_send){
-        if(wifi.isWifiEnabled()){
-            for(InetAddress h : hosts_send){
-                handler.postDelayed(getRunnable(h), SLEEP);
-            }
-            sendBroadcast(new Intent(ACTION_FINISH));
+    private void launchRequest(List<InetAddress> hosts_send, int request){
+        for(InetAddress h : hosts_send){
+            Thread t = new Thread(getRunnable(h, request));
+            t.start();
         }
     }
     
-    private Runnable getRunnable(InetAddress host){
-        
-        SmbPoc run = new SmbPoc();
-        
-        run.setHost(host);
-        return (Runnable)run;
+    private Runnable getRunnable(final InetAddress host, int request){
+        switch(request){
+        case 0:
+            SmbPoc smb = new SmbPoc();
+            smb.setHost(host);
+            return (Runnable) smb;
+        default:
+            return new Runnable() {
+                @Override public void run() {
+                    try {
+                        host.isReachable(TIMEOUT_REACH);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+        }
     }
 
 /**
@@ -173,41 +167,37 @@ public class Network extends Service
             return hostsToStr();
         }
 
-        public void inSendPacket(List<String> hosts_send, boolean repeat) {
+        public void inSendPacket(List<String> hosts_send, int request, boolean repeat) {
             Log.v(TAG, "inSendPacket");
-            if(wifi.isWifiEnabled()){
-                if(repeat){
-                    startService();
-                }
-                else {
-                    stopService();
-                }
-                launchRequest(hostsFromStr(hosts_send));
+            List<InetAddress> hosts_receive = hostsFromStr(hosts_send);
+            if(repeat){
+                startService(hosts_receive, request);
             }
+            else {
+                stopService();
+            }
+            launchRequest(hosts_receive, request);
         }
 
         public String inNetInfo() throws DeadObjectException {
-            if(wifi.isWifiEnabled()){
-                WifiInfo wifiInfo = wifi.getConnectionInfo();
-                return  "ip: " + getIp(dhcp.ipAddress).getHostAddress() + "\tbssid: " + wifiInfo.getBSSID() +"\n"+
-                        "nt: " + ip_net.getHostAddress() + "\tssid: " + wifiInfo.getSSID() +"\n"+
-                        "bc: " + ip_bc.getHostAddress();
-            }
-            else {
-                return "Wifi is disabled !";
-            }
+            WifiInfo wifiInfo = wifi.getConnectionInfo();
+            return  "ip: " + getIp(dhcp.ipAddress).getHostAddress() + "\t nt: " + ip_net.getHostAddress() + "/" + getNetCidr() +"\n"+
+                    "ssid: " + wifiInfo.getSSID() + "\t bssid: " + wifiInfo.getBSSID();
         }
     };
 
 /**
  * Network Logic
  */
-    private void dhcpInfo(){
+    private void getWifi(){
+        wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         if(wifi.isWifiEnabled()) {
             dhcp = wifi.getDhcpInfo();
             ip_bc = getBroadcastIP();
             ip_net = getNetIP();
             host_id = getHostId();
+            net_id = getNetId();
+            sendBroadcast(new Intent(ACTION_WIFI));
         }
     }
 
@@ -245,56 +235,67 @@ public class Network extends Service
     }
 
     private List<InetAddress> getAllHosts(){
-        List<InetAddress> hosts_new = new ArrayList<InetAddress>();
-        String ip_net_str = ip_net.getHostAddress();
+        List<String> hosts_new = new ArrayList<String>();
         String[] ip_net_split = ip_net.getHostAddress().split("\\.");
         String[] ip_bc_split = ip_bc.getHostAddress().split("\\.");
+        String ip_str = getIp(dhcp.ipAddress).getHostAddress();
     
-        try {
-            switch (host_id.hashCode()) {
-          
-            case 7:
-            case 255:
-            case 65535:
-            case 16777215:
-              //    1.0.0.1 to 126.255.255.254 255.255.255.0
-                Integer start = Integer.parseInt(ip_net_split[(ip_net_split.length-1)])+1;
-                Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
-                String ip_start = ip_net_str.substring(0, ip_net_str.lastIndexOf("."));
-                for(int i=start; i<end; i++){
-                    hosts_new.add(InetAddress.getByName(ip_start+"."+i));
-                }
-//                hosts_new.remove(getIp(dhcp.ipAddress));
-                break;
-              
-    //      case 65535:
-    //          // 128.1.0.1 to 191.255.255.254 255.255.0.0
-    //          Integer s1 = Integer.parseInt(ip_net_split[(ip_net_split.length-2)]);
-    //          Integer e1 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-2)]);
-    //          Integer s2 = Integer.parseInt(ip_net_split[(ip_net_split.length-1)]);
-    //          Integer e2 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
-    //          String ip1 = ip_net_str.substring(0, ip_net_str.indexOf(".", 4));
-    //          for(int i=s1; i<=e1; i++){
-    //              for(int j=s2; j<=e2; j++){
-    //                  ip_host = InetAddress.getByName(ip1+"."+i+"."+j);
-    //                  hosts.add(ip_host);
-    //              }
-    //          }
-    //          break;
-    //          
-    //      case 16777215:
-    //          // 192.0.1.1 to 223.255.254.254 255.0.0.0
-    //          break;
-              
+        switch (host_id.hashCode()) {
+      
+        case 7:
+        case 255:
+        case 65535:
+        case 16777215:
+            // 1.0.0.1 to 126.255.255.254 255.255.255.0
+            Integer start = Integer.parseInt(ip_net_split[(ip_net_split.length-1)])+1;
+            Integer end = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
+            String ip_start = ip_str.substring(0, ip_str.lastIndexOf("."));
+            for(int i=start; i<end; i++){
+                hosts_new.add(ip_start+"."+i);
             }
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
+            break;
+          
+//      case 65535:
+//          // 128.1.0.1 to 191.255.255.254 255.255.0.0
+//          Integer s1 = Integer.parseInt(ip_net_split[(ip_net_split.length-2)]);
+//          Integer e1 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-2)]);
+//          Integer s2 = Integer.parseInt(ip_net_split[(ip_net_split.length-1)]);
+//          Integer e2 = Integer.parseInt(ip_bc_split[(ip_bc_split.length-1)]);
+//          String ip1 = ip_net_str.substring(0, ip_net_str.indexOf(".", 4));
+//          for(int i=s1; i<=e1; i++){
+//              for(int j=s2; j<=e2; j++){
+//                  InetAddress ip_host = InetAddress.getByName(ip1+"."+i+"."+j);
+//                  hosts_new.add(ip_host);
+//              }
+//          }
+//          break;
+//          
+//      case 16777215:
+//          // 192.0.1.1 to 223.255.254.254 255.0.0.0
+//          break;
+          
         }
-        return hosts_new;
+        
+        return hostsFromStr(hosts_new);
+    }
+    
+    private int getNetCidr(){
+        String[] addr = net_id.getHostAddress().split("\\.");
+        int cidr = 0;
+        for(String a : addr){
+            int i = Integer.parseInt(a) + 1;
+            cidr += Math.floor(i/32);
+        }
+        return cidr;
     }
     
     private InetAddress getHostId(){
         int network = ~dhcp.netmask;
+        return getIp(network);
+    }
+    
+    private InetAddress getNetId(){
+        int network = dhcp.netmask;
         return getIp(network);
     }
 

@@ -47,25 +47,26 @@
         android:layout_height="wrap_content"
     	android:layout_marginLeft="5dip"
     	android:layout_marginRight="5dip"
-    	android:layout_marginTop="8dip"
-    	android:layout_marginBottom="10dip"
+    	android:layout_marginBottom="5dip"
     	android:textSize="12dip"
     	android:typeface="monospace"/>
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+    	android:layout_marginLeft="2dip"
+    	android:layout_marginRight="2dip">
     	
 	   	<Button android:id="@+id/btn3"
-		    android:layout_width="70dip"
-		    android:layout_height="40dip"
+		    android:layout_width="75dip"
+		    android:layout_height="35dip"
 		    android:textSize="12dip"
 		    android:text="All"/>
 	    	
 	   	<Button android:id="@+id/btn4"
-		    android:layout_width="70dip"
-		    android:layout_height="40dip"
+		    android:layout_width="75dip"
+		    android:layout_height="35dip"
 		    android:textSize="12dip"
 		    android:text="None"/>
 		    

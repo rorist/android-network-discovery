@@ -1,16 +1,20 @@
 package info.lamatricexiste.network;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,20 +39,32 @@ final public class Main extends Activity {
     private Button                btn;
     private Button                btn1;
     private CheckBox              cb;
-//    private ProgressDialog        progress = null;
+    private final CharSequence[]  items = {"Ping (ICMP)","Samba exploit"};
     private BroadcastReceiver     receiver = new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
             String a = intent.getAction();
             Log.v(TAG, "Receive broadcasted "+a);
-            if(a.equals(Network.ACTION_GETHOSTS)){
-                updateList();
+            if(a.equals(Network.ACTION_SENDHOST)){
+                String h = intent.getExtras().getString("addr");
+                if(!hosts.contains(h)){
+                    hosts.add(h);
+                    updateList();
+                }
+                
             }
             else if(a.equals(Network.ACTION_FINISH)){
                 setButtonOn(btn);
                 setButtonOn(btn1);
-//                if(progress!=null) {
-//                    progress.dismiss();
-//                }
+            }
+            else if(a.equals(Network.ACTION_UPDATELIST)){
+                updateList();
+            }
+            else if(a.equals(Network.ACTION_WIFI)){
+                try {
+                    addTextInfo(netInterface.inNetInfo());
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.getMessage());
+                }
             }
         }
     };
@@ -60,6 +76,7 @@ final public class Main extends Activity {
         info = (TextView) findViewById(R.id.info); 
         cb = (CheckBox) findViewById(R.id.repeat);
 
+        // Send Request
         btn = (Button) findViewById(R.id.btn);
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -67,13 +84,16 @@ final public class Main extends Activity {
             }
         });
         
+        // Reload
         btn1 = (Button) findViewById(R.id.btn1);
         btn1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                setSelectedHosts(false);
                 getUpdate();
             }
         });
         
+        // Wifi Settings
         Button btn2 = (Button) findViewById(R.id.btn2);
         btn2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -81,6 +101,7 @@ final public class Main extends Activity {
             }
         });
         
+        // All
         Button btn3 = (Button) findViewById(R.id.btn3);
         btn3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -88,6 +109,7 @@ final public class Main extends Activity {
             }
         });
         
+        // None
         Button btn4 = (Button) findViewById(R.id.btn4);
         btn4.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -95,55 +117,80 @@ final public class Main extends Activity {
             }
         });
         
+        // Hosts list
         adapter = new ArrayAdapter<String>(this, R.layout.list, R.id.list);
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
         
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Network.ACTION_GETHOSTS);
-        filter.addAction(Network.ACTION_FINISH);
-        registerReceiver(receiver, filter);
         startService(new Intent(this, Network.class));
     }
     
     @Override public void onResume(){
         super.onResume();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Network.ACTION_SENDHOST);
+        filter.addAction(Network.ACTION_FINISH);
+        filter.addAction(Network.ACTION_WIFI);
+        registerReceiver(receiver, filter);
         this.bindService(new Intent(this, Network.class), mConnection, Context.BIND_AUTO_CREATE);
     }
     
     @Override public void onPause(){
         super.onPause();
         this.unbindService(mConnection);
+        unregisterReceiver(receiver);
     }
     
     @Override protected void onStop() {
         super.onStop();
         stopService(new Intent(this, Network.class));
-        unregisterReceiver(receiver);
     }
 
     private void getUpdate(){
-        try {
-//          progress = ProgressDialog.show(ctxt, "Reload", "Updating clients ..", true);
-            setButtonOff(btn1);
-            makeToast("Updating list ...");
-            netInterface.inSearchReachableHosts();
-        } catch (RemoteException e) {
-            Log.e(TAG, e.getMessage());
-        }
+        setButtonOff(btn1);
+        new CheckHostsTask().execute();
+        makeToast("Updating list ...");
     }
     
     private void updateList(){
-        getHosts();
         adapter.clear();
         listHosts();
     }
+        
+    private void sendPacket(){
+        final boolean repeat = cb.isChecked();
+        setButtonOff(btn);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select method");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                try {
+                    makeToast("Sending request ...");
+                    netInterface.inSendPacket(getSelectedHosts(), item, repeat);
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.getMessage());
+                } catch (IllegalStateException e){
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+//FIXME
+//    private void getHosts(){
+//        try {
+//            hosts = netInterface.inGetHosts();
+//        } catch (RemoteException e) {
+//            Log.e(TAG, e.getMessage());
+//        }
+//    }
     
     private void listHosts(){
         for(String h : hosts){
             addText(h);
         }
-        list.setSelection(View.FOCUS_DOWN);
+//        list.setSelection(View.FOCUS_DOWN);
     }
     
     private List<String> getSelectedHosts(){
@@ -204,30 +251,6 @@ final public class Main extends Activity {
  * Service connection
  */
     
-    private void sendPacket(){
-        boolean repeat = cb.isChecked();
-        try {
-//          progress = ProgressDialog.show(ctxt, "Send", "Sending packets ..", true);
-            makeToast("Sending request ...");
-            setButtonOff(btn);
-            netInterface.inSendPacket(getSelectedHosts(), repeat);
-        }
-        catch (IllegalStateException e){
-            Log.e(TAG, e.getMessage());
-        }
-        catch (RemoteException e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
-    
-    private void getHosts(){
-        try {
-            hosts = netInterface.inGetHosts();
-        } catch (RemoteException e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
-    
     private ServiceConnection mConnection = new ServiceConnection()
     {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -235,7 +258,6 @@ final public class Main extends Activity {
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
             try {
                 addTextInfo(netInterface.inNetInfo());
-                getUpdate();
             } catch (RemoteException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -246,4 +268,19 @@ final public class Main extends Activity {
             netInterface = null;
         }
     };
+
+    private class CheckHostsTask extends AsyncTask<Void, Integer, Long> {
+        protected Long doInBackground(Void... v) {
+            Log.v(TAG, "CheckHostsTask, doInBackground");
+            try {
+                netInterface.inSearchReachableHosts();
+            } catch (RemoteException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            return (long) 1;
+        }
+        protected void onPostExecute(Long result) {
+            Log.v(TAG, "CheckHostsTask, onPostExecute " + result);
+        }
+    }
 }
