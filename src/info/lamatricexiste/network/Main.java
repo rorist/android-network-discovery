@@ -1,6 +1,5 @@
 package info.lamatricexiste.network;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -61,7 +60,9 @@ final public class Main extends Activity {
             }
             else if(a.equals(Network.ACTION_WIFI)){
                 try {
-                    addTextInfo(netInterface.inNetInfo());
+                    if(netInterface!=null){
+                        addTextInfo(netInterface.inNetInfo());
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -145,6 +146,47 @@ final public class Main extends Activity {
         super.onStop();
         stopService(new Intent(this, Network.class));
     }
+
+/**
+ * Service connection
+ */
+    
+    private ServiceConnection mConnection = new ServiceConnection()
+    {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.v(TAG, "Service binded");
+            netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
+            try {
+                addTextInfo(netInterface.inNetInfo());
+            } catch (RemoteException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            Log.v(TAG, "Service unbinded");
+            netInterface = null;
+        }
+    };
+
+    private class CheckHostsTask extends AsyncTask<Void, Integer, Long> {
+        protected Long doInBackground(Void... v) {
+            Log.v(TAG, "CheckHostsTask, doInBackground");
+            try {
+                netInterface.inSearchReachableHosts();
+            } catch (RemoteException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            return (long) 1;
+        }
+        protected void onPostExecute(Long result) {
+            Log.v(TAG, "CheckHostsTask, onPostExecute " + result);
+        }
+    }
+
+/**
+ * Main
+ */
 
     private void getUpdate(){
         setButtonOff(btn1);
@@ -245,42 +287,5 @@ final public class Main extends Activity {
     private void setButtonOn(Button b){
         b.setClickable(true);
         b.setEnabled(true);
-    }
-
-/**
- * Service connection
- */
-    
-    private ServiceConnection mConnection = new ServiceConnection()
-    {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.v(TAG, "Service binded");
-            netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
-            try {
-                addTextInfo(netInterface.inNetInfo());
-            } catch (RemoteException e) {
-                Log.e(TAG, e.getMessage());
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            Log.v(TAG, "Service unbinded");
-            netInterface = null;
-        }
-    };
-
-    private class CheckHostsTask extends AsyncTask<Void, Integer, Long> {
-        protected Long doInBackground(Void... v) {
-            Log.v(TAG, "CheckHostsTask, doInBackground");
-            try {
-                netInterface.inSearchReachableHosts();
-            } catch (RemoteException e) {
-                Log.e(TAG, e.getMessage());
-            }
-            return (long) 1;
-        }
-        protected void onPostExecute(Long result) {
-            Log.v(TAG, "CheckHostsTask, onPostExecute " + result);
-        }
     }
 }
