@@ -1,6 +1,6 @@
 package info.lamatricexiste.network;
 
-public class DiscoveryMulticast implements Runnable
+public class DiscoveryBroadcast extends Discovery
 {
 
     public void run()

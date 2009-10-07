@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class DiscoveryUnicast implements Runnable
+public class DiscoveryUnicast extends Discovery
 {
     private final String TAG    = "DiscoveryUnicast";
     private Context     ctxt    =  null;
@@ -17,16 +17,8 @@ public class DiscoveryUnicast implements Runnable
     private InetAddress ip_net  =  null;
     private InetAddress ip_bc   =  null;
     private InetAddress host_id =  null;
-    
-    public void setVar(Context ctxt, InetAddress ip, InetAddress ip_net, InetAddress ip_bc, InetAddress host_id){
-        this.ctxt = ctxt;
-        this.ip = ip;
-        this.ip_net = ip_net;
-        this.ip_bc = ip_bc;
-        this.host_id = host_id;
-    } 
 
-    public void run(){
+    private void discover(){
         final List<String> hosts_all = getAllHosts();
         int len = hosts_all.size();
         int pos = hosts_all.indexOf(ip.getHostAddress());
