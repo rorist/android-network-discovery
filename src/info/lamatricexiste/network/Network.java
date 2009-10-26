@@ -13,12 +13,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class Network extends Service
@@ -39,6 +41,8 @@ public class Network extends Service
     private         InetAddress     ip_bc             =  null;
     private         InetAddress     host_id           =  null;
     private         InetAddress     net_id            =  null;
+    @SuppressWarnings("unused")
+    private SharedPreferences       prefs             =  null;
     private BroadcastReceiver       receiver          =  new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
             String a = intent.getAction();
@@ -74,6 +78,7 @@ public class Network extends Service
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override public void onDestroy() {
@@ -84,10 +89,12 @@ public class Network extends Service
 
     @Override public IBinder onBind(Intent intent){
         getWifi();
+        /*
         if(hosts.isEmpty()){
             Log.v(TAG, "HOSTS IS EMPTY");
-            onUpdate();
+            onUpdate(1); //FIXME
         }
+        */
         sendBroadcast(new Intent(ACTION_UPDATELIST));
 //        try {
 //            ip_bc = InetAddress.getByName("10.0.10.50");
@@ -116,13 +123,19 @@ public class Network extends Service
  * Runnable requests
  */
     
-    private void onUpdate(){
+    private void onUpdate(int method){
         hosts = new ArrayList<InetAddress>();
         //TODO: handler multiple methods
         if(isWifiEnabled()){
-            DiscoveryUnicast run = new DiscoveryUnicast();
-            run.setVar(this, getIp(dhcp.ipAddress), ip_net, ip_bc, host_id);
-            new Thread(run).start();
+            switch(method){
+                case 1:
+                    DiscoveryUnicast run = new DiscoveryUnicast();
+                    run.setVar(this, getIp(dhcp.ipAddress), ip_net, ip_bc, host_id);
+                    new Thread(run).start();
+                    break;
+                default:
+                    Log.v(TAG, "No discovery method selected!");
+            }
         }
     }
     
@@ -132,6 +145,7 @@ public class Network extends Service
                 Thread t = new Thread(getRunnable(h, request));
                 t.start();
             }
+            sendBroadcast(new Intent(ACTION_FINISH)); //TODO: Move to SendSmbNegotiate and so on
         }
     }
     
@@ -160,9 +174,9 @@ public class Network extends Service
 
     private final NetworkInterface.Stub mBinder = new NetworkInterface.Stub() {
 
-        public void inSearchReachableHosts() throws DeadObjectException  {
+        public void inSearchReachableHosts(int method) throws DeadObjectException  {
             Log.v(TAG, "inSearchReachableHosts");
-            onUpdate();
+            onUpdate(method);
         }
 
         public List<String> inGetHosts() throws RemoteException {

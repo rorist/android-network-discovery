@@ -5,20 +5,14 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 public class DiscoveryUnicast extends Discovery
 {
-    private final String TAG    = "DiscoveryUnicast";
-    private Context     ctxt    =  null;
-    private InetAddress ip      =  null;
-    private InetAddress ip_net  =  null;
-    private InetAddress ip_bc   =  null;
-    private InetAddress host_id =  null;
+    protected final String TAG    = "DiscoveryUnicast";
 
-    private void discover(){
+    protected void discover(){
         final List<String> hosts_all = getAllHosts();
         int len = hosts_all.size();
         int pos = hosts_all.indexOf(ip.getHostAddress());
@@ -33,7 +27,7 @@ public class DiscoveryUnicast extends Discovery
                         i.putExtra("addr", host);
                         ctxt.sendBroadcast(i);
                     }
-                    Thread.currentThread().interrupt(); //FIXME Ceci est un test
+                    Thread.currentThread().interrupt();
                 }
             };
             t.start();
@@ -49,7 +43,7 @@ public class DiscoveryUnicast extends Discovery
                         i.putExtra("addr", host);
                         ctxt.sendBroadcast(i);
                     }
-                    Thread.currentThread().interrupt(); //FIXME Ceci est un test
+                    Thread.currentThread().interrupt();
                 }
             };
             t.start();

@@ -1,0 +1,9 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="discover_method"
+        android:title="Discovery Method"
+        android:summary="Method used to discover host on the network"
+        android:entries="@array/discover_method_name"
+        android:entryValues="@array/discover_method_value"
+        android:dialogTitle="Network discovery method"/>
+</PreferenceScreen>
