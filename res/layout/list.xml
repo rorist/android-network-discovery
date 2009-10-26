@@ -6,11 +6,17 @@
 	
 	<CheckBox
 		android:id="@+id/list"
-	    android:layout_width="fill_parent"
+	    android:layout_width="0dip"
 	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
 	    android:paddingLeft="42dip"
     	android:textSize="12dip"
     	android:typeface="monospace"
 	    android:text="List"/>
+	    
+<!--	<Button android:id="@+id/btn_list"-->
+<!--		android:layout_width="75dip"-->
+<!--		android:layout_height="35dip"-->
+<!--		android:text="Details"/>-->
     
 </LinearLayout>
