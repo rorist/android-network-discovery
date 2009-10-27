@@ -39,8 +39,6 @@ public class Network extends Service
     private         List<InetAddress> hosts           =  new ArrayList<InetAddress>();
     private         InetAddress     ip_net            =  null;
     private         InetAddress     ip_bc             =  null;
-    private         InetAddress     host_id           =  null;
-    private         InetAddress     net_id            =  null;
     @SuppressWarnings("unused")
     private SharedPreferences       prefs             =  null;
     private BroadcastReceiver       receiver          =  new BroadcastReceiver(){
@@ -99,7 +97,6 @@ public class Network extends Service
 //        try {
 //            ip_bc = InetAddress.getByName("10.0.10.50");
 //            ip_net = InetAddress.getByName("10.0.10.0");
-//            host_id = InetAddress.getByName("0.0.0.255");
 //        } catch (UnknownHostException e) {
 //            Log.e(TAG, e.getMessage());
 //        }
@@ -130,7 +127,7 @@ public class Network extends Service
             switch(method){
                 case 1:
                     DiscoveryUnicast run = new DiscoveryUnicast();
-                    run.setVar(this, getIp(dhcp.ipAddress), ip_net, ip_bc, host_id);
+                    run.setVar(this, getIp(dhcp.ipAddress), ip_net, ip_bc, getNetmask(), getNetCidr());
                     new Thread(run).start();
                     break;
                 default:
@@ -253,8 +250,6 @@ public class Network extends Service
             dhcp = wifi.getDhcpInfo();
             ip_bc = getBroadcastIP();
             ip_net = getNetIP();
-            host_id = getHostId();
-            net_id = getNetId();
 //            sendBroadcast(new Intent(ACTION_WIFI));
         }
     }
@@ -280,21 +275,18 @@ public class Network extends Service
     }
     
     private int getNetCidr(){
-        String[] addr = net_id.getHostAddress().split("\\.");
-        int cidr = 0;
-        for(String a : addr){
-            int i = Integer.parseInt(a) + 1;
-            cidr += Math.floor(i/32);
-        }
-        return cidr;
+        int i = dhcp.netmask;
+        i = i - ((i >> 1) & 0x55555555);
+        i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+        return ((i + (i >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
     }
     
-    private InetAddress getHostId(){
+    private InetAddress getInvertedNetmask(){
         int network = ~dhcp.netmask;
         return getIp(network);
     }
     
-    private InetAddress getNetId(){
+    private InetAddress getNetmask(){
         int network = dhcp.netmask;
         return getIp(network);
     }

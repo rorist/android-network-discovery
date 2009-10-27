@@ -5,9 +5,11 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -39,11 +41,11 @@ final public class Main extends Activity {
     private ArrayAdapter<String>  adapter;
     private ListView              list;
     private TextView              info;
-//    private CheckBox              cb;
-//    private Button                btn;
+    private CheckBox              cb;
+    private Button                btn;
     private Button                btn1;
     private SharedPreferences     prefs = null;;
-//    private final CharSequence[]  items = {"Ping (ICMP)","Samba exploit"};
+    private final CharSequence[]  items = {"Ping (ICMP)","Samba exploit"};
     private BroadcastReceiver     receiver = new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
             String a = intent.getAction();
@@ -56,7 +58,7 @@ final public class Main extends Activity {
                 }
             }
             else if(a.equals(Network.ACTION_FINISH)){
-//                setButtonOn(btn);
+                setButtonOn(btn);
                 setButtonOn(btn1);
             }
             else if(a.equals(Network.ACTION_UPDATELIST)){
@@ -79,16 +81,16 @@ final public class Main extends Activity {
         setContentView(R.layout.main);
         
         info = (TextView) findViewById(R.id.info); 
-//        cb = (CheckBox) findViewById(R.id.repeat);
+        cb = (CheckBox) findViewById(R.id.repeat);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Send Request
-//        btn = (Button) findViewById(R.id.btn);
-//        btn.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                sendPacket();
-//            }
-//        });
+        btn = (Button) findViewById(R.id.btn);
+        btn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                sendPacket();
+            }
+        });
         
         // Reload
         btn1 = (Button) findViewById(R.id.btn1);
@@ -107,21 +109,21 @@ final public class Main extends Activity {
             }
         });
         
-//        // All
-//        Button btn3 = (Button) findViewById(R.id.btn3);
-//        btn3.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                setSelectedHosts(true);
-//            }
-//        });
-//        
-//        // None
-//        Button btn4 = (Button) findViewById(R.id.btn4);
-//        btn4.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                setSelectedHosts(false);
-//            }
-//        });
+        // All
+        Button btn3 = (Button) findViewById(R.id.btn3);
+        btn3.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setSelectedHosts(true);
+            }
+        });
+        
+        // None
+        Button btn4 = (Button) findViewById(R.id.btn4);
+        btn4.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setSelectedHosts(false);
+            }
+        });
         
         // Hosts list
         adapter = new ArrayAdapter<String>(this, R.layout.list, R.id.list);
@@ -217,26 +219,26 @@ final public class Main extends Activity {
         makeToast("Updating list ...");
     }
         
-//    private void sendPacket(){
-//        final boolean repeat = cb.isChecked();
-//        setButtonOff(btn);
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setTitle("Select method");
-//        builder.setItems(items, new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int item) {
-//                try {
-//                    makeToast("Sending request ...");
-//                    netInterface.inSendPacket(getSelectedHosts(), item, repeat);
-//                } catch (RemoteException e) {
-//                    Log.e(TAG, e.getMessage());
-//                } catch (IllegalStateException e){
-//                    Log.e(TAG, e.getMessage());
-//                }
-//            }
-//        });
-//        AlertDialog alert = builder.create();
-//        alert.show();
-//    }
+    private void sendPacket(){
+        final boolean repeat = cb.isChecked();
+        setButtonOff(btn);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select method");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                try {
+                    makeToast("Sending request ...");
+                    netInterface.inSendPacket(getSelectedHosts(), item, repeat);
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.getMessage());
+                } catch (IllegalStateException e){
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
     
     private void updateList(){
         adapter.clear();
@@ -255,17 +257,17 @@ final public class Main extends Activity {
 //        Button btn_list = (Button) findViewById(R.id.btn_list);
     }
     
-//    private List<String> getSelectedHosts(){
-//        List<String> hosts_s = new ArrayList<String>();
-//        int listCount = list.getChildCount();
-//        for(int i=0; i<listCount; i++){
-//            CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
-//            if(cb.isChecked()){
-//                hosts_s.add(hosts.get(i));
-//            }
-//        }
-//        return hosts_s;
-//    }
+    private List<String> getSelectedHosts(){
+        List<String> hosts_s = new ArrayList<String>();
+        int listCount = list.getChildCount();
+        for(int i=0; i<listCount; i++){
+            CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
+            if(cb.isChecked()){
+                hosts_s.add(hosts.get(i));
+            }
+        }
+        return hosts_s;
+    }
     
     private void setSelectedHosts(Boolean all){
         int listCount = list.getChildCount();

@@ -12,19 +12,20 @@ public class Discovery implements Runnable
     protected InetAddress ip      =  null;
     protected InetAddress ip_net  =  null;
     protected InetAddress ip_bc   =  null;
-    protected InetAddress host_id =  null;
+    protected InetAddress ip_mask =  null;
+    protected int         cidr    =  24;
 
     public void run(){
         discover();
     }
     
-    public void setVar(Context ctxt, InetAddress ip, InetAddress ip_net, InetAddress ip_bc, InetAddress host_id){
-        Log.v(TAG, "setVar");
+    public void setVar(Context ctxt, InetAddress ip, InetAddress ip_net, InetAddress ip_bc, InetAddress ip_mask, int cidr){
         this.ctxt = ctxt;
         this.ip = ip;
         this.ip_net = ip_net;
         this.ip_bc = ip_bc;
-        this.host_id = host_id;
+        this.ip_mask = ip_mask;
+        this.cidr = cidr;
     } 
 
     protected void discover(){
