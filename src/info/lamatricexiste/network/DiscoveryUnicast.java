@@ -2,8 +2,6 @@ package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 import android.content.Intent;
 import android.util.Log;
@@ -17,9 +15,9 @@ public class DiscoveryUnicast extends Discovery
         int start = ip_int & (1 - (1<<(32 - cidr)));
         int end = ip_int | ((1<<(32 - cidr)) - 1);
         
-        Intent i = new Intent(Network.ACTION_TOTALHOSTS);
-        i.putExtra("total", (end-start));
-        ctxt.sendBroadcast(i);
+        Intent intent = new Intent(Network.ACTION_TOTALHOSTS);
+        intent.putExtra("total", (end-start));
+        ctxt.sendBroadcast(intent);
 
         for(int i=start; i<=end; i++){
             final String host = hashToIp(i);

@@ -30,6 +30,7 @@ public class Network extends Service
     public  final   static String   ACTION_FINISH     =  "info.lamatricexiste.network.FINISH";
     public  final   static String   ACTION_UPDATELIST =  "info.lamatricexiste.network.UPDATELIST";
     public  final   static String   ACTION_WIFI       =  "info.lamatricexiste.network.WIFI";
+    public  final   static String   ACTION_TOTALHOSTS =  "info.lamatricexiste.network.TOTALHOSTS";
     public  final   static int      TIMEOUT_REACH     =  600;
     private final   long            UPDATE_INTERVAL   =  60000; //1mn
     public  static  int             WifiState         =  -1;
@@ -281,10 +282,10 @@ public class Network extends Service
         return ((i + (i >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
     }
     
-    private InetAddress getInvertedNetmask(){
-        int network = ~dhcp.netmask;
-        return getIp(network);
-    }
+//    private InetAddress getInvertedNetmask(){
+//        int network = ~dhcp.netmask;
+//        return getIp(network);
+//    }
     
     private InetAddress getNetmask(){
         int network = dhcp.netmask;
