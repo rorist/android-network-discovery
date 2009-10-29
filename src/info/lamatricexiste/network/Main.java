@@ -1,7 +1,6 @@
 package info.lamatricexiste.network;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import android.app.Activity;
@@ -14,6 +13,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -28,6 +30,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,48 +43,16 @@ final public class Main extends Activity {
     private NetworkInterface      netInterface = null;
     private ArrayAdapter<String>  adapter;
     private ListView              list;
-    private TextView              info;
-    private CheckBox              cb;
     private Button                btn;
     private Button                btn1;
     private SharedPreferences     prefs = null;;
     private final CharSequence[]  items = {"Ping (ICMP)","Samba exploit"};
-    private BroadcastReceiver     receiver = new BroadcastReceiver(){
-        public void onReceive(Context ctxt, Intent intent){
-            String a = intent.getAction();
-            Log.v(TAG, "Receive broadcasted "+a);
-            if(a.equals(Network.ACTION_SENDHOST)){
-                String h = intent.getExtras().getString("addr");
-                if(!hosts.contains(h)){
-                    hosts.add(h);
-                    updateList();
-                }
-            }
-            else if(a.equals(Network.ACTION_FINISH)){
-                setButtonOn(btn);
-                setButtonOn(btn1);
-            }
-            else if(a.equals(Network.ACTION_UPDATELIST)){
-                updateList();
-            }
-            else if(a.equals(Network.ACTION_WIFI)){
-                try {
-                    if(netInterface!=null){
-                        addTextInfo(netInterface.inNetInfo());
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            }
-        }
-    };
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        info = (TextView) findViewById(R.id.info); 
-        cb = (CheckBox) findViewById(R.id.repeat);
+//        info = (TextView) findViewById(R.id.info);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Send Request
@@ -138,7 +109,13 @@ final public class Main extends Activity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Network.ACTION_SENDHOST);
         filter.addAction(Network.ACTION_FINISH);
-        filter.addAction(Network.ACTION_WIFI);
+        filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
         this.bindService(new Intent(this, Network.class), mConnection, Context.BIND_AUTO_CREATE);
     }
@@ -166,8 +143,109 @@ final public class Main extends Activity {
         }
         return (super.onOptionsItemSelected(item));
     }
-
-
+    
+    // Broadcast Receiver
+    private BroadcastReceiver receiver = new BroadcastReceiver(){
+        public void onReceive(Context ctxt, Intent intent){
+            String a = intent.getAction();
+            Log.v(TAG, "Receive broadcasted "+a);
+            if(a.equals(Network.ACTION_SENDHOST)){
+                String h = intent.getExtras().getString("addr");
+                if(!hosts.contains(h)){
+                    hosts.add(h);
+                    updateList();
+                }
+            }
+            else if(a.equals(Network.ACTION_FINISH)){
+                setButtonOn(btn);
+                setButtonOn(btn1);
+            }
+            else if(a.equals(Network.ACTION_UPDATELIST)){
+                updateList();
+            }
+            else if(a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)){
+                setWifiState(intent);
+            }
+            else if(a.equals(WifiManager.NETWORK_IDS_CHANGED_ACTION) ||
+                    a.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION) ||
+                    a.equals(WifiManager.RSSI_CHANGED_ACTION) ||
+                    a.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) ||
+                    a.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION) ||
+                    a.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) ||
+                    a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)){
+                setWifiInfo();
+            }
+        }
+    };
+    
+    private void setWifiInfo(){
+        TextView info_ip = (TextView) findViewById(R.id.info_ip);
+        TextView info_nt = (TextView) findViewById(R.id.info_nt);
+        TextView info_id = (TextView) findViewById(R.id.info_id);
+        ImageView info_status = (ImageView) findViewById(R.id.info_status);
+        WifiManager wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifi.getConnectionInfo();
+        SupplicantState sstate = wifiInfo.getSupplicantState();
+        
+        info_ip.setText("");
+        info_nt.setText("");
+        switch (sstate) {
+            case SCANNING:
+                info_id.setText(R.string.wifi_scanning);
+                info_status.setImageResource(R.drawable.wifi_inactive);
+                break;
+            case ASSOCIATED:
+            case ASSOCIATING:
+                info_id.setText(String.format(getString(R.string.wifi_associating), "myNetwork"));
+                info_status.setImageResource(R.drawable.wifi_inactive);
+                break;
+            case COMPLETED:
+                info_ip.setText("IP: ");
+                info_nt.setText("NT: ");
+                info_id.setText("SSID: ");
+                info_status.setImageResource(R.drawable.wifi_inactive);
+                break;
+            default:
+                info_id.setText(R.string.wifi_other);
+                info_status.setImageResource(R.drawable.wifi_inactive);
+        }
+    }
+    
+    private void setWifiState(Intent intent){
+        TextView info_ip = (TextView) findViewById(R.id.info_ip);
+        TextView info_nt = (TextView) findViewById(R.id.info_nt);
+        TextView info_id = (TextView) findViewById(R.id.info_id);
+        ImageView info_status = (ImageView) findViewById(R.id.info_status);
+        
+        info_ip.setText("");
+        info_nt.setText("");
+        int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
+        switch(WifiState){
+            case WifiManager.WIFI_STATE_ENABLED:
+                info_id.setText(R.string.wifi_enabled);
+                info_status.setImageResource(R.drawable.wifi_inactive);
+                break;
+            case WifiManager.WIFI_STATE_ENABLING:
+                info_id.setText(R.string.wifi_enabling);
+                info_status.setImageResource(R.drawable.wifi_inactive);
+                break;
+            case WifiManager.WIFI_STATE_DISABLING:
+                info_id.setText(R.string.wifi_disabling);
+                info_status.setImageResource(R.drawable.wifi_disabled);
+                break;
+            case WifiManager.WIFI_STATE_DISABLED:
+                info_id.setText(R.string.wifi_disabled);
+                info_status.setImageResource(R.drawable.wifi_disabled);
+                break;
+            case WifiManager.WIFI_STATE_UNKNOWN:
+                info_id.setText(R.string.wifi_unknown);
+                info_status.setImageResource(R.drawable.wifi_disabled);
+                break;
+            default:
+                info_id.setText(R.string.wifi_strange);
+                info_status.setImageResource(R.drawable.wifi_disabled);
+        }
+    }
 
 /**
  * Service connection
@@ -178,11 +256,6 @@ final public class Main extends Activity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.v(TAG, "Service binded");
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
-            try {
-                addTextInfo(netInterface.inNetInfo());
-            } catch (RemoteException e) {
-                Log.e(TAG, e.getMessage());
-            }
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -220,6 +293,7 @@ final public class Main extends Activity {
     }
         
     private void sendPacket(){
+        CheckBox cb = (CheckBox) findViewById(R.id.repeat); //FIXME: This is bad
         final boolean repeat = cb.isChecked();
         setButtonOff(btn);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -283,18 +357,6 @@ final public class Main extends Activity {
     
     private void makeToast(String txt){
         Toast.makeText(getApplicationContext(), (CharSequence)txt, Toast.LENGTH_SHORT).show();
-    }
-    
-    private void addTextInfo(String text){
-        try {
-            info.setText(text);
-        }
-        catch (ConcurrentModificationException e){
-            Log.e(TAG, e.getMessage());
-        }
-        catch (NullPointerException e){
-            Log.e(TAG, e.getMessage());
-        }
     }
     
     private void setButtonOff(Button b){

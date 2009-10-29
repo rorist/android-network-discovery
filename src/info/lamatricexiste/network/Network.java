@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.DhcpInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.DeadObjectException;
 import android.os.IBinder;
@@ -29,7 +28,6 @@ public class Network extends Service
     public  final   static String   ACTION_SENDHOST   =  "info.lamatricexiste.network.SENDHOST";
     public  final   static String   ACTION_FINISH     =  "info.lamatricexiste.network.FINISH";
     public  final   static String   ACTION_UPDATELIST =  "info.lamatricexiste.network.UPDATELIST";
-    public  final   static String   ACTION_WIFI       =  "info.lamatricexiste.network.WIFI";
     public  final   static String   ACTION_TOTALHOSTS =  "info.lamatricexiste.network.TOTALHOSTS";
     public  final   static int      TIMEOUT_REACH     =  600;
     private final   long            UPDATE_INTERVAL   =  60000; //1mn
@@ -38,8 +36,6 @@ public class Network extends Service
     private         DhcpInfo        dhcp              =  null;
     private         Timer           timer             =  new Timer();
     private         List<InetAddress> hosts           =  new ArrayList<InetAddress>();
-    private         InetAddress     ip_net            =  null;
-    private         InetAddress     ip_bc             =  null;
     @SuppressWarnings("unused")
     private SharedPreferences       prefs             =  null;
     private BroadcastReceiver       receiver          =  new BroadcastReceiver(){
@@ -57,15 +53,7 @@ public class Network extends Service
                 }
             }
             else if(a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)){
-                int extra = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-                if(WifiState!=extra){
-                    WifiState = extra;
-                    sendBroadcast(new Intent(ACTION_WIFI));
-                }
-            }
-            else if(a.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)){
-                // Wifi is associated
-                sendBroadcast(new Intent(ACTION_WIFI));
+                WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
             }
         }
     };
@@ -75,7 +63,6 @@ public class Network extends Service
         IntentFilter filter = new IntentFilter();
         filter.addAction(Network.ACTION_SENDHOST);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
@@ -88,13 +75,7 @@ public class Network extends Service
 
     @Override public IBinder onBind(Intent intent){
         getWifi();
-        /*
-        if(hosts.isEmpty()){
-            Log.v(TAG, "HOSTS IS EMPTY");
-            onUpdate(1); //FIXME
-        }
-        */
-        sendBroadcast(new Intent(ACTION_UPDATELIST));
+//        sendBroadcast(new Intent(ACTION_UPDATELIST));
 //        try {
 //            ip_bc = InetAddress.getByName("10.0.10.50");
 //            ip_net = InetAddress.getByName("10.0.10.0");
@@ -128,7 +109,7 @@ public class Network extends Service
             switch(method){
                 case 1:
                     DiscoveryUnicast run = new DiscoveryUnicast();
-                    run.setVar(this, getIp(dhcp.ipAddress), ip_net, ip_bc, getNetmask(), getNetCidr());
+                    run.setVar(this, getIp(), getNetIP(), getBroadcastIP(), getNetmask(), getNetCidr());
                     new Thread(run).start();
                     break;
                 default:
@@ -193,44 +174,6 @@ public class Network extends Service
             }
             launchRequest(hosts_receive, request);
         }
-
-        public String inNetInfo() throws DeadObjectException {
-            String ret = "";
-            switch(WifiState){
-            
-                case WifiManager.WIFI_STATE_ENABLED:
-                    getWifi();
-                    if(isWifiEnabled()){
-                        WifiInfo wifiInfo = wifi.getConnectionInfo();
-                        ret = "ip: " + getIp(dhcp.ipAddress).getHostAddress() + "\t nt: " + ip_net.getHostAddress() + "/" + getNetCidr() +"\n"+
-                              "ssid: " + wifiInfo.getSSID() + "\t bssid: " + wifiInfo.getBSSID();
-                    } else {
-                        ret = "Wifi is enabled";
-                    }
-                    break;
-                    
-                case WifiManager.WIFI_STATE_ENABLING:
-                    ret = "Wifi is enabling";
-                    break;
-                    
-                case WifiManager.WIFI_STATE_DISABLED:
-                    ret = "Wifi is disabled";
-                    break;
-                
-                case WifiManager.WIFI_STATE_DISABLING:
-                    ret = "Wifi is disabling";
-                    break;
-                
-                case WifiManager.WIFI_STATE_UNKNOWN:
-                    ret = "Wifi state unknown";
-                    break;
-                
-                default:
-                    ret = "Wifi is acting strangely";
-            
-            }
-            return ret;
-        }
     };
 
 /**
@@ -249,9 +192,6 @@ public class Network extends Service
         wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         if(wifi.isWifiEnabled()) {
             dhcp = wifi.getDhcpInfo();
-            ip_bc = getBroadcastIP();
-            ip_net = getNetIP();
-//            sendBroadcast(new Intent(ACTION_WIFI));
         }
     }
 
@@ -287,22 +227,23 @@ public class Network extends Service
 //        return getIp(network);
 //    }
     
+    private InetAddress getIp(){
+        return getIpFromInt(dhcp.ipAddress);
+    }
+    
     private InetAddress getNetmask(){
-        int network = dhcp.netmask;
-        return getIp(network);
+        return getIpFromInt(dhcp.netmask);
     }
 
     private InetAddress getNetIP(){
-        int network = (dhcp.ipAddress & dhcp.netmask);
-        return getIp(network);
+        return getIpFromInt(dhcp.ipAddress & dhcp.netmask);
     }
 
     private InetAddress getBroadcastIP(){
-        int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
-        return getIp(broadcast);
+        return getIpFromInt((dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask);
     }
     
-    private InetAddress getIp(int ip_int){
+    private InetAddress getIpFromInt(int ip_int){
         byte[] quads = new byte[4];
         
         for (int k = 0; k < 4; k++)
@@ -315,15 +256,5 @@ public class Network extends Service
             return null;
         }
     }
-    
-//    private int getIpInt(InetAddress ip_addr) {
-//        String[] a = ip_addr.getHostAddress().split("\\.");
-//        return (
-//                Integer.parseInt(a[3])*16777216 + 
-//                Integer.parseInt(a[2])*65536 +
-//                Integer.parseInt(a[1])*256 +
-//                Integer.parseInt(a[0])
-//        );
-//    }
 
 }
