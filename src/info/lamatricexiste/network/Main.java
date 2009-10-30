@@ -51,8 +51,6 @@ final public class Main extends Activity {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-//        info = (TextView) findViewById(R.id.info);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Send Request
@@ -148,7 +146,7 @@ final public class Main extends Activity {
     private BroadcastReceiver receiver = new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
             String a = intent.getAction();
-            Log.v(TAG, "Receive broadcasted "+a);
+            Log.d(TAG, "Receive broadcasted "+a);
             if(a.equals(Network.ACTION_SENDHOST)){
                 String h = intent.getExtras().getString("addr");
                 if(!hosts.contains(h)){
@@ -171,8 +169,7 @@ final public class Main extends Activity {
                     a.equals(WifiManager.RSSI_CHANGED_ACTION) ||
                     a.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) ||
                     a.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION) ||
-                    a.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) ||
-                    a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)){
+                    a.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)){
                 setWifiInfo();
             }
         }
@@ -186,6 +183,7 @@ final public class Main extends Activity {
         WifiManager wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifi.getConnectionInfo();
         SupplicantState sstate = wifiInfo.getSupplicantState();
+        NetworkInfo net = new NetworkInfo((WifiManager) this.getSystemService(Context.WIFI_SERVICE));
         
         info_ip.setText("");
         info_nt.setText("");
@@ -196,18 +194,15 @@ final public class Main extends Activity {
                 break;
             case ASSOCIATED:
             case ASSOCIATING:
-                info_id.setText(String.format(getString(R.string.wifi_associating), "myNetwork"));
+                info_id.setText(String.format(getString(R.string.wifi_associating), net.getSSID()));
                 info_status.setImageResource(R.drawable.wifi_inactive);
                 break;
             case COMPLETED:
-                info_ip.setText("IP: ");
-                info_nt.setText("NT: ");
-                info_id.setText("SSID: ");
-                info_status.setImageResource(R.drawable.wifi_inactive);
+                info_ip.setText("IP: "+net.getIp().getHostAddress());
+                info_nt.setText("NT: "+net.getNetIp().getHostAddress()+"/"+net.getNetCidr());
+                info_id.setText("SSID: "+net.getSSID());
+                info_status.setImageResource(R.drawable.wifi_active);
                 break;
-            default:
-                info_id.setText(R.string.wifi_other);
-                info_status.setImageResource(R.drawable.wifi_inactive);
         }
     }
     
@@ -224,6 +219,7 @@ final public class Main extends Activity {
             case WifiManager.WIFI_STATE_ENABLED:
                 info_id.setText(R.string.wifi_enabled);
                 info_status.setImageResource(R.drawable.wifi_inactive);
+                setWifiInfo();
                 break;
             case WifiManager.WIFI_STATE_ENABLING:
                 info_id.setText(R.string.wifi_enabling);
@@ -254,19 +250,19 @@ final public class Main extends Activity {
     private ServiceConnection mConnection = new ServiceConnection()
     {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.v(TAG, "Service binded");
+            Log.d(TAG, "Service binded");
             netInterface = NetworkInterface.Stub.asInterface((IBinder)service);
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            Log.v(TAG, "Service unbinded");
+            Log.d(TAG, "Service unbinded");
             netInterface = null;
         }
     };
 
     private class CheckHostsTask extends AsyncTask<Void, Integer, Long> {
         protected Long doInBackground(Void... v) {
-            Log.v(TAG, "CheckHostsTask, doInBackground");
+            Log.d(TAG, "CheckHostsTask, doInBackground");
             try {
                 int method = Integer.parseInt(prefs.getString("discover_method", String.valueOf(DEFAULT_DISCOVER)));
                 netInterface.inSearchReachableHosts(method);
@@ -278,7 +274,7 @@ final public class Main extends Activity {
             return (long) 1;
         }
         protected void onPostExecute(Long result) {
-            Log.v(TAG, "CheckHostsTask, onPostExecute " + result);
+            Log.d(TAG, "CheckHostsTask, onPostExecute " + result);
         }
     }
 

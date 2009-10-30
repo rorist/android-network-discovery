@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.DeadObjectException;
 import android.os.IBinder;
@@ -32,8 +31,7 @@ public class Network extends Service
     public  final   static int      TIMEOUT_REACH     =  600;
     private final   long            UPDATE_INTERVAL   =  60000; //1mn
     public  static  int             WifiState         =  -1;
-    private         WifiManager     wifi              =  null;
-    private         DhcpInfo        dhcp              =  null;
+    private         WifiManager     WifiService       =  null;
     private         Timer           timer             =  new Timer();
     private         List<InetAddress> hosts           =  new ArrayList<InetAddress>();
     @SuppressWarnings("unused")
@@ -74,7 +72,7 @@ public class Network extends Service
     }
 
     @Override public IBinder onBind(Intent intent){
-        getWifi();
+        WifiService = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 //        sendBroadcast(new Intent(ACTION_UPDATELIST));
 //        try {
 //            ip_bc = InetAddress.getByName("10.0.10.50");
@@ -103,13 +101,14 @@ public class Network extends Service
  */
     
     private void onUpdate(int method){
+        NetworkInfo net = new NetworkInfo(WifiService);
         hosts = new ArrayList<InetAddress>();
         //TODO: handler multiple methods
-        if(isWifiEnabled()){
+        if(net.isWifiEnabled()){
             switch(method){
                 case 1:
                     DiscoveryUnicast run = new DiscoveryUnicast();
-                    run.setVar(this, getIp(), getNetIP(), getBroadcastIP(), getNetmask(), getNetCidr());
+                    run.setVar(this, net.getIp(), net.getNetIp(), net.getBroadcastIp(), net.getNetmask(), net.getNetCidr());
                     new Thread(run).start();
                     break;
                 default:
@@ -119,7 +118,8 @@ public class Network extends Service
     }
     
     private void launchRequest(List<InetAddress> hosts_send, int request){
-        if(isWifiEnabled()){
+        NetworkInfo net = new NetworkInfo(WifiService);
+        if(net.isWifiEnabled()){
             for(InetAddress h : hosts_send){
                 Thread t = new Thread(getRunnable(h, request));
                 t.start();
@@ -177,23 +177,8 @@ public class Network extends Service
     };
 
 /**
- * Network Logic
+ * Hosts to/from String
  */
-    private Boolean isWifiEnabled(){
-        if( wifi!=null && dhcp!=null && 
-            wifi.getConnectionInfo().getBSSID()!=null &&
-            WifiState==WifiManager.WIFI_STATE_ENABLED){
-            return true;
-        }
-        return false;
-    }
-    
-    private void getWifi(){
-        wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-        if(wifi.isWifiEnabled()) {
-            dhcp = wifi.getDhcpInfo();
-        }
-    }
 
     private List<String> hostsToStr(){
         List<String> hosts_str = new ArrayList<String>();
@@ -214,47 +199,4 @@ public class Network extends Service
         }
         return hosts_new;
     }
-    
-    private int getNetCidr(){
-        int i = dhcp.netmask;
-        i = i - ((i >> 1) & 0x55555555);
-        i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
-        return ((i + (i >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
-    }
-    
-//    private InetAddress getInvertedNetmask(){
-//        int network = ~dhcp.netmask;
-//        return getIp(network);
-//    }
-    
-    private InetAddress getIp(){
-        return getIpFromInt(dhcp.ipAddress);
-    }
-    
-    private InetAddress getNetmask(){
-        return getIpFromInt(dhcp.netmask);
-    }
-
-    private InetAddress getNetIP(){
-        return getIpFromInt(dhcp.ipAddress & dhcp.netmask);
-    }
-
-    private InetAddress getBroadcastIP(){
-        return getIpFromInt((dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask);
-    }
-    
-    private InetAddress getIpFromInt(int ip_int){
-        byte[] quads = new byte[4];
-        
-        for (int k = 0; k < 4; k++)
-            quads[k] = (byte) ((ip_int >> k * 8) & 0xFF);
-        try {
-            return InetAddress.getByAddress(quads);
-        }
-        catch (java.net.UnknownHostException e) {
-            Log.e(TAG, e.getMessage());
-            return null;
-        }
-    }
-
 }
