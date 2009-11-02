@@ -36,7 +36,7 @@ public class DiscoveryUnicast extends Discovery
         ctxt.sendBroadcast(new Intent(Network.ACTION_FINISH));
     }
     
-    private Boolean checkHost(String host){
+    private boolean checkHost(String host){
         Reachable r = new Reachable();
         try {
             InetAddress h = InetAddress.getByName(host); 

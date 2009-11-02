@@ -19,7 +19,7 @@ public class NetworkInfo
         }
     }
     
-    public Boolean isWifiEnabled(){
+    public boolean isWifiEnabled(){
         if(wifi!=null && dhcp!=null && 
            getSSID()!=null &&
            wifi.getWifiState()==WifiManager.WIFI_STATE_ENABLED){

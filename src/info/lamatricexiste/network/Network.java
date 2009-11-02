@@ -13,12 +13,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class Network extends Service
@@ -34,8 +32,7 @@ public class Network extends Service
     private         WifiManager     WifiService       =  null;
     private         Timer           timer             =  new Timer();
     private         List<InetAddress> hosts           =  new ArrayList<InetAddress>();
-    @SuppressWarnings("unused")
-    private SharedPreferences       prefs             =  null;
+//    private SharedPreferences       prefs             =  null;
     private BroadcastReceiver       receiver          =  new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
             String a = intent.getAction();
@@ -62,7 +59,7 @@ public class Network extends Service
         filter.addAction(Network.ACTION_SENDHOST);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        prefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override public void onDestroy() {
@@ -74,12 +71,6 @@ public class Network extends Service
     @Override public IBinder onBind(Intent intent){
         WifiService = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 //        sendBroadcast(new Intent(ACTION_UPDATELIST));
-//        try {
-//            ip_bc = InetAddress.getByName("10.0.10.50");
-//            ip_net = InetAddress.getByName("10.0.10.0");
-//        } catch (UnknownHostException e) {
-//            Log.e(TAG, e.getMessage());
-//        }
         return mBinder;
     }
 
@@ -136,7 +127,7 @@ public class Network extends Service
             return (Runnable) smb;
         default:
             return new Runnable() {
-                @Override public void run() {
+                public void run() {
                     try {
                         host.isReachable(TIMEOUT_REACH);
                     } catch (IOException e) {

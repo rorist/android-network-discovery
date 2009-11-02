@@ -13,7 +13,7 @@ public class Reachable {
     final int timeout = 100;
     final int len = ports.length;
     
-    public Boolean request(InetAddress host) {
+    public boolean request(InetAddress host) {
         for(int i=0; i<len; i++){
             try {
                 Socket s = new Socket();

@@ -1,10 +1,13 @@
 package info.lamatricexiste.network;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -45,8 +49,7 @@ final public class Main extends Activity {
     private ListView              list;
     private Button                btn;
     private Button                btn1;
-    private SharedPreferences     prefs = null;;
-    private final CharSequence[]  items = {"Ping (ICMP)","Samba exploit"};
+    private SharedPreferences     prefs = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +68,7 @@ final public class Main extends Activity {
         btn1 = (Button) findViewById(R.id.btn1);
         btn1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                setSelectedHosts(false);
+            	clearList();
                 getUpdate();
             }
         });
@@ -98,6 +101,15 @@ final public class Main extends Activity {
         adapter = new ArrayAdapter<String>(this, R.layout.list, R.id.list);
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
+        // List selection
+        list.setItemsCanFocus(false);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id){
+                try {
+					scanPort(InetAddress.getByName(hosts.get(position)));
+				} catch (UnknownHostException e) {}
+            }
+        });
         
         startService(new Intent(this, Network.class));
     }
@@ -274,40 +286,73 @@ final public class Main extends Activity {
             return (long) 1;
         }
         protected void onPostExecute(Long result) {
-            Log.d(TAG, "CheckHostsTask, onPostExecute " + result);
+//            Log.d(TAG, "CheckHostsTask, onPostExecute " + result);
         }
     }
+    
+//    private class PortscanTask extends AsyncTask<Void, Integer, Long>{
+//        protected Long doInBackground(Void... v) {
+//            return (long) 1;
+//        }
+//        protected void onPostExecute(Long result) {
+//        }
+//    }
 
 /**
  * Main
  */
 
+    private void clearList(){
+//        setSelectedHosts(false);
+        adapter.clear();
+        hosts = new ArrayList<String>();
+    }
+    
     private void getUpdate(){
         setButtonOff(btn1);
         new CheckHostsTask().execute();
         makeToast("Updating list ...");
     }
+    
+    private void scanPort(InetAddress host){
+    	// Start progress dialog
+    	ProgressDialog progress = ProgressDialog.show(this, "", "Scanning ports ...", false);
+
+    	// Run scanner
+    	PortScan scanner = new PortScan();
+    	CharSequence[] ports = scanner.scan(host);
+    	
+    	// Display Results
+    	progress.dismiss();
+        @SuppressWarnings("unused")
+		AlertDialog builder = new AlertDialog.Builder(this)
+	        .setTitle(host.getHostAddress())
+	        .setItems(ports, null)
+	        .setNeutralButton("Ok", null)
+	        .show();
+	}
         
     private void sendPacket(){
         CheckBox cb = (CheckBox) findViewById(R.id.repeat); //FIXME: This is bad
         final boolean repeat = cb.isChecked();
+        final CharSequence[]  items = {"Ping (ICMP)","Samba exploit"};
         setButtonOff(btn);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select method");
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                try {
-                    makeToast("Sending request ...");
-                    netInterface.inSendPacket(getSelectedHosts(), item, repeat);
-                } catch (RemoteException e) {
-                    Log.e(TAG, e.getMessage());
-                } catch (IllegalStateException e){
-                    Log.e(TAG, e.getMessage());
-                }
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
+        @SuppressWarnings("unused")
+		AlertDialog dialog = new AlertDialog.Builder(this)
+	        .setTitle("Select method")
+	        .setItems(items, new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialog, int item) {
+	                try {
+	                    makeToast("Sending request ...");
+	                    netInterface.inSendPacket(getSelectedHosts(), item, repeat);
+	                } catch (RemoteException e) {
+	                    Log.e(TAG, e.getMessage());
+	                } catch (IllegalStateException e){
+	                    Log.e(TAG, e.getMessage());
+	                }
+	            }
+	        })
+	        .show();
     }
     
     private void updateList(){
@@ -319,12 +364,10 @@ final public class Main extends Activity {
         for(String h : hosts){
             addText(h);
         }
-//        list.setSelection(View.FOCUS_DOWN);
     }
 
     private void addText(String text){
         adapter.add(text);
-//        Button btn_list = (Button) findViewById(R.id.btn_list);
     }
     
     private List<String> getSelectedHosts(){
