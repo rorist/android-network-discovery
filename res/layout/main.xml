@@ -17,7 +17,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_gravity="center_horizontal"
 	        android:text="Discover"/>
-	    
+<!-- 
         <Button android:id="@+id/btn"
 	        android:layout_width="80dip"
 	        android:layout_height="wrap_content"
@@ -33,9 +33,9 @@
 			android:textSize="10dip"
     		android:typeface="monospace"
 			android:text="Send every minute"/>
-   
+-->
     </LinearLayout>
-
+<!--
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
@@ -56,7 +56,7 @@
 		    android:text="None"/>
 		    
 	</LinearLayout>
-
+ -->
 	<ListView android:id="@+id/output"
 	   	android:layout_width="fill_parent"
 	   	android:layout_height="fill_parent"

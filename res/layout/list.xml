@@ -6,8 +6,9 @@
 	
 	<CheckBox
 		android:id="@+id/list"
-	    android:layout_width="wrap_content"
+	    android:layout_width="0dip"
 	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
 	    android:paddingLeft="42dip"
     	android:textSize="12dip"
     	android:typeface="monospace"
