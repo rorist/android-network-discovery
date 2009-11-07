@@ -5,12 +5,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-//import android.util.Log;
-
 public class Reachable {
         
     final int[] ports = {445,80};
-    final int timeout = 100;
+    final int timeout = 200;
     final int len = ports.length;
     
     public boolean request(InetAddress host) {

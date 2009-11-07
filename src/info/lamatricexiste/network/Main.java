@@ -1,7 +1,5 @@
 package info.lamatricexiste.network;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +28,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -43,9 +41,10 @@ final public class Main extends Activity {
     
     private final String          TAG = "NetworkMain";
     private final int             DEFAULT_DISCOVER = 1;
-    private List<String>          hosts = new ArrayList<String>();
+    private List<String>          hosts = null;
+    private List<CharSequence[]>  hosts_ports = null;
     private NetworkInterface      netInterface = null;
-    private ArrayAdapter<String>  adapter;
+    private HostsAdapter          adapter;
     private ListView              list;
     private Button                btn;
     private Button                btn1;
@@ -68,7 +67,7 @@ final public class Main extends Activity {
         btn1 = (Button) findViewById(R.id.btn1);
         btn1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	clearList();
+            	initList();
                 getUpdate();
             }
         });
@@ -98,18 +97,10 @@ final public class Main extends Activity {
         });
         
         // Hosts list
-        adapter = new ArrayAdapter<String>(this, R.layout.list, R.id.list);
+        adapter = new HostsAdapter(this, R.layout.list, R.id.list);
         list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
-        // List selection
-        list.setItemsCanFocus(false);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id){
-                try {
-					scanPort(InetAddress.getByName(hosts.get(position)));
-				} catch (UnknownHostException e) {}
-            }
-        });
+        list.setItemsCanFocus(true);
         
         startService(new Intent(this, Network.class));
     }
@@ -154,6 +145,27 @@ final public class Main extends Activity {
         return (super.onOptionsItemSelected(item));
     }
     
+    // Custom ArrayAdapter
+    private class HostsAdapter extends ArrayAdapter<String>
+    {
+        public HostsAdapter(Context context, int resource, int textViewresourceId){
+            super(context, resource, textViewresourceId);
+        }
+
+        @Override public View getView(final int position, View convertView, ViewGroup parent){
+            convertView = super.getView(position, convertView, parent);
+            if(convertView!=null){
+                Button btn_ports = (Button) convertView.findViewById(R.id.list_port);
+                btn_ports.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        scanPort(position, hosts.get(position), false);
+                    }
+                });
+            }
+            return convertView;
+        }
+    }
+    
     // Broadcast Receiver
     private BroadcastReceiver receiver = new BroadcastReceiver(){
         public void onReceive(Context ctxt, Intent intent){
@@ -163,12 +175,14 @@ final public class Main extends Activity {
                 String h = intent.getExtras().getString("addr");
                 if(!hosts.contains(h)){
                     hosts.add(h);
+                    hosts_ports.add(null);
                     updateList();
                 }
             }
             else if(a.equals(Network.ACTION_FINISH)){
                 setButtonOn(btn);
                 setButtonOn(btn1);
+                makeToast("Discovery finished!");
             }
             else if(a.equals(Network.ACTION_UPDATELIST)){
                 updateList();
@@ -271,6 +285,16 @@ final public class Main extends Activity {
             netInterface = null;
         }
     };
+ 
+/**
+ * Discover hosts
+ */
+    
+    private void getUpdate(){
+        setButtonOff(btn1);
+        new CheckHostsTask().execute();
+        makeToast("Updating list ...");
+    }
 
     private class CheckHostsTask extends AsyncTask<Void, Integer, Long> {
         protected Long doInBackground(Void... v) {
@@ -290,47 +314,62 @@ final public class Main extends Activity {
         }
     }
     
-//    private class PortscanTask extends AsyncTask<Void, Integer, Long>{
-//        protected Long doInBackground(Void... v) {
-//            return (long) 1;
-//        }
-//        protected void onPostExecute(Long result) {
-//        }
-//    }
+/**
+ * Port Scan
+ */
+    
+    private class ScanPortTask extends AsyncTask<Void, Integer, Long> {
+        private int position;
+        private String host;
+        private ProgressDialog progress = null;
+        private CharSequence[] ports = null;
+        protected void onPreExecute(){
+    	    progress = ProgressDialog.show(Main.this, "", "Scanning ports ...", false);
+        }
+        protected Long doInBackground(Void... v) {
+            ports = new PortScan().scan(host);
+            return (long) 1;
+        }
+        protected void onPostExecute(Long result) {
+        	hosts_ports.set(position, ports);
+            progress.dismiss();
+            showPorts(ports, position, host);
+        }
+        public void setInfo(int position, String host){
+            this.position = position;
+            this.host = host;
+        }
+    }
 
+    private void scanPort(final int position, final String host, boolean force){
+    	CharSequence[] ports = hosts_ports.get(position); 
+    	if(force || ports==null){
+	        ScanPortTask task = new ScanPortTask();
+	        task.setInfo(position, host);
+	        task.execute();
+    	}
+    	else {
+    		showPorts(ports, position, host);
+    	}
+	}
+    
+    private void showPorts(final CharSequence[] ports, final int position, final String host){
+        @SuppressWarnings("unused")
+		AlertDialog scanDone = new AlertDialog.Builder(Main.this)
+            .setTitle(host)
+            .setItems(ports, null)
+            .setPositiveButton("Rescan", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dlg, int sumthin) {
+                    scanPort(position, host, true);
+                }
+            })
+            .setNegativeButton("Close", null)
+            .show();
+    }
+    
 /**
  * Main
  */
-
-    private void clearList(){
-//        setSelectedHosts(false);
-        adapter.clear();
-        hosts = new ArrayList<String>();
-    }
-    
-    private void getUpdate(){
-        setButtonOff(btn1);
-        new CheckHostsTask().execute();
-        makeToast("Updating list ...");
-    }
-    
-    private void scanPort(InetAddress host){
-    	// Start progress dialog
-    	ProgressDialog progress = ProgressDialog.show(this, "", "Scanning ports ...", false);
-
-    	// Run scanner
-    	PortScan scanner = new PortScan();
-    	CharSequence[] ports = scanner.scan(host);
-    	
-    	// Display Results
-    	progress.dismiss();
-        @SuppressWarnings("unused")
-		AlertDialog builder = new AlertDialog.Builder(this)
-	        .setTitle(host.getHostAddress())
-	        .setItems(ports, null)
-	        .setNeutralButton("Ok", null)
-	        .show();
-	}
         
     private void sendPacket(){
         CheckBox cb = (CheckBox) findViewById(R.id.repeat); //FIXME: This is bad
@@ -353,6 +392,13 @@ final public class Main extends Activity {
 	            }
 	        })
 	        .show();
+    }
+
+    private void initList(){
+//        setSelectedHosts(false);
+        adapter.clear();
+        hosts = new ArrayList<String>();
+        hosts_ports = new ArrayList<CharSequence[]>();
     }
     
     private void updateList(){

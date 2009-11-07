@@ -15,4 +15,10 @@
 	    android:focusable="false"
 	    android:focusableInTouchMode="false"/>
     
+	    <Button android:id="@+id/list_port"
+	        android:layout_width="80dip"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:text="Ports"/>
+
 </LinearLayout>

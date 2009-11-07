@@ -18,22 +18,41 @@ public class DiscoveryUnicast extends Discovery
         Intent intent = new Intent(Network.ACTION_TOTALHOSTS);
         intent.putExtra("total", (end-start));
         ctxt.sendBroadcast(intent);
+        
+        //self
+        intent = new Intent(Network.ACTION_SENDHOST);
+        intent.putExtra("addr", ip.getHostAddress());
+        ctxt.sendBroadcast(intent);
 
-        for(int i=start; i<=end; i++){
-            final String host = hashToIp(i);
-            Thread t = new Thread() {
-                public void run(){
-                    if(checkHost(host)){
-                        Intent i = new Intent(Network.ACTION_SENDHOST);
-                        i.putExtra("addr", host);
-                        ctxt.sendBroadcast(i);
-                    }
-                    Thread.currentThread().interrupt();
-                }
-            };
-            t.start();
+        //gateway
+        launch(start);
+        
+        //rewind
+        for(int i=ip_int-1; i>start; i--){
+            launch(i);
         }
+        
+        //forward
+        for(int j=ip_int+1; j<=end; j++){
+            launch(j);
+        }
+
         ctxt.sendBroadcast(new Intent(Network.ACTION_FINISH));
+    }
+    
+    private void launch(int i){
+        final String host = hashToIp(i);
+        Thread t = new Thread() {
+            public void run(){
+                if(checkHost(host)){
+                    Intent i = new Intent(Network.ACTION_SENDHOST);
+                    i.putExtra("addr", host);
+                    ctxt.sendBroadcast(i);
+                }
+                Thread.currentThread().interrupt();
+            }
+        };
+        t.start();
     }
     
     private boolean checkHost(String host){
