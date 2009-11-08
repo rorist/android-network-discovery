@@ -18,11 +18,6 @@ public class DiscoveryUnicast extends Discovery
         Intent intent = new Intent(Network.ACTION_TOTALHOSTS);
         intent.putExtra("total", (end-start));
         ctxt.sendBroadcast(intent);
-        
-        //self
-        intent = new Intent(Network.ACTION_SENDHOST);
-        intent.putExtra("addr", ip.getHostAddress());
-        ctxt.sendBroadcast(intent);
 
         //gateway
         launch(start);

@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +45,7 @@ final public class Main extends Activity {
     private HostsAdapter          adapter;
     private ListView              list;
 //    private Button                btn;
-    private Button                btn1;
+    private Button                btn_discover;
     private SharedPreferences     prefs = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -62,9 +61,9 @@ final public class Main extends Activity {
 //            }
 //        });
         
-        // Reload
-        btn1 = (Button) findViewById(R.id.btn1);
-        btn1.setOnClickListener(new View.OnClickListener() {
+        // Discover
+        btn_discover = (Button) findViewById(R.id.btn1);
+        btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	initList();
                 getUpdate();
@@ -180,7 +179,7 @@ final public class Main extends Activity {
             }
             else if(a.equals(Network.ACTION_FINISH)){
 //                setButtonOn(btn);
-                setButtonOn(btn1);
+                setButtonOn(btn_discover);
                 makeToast("Discovery finished!");
             }
             else if(a.equals(Network.ACTION_UPDATELIST)){
@@ -204,29 +203,27 @@ final public class Main extends Activity {
         TextView info_ip = (TextView) findViewById(R.id.info_ip);
         TextView info_nt = (TextView) findViewById(R.id.info_nt);
         TextView info_id = (TextView) findViewById(R.id.info_id);
-        ImageView info_status = (ImageView) findViewById(R.id.info_status);
         WifiManager wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifi.getConnectionInfo();
         SupplicantState sstate = wifiInfo.getSupplicantState();
         NetworkInfo net = new NetworkInfo((WifiManager) this.getSystemService(Context.WIFI_SERVICE));
         
         info_ip.setText("");
-        info_nt.setText("");
+        info_id.setText("");
+        setButtonOff(btn_discover);
         switch (sstate) {
             case SCANNING:
-                info_id.setText(R.string.wifi_scanning);
-                info_status.setImageResource(R.drawable.wifi_inactive);
+            	info_nt.setText(R.string.wifi_scanning);
                 break;
             case ASSOCIATED:
             case ASSOCIATING:
-                info_id.setText(String.format(getString(R.string.wifi_associating), net.getSSID()));
-                info_status.setImageResource(R.drawable.wifi_inactive);
+            	info_nt.setText(String.format(getString(R.string.wifi_associating), net.getSSID()));
                 break;
             case COMPLETED:
+            	setButtonOn(btn_discover);
                 info_ip.setText("IP: "+net.getIp().getHostAddress());
                 info_nt.setText("NT: "+net.getNetIp().getHostAddress()+"/"+net.getNetCidr());
                 info_id.setText("SSID: "+net.getSSID());
-                info_status.setImageResource(R.drawable.wifi_active);
                 break;
         }
     }
@@ -235,36 +232,30 @@ final public class Main extends Activity {
         TextView info_ip = (TextView) findViewById(R.id.info_ip);
         TextView info_nt = (TextView) findViewById(R.id.info_nt);
         TextView info_id = (TextView) findViewById(R.id.info_id);
-        ImageView info_status = (ImageView) findViewById(R.id.info_status);
         
         info_ip.setText("");
-        info_nt.setText("");
+        info_id.setText("");
         int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
+        setButtonOff(btn_discover);
         switch(WifiState){
             case WifiManager.WIFI_STATE_ENABLED:
-                info_id.setText(R.string.wifi_enabled);
-                info_status.setImageResource(R.drawable.wifi_inactive);
+            	info_nt.setText(R.string.wifi_enabled);
                 setWifiInfo();
                 break;
             case WifiManager.WIFI_STATE_ENABLING:
-                info_id.setText(R.string.wifi_enabling);
-                info_status.setImageResource(R.drawable.wifi_inactive);
+            	info_nt.setText(R.string.wifi_enabling);
                 break;
             case WifiManager.WIFI_STATE_DISABLING:
-                info_id.setText(R.string.wifi_disabling);
-                info_status.setImageResource(R.drawable.wifi_disabled);
+            	info_nt.setText(R.string.wifi_disabling);
                 break;
             case WifiManager.WIFI_STATE_DISABLED:
-                info_id.setText(R.string.wifi_disabled);
-                info_status.setImageResource(R.drawable.wifi_disabled);
+            	info_nt.setText(R.string.wifi_disabled);
                 break;
             case WifiManager.WIFI_STATE_UNKNOWN:
-                info_id.setText(R.string.wifi_unknown);
-                info_status.setImageResource(R.drawable.wifi_disabled);
+            	info_nt.setText(R.string.wifi_unknown);
                 break;
             default:
-                info_id.setText(R.string.wifi_strange);
-                info_status.setImageResource(R.drawable.wifi_disabled);
+            	info_nt.setText(R.string.wifi_strange);
         }
     }
 
@@ -290,7 +281,7 @@ final public class Main extends Activity {
  */
     
     private void getUpdate(){
-        setButtonOff(btn1);
+        setButtonOff(btn_discover);
         new CheckHostsTask().execute();
         makeToast("Updating list ...");
     }
@@ -353,17 +344,22 @@ final public class Main extends Activity {
 	}
     
     private void showPorts(final CharSequence[] ports, final int position, final String host){
-        @SuppressWarnings("unused")
-		AlertDialog scanDone = new AlertDialog.Builder(Main.this)
-            .setTitle(host)
-            .setItems(ports, null)
+		AlertDialog.Builder scanDone = new AlertDialog.Builder(Main.this);
+        scanDone
+        	.setTitle(host)
             .setPositiveButton("Rescan", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dlg, int sumthin) {
                     scanPort(position, host, true);
                 }
             })
-            .setNegativeButton("Close", null)
-            .show();
+            .setNegativeButton("Close", null);
+    	if(ports.length>0){
+            scanDone.setItems(ports, null);
+    	}
+    	else {
+    		scanDone.setMessage("No open port found");
+    	}
+    	scanDone.show();
     }
     
 /**

@@ -18,8 +18,8 @@
     
 	    <Button android:id="@+id/list_port"
 	        android:layout_width="80dip"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
+	        android:layout_height="38dip"
+	        android:layout_gravity="center_vertical"
 	        android:text="Ports"/>
 
 </LinearLayout>

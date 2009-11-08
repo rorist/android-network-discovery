@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
@@ -8,112 +9,102 @@
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-    	android:layout_marginTop="5dip"
-    	android:layout_marginLeft="2dip"
-    	android:layout_marginRight="2dip">
-    	
-	    <Button android:id="@+id/btn1"
-	        android:layout_width="80dip"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="Discover"/>
-<!-- 
-        <Button android:id="@+id/btn"
-	        android:layout_width="80dip"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="Send"/>
-        
-		<CheckBox
-			android:id="@+id/repeat"
-			android:layout_width="0dip"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:paddingLeft="42dip"
-			android:textSize="10dip"
-    		android:typeface="monospace"
-			android:text="Send every minute"/>
--->
+        android:layout_marginTop="5dip"
+        android:layout_marginLeft="2dip"
+        android:layout_marginRight="2dip">
+
+        <Button
+            android:id="@+id/btn1"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Discover" />
+        <!--
+            <Button android:id="@+id/btn" android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Send"/> <CheckBox android:id="@+id/repeat"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" android:paddingLeft="42dip"
+            android:textSize="10dip" android:typeface="monospace"
+            android:text="Send every minute"/>
+
+       -->
     </LinearLayout>
-<!--
-    <LinearLayout
-        android:orientation="horizontal"
+    <!--
+        <LinearLayout android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-    	android:layout_marginLeft="2dip"
-    	android:layout_marginRight="2dip">
-    	
-	   	<Button android:id="@+id/btn3"
-		    android:layout_width="75dip"
-		    android:layout_height="35dip"
-		    android:textSize="12dip"
-		    android:text="All"/>
-	    	
-	   	<Button android:id="@+id/btn4"
-		    android:layout_width="75dip"
-		    android:layout_height="35dip"
-		    android:textSize="12dip"
-		    android:text="None"/>
-		    
-	</LinearLayout>
- -->
-	<ListView android:id="@+id/output"
-	   	android:layout_width="fill_parent"
-	   	android:layout_height="fill_parent"
-	   	android:layout_weight="1"
-	   	android:layout_margin="5dip"/>
+        android:layout_marginLeft="2dip"
+        android:layout_marginRight="2dip"> <Button
+        android:id="@+id/btn3" android:layout_width="75dip"
+        android:layout_height="35dip" android:textSize="12dip"
+        android:text="All"/> <Button android:id="@+id/btn4"
+        android:layout_width="75dip" android:layout_height="35dip"
+        android:textSize="12dip" android:text="None"/> </LinearLayout>
+    -->
+    <ListView
+        android:id="@+id/output"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:layout_margin="5dip" />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-    	android:layout_marginTop="5dip"
-    	android:layout_marginLeft="2dip"
-    	android:layout_marginRight="2dip">
-    	
-	    <Button android:id="@+id/btn2"
-	        android:layout_width="80dip"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_vertical"
-	        android:text="Wifi"/>
-	        
-	    <ImageView android:id="@+id/info_status"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	  			android:layout_gravity="center_vertical"
-	        android:src="@drawable/wifi_disabled"/>
-	   	
-	    <LinearLayout
-	        android:orientation="vertical"
-	        android:layout_width="0dip"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	    	android:layout_marginLeft="5dip">
-		        
+        android:layout_marginTop="5dip"
+        android:layout_marginLeft="2dip"
+        android:layout_marginRight="2dip">
+
+        <Button
+            android:id="@+id/btn2"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="Wifi" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip">
+
             <TextView
                 android:id="@+id/info_ip"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
-                android:typeface="monospace"/>
-        
+                android:typeface="monospace" />
+
             <TextView
                 android:id="@+id/info_nt"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
-                android:typeface="monospace"/>
-            
+                android:typeface="monospace"
+                android:text="Starting Wifi" />
+
             <TextView
                 android:id="@+id/info_id"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
-                android:typeface="monospace"
-                android:text="Starting Wifi"/>
-			
-		</LinearLayout>
-	        
-	</LinearLayout>
+                android:typeface="monospace" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_export"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="Export" />
+
+    </LinearLayout>
 
 </LinearLayout>
