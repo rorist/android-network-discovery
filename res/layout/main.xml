@@ -29,8 +29,7 @@
             android:layout_weight="1" android:paddingLeft="42dip"
             android:textSize="10dip" android:typeface="monospace"
             android:text="Send every minute"/>
-
-       -->
+        -->
     </LinearLayout>
     <!--
         <LinearLayout android:orientation="horizontal"
@@ -98,12 +97,12 @@
 
         </LinearLayout>
 
-<!--        <Button-->
-<!--            android:id="@+id/btn_export"-->
-<!--            android:layout_width="80dip"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center_vertical"-->
-<!--            android:text="Export" />-->
+<!--    <Button-->
+<!--        android:id="@+id/btn_export"-->
+<!--        android:layout_width="80dip"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center_vertical"-->
+<!--        android:text="Export" />-->
 
     </LinearLayout>
 
