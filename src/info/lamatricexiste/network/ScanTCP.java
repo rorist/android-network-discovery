@@ -7,12 +7,14 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Observable;
 
+import android.util.Log;
+
 public class ScanTCP extends Observable implements Runnable
 {
-//    private final String TAG       =  "ScanTCP";
-    private final int TIMEOUT      =  100;
-    private final int MAX_CLOSED   =  2;
-    private final int MAX_FILTERED =  1;
+    private final String TAG       =  "ScanTCP";
+    private final int TIMEOUT      =  60;
+    private final int MAX_CLOSED   =  1;
+    private final int MAX_FILTERED =  2;
     private String    state        =  "";
     private String    ip           =  "";
     private int       port         =  0;
@@ -36,44 +38,52 @@ public class ScanTCP extends Observable implements Runnable
     }
 
     protected void scan(){
+        Socket s = new Socket();
         try {
-            Socket s = new Socket();
-            s.bind(null);
-            s.connect(new InetSocketAddress(ip, port), TIMEOUT);
-            s.close();
+            InetSocketAddress addr = new InetSocketAddress(ip, port);
+            s.connect(addr, TIMEOUT);
             state = "open";
         }
-//        catch (Exception e) {
-//        	e.printStackTrace();
-//        }
-        catch (ConnectException e){
-        	setFiltered();
-        }
         catch (SocketTimeoutException e){
-        	setFiltered();
+            setFiltered();
+//            Log.e(TAG, port+": "+e.toString());
+        }
+        catch (ConnectException e){
+            setClosed();
+//            Log.e(TAG, port+": "+e.toString());
         }
         catch (IOException e) {
-        	setClosed();
+            setClosed();
+//            Log.e(TAG, port+": "+e.toString());
+        }
+        finally {
+            try {
+                if(s!=null){
+                    s.close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, port+": "+e.toString());
+            }
         }
     }
     
     private void setFiltered(){
-    	cnt_filtered++;
-    	if(cnt_filtered < MAX_FILTERED){
-    		this.scan();
-    	}
-    	else {
+        cnt_filtered++;
+        if(cnt_filtered < MAX_FILTERED){
+            this.scan();
+        }
+        else {
             state = "filtered";
-    	}
+        }
     }
     
     private void setClosed(){
-    	cnt_closed++;
-    	if(cnt_closed < MAX_CLOSED){
-    		this.scan();
-    	}
-    	else {
-    		state = "closed";
-    	}
+        cnt_closed++;
+        if(cnt_closed < MAX_CLOSED){
+            this.scan();
+        }
+        else {
+            state = "closed";
+        }
     }
 }

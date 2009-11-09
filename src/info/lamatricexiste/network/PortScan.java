@@ -31,7 +31,7 @@ public class PortScan implements Observer {
 	public void update(Observable observable, Object data) {
 		if(observable instanceof ScanTCP){
 			String state = (String)data;
-			if(state.equals("open") || state.equals("closed")){
+			if(state.equals("open")){
 				ScanTCP s = (ScanTCP)observable;
 				int port = s.getPort();
 				result.add(port+"/tcp "+state);

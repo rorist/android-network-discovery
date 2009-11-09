@@ -313,6 +313,7 @@ final public class Main extends Activity {
         private String host;
         private ProgressDialog progress = null;
         private CharSequence[] ports = null;
+        
         protected void onPreExecute(){
     	    progress = ProgressDialog.show(Main.this, "", "Scanning ports ...", false);
         }
