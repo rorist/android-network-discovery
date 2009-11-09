@@ -2,6 +2,8 @@ package info.lamatricexiste.network;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,6 +41,7 @@ final public class Main extends Activity {
     
     private final String          TAG = "NetworkMain";
     private final int             DEFAULT_DISCOVER = 1;
+    private final int             NB_PORTS = 1024;
     private List<String>          hosts = null;
     private List<CharSequence[]>  hosts_ports = null;
     private NetworkInterface      netInterface = null;
@@ -47,6 +50,7 @@ final public class Main extends Activity {
 //    private Button                btn;
     private Button                btn_discover;
     private SharedPreferences     prefs = null;
+    private boolean				  discovering = false;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -178,6 +182,7 @@ final public class Main extends Activity {
                 }
             }
             else if(a.equals(Network.ACTION_FINISH)){
+            	discovering = false;
 //                setButtonOn(btn);
                 setButtonOn(btn_discover);
                 makeToast("Discovery finished!");
@@ -220,7 +225,8 @@ final public class Main extends Activity {
             	info_nt.setText(String.format(getString(R.string.wifi_associating), net.getSSID()));
                 break;
             case COMPLETED:
-            	setButtonOn(btn_discover);
+            	if(discovering==false)
+            		setButtonOn(btn_discover);
                 info_ip.setText("IP: "+net.getIp().getHostAddress());
                 info_nt.setText("NT: "+net.getNetIp().getHostAddress()+"/"+net.getNetCidr());
                 info_id.setText("SSID: "+net.getSSID());
@@ -281,6 +287,7 @@ final public class Main extends Activity {
  */
     
     private void getUpdate(){
+    	discovering = true;
         setButtonOff(btn_discover);
         new CheckHostsTask().execute();
         makeToast("Updating list ...");
@@ -288,7 +295,7 @@ final public class Main extends Activity {
 
     private class CheckHostsTask extends AsyncTask<Void, Integer, Long> {
         protected Long doInBackground(Void... v) {
-            Log.d(TAG, "CheckHostsTask, doInBackground");
+//            Log.d(TAG, "CheckHostsTask, doInBackground");
             try {
                 int method = Integer.parseInt(prefs.getString("discover_method", String.valueOf(DEFAULT_DISCOVER)));
                 netInterface.inSearchReachableHosts(method);
@@ -308,17 +315,28 @@ final public class Main extends Activity {
  * Port Scan
  */
     
-    private class ScanPortTask extends AsyncTask<Void, Integer, Long> {
+    private class ScanPortTask extends AsyncTask<Void, Integer, Long> implements Observer {
         private int position;
         private String host;
         private ProgressDialog progress = null;
         private CharSequence[] ports = null;
+        private int progress_current = 0;
+        private final String MSG = "Scanning ports ..";
+//        private static final int CORE_POOL_SIZE = 1;
+//        private static final int MAXIMUM_POOL_SIZE = 10;
         
         protected void onPreExecute(){
-    	    progress = ProgressDialog.show(Main.this, "", "Scanning ports ...", false);
+    	    progress = new ProgressDialog(Main.this);
+            progress.setMessage(MSG);
+            progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progress.setCancelable(false);
+            progress.setMax(NB_PORTS);
+            progress.show();
         }
         protected Long doInBackground(Void... v) {
-            ports = new PortScan().scan(host);
+        	PortScan scan = new PortScan();
+        	scan.addObserver(this); 
+            ports = scan.scan(host);
             return (long) 1;
         }
         protected void onPostExecute(Long result) {
@@ -329,6 +347,10 @@ final public class Main extends Activity {
         public void setInfo(int position, String host){
             this.position = position;
             this.host = host;
+        }
+        public void update(Observable observable, Object data) {
+            progress_current++;
+            progress.setProgress(progress_current);
         }
     }
 

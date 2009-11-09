@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
     
-public class PortScan implements Observer {
+public class PortScan extends Observable implements Observer {
 	
 //	private final String 	TAG 		=  "PortScan";
     private final int    	PORT_START 	=  1;
@@ -16,6 +16,10 @@ public class PortScan implements Observer {
 
         //ScanTCP
         for(int i=PORT_START; i<=PORT_END; i++){
+            // Notify ScanPortTask
+            setChanged();
+            notifyObservers();
+            // Scan work
         	ScanTCP s = new ScanTCP(host, i);
         	s.addObserver(this);
         	Thread scanPortThread = new Thread(s);
@@ -30,12 +34,11 @@ public class PortScan implements Observer {
 
 	public void update(Observable observable, Object data) {
 		if(observable instanceof ScanTCP){
-			String state = (String)data;
-			if(state.equals("open")){
-				ScanTCP s = (ScanTCP)observable;
-				int port = s.getPort();
-				result.add(port+"/tcp "+state);
-			}
+			// Get Scan object
+			ScanTCP s = (ScanTCP)observable;
+			int port = s.getPort();
+			// Save port
+			result.add(port+"/tcp open");
 		}
 	}
 }

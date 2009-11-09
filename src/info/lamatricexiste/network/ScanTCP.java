@@ -14,8 +14,7 @@ public class ScanTCP extends Observable implements Runnable
     private final String TAG       =  "ScanTCP";
     private final int TIMEOUT      =  60;
     private final int MAX_CLOSED   =  1;
-    private final int MAX_FILTERED =  2;
-    private String    state        =  "";
+    private final int MAX_FILTERED =  1;
     private String    ip           =  "";
     private int       port         =  0;
     private int       cnt_closed   =  0;
@@ -28,8 +27,6 @@ public class ScanTCP extends Observable implements Runnable
 
     public void run() {
         scan();
-        setChanged();
-        notifyObservers(state);
         Thread.currentThread().interrupt();
     }
     
@@ -39,22 +36,23 @@ public class ScanTCP extends Observable implements Runnable
 
     protected void scan(){
         Socket s = new Socket();
+        InetSocketAddress addr = new InetSocketAddress(ip, port);
         try {
-            InetSocketAddress addr = new InetSocketAddress(ip, port);
+            setChanged();
             s.connect(addr, TIMEOUT);
-            state = "open";
+            notifyObservers();
         }
         catch (SocketTimeoutException e){
             setFiltered();
-//            Log.e(TAG, port+": "+e.toString());
         }
         catch (ConnectException e){
             setClosed();
-//            Log.e(TAG, port+": "+e.toString());
         }
-        catch (IOException e) {
+        catch (IOException e){
             setClosed();
-//            Log.e(TAG, port+": "+e.toString());
+        }
+        catch (Exception e){
+            Log.e(TAG, "FIXME: "+port+": "+e.toString());
         }
         finally {
             try {
@@ -62,7 +60,7 @@ public class ScanTCP extends Observable implements Runnable
                     s.close();
                 }
             } catch (IOException e) {
-                Log.e(TAG, port+": "+e.toString());
+            	Log.e(TAG, "FIXME: "+port+": "+e.toString());
             }
         }
     }
@@ -72,18 +70,12 @@ public class ScanTCP extends Observable implements Runnable
         if(cnt_filtered < MAX_FILTERED){
             this.scan();
         }
-        else {
-            state = "filtered";
-        }
     }
     
     private void setClosed(){
         cnt_closed++;
         if(cnt_closed < MAX_CLOSED){
             this.scan();
-        }
-        else {
-            state = "closed";
         }
     }
 }
