@@ -75,6 +75,14 @@ final public class Main extends Activity {
 			}
 		});
 
+		// Export
+		Button btn_export = (Button) findViewById(R.id.btn_export);
+		btn_export.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				new Export(Main.this, hosts, hosts_ports);
+			}
+		});
+
 		// Wifi Settings
 		Button btn2 = (Button) findViewById(R.id.btn2);
 		btn2.setOnClickListener(new View.OnClickListener() {
