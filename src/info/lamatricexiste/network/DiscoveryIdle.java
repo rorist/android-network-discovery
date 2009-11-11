@@ -1,6 +1,6 @@
 package info.lamatricexiste.network;
 
-public class DiscoveryIdle extends Discovery {
+public class DiscoveryIdle {
 
 	public void discover() {
 	}

@@ -2,21 +2,25 @@ package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Observable;
 
-import android.content.Intent;
 import android.util.Log;
 
-public class DiscoveryUnicast extends Discovery {
-	protected final String TAG = "DiscoveryUnicast";
+public class DiscoveryUnicast extends Observable implements Runnable {
+	private final String TAG = "DiscoveryUnicast";
+	private InetAddress ip = null;
+	private final static int TIMEOUT_REACH = 600;
+	private int cidr = 24;
 
-	protected void discover() {
+	public void setVar(InetAddress ip, int cidr) {
+		this.ip = ip;
+		this.cidr = cidr;
+	}
+
+	public void run() {
 		int ip_int = ip.hashCode();
 		int start = ip_int & (1 - (1 << (32 - cidr)));
 		int end = ip_int | ((1 << (32 - cidr)) - 1);
-
-		Intent intent = new Intent(Network.ACTION_TOTALHOSTS);
-		intent.putExtra("total", (end - start));
-		ctxt.sendBroadcast(intent);
 
 		// gateway
 		launch(start);
@@ -30,8 +34,9 @@ public class DiscoveryUnicast extends Discovery {
 		for (int j = ip_int + 1; j <= end; j++) {
 			launch(j);
 		}
-
-		ctxt.sendBroadcast(new Intent(Network.ACTION_FINISH));
+		
+		setChanged();
+		notifyObservers(null);
 	}
 
 	private void launch(int i) {
@@ -39,9 +44,8 @@ public class DiscoveryUnicast extends Discovery {
 		Thread t = new Thread() {
 			public void run() {
 				if (checkHost(host)) {
-					Intent i = new Intent(Network.ACTION_SENDHOST);
-					i.putExtra("addr", host);
-					ctxt.sendBroadcast(i);
+					setChanged();
+					notifyObservers(host);
 				}
 				Thread.currentThread().interrupt();
 			}
@@ -53,7 +57,7 @@ public class DiscoveryUnicast extends Discovery {
 		Reachable r = new Reachable();
 		try {
 			InetAddress h = InetAddress.getByName(host);
-			if (h.isReachable(Network.TIMEOUT_REACH) || r.request(h)) {
+			if (h.isReachable(TIMEOUT_REACH) || r.request(h)) {
 				return true;
 			}
 		} catch (IOException e) {

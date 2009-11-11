@@ -1,6 +1,6 @@
 package info.lamatricexiste.network;
 
-public class DiscoveryBroadcast extends Discovery {
+public class DiscoveryBroadcast {
 	// private final int PORT = 7;
 
 	public void discover() {

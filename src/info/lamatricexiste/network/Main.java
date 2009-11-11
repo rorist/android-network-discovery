@@ -9,21 +9,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -40,23 +34,23 @@ import android.widget.Toast;
 final public class Main extends Activity {
 
 	private final String TAG = "NetworkMain";
-	private final int DEFAULT_DISCOVER = 1;
+	// private final int DEFAULT_DISCOVER = 1;
 	private final int NB_PORTS = 1024;
 	private List<String> hosts = null;
 	private List<CharSequence[]> hosts_ports = null;
-	private NetworkInterface netInterface = null;
 	private HostsAdapter adapter;
 	private ListView list;
 	// private Button btn;
 	private Button btn_discover;
-	private SharedPreferences prefs = null;
+	// private SharedPreferences prefs = null;
 	private boolean discovering = false;
+	private WifiManager WifiService;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		// prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		// Send Request
 		// btn = (Button) findViewById(R.id.btn);
@@ -70,8 +64,7 @@ final public class Main extends Activity {
 		btn_discover = (Button) findViewById(R.id.btn1);
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				initList();
-				getUpdate();
+				startDiscovering();
 			}
 		});
 
@@ -113,15 +106,15 @@ final public class Main extends Activity {
 		list.setAdapter(adapter);
 		list.setItemsCanFocus(true);
 
-		startService(new Intent(this, Network.class));
+		WifiService = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(Network.ACTION_SENDHOST);
-		filter.addAction(Network.ACTION_FINISH);
+		// filter.addAction(Network.ACTION_SENDHOST);
+		// filter.addAction(Network.ACTION_FINISH);
 		filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
 		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 		filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
@@ -130,21 +123,17 @@ final public class Main extends Activity {
 		filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 		filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 		registerReceiver(receiver, filter);
-		this.bindService(new Intent(this, Network.class), mConnection,
-				Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		this.unbindService(mConnection);
 		unregisterReceiver(receiver);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		stopService(new Intent(this, Network.class));
 	}
 
 	@Override
@@ -156,7 +145,7 @@ final public class Main extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.settings) {
-			startActivity(new Intent(this, Prefs.class));
+			// startActivity(new Intent(this, Prefs.class));
 			return true;
 		}
 		return (super.onOptionsItemSelected(item));
@@ -191,21 +180,7 @@ final public class Main extends Activity {
 		public void onReceive(Context ctxt, Intent intent) {
 			String a = intent.getAction();
 			Log.d(TAG, "Receive broadcasted " + a);
-			if (a.equals(Network.ACTION_SENDHOST)) {
-				String h = intent.getExtras().getString("addr");
-				if (!hosts.contains(h)) {
-					hosts.add(h);
-					hosts_ports.add(null);
-					updateList();
-				}
-			} else if (a.equals(Network.ACTION_FINISH)) {
-				discovering = false;
-				// setButtonOn(btn);
-				setButtonOn(btn_discover);
-				makeToast("Discovery finished!");
-			} else if (a.equals(Network.ACTION_UPDATELIST)) {
-				updateList();
-			} else if (a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+			if (a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				setWifiState(intent);
 			} else if (a.equals(WifiManager.NETWORK_IDS_CHANGED_ACTION)
 					|| a.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
@@ -223,12 +198,11 @@ final public class Main extends Activity {
 		TextView info_ip = (TextView) findViewById(R.id.info_ip);
 		TextView info_nt = (TextView) findViewById(R.id.info_nt);
 		TextView info_id = (TextView) findViewById(R.id.info_id);
-		WifiManager wifi = (WifiManager) this
-				.getSystemService(Context.WIFI_SERVICE);
-		WifiInfo wifiInfo = wifi.getConnectionInfo();
+		WifiInfo wifiInfo = WifiService.getConnectionInfo(); // TODO: User
+		// NetworkInfo
+		// class
 		SupplicantState sstate = wifiInfo.getSupplicantState();
-		NetworkInfo net = new NetworkInfo((WifiManager) this
-				.getSystemService(Context.WIFI_SERVICE));
+		NetworkInfo net = new NetworkInfo(WifiService);
 
 		info_ip.setText("");
 		info_id.setText("");
@@ -285,57 +259,75 @@ final public class Main extends Activity {
 	}
 
 	/**
-	 * Service connection
-	 */
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			Log.d(TAG, "Service binded");
-			netInterface = NetworkInterface.Stub.asInterface((IBinder) service);
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			Log.d(TAG, "Service unbinded");
-			netInterface = null;
-		}
-	};
-
-	/**
 	 * Discover hosts
 	 */
 
-	private void getUpdate() {
-		discovering = true;
-		setButtonOff(btn_discover);
-		new CheckHostsTask().execute();
-		makeToast("Updating list ...");
+	private class CheckHostsTask extends AsyncTask<Void, Boolean, Void>
+			implements Observer {
+
+		protected Void doInBackground(Void... v) {
+			NetworkInfo net = new NetworkInfo(WifiService);
+			DiscoveryUnicast discover = new DiscoveryUnicast();
+			discover.addObserver(this);
+			discover.setVar(net.getIp(), net.getNetCidr());
+
+			Thread discoverThread = new Thread(discover);
+			discoverThread.setPriority(Thread.MAX_PRIORITY);
+			discoverThread.start();
+			return null;
+		}
+
+		protected void onProgressUpdate(Boolean... item) {
+			if (item[0] == true) {
+				stopDiscovering();
+			} else {
+				updateList();
+			}
+		}
+
+		public void update(Observable observable, Object data) {
+			String host = (String) data;
+			if (data == null) {
+				publishProgress(true);
+			} else {
+				if (!hosts.contains(host)) {
+					hosts.add(host);
+					hosts_ports.add(null);
+					publishProgress(false);
+				}
+			}
+		}
 	}
 
-	private class CheckHostsTask extends AsyncTask<Void, Integer, Long> {
-		protected Long doInBackground(Void... v) {
-			// Log.d(TAG, "CheckHostsTask, doInBackground");
-			try {
-				int method = Integer.parseInt(prefs.getString(
-						"discover_method", String.valueOf(DEFAULT_DISCOVER)));
-				netInterface.inSearchReachableHosts(method);
-			} catch (RemoteException e) {
-				Log.e(TAG, e.getMessage());
-			} catch (ClassCastException e) {
-				Log.e(TAG, e.getMessage());
-			}
-			return (long) 1;
-		}
+	private void startDiscovering() {
+		discovering = true;
+		makeToast("Updating list ...");
+		// btn_discover.setText("Cancel");
+		// btn_discover.setOnClickListener(new View.OnClickListener() {
+		// public void onClick(View v) {
+		// // Cancel
+		// }
+		// });
+		initList();
+		new CheckHostsTask().execute();
+	}
 
-		protected void onPostExecute(Long result) {
-			// Log.d(TAG, "CheckHostsTask, onPostExecute " + result);
-		}
+	private void stopDiscovering() {
+		discovering = false;
+		makeToast("Discovery finished!");
+		// btn_discover.setText("Discover");
+		// btn_discover.setOnClickListener(new View.OnClickListener() {
+		// public void onClick(View v) {
+		// startDiscovering();
+		// }
+		// });
 	}
 
 	/**
 	 * Port Scan
 	 */
 
-	private class ScanPortTask extends AsyncTask<Void, Integer, Long> implements
+	private class ScanPortTask extends AsyncTask<Void, Void, Void> implements
 			Observer {
 		private int position;
 		private String host;
@@ -356,14 +348,14 @@ final public class Main extends Activity {
 			progress.show();
 		}
 
-		protected Long doInBackground(Void... v) {
+		protected Void doInBackground(Void... v) {
 			PortScan scan = new PortScan();
 			scan.addObserver(this);
 			ports = scan.scan(host);
-			return (long) 1;
+			return null;
 		}
 
-		protected void onPostExecute(Long result) {
+		protected void onPostExecute(Void unused) {
 			hosts_ports.set(position, ports);
 			progress.dismiss();
 			showPorts(ports, position, host);
