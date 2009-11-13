@@ -19,6 +19,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Discover" />
+
+        <Button
+            android:id="@+id/btn_export"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="Export" />
         <!--
             <Button android:id="@+id/btn" android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -96,13 +103,6 @@
                 android:typeface="monospace" />
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_export"
-            android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="Export" />
 
     </LinearLayout>
 

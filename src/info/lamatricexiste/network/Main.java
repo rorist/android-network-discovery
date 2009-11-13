@@ -1,5 +1,6 @@
 package info.lamatricexiste.network;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -18,8 +19,10 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +46,7 @@ final public class Main extends Activity {
 	private ListView list;
 	// private Button btn;
 	private Button btn_discover;
+	private Button btn_export;
 	// private SharedPreferences prefs = null;
 	private boolean discovering = false;
 	private WifiManager WifiService;
@@ -69,10 +74,10 @@ final public class Main extends Activity {
 		});
 
 		// Export
-		Button btn_export = (Button) findViewById(R.id.btn_export);
+		btn_export = (Button) findViewById(R.id.btn_export);
 		btn_export.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				new Export(Main.this, hosts, hosts_ports);
+				export();
 			}
 		});
 
@@ -113,8 +118,6 @@ final public class Main extends Activity {
 	public void onResume() {
 		super.onResume();
 		IntentFilter filter = new IntentFilter();
-		// filter.addAction(Network.ACTION_SENDHOST);
-		// filter.addAction(Network.ACTION_FINISH);
 		filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
 		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 		filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
@@ -207,18 +210,26 @@ final public class Main extends Activity {
 		info_ip.setText("");
 		info_id.setText("");
 		setButtonOff(btn_discover);
+		setButtonOff(btn_export);
 		switch (sstate) {
 		case SCANNING:
 			info_nt.setText(R.string.wifi_scanning);
 			break;
 		case ASSOCIATED:
 		case ASSOCIATING:
-			info_nt.setText(String.format(getString(R.string.wifi_associating),
-					net.getSSID()));
+			String ssid = net.getSSID();
+			if (ssid != null) {
+				info_nt.setText(String.format(
+						getString(R.string.wifi_associating_ap), ssid));
+			} else {
+				info_nt.setText(R.string.wifi_associating);
+			}
 			break;
 		case COMPLETED:
-			if (discovering == false)
+			if (discovering == false) {
 				setButtonOn(btn_discover);
+				setButtonOn(btn_export);
+			}
 			info_ip.setText("IP: " + net.getIp().getHostAddress());
 			info_nt.setText("NT: " + net.getNetIp().getHostAddress() + "/"
 					+ net.getNetCidr());
@@ -236,6 +247,7 @@ final public class Main extends Activity {
 		info_id.setText("");
 		int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
 		setButtonOff(btn_discover);
+		setButtonOff(btn_export);
 		switch (WifiState) {
 		case WifiManager.WIFI_STATE_ENABLED:
 			info_nt.setText(R.string.wifi_enabled);
@@ -262,8 +274,10 @@ final public class Main extends Activity {
 	 * Discover hosts
 	 */
 
-	private class CheckHostsTask extends AsyncTask<Void, Boolean, Void>
+	private class CheckHostsTask extends AsyncTask<Void, String, Void>
 			implements Observer {
+
+		private Thread discoverThread;
 
 		protected Void doInBackground(Void... v) {
 			NetworkInfo net = new NetworkInfo(WifiService);
@@ -271,29 +285,38 @@ final public class Main extends Activity {
 			discover.addObserver(this);
 			discover.setVar(net.getIp(), net.getNetCidr());
 
-			Thread discoverThread = new Thread(discover);
+			discoverThread = new Thread(discover);
 			discoverThread.setPriority(Thread.MAX_PRIORITY);
 			discoverThread.start();
+
 			return null;
 		}
 
-		protected void onProgressUpdate(Boolean... item) {
-			if (item[0] == true) {
+		// protected void onCancelled() {
+		// discoverThread.interrupt();
+		// discoverThread.stop();
+		// stopDiscovering();
+		// }
+
+		protected void onProgressUpdate(String... item) {
+			if (item[0] == "finished") {
 				stopDiscovering();
 			} else {
-				updateList();
+				addHost(item[0]);
 			}
 		}
 
 		public void update(Observable observable, Object data) {
 			String host = (String) data;
 			if (data == null) {
-				publishProgress(true);
+				publishProgress("finished");
+				Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+				v.vibrate((long) 250);
 			} else {
 				if (!hosts.contains(host)) {
 					hosts.add(host);
 					hosts_ports.add(null);
-					publishProgress(false);
+					publishProgress(host);
 				}
 			}
 		}
@@ -301,20 +324,21 @@ final public class Main extends Activity {
 
 	private void startDiscovering() {
 		discovering = true;
-		makeToast("Updating list ...");
+		makeToast(R.string.discover_start);
+		initList();
+		final CheckHostsTask task = new CheckHostsTask();
+		task.execute();
 		// btn_discover.setText("Cancel");
 		// btn_discover.setOnClickListener(new View.OnClickListener() {
 		// public void onClick(View v) {
-		// // Cancel
+		// task.cancel(true);
 		// }
 		// });
-		initList();
-		new CheckHostsTask().execute();
 	}
 
 	private void stopDiscovering() {
 		discovering = false;
-		makeToast("Discovery finished!");
+		makeToast(R.string.discover_finished);
 		// btn_discover.setText("Discover");
 		// btn_discover.setOnClickListener(new View.OnClickListener() {
 		// public void onClick(View v) {
@@ -334,14 +358,13 @@ final public class Main extends Activity {
 		private ProgressDialog progress = null;
 		private CharSequence[] ports = null;
 		private int progress_current = 0;
-		private final String MSG = "Scanning ports ..";
 
 		// private static final int CORE_POOL_SIZE = 1;
 		// private static final int MAXIMUM_POOL_SIZE = 10;
 
 		protected void onPreExecute() {
 			progress = new ProgressDialog(Main.this);
-			progress.setMessage(MSG);
+			progress.setMessage(getString(R.string.scan_start));
 			progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progress.setCancelable(false);
 			progress.setMax(NB_PORTS);
@@ -395,7 +418,7 @@ final public class Main extends Activity {
 		if (ports.length > 0) {
 			scanDone.setItems(ports, null);
 		} else {
-			scanDone.setMessage("No open port found");
+			scanDone.setMessage(R.string.scan_noport);
 		}
 		scanDone.show();
 	}
@@ -427,6 +450,32 @@ final public class Main extends Activity {
 	// .show();
 	// }
 
+	private void export() {
+		final Export e = new Export(Main.this, hosts, hosts_ports);
+		String file = e.getFileName();
+
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View v = inflater.inflate(R.layout.file, null);
+		final EditText txt = (EditText) v.findViewById(R.id.export_file);
+		txt.setText(file);
+
+		AlertDialog.Builder getFileName = new AlertDialog.Builder(Main.this);
+		getFileName.setTitle("Choose file destination");
+		getFileName.setView(v);
+		getFileName.setPositiveButton("Save",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dlg, int sumthin) {
+						try {
+							e.writeToSd((txt.getText()).toString());
+						} catch (IOException e) {
+							makeToast("Error: " + e.getMessage());
+							export();
+						}
+					}
+				});
+		getFileName.show();
+	}
+
 	private void initList() {
 		// setSelectedHosts(false);
 		adapter.clear();
@@ -434,18 +483,18 @@ final public class Main extends Activity {
 		hosts_ports = new ArrayList<CharSequence[]>();
 	}
 
-	private void updateList() {
-		adapter.clear();
-		listHosts();
-	}
+	// private void updateList() {
+	// adapter.clear();
+	// listHosts();
+	// }
+	//
+	// private void listHosts() {
+	// for (String h : hosts) {
+	// addHost(h);
+	// }
+	// }
 
-	private void listHosts() {
-		for (String h : hosts) {
-			addText(h);
-		}
-	}
-
-	private void addText(String text) {
+	private void addHost(String text) {
 		adapter.add(text);
 	}
 
@@ -473,9 +522,13 @@ final public class Main extends Activity {
 	// }
 	// }
 
-	private void makeToast(String txt) {
-		Toast.makeText(getApplicationContext(), (CharSequence) txt,
+	private void makeToast(String msg) {
+		Toast.makeText(getApplicationContext(), (CharSequence) msg,
 				Toast.LENGTH_SHORT).show();
+	}
+
+	private void makeToast(int msg) {
+		Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 	}
 
 	private void setButtonOff(Button b) {

@@ -34,7 +34,7 @@ public class DiscoveryUnicast extends Observable implements Runnable {
 		for (int j = ip_int + 1; j <= end; j++) {
 			launch(j);
 		}
-		
+
 		setChanged();
 		notifyObservers(null);
 	}
