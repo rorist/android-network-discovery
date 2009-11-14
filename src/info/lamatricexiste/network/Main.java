@@ -40,6 +40,7 @@ final public class Main extends Activity {
 	private final String TAG = "NetworkMain";
 	// private final int DEFAULT_DISCOVER = 1;
 	private final int NB_PORTS = 1024;
+	private final long VIBRATE = (long) 250;
 	private List<String> hosts = null;
 	private List<CharSequence[]> hosts_ports = null;
 	private HostsAdapter adapter;
@@ -317,6 +318,8 @@ final public class Main extends Activity {
 
 	private void startDiscovering() {
 		discovering = true;
+		setButtonOff(btn_discover);
+		setButtonOff(btn_export);
 		makeToast(R.string.discover_start);
 		initList();
 		final CheckHostsTask task = new CheckHostsTask();
@@ -332,9 +335,11 @@ final public class Main extends Activity {
 
 	private void stopDiscovering() {
 		discovering = false;
+		setButtonOn(btn_discover);
+		setButtonOn(btn_export);
 		makeToast(R.string.discover_finished);
 		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-		v.vibrate((long) 250);
+		v.vibrate(VIBRATE);
 		// btn_discover.setText("Discover");
 		// btn_discover.setOnClickListener(new View.OnClickListener() {
 		// public void onClick(View v) {
@@ -377,6 +382,8 @@ final public class Main extends Activity {
 			hosts_ports.set(position, result);
 			progress.dismiss();
 			showPorts(result, position, host);
+			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			v.vibrate(VIBRATE);
 		}
 
 		public void setInfo(int position, String host) {
@@ -466,6 +473,7 @@ final public class Main extends Activity {
 					public void onClick(DialogInterface dlg, int sumthin) {
 						try {
 							e.writeToSd((txt.getText()).toString());
+							makeToast(R.string.export_finished);
 						} catch (IOException e) {
 							makeToast("Error: " + e.getMessage());
 							export();

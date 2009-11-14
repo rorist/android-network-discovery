@@ -39,34 +39,34 @@ public class Export {
 	}
 
 	private String prepareXml() {
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-				+ "<NetworkDiscovery>";
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+				+ "<NetworkDiscovery>\r\n";
 		// Network Information
-		xml += "<info>"
-				+ "<date>"
+		xml += "\t<info>\r\n"
+				+ "\t\t<date>"
 				+ (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"))
 						.format(new Date())
-				+ "</date>" // RFC 2822
-				+ "<network>" + net.getNetIp().getHostAddress() + "/"
-				+ net.getNetCidr() + "</network>" + "<ssid>" + net.getSSID()
-				+ "</ssid>" + "<bssid>" + net.getBSSID() + "</bssid>" + "<ip>"
-				+ net.getIp().getHostAddress() + "</ip>" + "</info>";
+				+ "</date>\r\n" // RFC 2822
+				+ "\t\t<network>" + net.getNetIp().getHostAddress() + "/"
+				+ net.getNetCidr() + "</network>\r\n" + "\t\t<ssid>" + net.getSSID()
+				+ "</ssid>\r\n" + "\t\t<bssid>" + net.getBSSID() + "</bssid>\r\n" + "\t\t<ip>"
+				+ net.getIp().getHostAddress() + "</ip>\r\n" + "\t</info>\r\n";
 
 		// Hosts and Ports
 		if (hosts != null) {
-			xml += "<hosts>";
+			xml += "\t<hosts>\r\n";
 			for (int i = 0; i < hosts.size(); i++) {
 				String host = hosts.get(i);
 				CharSequence[] ports = hosts_ports.get(i);
-				xml += "<host value=\"" + host + "\">";
+				xml += "\t\t<host value=\"" + host + "\">\r\n";
 				if (ports != null) {
 					for (int j = 0; j < ports.length; j++) {
-						xml += "<port>" + ports[j] + "</port>";
+						xml += "\t\t\t<port>" + ports[j] + "</port>\r\n";
 					}
 				}
-				xml += "</host>";
+				xml += "\t\t</host>\r\n";
 			}
-			xml += "</hosts>";
+			xml += "\t</hosts>\r\n";
 		}
 
 		xml += "</NetworkDiscovery>";
