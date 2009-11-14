@@ -277,48 +277,41 @@ final public class Main extends Activity {
 	private class CheckHostsTask extends AsyncTask<Void, String, Void>
 			implements Observer {
 
-		private Thread discoverThread;
+		private int hosts_done = 0;
+		private int hosts_size;
 
 		protected Void doInBackground(Void... v) {
 			NetworkInfo net = new NetworkInfo(WifiService);
-			DiscoveryUnicast discover = new DiscoveryUnicast();
-			discover.addObserver(this);
-			discover.setVar(net.getIp(), net.getNetCidr());
+			int cidr = net.getNetCidr();
+			int ip_int = net.getIp().hashCode();
+			int start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;
+			int end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
+			hosts_size = end - start;
 
-			discoverThread = new Thread(discover);
-			discoverThread.setPriority(Thread.MAX_PRIORITY);
-			discoverThread.start();
+			DiscoveryUnicast discover = new DiscoveryUnicast(this);
+			discover.run(ip_int, start, end);
 
 			return null;
 		}
 
-		// protected void onCancelled() {
-		// discoverThread.interrupt();
-		// discoverThread.stop();
-		// stopDiscovering();
-		// }
+		protected void onCancelled() {
+		}
 
 		protected void onProgressUpdate(String... item) {
-			if (item[0] == "finished") {
+			String host = item[0];
+			if (host != null) {
+				addHost(host);
+				hosts.add(host);
+				hosts_ports.add(null);
+			}
+			hosts_done++;
+			if (hosts_done == hosts_size) {
 				stopDiscovering();
-			} else {
-				addHost(item[0]);
 			}
 		}
 
 		public void update(Observable observable, Object data) {
-			String host = (String) data;
-			if (data == null) {
-				publishProgress("finished");
-				Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-				v.vibrate((long) 250);
-			} else {
-				if (!hosts.contains(host)) {
-					hosts.add(host);
-					hosts_ports.add(null);
-					publishProgress(host);
-				}
-			}
+			publishProgress((String) data);
 		}
 	}
 
@@ -328,6 +321,7 @@ final public class Main extends Activity {
 		initList();
 		final CheckHostsTask task = new CheckHostsTask();
 		task.execute();
+
 		// btn_discover.setText("Cancel");
 		// btn_discover.setOnClickListener(new View.OnClickListener() {
 		// public void onClick(View v) {
@@ -339,6 +333,8 @@ final public class Main extends Activity {
 	private void stopDiscovering() {
 		discovering = false;
 		makeToast(R.string.discover_finished);
+		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		v.vibrate((long) 250);
 		// btn_discover.setText("Discover");
 		// btn_discover.setOnClickListener(new View.OnClickListener() {
 		// public void onClick(View v) {
