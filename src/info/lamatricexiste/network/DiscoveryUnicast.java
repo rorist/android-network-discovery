@@ -11,17 +11,17 @@ import android.util.Log;
 
 public class DiscoveryUnicast {
 	private final String TAG = "DiscoveryUnicast";
-	private final static int TIMEOUT_REACH = 600;
-	private final static int POOL_SIZE = 20;
+	private final int TIMEOUT_REACH = 600;
 	private ExecutorService pool;
 	private Observer observer;
 
 	DiscoveryUnicast(Observer observer) {
 		this.observer = observer;
-		pool = Executors.newFixedThreadPool(POOL_SIZE);
 	}
 
 	public void run(int ip_int, int start, int end) {
+		pool = Executors.newFixedThreadPool(end - start);
+
 		// gateway
 		launch(start);
 

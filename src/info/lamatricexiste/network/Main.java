@@ -352,15 +352,13 @@ final public class Main extends Activity {
 		private int position;
 		private String host;
 		private ProgressDialog progress = null;
-		private CharSequence[] ports = null;
+		private ArrayList<CharSequence> ports = new ArrayList<CharSequence>();
 		private int progress_current = 0;
-
-		// private static final int CORE_POOL_SIZE = 1;
-		// private static final int MAXIMUM_POOL_SIZE = 10;
 
 		protected void onPreExecute() {
 			progress = new ProgressDialog(Main.this);
-			progress.setMessage(getString(R.string.scan_start));
+			progress.setMessage(String.format(getString(R.string.scan_start),
+					host));
 			progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progress.setCancelable(false);
 			progress.setMax(NB_PORTS);
@@ -369,15 +367,16 @@ final public class Main extends Activity {
 
 		protected Void doInBackground(Void... v) {
 			PortScan scan = new PortScan();
-			scan.addObserver(this);
-			ports = scan.scan(host);
+			scan.scan(this, host);
 			return null;
 		}
 
 		protected void onPostExecute(Void unused) {
-			hosts_ports.set(position, ports);
+			CharSequence[] result = ports
+					.toArray(new CharSequence[ports.size()]);
+			hosts_ports.set(position, result);
 			progress.dismiss();
-			showPorts(ports, position, host);
+			showPorts(result, position, host);
 		}
 
 		public void setInfo(int position, String host) {
@@ -386,6 +385,10 @@ final public class Main extends Activity {
 		}
 
 		public void update(Observable observable, Object data) {
+			CharSequence port = (CharSequence) data;
+			if (port != null) {
+				ports.add(port);
+			}
 			progress_current++;
 			progress.setProgress(progress_current);
 		}

@@ -26,7 +26,6 @@ public class ScanTCP extends Observable implements Runnable {
 
 	public void run() {
 		scan();
-		Thread.currentThread().interrupt();
 	}
 
 	public int getPort() {
@@ -36,10 +35,10 @@ public class ScanTCP extends Observable implements Runnable {
 	protected void scan() {
 		Socket s = new Socket();
 		InetSocketAddress addr = new InetSocketAddress(ip, port);
+		setChanged();
 		try {
-			setChanged();
 			s.connect(addr, TIMEOUT);
-			notifyObservers();
+			notifyObservers(port + "/tcp open");
 		} catch (SocketTimeoutException e) {
 			setFiltered();
 		} catch (ConnectException e) {
@@ -56,6 +55,7 @@ public class ScanTCP extends Observable implements Runnable {
 			} catch (IOException e) {
 				Log.e(TAG, "FIXME: " + port + ": " + e.toString());
 			}
+			notifyObservers(null);
 		}
 	}
 
