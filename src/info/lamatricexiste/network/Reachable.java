@@ -7,8 +7,8 @@ import java.net.Socket;
 
 public class Reachable {
 
-	final int[] ports = { 445, 80 };
-	final int timeout = 200;
+	final int[] ports = { 135, 80, 111, 139, 445, 554};
+	final int timeout = 300;
 	final int len = ports.length;
 
 	public boolean request(InetAddress host) {

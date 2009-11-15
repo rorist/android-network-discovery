@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class ScanTCP extends Observable implements Runnable {
 	private final String TAG = "ScanTCP";
-	private final int TIMEOUT = 60;
+	private final int TIMEOUT = 2000;
 	private final int MAX_CLOSED = 1;
 	private final int MAX_FILTERED = 1;
 	private String ip = "";
@@ -55,7 +55,7 @@ public class ScanTCP extends Observable implements Runnable {
 			} catch (IOException e) {
 				Log.e(TAG, "FIXME: " + port + ": " + e.toString());
 			}
-			notifyObservers(null);
+			notifyObservers();
 		}
 	}
 

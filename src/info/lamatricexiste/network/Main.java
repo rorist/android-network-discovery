@@ -23,9 +23,6 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -140,20 +137,20 @@ final public class Main extends Activity {
 		super.onStop();
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		new MenuInflater(getApplication()).inflate(R.menu.options, menu);
-		return (super.onCreateOptionsMenu(menu));
-	}
+	// @Override
+	// public boolean onCreateOptionsMenu(Menu menu) {
+	// new MenuInflater(getApplication()).inflate(R.menu.options, menu);
+	// return (super.onCreateOptionsMenu(menu));
+	// }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.settings) {
-			// startActivity(new Intent(this, Prefs.class));
-			return true;
-		}
-		return (super.onOptionsItemSelected(item));
-	}
+	// @Override
+	// public boolean onOptionsItemSelected(MenuItem item) {
+	// if (item.getItemId() == R.id.settings) {
+	// // startActivity(new Intent(this, Prefs.class));
+	// return true;
+	// }
+	// return (super.onOptionsItemSelected(item));
+	// }
 
 	// Custom ArrayAdapter
 	private class HostsAdapter extends ArrayAdapter<String> {
@@ -183,7 +180,7 @@ final public class Main extends Activity {
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent intent) {
 			String a = intent.getAction();
-			Log.d(TAG, "Receive broadcasted " + a);
+			// Log.d(TAG, "Receive broadcasted " + a);
 			if (a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				setWifiState(intent);
 			} else if (a.equals(WifiManager.NETWORK_IDS_CHANGED_ACTION)
@@ -202,9 +199,8 @@ final public class Main extends Activity {
 		TextView info_ip = (TextView) findViewById(R.id.info_ip);
 		TextView info_nt = (TextView) findViewById(R.id.info_nt);
 		TextView info_id = (TextView) findViewById(R.id.info_id);
-		WifiInfo wifiInfo = WifiService.getConnectionInfo(); // TODO: User
-		// NetworkInfo
-		// class
+		WifiInfo wifiInfo = WifiService.getConnectionInfo();
+		// TODO: User NetworkInfo class
 		SupplicantState sstate = wifiInfo.getSupplicantState();
 		NetworkInfo net = new NetworkInfo(WifiService);
 
@@ -217,6 +213,8 @@ final public class Main extends Activity {
 			info_nt.setText(R.string.wifi_scanning);
 			break;
 		case ASSOCIATED:
+			Log.d(TAG, "ASSOCIATED");
+			break;
 		case ASSOCIATING:
 			String ssid = net.getSSID();
 			if (ssid != null) {
@@ -227,6 +225,7 @@ final public class Main extends Activity {
 			}
 			break;
 		case COMPLETED:
+			// TODO: check when DHCP request is send and IP received
 			if (discovering == false) {
 				setButtonOn(btn_discover);
 				setButtonOn(btn_export);
@@ -278,6 +277,7 @@ final public class Main extends Activity {
 	private class CheckHostsTask extends AsyncTask<Void, String, Void>
 			implements Observer {
 
+		// private final int HOSTS_LIMIT = 512;
 		private int hosts_done = 0;
 		private int hosts_size;
 
@@ -289,13 +289,16 @@ final public class Main extends Activity {
 			int end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
 			hosts_size = end - start;
 
+			// Unicast method (default)
+			// if(hosts_size>HOSTS_LIMIT){
+			// hosts_size = HOSTS_LIMIT;
+			// start = ip_int - (HOSTS_LIMIT/2);
+			// end = ip_int + (HOSTS_LIMIT/2);
+			// }
 			DiscoveryUnicast discover = new DiscoveryUnicast(this);
 			discover.run(ip_int, start, end);
 
 			return null;
-		}
-
-		protected void onCancelled() {
 		}
 
 		protected void onProgressUpdate(String... item) {
@@ -397,7 +400,9 @@ final public class Main extends Activity {
 				ports.add(port);
 			}
 			progress_current++;
-			progress.setProgress(progress_current);
+			if (progress_current % 10 == 0) {
+				progress.setProgress(progress_current);
+			}
 		}
 	}
 

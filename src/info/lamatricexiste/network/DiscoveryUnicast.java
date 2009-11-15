@@ -4,14 +4,18 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
 
 public class DiscoveryUnicast {
 	private final String TAG = "DiscoveryUnicast";
-	private final int TIMEOUT_REACH = 600;
+	private final int TIMEOUT_REACH = 2000;
+	private final int MIN_THREADS = 3;
+	private final int MAX_THREADS = 10;
 	private ExecutorService pool;
 	private Observer observer;
 
@@ -20,19 +24,28 @@ public class DiscoveryUnicast {
 	}
 
 	public void run(int ip_int, int start, int end) {
-		pool = Executors.newFixedThreadPool(end - start);
+		final int size = end - start;
+		final ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(
+				size);
+		pool = new ThreadPoolExecutor(MIN_THREADS, MAX_THREADS,
+				(long) (size * TIMEOUT_REACH), TimeUnit.MILLISECONDS, queue);
 
 		// gateway
 		launch(start);
-
-		// rewind
+		// Rewind
 		for (int i = ip_int - 1; i > start; i--) {
 			launch(i);
 		}
-
-		// forward
+		// Forward
 		for (int j = ip_int + 1; j <= end; j++) {
 			launch(j);
+		}
+
+		pool.shutdown();
+		try {
+			pool.awaitTermination(120L, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			Log.e(TAG, "Got Interrupted");
 		}
 	}
 
@@ -56,11 +69,15 @@ public class DiscoveryUnicast {
 				InetAddress h = InetAddress.getByName(host);
 				if (h.isReachable(TIMEOUT_REACH) || r.request(h)) {
 					notifyObservers(host);
+				} else {
+					notifyObservers(null);
 				}
 			} catch (IOException e) {
+				notifyObservers();
 				Log.e(TAG, e.getMessage());
+			} finally {
+				// Thread.currentThread().interrupt();
 			}
-			notifyObservers(null);
 		}
 	}
 
