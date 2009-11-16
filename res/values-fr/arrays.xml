@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array
+        name="discover_method_name">
+        <item>Incrémental (defaut)</item>
+        <item>Broadcast</item>
+        <item>Idle scan</item>
+    </string-array>
+
+    <string-array
+        name="discover_method_value">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+</resources>

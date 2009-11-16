@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Network Discovery</string>
+    <string name="btn_discover">Rechercher</string>
+    <string name="btn_export">Exporter</string>
+    <string name="btn_close">Fermer</string>
+    <string name="btn_rescan">Rescanner</string>
+    <string name="wifi_enabled">Wifi activé</string>
+    <string name="wifi_enabling">Wifi en cours d'activation </string>
+    <string name="wifi_disabling">Wifi en cours de desactivation</string>
+    <string name="wifi_disabled">Wifi desactivé</string>
+    <string name="wifi_unknown">Etat du wifi inconnu</string>
+    <string name="wifi_strange">Le wifi se comporte bizarrement</string>
+    <string name="wifi_scanning">Scan des réseaux wifi</string>
+    <string name="wifi_associating_ap">Association en cours avec %s</string>
+    <string name="wifi_associating">Association du wifi en cours</string>
+    <string name="wifi_other">Wifi non associé</string>
+    <string name="discover_start">Recherche démarrée ...</string>
+    <string name="discover_finished">Recherche terminée !</string>
+    <string name="scan_start">Scan des ports sur %s</string>
+    <string name="scan_noport">Aucun port trouvé !</string>
+    <string name="export_finished">Fichier sauvegardé !</string>
+    <string name="export_choose">Choisir la destination</string>
+    <string name="export_save">Sauver</string>
+</resources>

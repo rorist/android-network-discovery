@@ -64,7 +64,8 @@ final public class Main extends Activity {
 		// });
 
 		// Discover
-		btn_discover = (Button) findViewById(R.id.btn1);
+		btn_discover = (Button) findViewById(R.id.btn_discover);
+		btn_discover.setText(R.string.btn_discover);
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				startDiscovering();
@@ -73,6 +74,7 @@ final public class Main extends Activity {
 
 		// Export
 		btn_export = (Button) findViewById(R.id.btn_export);
+		btn_export.setText(R.string.btn_export);
 		btn_export.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				export();
@@ -80,8 +82,8 @@ final public class Main extends Activity {
 		});
 
 		// Wifi Settings
-		Button btn2 = (Button) findViewById(R.id.btn2);
-		btn2.setOnClickListener(new View.OnClickListener() {
+		Button btn_wifi = (Button) findViewById(R.id.btn_wifi);
+		btn_wifi.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
 			}
@@ -400,7 +402,7 @@ final public class Main extends Activity {
 				ports.add(port);
 			}
 			progress_current++;
-			if (progress_current % 10 == 0) {
+			if (progress_current % 16 == 0) {
 				progress.setProgress(progress_current);
 			}
 		}
@@ -420,12 +422,12 @@ final public class Main extends Activity {
 	private void showPorts(final CharSequence[] ports, final int position,
 			final String host) {
 		AlertDialog.Builder scanDone = new AlertDialog.Builder(Main.this);
-		scanDone.setTitle(host).setPositiveButton("Rescan",
+		scanDone.setTitle(host).setPositiveButton(R.string.btn_rescan,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dlg, int sumthin) {
 						scanPort(position, host, true);
 					}
-				}).setNegativeButton("Close", null);
+				}).setNegativeButton(R.string.btn_close, null);
 		if (ports.length > 0) {
 			scanDone.setItems(ports, null);
 		} else {
@@ -471,9 +473,9 @@ final public class Main extends Activity {
 		txt.setText(file);
 
 		AlertDialog.Builder getFileName = new AlertDialog.Builder(Main.this);
-		getFileName.setTitle("Choose file destination");
+		getFileName.setTitle(R.string.export_choose);
 		getFileName.setView(v);
-		getFileName.setPositiveButton("Save",
+		getFileName.setPositiveButton(R.string.export_save,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dlg, int sumthin) {
 						try {
