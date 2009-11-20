@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.app.ProgressDialog;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -357,10 +357,8 @@ final public class Main extends Activity {
 	 * Port Scan
 	 */
 
-	private class ScanPortTask extends AsyncTask<Void, Void, Void> implements
-			Observer {
-		private int position;
-		private String host;
+	private class ScanPortTask extends PortScan {
+
 		private ProgressDialog progress = null;
 		private ArrayList<CharSequence> ports = new ArrayList<CharSequence>();
 		private int progress_current = 0;
@@ -375,36 +373,26 @@ final public class Main extends Activity {
 			progress.show();
 		}
 
-		protected Void doInBackground(Void... v) {
-			PortScan scan = new PortScan();
-			scan.scan(this, host);
-			return null;
-		}
-
 		protected void onPostExecute(Void unused) {
 			CharSequence[] result = ports
 					.toArray(new CharSequence[ports.size()]);
 			hosts_ports.set(position, result);
 			progress.dismiss();
 			showPorts(result, position, host);
-			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-			v.vibrate(VIBRATE);
+			// Vibrator v = (Vibrator)
+			// getSystemService(Context.VIBRATOR_SERVICE);
+			// v.vibrate(VIBRATE);
 		}
 
-		public void setInfo(int position, String host) {
-			this.position = position;
-			this.host = host;
-		}
-
-		public void update(Observable observable, Object data) {
-			CharSequence port = (CharSequence) data;
+		protected void onProgressUpdate(String... values) {
+			String port = (String) values[0];
 			if (port != null) {
 				ports.add(port);
 			}
 			progress_current++;
-			if (progress_current % 16 == 0) {
-				progress.setProgress(progress_current);
-			}
+			// if (progress_current % 16 == 0) {
+			progress.setProgress(progress_current);
+			// }
 		}
 	}
 
