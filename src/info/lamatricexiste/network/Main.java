@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import android.app.ProgressDialog;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,7 +19,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,7 +35,7 @@ final public class Main extends Activity {
 
 	private final String TAG = "NetworkMain";
 	// private final int DEFAULT_DISCOVER = 1;
-	private final long VIBRATE = (long) 250;
+//	private final long VIBRATE = (long) 250;
 	private List<String> hosts = null;
 	private List<CharSequence[]> hosts_ports = null;
 	private HostsAdapter adapter;
