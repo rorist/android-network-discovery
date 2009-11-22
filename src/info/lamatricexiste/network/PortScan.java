@@ -1,3 +1,12 @@
+/**
+ * Un peu de doc:
+ * http://weblogs.java.net/blog/2006/05/30/tricks-and-tips-nio-part-i-why-you-must-handle-opwrite
+ * http://www.java.net/blog/2006/06/06/tricks-and-tips-nio-part-ii-why-selectionkeyattach-evil
+ * http://weblogs.java.net/blog/2006/07/07/tricks-and-tips-nio-part-iii-thread-or-not-thread
+ * http://weblogs.java.net/blog/2006/07/19/tricks-and-tips-nio-part-iv-meet-selectors
+ * http://weblogs.java.net/blog/2006/09/21/tricks-and-tips-nio-part-v-ssl-and-nio-friend-or-foe
+ */
+
 package info.lamatricexiste.network;
 
 import java.io.IOException;
@@ -7,81 +16,152 @@ import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
 public class PortScan extends AsyncTask<Void, String, Void> {
 
-    private final String TAG = "PortScan";
-    private final int TIMEOUT = 200;
-    private final int NB_PORTS = 1024;
-    private final int PORT_START = 1;
-    private final int PORT_END = 1024; // Reference Table limit = 512
-    final int[] PORTS_SUP = { 5060, 5900, 5901, 5800, 9100 }; // SIP, VNC, VNCWeb, JET
-    private Selector selector;
-    protected String host;
-    protected int position;
+	private final String TAG = "PortScan";
+	private final int TIMEOUT_SELECT = 500;
+	private final int TIMEOUT_SOCKET = 600;
+	private final int SCAN_RATE = 0;
+	private final int STEP = 127;
+	// private final int PORT_START = 1;
+	// private final int PORT_END = 128;
+	int cnt_selected;
+	private Selector selector = null;
 
-    public void setInfo(int position, String host) {
-        this.position = position;
-        this.host = host;
-    }
+	protected final int NB_PORTS = 1024;
+	protected String host;
+	protected int position;
 
-    private void getSocket(InetAddress ina, int port) {
-        try {
-            // Create the socket
-            InetSocketAddress addr = new InetSocketAddress(ina, port);
-            SocketChannel socket;
-            socket = SocketChannel.open();
-            socket.configureBlocking(false);
-            //socket.socket().setSoTimeout(TIMEOUT);
-            socket.connect(addr);
-            // Register the Channel
-            socket.register(selector, SelectionKey.OP_CONNECT,
-                    new Integer(port));
-        } catch (IOException e) {
-            Log.e("getSocket", e.getMessage());
-        }
-    }
+	// private ExecutorService pool;
 
-    protected Void doInBackground(Void... params) {
-        //socketchannel with timeout: http://bit.ly/2djwRV
-        try {
-            selector = Selector.open();
-            InetAddress ina = InetAddress.getByName(host);
-            for (int i = PORT_START; i <= PORT_END; i++) {
-                getSocket(ina, i);
-            }
-            while (true) {
-                //selector.select(TIMEOUT*NB_PORTS);
-                selector.selectNow();
-                Set<SelectionKey> keys = selector.selectedKeys();
-                for (Iterator<SelectionKey> iterator = keys.iterator(); iterator
-                        .hasNext();) {
-                    SelectionKey key = (SelectionKey) iterator.next();
-                    SocketChannel socket = (SocketChannel) key.channel();
-                    if (key.isConnectable()) {
-                        Log.v(TAG, "isConnectable="+key.attachment());
-                        // Do a timeout here?
-                        if (socket.finishConnect()) {
-                            Log.v(TAG, "isConnected="+key.attachment());
-                            publishProgress(new String(key.attachment() + "/tcp open"));
-                        }
-                    } else {
-                        publishProgress(new String());
-                    }
-                    socket.close();
-                    iterator.remove();
-                }
-            }
-        } catch (UnknownHostException e) {
-            Log.e(TAG, e.getMessage());
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        return null;
-    }
+	public void setInfo(int position, String host) {
+		this.position = position;
+		this.host = host;
+	}
+
+	private void connectSocket(InetAddress ina, int port) {
+		try {
+			// Create the socket
+			InetSocketAddress addr = new InetSocketAddress(ina, port);
+			SocketChannel socket;
+			socket = SocketChannel.open();
+			socket.configureBlocking(false);
+			socket.connect(addr);
+			// Register the Channel with port and timestamp as attachement
+			HashMap<Integer, Long> data = new HashMap<Integer, Long>();
+			data.put(0, (long) port);
+			data.put(1, System.currentTimeMillis());
+			socket.register(selector, SelectionKey.OP_CONNECT, data);
+		} catch (IOException e) {
+			Log.e("getSocket", e.getMessage());
+		}
+	}
+
+	protected Void doInBackground(Void... params) {
+		try {
+			InetAddress ina = InetAddress.getByName(host);
+			main(ina, 1, 128);
+			main(ina, 129, 256);
+			main(ina, 257, 384);
+			main(ina, 385, 512);
+			main(ina, 513, 640);
+			main(ina, 641, 768);
+			main(ina, 769, 896);
+			main(ina, 897, 1024);
+		} catch (UnknownHostException e) {
+			Log.e(TAG, e.getMessage());
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void main(InetAddress ina, int PORT_START, int PORT_END) {
+		try {
+			cnt_selected = 0;
+			selector = Selector.open();
+
+			for (int i = PORT_START; i < PORT_END; i++) {
+				connectSocket(ina, i);
+				Thread.sleep(SCAN_RATE);
+			}
+
+			while (selector.isOpen()) {
+				selector.select(TIMEOUT_SELECT);
+				Iterator<SelectionKey> iterator = selector.selectedKeys()
+						.iterator();
+
+				while (iterator.hasNext()) {
+					SelectionKey key = (SelectionKey) iterator.next();
+					iterator.remove();
+					// Si isValid() seulement = port ouvert mais non connectable
+					if (key.isValid() && key.isConnectable()) {
+						SocketChannel socket = (SocketChannel) key.channel();
+						Map<Integer, Long> map = (HashMap<Integer, Long>) key
+								.attachment();
+						Long port = map.get(0);
+						try {
+							if (socket.isConnectionPending()) {
+								socket.finishConnect();
+								publishProgress(new String(port + "/tcp open"));
+								// Log.v(TAG, "open="+port);
+							}
+						} catch (IOException e) {
+							// No service
+							publishProgress(new String());
+							// Log.v(TAG, "closed=" + port);
+						} finally {
+							cnt_selected++;
+							key.cancel();
+							try {
+								socket.close();
+							} catch (IOException e1) {
+								Log.e(TAG, e1.getMessage());
+							}
+						}
+					}
+				}
+				cancelTimeouts();
+				if (cnt_selected == STEP) {
+					selector.close();
+				}
+			}
+		} catch (UnknownHostException e) {
+			Log.e(TAG, e.getMessage());
+		} catch (IOException e) {
+			Log.e(TAG, e.getMessage());
+		} catch (InterruptedException e) {
+			Log.e(TAG, e.getMessage());
+		} finally {
+			try {
+				selector.close();
+			} catch (IOException e) {
+				Log.e(TAG, e.getMessage());
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void cancelTimeouts() throws IOException {
+		// Emprunté ici
+		// http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
+		long now = System.currentTimeMillis();
+		for (SelectionKey key : selector.keys()) {
+			Map<Integer, Long> map = (HashMap<Integer, Long>) key.attachment();
+			long time = map.get(1);
+			if (key.isValid() && now - time > TIMEOUT_SOCKET) {
+				// Log.v(TAG, "canceled=" + map.get(0));
+				publishProgress(new String());
+				cnt_selected++;
+				key.cancel();
+				key.channel().close();
+			}
+		}
+	}
 }

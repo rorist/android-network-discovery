@@ -36,7 +36,6 @@ final public class Main extends Activity {
 
 	private final String TAG = "NetworkMain";
 	// private final int DEFAULT_DISCOVER = 1;
-	private final int NB_PORTS = 1024;
 	private final long VIBRATE = (long) 250;
 	private List<String> hosts = null;
 	private List<CharSequence[]> hosts_ports = null;
@@ -343,8 +342,8 @@ final public class Main extends Activity {
 		setButtonOn(btn_discover);
 		setButtonOn(btn_export);
 		makeToast(R.string.discover_finished);
-		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-		v.vibrate(VIBRATE);
+		// Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		// v.vibrate(VIBRATE);
 		// btn_discover.setText("Discover");
 		// btn_discover.setOnClickListener(new View.OnClickListener() {
 		// public void onClick(View v) {
@@ -385,12 +384,13 @@ final public class Main extends Activity {
 		}
 
 		protected void onProgressUpdate(String... values) {
-			String port = (String) values[0];
-			if (port != null) {
-				ports.add(port);
+			if (values.length > 0) {
+				if (!values[0].equals(new String())) {
+					ports.add(values[0]);
+				}
 			}
 			progress_current++;
-			// if (progress_current % 16 == 0) {
+			// if (progress_current % 2 == 0) {
 			progress.setProgress(progress_current);
 			// }
 		}
