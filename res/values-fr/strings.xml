@@ -17,6 +17,7 @@
     <string name="wifi_other">Wifi non associé</string>
     <string name="discover_start">Recherche démarrée ...</string>
     <string name="discover_finished">Recherche terminée !</string>
+    <string name="discover_canceled">Recherche annulée !</string>
     <string name="scan_start">Scan des ports sur %s</string>
     <string name="scan_noport">Aucun port trouvé !</string>
     <string name="export_finished">Fichier sauvegardé !</string>

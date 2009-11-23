@@ -5,17 +5,30 @@
     android:layout_height="45dip"
     android:paddingLeft="3dip">
 
-    <CheckBox
+    <TextView
         android:id="@+id/list"
         android:layout_width="0dip"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingLeft="42dip"
+        android:layout_gravity="center_vertical"
+        android:paddingLeft="12dip"
         android:textSize="12dip"
         android:typeface="monospace"
         android:text="List"
         android:focusable="false"
         android:focusableInTouchMode="false" />
+
+    <!--    <CheckBox-->
+    <!--        android:id="@+id/list"-->
+    <!--        android:layout_width="0dip"-->
+    <!--        android:layout_height="fill_parent"-->
+    <!--        android:layout_weight="1"-->
+    <!--        android:paddingLeft="42dip"-->
+    <!--        android:textSize="12dip"-->
+    <!--        android:typeface="monospace"-->
+    <!--        android:text="List"-->
+    <!--        android:focusable="false"-->
+    <!--        android:focusableInTouchMode="false" />-->
 
     <Button
         android:id="@+id/list_port"

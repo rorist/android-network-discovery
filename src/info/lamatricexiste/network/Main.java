@@ -3,8 +3,6 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,13 +15,14 @@ import android.content.IntentFilter;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,7 +34,7 @@ final public class Main extends Activity {
 
 	private final String TAG = "NetworkMain";
 	// private final int DEFAULT_DISCOVER = 1;
-//	private final long VIBRATE = (long) 250;
+	private final long VIBRATE = (long) 250;
 	private List<String> hosts = null;
 	private List<CharSequence[]> hosts_ports = null;
 	private HostsAdapter adapter;
@@ -44,12 +43,13 @@ final public class Main extends Activity {
 	private Button btn_discover;
 	private Button btn_export;
 	// private SharedPreferences prefs = null;
-	private boolean discovering = false;
 	private WifiManager WifiService;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main);
 		// prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -168,7 +168,7 @@ final public class Main extends Activity {
 						.findViewById(R.id.list_port);
 				btn_ports.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
-						scanPort(position, hosts.get(position), false);
+						scanPort(position, false);
 					}
 				});
 			}
@@ -196,6 +196,7 @@ final public class Main extends Activity {
 	};
 
 	private void setWifiInfo() {
+		// Use NetworkInfo
 		TextView info_ip = (TextView) findViewById(R.id.info_ip);
 		TextView info_nt = (TextView) findViewById(R.id.info_nt);
 		TextView info_id = (TextView) findViewById(R.id.info_id);
@@ -226,10 +227,8 @@ final public class Main extends Activity {
 			break;
 		case COMPLETED:
 			// TODO: check when DHCP request is send and IP received
-			if (discovering == false) {
-				setButtonOn(btn_discover);
-				setButtonOn(btn_export);
-			}
+			setButtonOn(btn_discover);
+			setButtonOn(btn_export);
 			info_ip.setText("IP: " + net.getIp().getHostAddress());
 			info_nt.setText("NT: " + net.getNetIp().getHostAddress() + "/"
 					+ net.getNetCidr());
@@ -274,81 +273,69 @@ final public class Main extends Activity {
 	 * Discover hosts
 	 */
 
-	private class CheckHostsTask extends AsyncTask<Void, String, Void>
-			implements Observer {
-
-		// private final int HOSTS_LIMIT = 512;
+	private class CheckHostsTask extends DiscoveryUnicast {
 		private int hosts_done = 0;
-		private int hosts_size;
 
-		protected Void doInBackground(Void... v) {
+		protected void onPreExecute() {
 			NetworkInfo net = new NetworkInfo(WifiService);
 			int cidr = net.getNetCidr();
-			int ip_int = net.getIp().hashCode();
-			int start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;
-			int end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
-			hosts_size = end - start;
-
-			// Unicast method (default)
-			// if(hosts_size>HOSTS_LIMIT){
-			// hosts_size = HOSTS_LIMIT;
-			// start = ip_int - (HOSTS_LIMIT/2);
-			// end = ip_int + (HOSTS_LIMIT/2);
-			// }
-			DiscoveryUnicast discover = new DiscoveryUnicast(this);
-			discover.run(ip_int, start, end);
-
-			return null;
+			ip_int = net.getIp().hashCode();
+			start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;
+			end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
+			size = end - start;
 		}
 
 		protected void onProgressUpdate(String... item) {
-			String host = item[0];
-			if (host != null) {
-				addHost(host);
-				hosts.add(host);
-				hosts_ports.add(null);
-			}
-			hosts_done++;
-			if (hosts_done == hosts_size) {
-				stopDiscovering();
+			if (!isCancelled()) {
+				String host = item[0];
+				if (!host.equals(new String())) {
+					addHost(host);
+					hosts.add(host);
+					hosts_ports.add(null);
+				}
+				hosts_done++;
+				setProgress(hosts_done * 10000 / size);
 			}
 		}
 
-		public void update(Observable observable, Object data) {
-			publishProgress((String) data);
+		protected void onPostExecute(Void unused) {
+			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			v.vibrate(VIBRATE);
+			makeToast(R.string.discover_finished);
+			stopDiscovering();
+		}
+
+		protected void onCancelled() {
+			pool.shutdownNow();
+			makeToast(R.string.discover_canceled);
+			stopDiscovering();
 		}
 	}
 
 	private void startDiscovering() {
-		discovering = true;
-		setButtonOff(btn_discover);
-		setButtonOff(btn_export);
 		makeToast(R.string.discover_start);
+		setProgressBarVisibility(true);
+		setProgressBarIndeterminateVisibility(true);
 		initList();
 		final CheckHostsTask task = new CheckHostsTask();
 		task.execute();
-
-		// btn_discover.setText("Cancel");
-		// btn_discover.setOnClickListener(new View.OnClickListener() {
-		// public void onClick(View v) {
-		// task.cancel(true);
-		// }
-		// });
+		btn_discover.setText("Cancel");
+		btn_discover.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				task.cancel(true);
+			}
+		});
 	}
 
 	private void stopDiscovering() {
-		discovering = false;
-		setButtonOn(btn_discover);
-		setButtonOn(btn_export);
-		makeToast(R.string.discover_finished);
-		// Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-		// v.vibrate(VIBRATE);
-		// btn_discover.setText("Discover");
-		// btn_discover.setOnClickListener(new View.OnClickListener() {
-		// public void onClick(View v) {
-		// startDiscovering();
-		// }
-		// });
+		setProgressBarVisibility(false);
+		setProgressBarIndeterminateVisibility(false);
+		btn_discover.setText("Discover");
+		btn_discover.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				startDiscovering();
+			}
+		});
 	}
 
 	/**
@@ -377,9 +364,8 @@ final public class Main extends Activity {
 			hosts_ports.set(position, result);
 			progress.dismiss();
 			showPorts(result, position, host);
-			// Vibrator v = (Vibrator)
-			// getSystemService(Context.VIBRATOR_SERVICE);
-			// v.vibrate(VIBRATE);
+			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			v.vibrate(VIBRATE);
 		}
 
 		protected void onProgressUpdate(String... values) {
@@ -389,13 +375,12 @@ final public class Main extends Activity {
 				}
 			}
 			progress_current++;
-			// if (progress_current % 2 == 0) {
 			progress.setProgress(progress_current);
-			// }
 		}
 	}
 
-	private void scanPort(final int position, final String host, boolean force) {
+	private void scanPort(final int position, boolean force) {
+		String host = hosts.get(position);
 		CharSequence[] ports = hosts_ports.get(position);
 		if (force || ports == null) {
 			ScanPortTask task = new ScanPortTask();
@@ -412,7 +397,7 @@ final public class Main extends Activity {
 		scanDone.setTitle(host).setPositiveButton(R.string.btn_rescan,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dlg, int sumthin) {
-						scanPort(position, host, true);
+						scanPort(position, true);
 					}
 				}).setNegativeButton(R.string.btn_close, null);
 		if (ports.length > 0) {
