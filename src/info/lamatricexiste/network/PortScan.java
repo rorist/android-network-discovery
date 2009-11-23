@@ -41,29 +41,11 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 		this.host = host;
 	}
 
-	private void connectSocket(InetAddress ina, int port) {
-		try {
-			// Create the socket
-			InetSocketAddress addr = new InetSocketAddress(ina, port);
-			SocketChannel socket;
-			socket = SocketChannel.open();
-			socket.configureBlocking(false);
-			socket.connect(addr);
-			// Register the Channel with port and timestamp as attachement
-			HashMap<Integer, Long> data = new HashMap<Integer, Long>();
-			data.put(0, (long) port);
-			data.put(1, System.currentTimeMillis());
-			socket.register(selector, SelectionKey.OP_CONNECT, data);
-		} catch (IOException e) {
-			Log.e("getSocket", e.getMessage());
-		}
-	}
-
 	protected Void doInBackground(Void... params) {
 		try {
 			step = 127;
 			InetAddress ina = InetAddress.getByName(host);
-			for (int i = 1; i <= 897; i += step + 1) {
+			for (int i = 1; i <= NB_PORTS - step; i += step + 1) {
 				scanPorts(ina, i, i + step);
 			}
 		} catch (Exception e) {
@@ -88,6 +70,24 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 			Thread.sleep(SCAN_RATE);
 		}
 		doSelect();
+	}
+
+	private void connectSocket(InetAddress ina, int port) {
+		try {
+			// Create the socket
+			InetSocketAddress addr = new InetSocketAddress(ina, port);
+			SocketChannel socket;
+			socket = SocketChannel.open();
+			socket.configureBlocking(false);
+			socket.connect(addr);
+			// Register the Channel with port and timestamp as attachement
+			HashMap<Integer, Long> data = new HashMap<Integer, Long>();
+			data.put(0, (long) port);
+			data.put(1, System.currentTimeMillis());
+			socket.register(selector, SelectionKey.OP_CONNECT, data);
+		} catch (IOException e) {
+			Log.e(TAG, e.getMessage());
+		}
 	}
 
 	private void doSelect() {

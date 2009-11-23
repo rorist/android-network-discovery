@@ -14,7 +14,7 @@ import android.util.Log;
 public class DiscoveryUnicast {
 	private final String TAG = "DiscoveryUnicast";
 	private final int TIMEOUT_REACH = 2000;
-	private final int MIN_THREADS = 3;
+	private final int MIN_THREADS = 5;
 	private final int MAX_THREADS = 10;
 	private ExecutorService pool;
 	private Observer observer;
