@@ -9,7 +9,9 @@
     <string name="wifi_enabling">Wifi is enabling</string>
     <string name="wifi_disabling">Wifi is disabling</string>
     <string name="wifi_disabled">Wifi is disabled</string>
-    <string name="wifi_dhcp">DHCP request</string>
+    <string name="wifi_scanning">Wifi is scanning</string>
+    <string name="wifi_associating">Wifi is associating</string>
+    <string name="wifi_dhcp">Obtaining IP address</string>
     <string name="wifi_unknown">Wifi state unknown</string>
     <string name="discover_start">Discovery started ...</string>
     <string name="discover_finished">Discovery finished !</string>

@@ -36,7 +36,7 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 	protected String host;
 	protected int position;
 
-	public void setInfo(int position, String host) {
+	PortScan(int position, String host) {
 		this.position = position;
 		this.host = host;
 	}
@@ -156,6 +156,15 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 				key.cancel();
 				key.channel().close();
 			}
+		}
+	}
+
+	protected void onCancelled() {
+		try {
+			// cancelTimeouts();
+			selector.close();
+		} catch (IOException e) {
+			Log.e(TAG, e.getMessage());
 		}
 	}
 }

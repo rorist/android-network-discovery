@@ -46,6 +46,8 @@ final public class Main extends Activity {
 	private Button btn_export;
 	// private SharedPreferences prefs = null;
 	private ConnectivityManager connMgr;
+	private CheckHostsTask checkHostsTask = null;
+	private ScanPortTask scanPortTask = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,7 @@ final public class Main extends Activity {
 		btn_discover.setText(R.string.btn_discover);
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				checkHostsTask = new CheckHostsTask();
 				startDiscovering();
 			}
 		});
@@ -226,17 +229,21 @@ final public class Main extends Activity {
 				Log.d(TAG, "SSTATE=" + sstate);
 				if (sstate == SupplicantState.COMPLETED) {
 					info_nt.setText(R.string.wifi_dhcp);
+				} else if (sstate == SupplicantState.SCANNING) {
+					info_nt.setText(R.string.wifi_scanning);
+				} else if (sstate == SupplicantState.ASSOCIATING) {
+					info_nt.setText(R.string.wifi_associating);
 				}
 
 			}
 		}
 
-		final NetworkInfo network_info = connMgr.getActiveNetworkInfo();
+		final NetworkInfo network_info = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		if (network_info != null) {
 			NetworkInfo.State state = network_info.getState();
 			Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
-			if (network_info.getType() == ConnectivityManager.TYPE_WIFI
-					&& state == NetworkInfo.State.CONNECTED) {
+			if (state == NetworkInfo.State.CONNECTED) {
 				WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 				NetInfo net = new NetInfo(WifiService);
 				info_ip.setText("IP: " + net.getIp().getHostAddress());
@@ -245,7 +252,11 @@ final public class Main extends Activity {
 				info_id.setText("SSID: " + net.getSSID());
 				setButtonOn(btn_discover);
 				setButtonOn(btn_export);
+			} else if (checkHostsTask != null) {
+				cancelAllTasks();
 			}
+		} else if (checkHostsTask != null) {
+			cancelAllTasks();
 		}
 	}
 
@@ -298,12 +309,11 @@ final public class Main extends Activity {
 		setProgressBarVisibility(true);
 		setProgressBarIndeterminateVisibility(true);
 		initList();
-		final CheckHostsTask task = new CheckHostsTask();
-		task.execute();
+		checkHostsTask.execute();
 		btn_discover.setText("Cancel");
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				task.cancel(true);
+				checkHostsTask.cancel(true);
 			}
 		});
 	}
@@ -314,9 +324,21 @@ final public class Main extends Activity {
 		btn_discover.setText("Discover");
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				checkHostsTask = new CheckHostsTask();
 				startDiscovering();
 			}
 		});
+	}
+
+	private void cancelAllTasks() {
+		if (checkHostsTask != null) {
+			checkHostsTask.cancel(true);
+			checkHostsTask = null;
+		}
+		if (scanPortTask != null) {
+			scanPortTask.cancel(true);
+			scanPortTask = null;
+		}
 	}
 
 	/**
@@ -328,6 +350,10 @@ final public class Main extends Activity {
 		private ProgressDialog progress = null;
 		private ArrayList<CharSequence> ports = new ArrayList<CharSequence>();
 		private int progress_current = 0;
+
+		ScanPortTask(int position, String host) {
+			super(position, host);
+		}
 
 		protected void onPreExecute() {
 			progress = new ProgressDialog(Main.this);
@@ -358,16 +384,20 @@ final public class Main extends Activity {
 			progress_current++;
 			progress.setProgress(progress_current);
 		}
+
+		protected void onCancelled() {
+			super.onCancelled();
+			progress.dismiss();
+		}
 	}
 
 	private void scanPort(final int position, boolean force) {
 		String host = hosts.get(position);
 		CharSequence[] ports = hosts_ports.get(position);
-		if (force || ports == null) {
-			ScanPortTask task = new ScanPortTask();
-			task.setInfo(position, host);
-			task.execute();
-		} else {
+		if (wifiConnectedOrWarn() && (force || ports == null)) {
+			scanPortTask = new ScanPortTask(position, host);
+			scanPortTask.execute();
+		} else if (ports != null) {
 			showPorts(ports, position, host);
 		}
 	}
@@ -392,6 +422,19 @@ final public class Main extends Activity {
 	/**
 	 * Main
 	 */
+
+	private boolean wifiConnectedOrWarn() {
+		final NetworkInfo network_info = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		if (network_info.getState() == NetworkInfo.State.CONNECTED) {
+			return true;
+		}
+		AlertDialog.Builder alert = new AlertDialog.Builder(Main.this);
+		alert.setMessage(R.string.wifi_disabled);
+		alert.setPositiveButton(R.string.btn_close, null);
+		alert.show();
+		return false;
+	}
 
 	// private void sendPacket(){
 	// CheckBox cb = (CheckBox) findViewById(R.id.repeat); //FIXME: This is bad

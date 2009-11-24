@@ -43,7 +43,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
 		pool.shutdown();
 		try {
-			pool.awaitTermination(120L, TimeUnit.SECONDS);
+			pool.awaitTermination(3600L, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			Log.e(TAG, "Got Interrupted");
 		}

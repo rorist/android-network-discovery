@@ -1,3 +1,4 @@
+//am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
 package info.lamatricexiste.network;
 
 import java.net.InetAddress;
@@ -31,7 +32,7 @@ public class NetInfo {
 		i = i - ((i >> 1) & 0x55555555);
 		i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
 		return ((i + (i >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
-//		return 24;
+//		return 28;
 	}
 
 	public InetAddress getIp() {
