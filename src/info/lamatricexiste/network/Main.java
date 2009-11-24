@@ -122,6 +122,7 @@ final public class Main extends Activity {
 		filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 		registerReceiver(receiver, filter);
+		networkStateChanged(new Intent());
 	}
 
 	@Override
@@ -193,43 +194,45 @@ final public class Main extends Activity {
 		setButtonOff(btn_export);
 
 		String action = intent.getAction();
-		Log.d(TAG, action);
-		if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-			int WifiState = intent
-					.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-			Log.d(TAG, "WifiState=" + WifiState);
-			switch (WifiState) {
-			case WifiManager.WIFI_STATE_ENABLING:
-				info_nt.setText(R.string.wifi_enabling);
-				break;
-			case WifiManager.WIFI_STATE_ENABLED:
-				info_nt.setText(R.string.wifi_enabled);
-				break;
-			case WifiManager.WIFI_STATE_DISABLING:
-				info_nt.setText(R.string.wifi_disabling);
-				break;
-			case WifiManager.WIFI_STATE_DISABLED:
-				info_nt.setText(R.string.wifi_disabled);
-				break;
-			default:
-				info_nt.setText(R.string.wifi_unknown);
+		if (action != null) {
+			Log.d(TAG, action);
+			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+				int WifiState = intent.getIntExtra(
+						WifiManager.EXTRA_WIFI_STATE, -1);
+				Log.d(TAG, "WifiState=" + WifiState);
+				switch (WifiState) {
+				case WifiManager.WIFI_STATE_ENABLING:
+					info_nt.setText(R.string.wifi_enabling);
+					break;
+				case WifiManager.WIFI_STATE_ENABLED:
+					info_nt.setText(R.string.wifi_enabled);
+					break;
+				case WifiManager.WIFI_STATE_DISABLING:
+					info_nt.setText(R.string.wifi_disabling);
+					break;
+				case WifiManager.WIFI_STATE_DISABLED:
+					info_nt.setText(R.string.wifi_disabled);
+					break;
+				default:
+					info_nt.setText(R.string.wifi_unknown);
+				}
+			}
+
+			if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+				WifiManager WifiService = (WifiManager) this
+						.getSystemService(Context.WIFI_SERVICE);
+				WifiInfo wifiInfo = WifiService.getConnectionInfo();
+				SupplicantState sstate = wifiInfo.getSupplicantState();
+				Log.d(TAG, "SSTATE=" + sstate);
+				if (sstate == SupplicantState.COMPLETED) {
+					info_nt.setText(R.string.wifi_dhcp);
+				}
+
 			}
 		}
 
-		if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-			WifiManager WifiService = (WifiManager) this
-					.getSystemService(Context.WIFI_SERVICE);
-			WifiInfo wifiInfo = WifiService.getConnectionInfo();
-			SupplicantState sstate = wifiInfo.getSupplicantState();
-			Log.d(TAG, "SSTATE=" + sstate);
-			if (sstate == SupplicantState.COMPLETED) {
-				info_nt.setText(R.string.wifi_dhcp);
-			}
-
-		}
 		final NetworkInfo network_info = connMgr.getActiveNetworkInfo();
-		if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)
-				&& network_info != null) {
+		if (network_info != null) {
 			NetworkInfo.State state = network_info.getState();
 			Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
 			if (network_info.getType() == ConnectivityManager.TYPE_WIFI
