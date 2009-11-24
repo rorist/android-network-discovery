@@ -12,6 +12,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -43,7 +45,7 @@ final public class Main extends Activity {
 	private Button btn_discover;
 	private Button btn_export;
 	// private SharedPreferences prefs = null;
-	private WifiManager WifiService;
+	private ConnectivityManager connMgr;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -109,20 +111,16 @@ final public class Main extends Activity {
 		list.setAdapter(adapter);
 		list.setItemsCanFocus(true);
 
-		WifiService = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+		connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
-		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-		filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
-		filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-		filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-		filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 		registerReceiver(receiver, filter);
 	}
 
@@ -179,93 +177,72 @@ final public class Main extends Activity {
 	// Broadcast Receiver
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent intent) {
-			String a = intent.getAction();
-			// Log.d(TAG, "Receive broadcasted " + a);
-			if (a.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-				setWifiState(intent);
-			} else if (a.equals(WifiManager.NETWORK_IDS_CHANGED_ACTION)
-					|| a.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-					|| a.equals(WifiManager.RSSI_CHANGED_ACTION)
-					|| a.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-					|| a
-							.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
-					|| a.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
-				setWifiInfo();
-			}
+			networkStateChanged(intent);
 		}
 	};
 
-	private void setWifiInfo() {
+	private void networkStateChanged(Intent intent) {
 		// Use NetworkInfo
 		TextView info_ip = (TextView) findViewById(R.id.info_ip);
 		TextView info_nt = (TextView) findViewById(R.id.info_nt);
 		TextView info_id = (TextView) findViewById(R.id.info_id);
-		WifiInfo wifiInfo = WifiService.getConnectionInfo();
-		// TODO: User NetworkInfo class
-		SupplicantState sstate = wifiInfo.getSupplicantState();
-		NetworkInfo net = new NetworkInfo(WifiService);
 
 		info_ip.setText("");
 		info_id.setText("");
 		setButtonOff(btn_discover);
 		setButtonOff(btn_export);
-		switch (sstate) {
-		case SCANNING:
-			info_nt.setText(R.string.wifi_scanning);
-			break;
-		case ASSOCIATED:
-			Log.d(TAG, "ASSOCIATED");
-			break;
-		case ASSOCIATING:
-			String ssid = net.getSSID();
-			if (ssid != null) {
-				info_nt.setText(String.format(
-						getString(R.string.wifi_associating_ap), ssid));
-			} else {
-				info_nt.setText(R.string.wifi_associating);
+
+		String action = intent.getAction();
+		Log.d(TAG, action);
+		if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+			int WifiState = intent
+					.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
+			Log.d(TAG, "WifiState=" + WifiState);
+			switch (WifiState) {
+			case WifiManager.WIFI_STATE_ENABLING:
+				info_nt.setText(R.string.wifi_enabling);
+				break;
+			case WifiManager.WIFI_STATE_ENABLED:
+				info_nt.setText(R.string.wifi_enabled);
+				break;
+			case WifiManager.WIFI_STATE_DISABLING:
+				info_nt.setText(R.string.wifi_disabling);
+				break;
+			case WifiManager.WIFI_STATE_DISABLED:
+				info_nt.setText(R.string.wifi_disabled);
+				break;
+			default:
+				info_nt.setText(R.string.wifi_unknown);
 			}
-			break;
-		case COMPLETED:
-			// TODO: check when DHCP request is send and IP received
-			setButtonOn(btn_discover);
-			setButtonOn(btn_export);
-			info_ip.setText("IP: " + net.getIp().getHostAddress());
-			info_nt.setText("NT: " + net.getNetIp().getHostAddress() + "/"
-					+ net.getNetCidr());
-			info_id.setText("SSID: " + net.getSSID());
-			break;
 		}
-	}
 
-	private void setWifiState(Intent intent) {
-		TextView info_ip = (TextView) findViewById(R.id.info_ip);
-		TextView info_nt = (TextView) findViewById(R.id.info_nt);
-		TextView info_id = (TextView) findViewById(R.id.info_id);
+		if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+			WifiManager WifiService = (WifiManager) this
+					.getSystemService(Context.WIFI_SERVICE);
+			WifiInfo wifiInfo = WifiService.getConnectionInfo();
+			SupplicantState sstate = wifiInfo.getSupplicantState();
+			Log.d(TAG, "SSTATE=" + sstate);
+			if (sstate == SupplicantState.COMPLETED) {
+				info_nt.setText(R.string.wifi_dhcp);
+			}
 
-		info_ip.setText("");
-		info_id.setText("");
-		int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-		setButtonOff(btn_discover);
-		setButtonOff(btn_export);
-		switch (WifiState) {
-		case WifiManager.WIFI_STATE_ENABLED:
-			info_nt.setText(R.string.wifi_enabled);
-			setWifiInfo();
-			break;
-		case WifiManager.WIFI_STATE_ENABLING:
-			info_nt.setText(R.string.wifi_enabling);
-			break;
-		case WifiManager.WIFI_STATE_DISABLING:
-			info_nt.setText(R.string.wifi_disabling);
-			break;
-		case WifiManager.WIFI_STATE_DISABLED:
-			info_nt.setText(R.string.wifi_disabled);
-			break;
-		case WifiManager.WIFI_STATE_UNKNOWN:
-			info_nt.setText(R.string.wifi_unknown);
-			break;
-		default:
-			info_nt.setText(R.string.wifi_strange);
+		}
+		final NetworkInfo network_info = connMgr.getActiveNetworkInfo();
+		if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)
+				&& network_info != null) {
+			NetworkInfo.State state = network_info.getState();
+			Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
+			if (network_info.getType() == ConnectivityManager.TYPE_WIFI
+					&& state == NetworkInfo.State.CONNECTED) {
+				WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+				NetInfo net = new NetInfo(WifiService);
+				info_ip.setText("IP: " + net.getIp().getHostAddress());
+				info_nt.setText("NT: " + net.getNetIp().getHostAddress() + "/"
+						+ net.getNetCidr());
+				info_id.setText("SSID: " + net.getSSID());
+				setButtonOn(btn_discover);
+				setButtonOn(btn_export);
+			}
 		}
 	}
 
@@ -277,7 +254,8 @@ final public class Main extends Activity {
 		private int hosts_done = 0;
 
 		protected void onPreExecute() {
-			NetworkInfo net = new NetworkInfo(WifiService);
+			WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+			NetInfo net = new NetInfo(WifiService);
 			int cidr = net.getNetCidr();
 			ip_int = net.getIp().hashCode();
 			start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;

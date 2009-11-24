@@ -15,13 +15,13 @@ public class Export {
 	// private final String TAG = "Export";
 	private List<String> hosts;
 	private List<CharSequence[]> hosts_ports;
-	private NetworkInfo net;
+	private NetInfo net;
 
 	public Export(Context ctxt, List<String> hosts,
 			List<CharSequence[]> hosts_ports) {
 		this.hosts = hosts;
 		this.hosts_ports = hosts_ports;
-		net = new NetworkInfo((WifiManager) ctxt
+		net = new NetInfo((WifiManager) ctxt
 				.getSystemService(Context.WIFI_SERVICE));
 	}
 

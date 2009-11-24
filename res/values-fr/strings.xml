@@ -9,12 +9,8 @@
     <string name="wifi_enabling">Wifi en cours d'activation </string>
     <string name="wifi_disabling">Wifi en cours de desactivation</string>
     <string name="wifi_disabled">Wifi desactivé</string>
-    <string name="wifi_unknown">Etat du wifi inconnu</string>
-    <string name="wifi_strange">Le wifi se comporte bizarrement</string>
-    <string name="wifi_scanning">Scan des réseaux wifi</string>
-    <string name="wifi_associating_ap">Association en cours avec %s</string>
-    <string name="wifi_associating">Association du wifi en cours</string>
-    <string name="wifi_other">Wifi non associé</string>
+    <string name="wifi_dhcp">Requete DHCP</string>
+    <string name="wifi_unknown">Etat du Wifi inconnu</string>
     <string name="discover_start">Recherche démarrée ...</string>
     <string name="discover_finished">Recherche terminée !</string>
     <string name="discover_canceled">Recherche annulée !</string>
