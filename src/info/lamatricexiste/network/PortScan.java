@@ -144,8 +144,7 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 
 	@SuppressWarnings("unchecked")
 	private void cancelTimeouts() throws IOException {
-		// Emprunté ici
-		// http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
+		// Borrowed here http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
 		long now = System.currentTimeMillis();
 		for (SelectionKey key : selector.keys()) {
 			Map<Integer, Long> map = (HashMap<Integer, Long>) key.attachment();

@@ -3,6 +3,7 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -45,6 +46,7 @@ final public class Main extends Activity {
 	private Button btn_discover;
 	private Button btn_export;
 	// private SharedPreferences prefs = null;
+    private boolean rooted = false;
 	private ConnectivityManager connMgr;
 	private CheckHostsTask checkHostsTask = null;
 	private ScanPortTask scanPortTask = null;
@@ -115,6 +117,7 @@ final public class Main extends Activity {
 		list.setItemsCanFocus(true);
 
 		connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        checkRoot();
 	}
 
 	@Override
@@ -387,7 +390,7 @@ final public class Main extends Activity {
 
 		protected void onCancelled() {
 			super.onCancelled();
-			progress.dismiss();
+			this.onPostExecute(null);
 		}
 	}
 
@@ -435,6 +438,19 @@ final public class Main extends Activity {
 		alert.show();
 		return false;
 	}
+
+    private void checkRoot(){
+        // Borrowed here: http://bit.ly/754iGA
+        try {
+            File su = new File("/system/bin/su");
+            if (su.exists() == false) {
+                rooted = false;
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Can't obtain root: "+e.getMessage());
+            rooted = false;
+        }
+    }
 
 	// private void sendPacket(){
 	// CheckBox cb = (CheckBox) findViewById(R.id.repeat); //FIXME: This is bad
