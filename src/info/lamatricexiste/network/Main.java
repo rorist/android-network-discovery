@@ -299,8 +299,6 @@ final public class Main extends Activity {
 				String host = item[0];
 				if (!host.equals(new String())) {
 					addHost(host);
-					hosts.add(host);
-					hosts_ports.add(null);
 				}
 				hosts_done++;
 				setProgress(hosts_done * 10000 / size);
@@ -379,12 +377,21 @@ final public class Main extends Activity {
 
 		@Override
 		protected void onPreExecute() {
+			// Get preferences
+			String port_start_pref = prefs.getString(Prefs.KEY_PORT_START,
+					Prefs.DEFAULT_PORT_START);
+			String port_end_pref = prefs.getString(Prefs.KEY_PORT_END,
+					Prefs.DEFAULT_PORT_END);
+			port_start = Integer.parseInt(port_start_pref);
+			port_end = Integer.parseInt(port_end_pref);
+			nb_port = port_end - port_start + 1;
+			// Set progress
 			progress = new ProgressDialog(Main.this);
 			progress.setMessage(String.format(getString(R.string.scan_start),
 					host));
 			progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			progress.setCancelable(false);
-			progress.setMax(NB_PORTS);
+			progress.setMax(nb_port);
 			progress.show();
 		}
 
@@ -548,6 +555,8 @@ final public class Main extends Activity {
 
 	private void addHost(String text) {
 		adapter.add(text);
+		hosts.add(text);
+		hosts_ports.add(null);
 	}
 
 	// private List<String> getSelectedHosts(){

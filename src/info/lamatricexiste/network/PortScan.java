@@ -32,7 +32,9 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 	private int cnt_selected;
 	private Selector selector = null;
 
-	protected final int NB_PORTS = 1024;
+	protected int port_start;
+	protected int port_end;
+	protected int nb_port;
 	protected String host;
 	protected int position;
 
@@ -45,7 +47,7 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 		try {
 			step = 127;
 			InetAddress ina = InetAddress.getByName(host);
-			for (int i = 1; i <= NB_PORTS - step; i += step + 1) {
+			for (int i = port_start; i <= port_end - step; i += step + 1) {
 				scanPorts(ina, i, i + step);
 			}
 		} catch (Exception e) {
@@ -144,7 +146,8 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 
 	@SuppressWarnings("unchecked")
 	private void cancelTimeouts() throws IOException {
-		// Borrowed here http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
+		// Borrowed here
+		// http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
 		long now = System.currentTimeMillis();
 		for (SelectionKey key : selector.keys()) {
 			Map<Integer, Long> map = (HashMap<Integer, Long>) key.attachment();

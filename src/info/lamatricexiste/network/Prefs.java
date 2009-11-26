@@ -5,8 +5,14 @@ import android.preference.PreferenceActivity;
 
 public class Prefs extends PreferenceActivity {
 	// private final String TAG = "Prefs";
+
 	public final static String KEY_VIBRATE_FINISH = "vibrate_finish";
 	public final static boolean DEFAULT_VIBRATE_FINISH = true;
+
+	public final static String KEY_PORT_START = "port_start";
+	public final static String KEY_PORT_END = "port_end";
+	public final static String DEFAULT_PORT_START = "1";
+	public final static String DEFAULT_PORT_END = "1024";
 
 	// private CheckBoxPreference mVibrate;
 
