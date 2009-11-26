@@ -2,9 +2,11 @@
 <resources>
     <string name="app_name">Network Discovery</string>
     <string name="btn_discover">Rechercher</string>
+    <string name="btn_discover_cancel">Annuler</string>
     <string name="btn_export">Exporter</string>
     <string name="btn_close">Fermer</string>
     <string name="btn_rescan">Rescanner</string>
+    <string name="btn_options">Options</string>
     <string name="wifi_enabled">Wifi activé</string>
     <string name="wifi_enabling">Wifi en cours d'activation </string>
     <string name="wifi_disabling">Wifi en cours de desactivation</string>
@@ -21,4 +23,7 @@
     <string name="export_finished">Fichier sauvegardé !</string>
     <string name="export_choose">Choisir la destination</string>
     <string name="export_save">Sauver</string>
+    <string name="preferences_notifications">Notifications</string>
+    <string name="preferences_vibrate_title">Vibration</string>
+    <string name="preferences_vibrate_summary">Vibre lorsque le Scan est terminé</string>
 </resources>

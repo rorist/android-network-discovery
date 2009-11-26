@@ -15,15 +15,25 @@
 
         <Button
             android:id="@+id/btn_discover"
-            android:layout_width="100dip"
+            android:layout_width="105dip"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:text="@string/btn_discover" />
 
         <Button
             android:id="@+id/btn_export"
-            android:layout_width="100dip"
+            android:layout_width="105dip"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:text="@string/btn_export" />
+
+        <Button
+            android:id="@+id/btn_options"
+            android:layout_width="105dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/btn_options" />
+
         <!--
             <Button android:id="@+id/btn" android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -91,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
                 android:typeface="monospace"
-                android:text="Starting Wifi" />
+                android:text="" />
 
             <TextView
                 android:id="@+id/info_id"

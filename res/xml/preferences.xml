@@ -1,10 +1,19 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <ListPreference
-        android:key="discover_method"
-        android:title="Discovery Method"
-        android:summary="Method used to discover host on the network"
-        android:entries="@array/discover_method_name"
-        android:entryValues="@array/discover_method_value"
-        android:dialogTitle="Network discovery method" />
+    <PreferenceCategory
+        android:title="@string/preferences_notifications">
+        <CheckBoxPreference
+            android:key="vibrate_finish"
+            android:title="@string/preferences_vibrate_title"
+            android:summary="@string/preferences_vibrate_summary"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+
+    <!--<ListPreference-->
+    <!--    android:key="discover_method"-->
+    <!--    android:title="Discovery Method"-->
+    <!--    android:summary="Method used to discover host on the network"-->
+    <!--    android:entries="@array/discover_method_name"-->
+    <!--    android:entryValues="@array/discover_method_value"-->
+    <!--    android:dialogTitle="Network discovery method" />-->
 </PreferenceScreen>

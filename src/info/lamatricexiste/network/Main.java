@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -19,9 +20,13 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -44,7 +49,7 @@ final public class Main extends Activity {
 	// private Button btn;
 	private Button btn_discover;
 	private Button btn_export;
-	// private SharedPreferences prefs = null;
+	private SharedPreferences prefs = null;
 	// private boolean rooted = false;
 	private ConnectivityManager connMgr;
 	private CheckHostsTask checkHostsTask = null;
@@ -56,19 +61,12 @@ final public class Main extends Activity {
 		requestWindowFeature(Window.FEATURE_PROGRESS);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main);
-		// prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		// Send Request
-		// btn = (Button) findViewById(R.id.btn);
-		// btn.setOnClickListener(new View.OnClickListener() {
-		// public void onClick(View v) {
-		// sendPacket();
-		// }
-		// });
+		// Get global preferences
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		// Discover
 		btn_discover = (Button) findViewById(R.id.btn_discover);
-		btn_discover.setText(R.string.btn_discover);
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				checkHostsTask = new CheckHostsTask();
@@ -78,10 +76,17 @@ final public class Main extends Activity {
 
 		// Export
 		btn_export = (Button) findViewById(R.id.btn_export);
-		btn_export.setText(R.string.btn_export);
 		btn_export.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				export();
+			}
+		});
+
+		// Options
+		Button btn_options = (Button) findViewById(R.id.btn_options);
+		btn_options.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				startActivity(new Intent(Main.this, Prefs.class));
 			}
 		});
 
@@ -92,6 +97,14 @@ final public class Main extends Activity {
 				startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
 			}
 		});
+
+		// Send Request
+		// btn = (Button) findViewById(R.id.btn);
+		// btn.setOnClickListener(new View.OnClickListener() {
+		// public void onClick(View v) {
+		// sendPacket();
+		// }
+		// });
 
 		// All
 		// Button btn3 = (Button) findViewById(R.id.btn3);
@@ -141,20 +154,20 @@ final public class Main extends Activity {
 		super.onStop();
 	}
 
-	// @Override
-	// public boolean onCreateOptionsMenu(Menu menu) {
-	// new MenuInflater(getApplication()).inflate(R.menu.options, menu);
-	// return (super.onCreateOptionsMenu(menu));
-	// }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		new MenuInflater(getApplication()).inflate(R.menu.options, menu);
+		return (super.onCreateOptionsMenu(menu));
+	}
 
-	// @Override
-	// public boolean onOptionsItemSelected(MenuItem item) {
-	// if (item.getItemId() == R.id.settings) {
-	// // startActivity(new Intent(this, Prefs.class));
-	// return true;
-	// }
-	// return (super.onOptionsItemSelected(item));
-	// }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.settings) {
+			startActivity(new Intent(this, Prefs.class));
+			return true;
+		}
+		return (super.onOptionsItemSelected(item));
+	}
 
 	// Custom ArrayAdapter
 	private class HostsAdapter extends ArrayAdapter<String> {
@@ -296,8 +309,11 @@ final public class Main extends Activity {
 
 		@Override
 		protected void onPostExecute(Void unused) {
-			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-			v.vibrate(VIBRATE);
+			if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
+					Prefs.DEFAULT_VIBRATE_FINISH) == true) {
+				Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+				v.vibrate(VIBRATE);
+			}
 			makeToast(R.string.discover_finished);
 			stopDiscovering();
 		}
@@ -316,7 +332,7 @@ final public class Main extends Activity {
 		setProgressBarIndeterminateVisibility(true);
 		initList();
 		checkHostsTask.execute();
-		btn_discover.setText("Cancel");
+		btn_discover.setText(R.string.btn_discover_cancel);
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				checkHostsTask.cancel(true);
@@ -327,7 +343,7 @@ final public class Main extends Activity {
 	private void stopDiscovering() {
 		setProgressBarVisibility(false);
 		setProgressBarIndeterminateVisibility(false);
-		btn_discover.setText("Discover");
+		btn_discover.setText(R.string.btn_discover);
 		btn_discover.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				checkHostsTask = new CheckHostsTask();
@@ -379,8 +395,11 @@ final public class Main extends Activity {
 			hosts_ports.set(position, result);
 			progress.dismiss();
 			showPorts(result, position, host);
-			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-			v.vibrate(VIBRATE);
+			if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
+					Prefs.DEFAULT_VIBRATE_FINISH) == true) {
+				Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+				v.vibrate(VIBRATE);
+			}
 		}
 
 		@Override
