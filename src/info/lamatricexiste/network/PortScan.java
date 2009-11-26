@@ -29,7 +29,7 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 	private final int TIMEOUT_SOCKET = 600;
 	private final int SCAN_RATE = 0;
 	private int step;
-	int cnt_selected;
+	private int cnt_selected;
 	private Selector selector = null;
 
 	protected final int NB_PORTS = 1024;

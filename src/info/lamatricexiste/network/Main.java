@@ -3,7 +3,6 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.File;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,7 +45,7 @@ final public class Main extends Activity {
 	private Button btn_discover;
 	private Button btn_export;
 	// private SharedPreferences prefs = null;
-    private boolean rooted = false;
+	// private boolean rooted = false;
 	private ConnectivityManager connMgr;
 	private CheckHostsTask checkHostsTask = null;
 	private ScanPortTask scanPortTask = null;
@@ -117,7 +116,7 @@ final public class Main extends Activity {
 		list.setItemsCanFocus(true);
 
 		connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        checkRoot();
+		// checkRoot();
 	}
 
 	@Override
@@ -270,6 +269,7 @@ final public class Main extends Activity {
 	private class CheckHostsTask extends DiscoveryUnicast {
 		private int hosts_done = 0;
 
+		@Override
 		protected void onPreExecute() {
 			WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 			NetInfo net = new NetInfo(WifiService);
@@ -280,6 +280,7 @@ final public class Main extends Activity {
 			size = end - start;
 		}
 
+		@Override
 		protected void onProgressUpdate(String... item) {
 			if (!isCancelled()) {
 				String host = item[0];
@@ -293,6 +294,7 @@ final public class Main extends Activity {
 			}
 		}
 
+		@Override
 		protected void onPostExecute(Void unused) {
 			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 			v.vibrate(VIBRATE);
@@ -300,6 +302,7 @@ final public class Main extends Activity {
 			stopDiscovering();
 		}
 
+		@Override
 		protected void onCancelled() {
 			pool.shutdownNow();
 			makeToast(R.string.discover_canceled);
@@ -358,6 +361,7 @@ final public class Main extends Activity {
 			super(position, host);
 		}
 
+		@Override
 		protected void onPreExecute() {
 			progress = new ProgressDialog(Main.this);
 			progress.setMessage(String.format(getString(R.string.scan_start),
@@ -368,6 +372,7 @@ final public class Main extends Activity {
 			progress.show();
 		}
 
+		@Override
 		protected void onPostExecute(Void unused) {
 			CharSequence[] result = ports
 					.toArray(new CharSequence[ports.size()]);
@@ -378,6 +383,7 @@ final public class Main extends Activity {
 			v.vibrate(VIBRATE);
 		}
 
+		@Override
 		protected void onProgressUpdate(String... values) {
 			if (values.length > 0) {
 				if (!values[0].equals(new String())) {
@@ -388,6 +394,7 @@ final public class Main extends Activity {
 			progress.setProgress(progress_current);
 		}
 
+		@Override
 		protected void onCancelled() {
 			super.onCancelled();
 			this.onPostExecute(null);
@@ -439,18 +446,18 @@ final public class Main extends Activity {
 		return false;
 	}
 
-    private void checkRoot(){
-        // Borrowed here: http://bit.ly/754iGA
-        try {
-            File su = new File("/system/bin/su");
-            if (su.exists() == false) {
-                rooted = false;
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "Can't obtain root: "+e.getMessage());
-            rooted = false;
-        }
-    }
+	// private void checkRoot() {
+	// // Borrowed here: http://bit.ly/754iGA
+	// try {
+	// File su = new File("/system/bin/su");
+	// if (su.exists() == false) {
+	// rooted = false;
+	// }
+	// } catch (Exception e) {
+	// Log.d(TAG, "Can't obtain root: " + e.getMessage());
+	// rooted = false;
+	// }
+	// }
 
 	// private void sendPacket(){
 	// CheckBox cb = (CheckBox) findViewById(R.id.repeat); //FIXME: This is bad

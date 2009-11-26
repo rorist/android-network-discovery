@@ -2,9 +2,8 @@ package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import android.os.AsyncTask;
@@ -13,9 +12,10 @@ import android.util.Log;
 public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
 	private final String TAG = "DiscoveryUnicast";
-	private final int TIMEOUT_REACH = 2000;
-	private final int MIN_THREADS = 5;
-	private final int MAX_THREADS = 10;
+	private final int TIMEOUT_REACH = 1000;
+	private int pt_forward;
+	private int pt_backward;
+	private int pt_move = 1; // -1=backward 1=forward
 
 	protected ExecutorService pool;
 	protected int ip_int;
@@ -24,21 +24,28 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 	protected int size = 0;
 
 	protected Void doInBackground(Void... params) {
-
-		final ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(
-				size);
-		pool = new ThreadPoolExecutor(MIN_THREADS, MAX_THREADS,
-				(long) (size * TIMEOUT_REACH), TimeUnit.MILLISECONDS, queue);
+		pool = Executors.newCachedThreadPool();
 
 		// gateway
 		launch(start);
-		// Rewind
-		for (int i = ip_int - 1; i > start; i--) {
-			launch(i);
-		}
-		// Forward
-		for (int j = ip_int + 1; j <= end; j++) {
-			launch(j);
+
+		// hosts
+		pt_backward = ip_int - 1;
+		pt_forward = ip_int + 1;
+		for (int i = 0; i < size - 1; i++) {
+			int ip;
+			if (pt_move == -1 && pt_backward > start) {
+				ip = pt_backward;
+				pt_backward--;
+				pt_move = 1;
+			} else if (pt_move == 1 && pt_forward <= end) {
+				ip = pt_forward;
+				pt_forward++;
+				pt_move = -1;
+			} else {
+				ip = ip_int;
+			}
+			launch(ip);
 		}
 
 		pool.shutdown();
