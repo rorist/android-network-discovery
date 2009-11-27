@@ -3,6 +3,9 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import android.net.Uri;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,12 +33,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 final public class Main extends Activity {
 
@@ -130,6 +135,14 @@ final public class Main extends Activity {
 
 		connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		// checkRoot();
+
+        //Fake hosts and ports
+        /*
+        initList();
+        addHost("192.168.1.1");
+        CharSequence[] port = {"80/tcp open","443/tcp open"};
+        hosts_ports.set(0, port);
+        */
 	}
 
 	@Override
@@ -288,9 +301,10 @@ final public class Main extends Activity {
 			NetInfo net = new NetInfo(WifiService);
 			int cidr = net.getNetCidr();
 			ip_int = net.getIp().hashCode();
-			start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;
+			start = (ip_int & (1 - (1 << (32 - cidr))));
 			end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
-			size = end - start;
+			size = end - start + 1;
+            setProgress(0);
 		}
 
 		@Override
@@ -448,12 +462,38 @@ final public class Main extends Activity {
 					}
 				}).setNegativeButton(R.string.btn_close, null);
 		if (ports.length > 0) {
-			scanDone.setItems(ports, null);
+			scanDone.setItems(ports, new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialog, int which){
+                    openPortService(host, ports[which]);
+                }
+            });
 		} else {
 			scanDone.setMessage(R.string.scan_noport);
 		}
 		scanDone.show();
 	}
+
+    private void openPortService(String host, CharSequence port_str){
+        Pattern port_ptn = Pattern.compile("([0-9]+)/tcp open"); 
+        Matcher port_mtc = port_ptn.matcher(port_str);
+        if(port_mtc.matches()){
+            int port = Integer.parseInt(port_mtc.group(1));
+            switch(port){
+            case 80:
+                    Intent i1 = new Intent(Intent.ACTION_VIEW);
+                    i1.setData(Uri.parse("http://"+host));
+                    startActivity(i1);
+                break;
+            case 443:
+                    Intent i2 = new Intent(Intent.ACTION_VIEW);
+                    i2.setData(Uri.parse("https://"+host));
+                    startActivity(i2);
+                break;
+            default:
+                ;
+            }
+        }
+    }
 
 	/**
 	 * Main
@@ -486,7 +526,7 @@ final public class Main extends Activity {
 	// }
 
 	// private void sendPacket(){
-	// CheckBox cb = (CheckBox) findViewById(R.id.repeat); //FIXME: This is bad
+	// CheckBox cb = (CheckBox) findViewById(R.id.repeat);
 	// final boolean repeat = cb.isChecked();
 	// final CharSequence[] items = {"Ping (ICMP)","Samba exploit"};
 	// setButtonOff(btn);
