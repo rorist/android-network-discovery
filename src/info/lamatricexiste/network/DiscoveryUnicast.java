@@ -15,7 +15,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 	private final int TIMEOUT_REACH = 1000;
 	private int pt_forward;
 	private int pt_backward;
-	private int pt_move = 1; // -1=backward 1=forward
+	private int pt_move = 2; // 1=backward 2=forward
 
 	protected ExecutorService pool;
 	protected int ip_int;
@@ -33,19 +33,19 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 		pt_backward = ip_int - 1;
 		pt_forward = ip_int + 1;
 		for (int i = 0; i < size - 1; i++) {
-			int ip;
-			if (pt_move == -1 && pt_backward > start) {
-				ip = pt_backward;
+			if (pt_move == 1 && pt_backward > start) {
+			    launch(pt_backward);
 				pt_backward--;
-				pt_move = 1;
-			} else if (pt_move == 1 && pt_forward <= end) {
-				ip = pt_forward;
+				pt_move = 2;
+			} else if (pt_move == 2 && pt_forward <= end) {
+			    launch(pt_forward);
 				pt_forward++;
-				pt_move = -1;
+				pt_move = 1;
 			} else {
-				ip = ip_int;
+                if(pt_move==1) pt_move=2;
+                else if(pt_move==2) pt_move=1;
+                Log.d(TAG, "Error discovering, move="+pt_move+", fw="+pt_forward+", bk="+pt_backward);
 			}
-			launch(ip);
 		}
 
 		pool.shutdown();
