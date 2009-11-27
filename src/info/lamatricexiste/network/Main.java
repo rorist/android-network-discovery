@@ -3,9 +3,8 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import android.net.Uri;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,6 +17,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -33,14 +33,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
 
 final public class Main extends Activity {
 
@@ -136,13 +134,23 @@ final public class Main extends Activity {
 		connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		// checkRoot();
 
-        //Fake hosts and ports
-        /*
-        initList();
-        addHost("192.168.1.1");
-        CharSequence[] port = {"80/tcp open","443/tcp open"};
-        hosts_ports.set(0, port);
-        */
+		// Fake hosts and ports
+
+		initList();
+		addHost("10.0.10.1");
+		CharSequence[] port = { "80/tcp open", "443/tcp open" };
+		hosts_ports.set(0, port);
+
+		// try {
+		// File su = new File("/proc/net/arp");
+		// if (su.exists() == false) {
+		// Log.v(TAG, "ARP File is NOT accessible");
+		// } else {
+		// Log.v(TAG, "ARP File is accessible");
+		// }
+		// } catch (Exception e) {
+		// Log.d(TAG, "Can't open file ARP: " + e.getMessage());
+		// }
 	}
 
 	@Override
@@ -304,7 +312,7 @@ final public class Main extends Activity {
 			start = (ip_int & (1 - (1 << (32 - cidr))));
 			end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
 			size = end - start + 1;
-            setProgress(0);
+			setProgress(0);
 		}
 
 		@Override
@@ -462,38 +470,44 @@ final public class Main extends Activity {
 					}
 				}).setNegativeButton(R.string.btn_close, null);
 		if (ports.length > 0) {
-			scanDone.setItems(ports, new DialogInterface.OnClickListener(){
-                public void onClick(DialogInterface dialog, int which){
-                    openPortService(host, ports[which]);
-                }
-            });
+			scanDone.setItems(ports, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					openPortService(host, ports[which]);
+				}
+			});
 		} else {
 			scanDone.setMessage(R.string.scan_noport);
 		}
 		scanDone.show();
 	}
 
-    private void openPortService(String host, CharSequence port_str){
-        Pattern port_ptn = Pattern.compile("([0-9]+)/tcp open"); 
-        Matcher port_mtc = port_ptn.matcher(port_str);
-        if(port_mtc.matches()){
-            int port = Integer.parseInt(port_mtc.group(1));
-            switch(port){
-            case 80:
-                    Intent i1 = new Intent(Intent.ACTION_VIEW);
-                    i1.setData(Uri.parse("http://"+host));
-                    startActivity(i1);
-                break;
-            case 443:
-                    Intent i2 = new Intent(Intent.ACTION_VIEW);
-                    i2.setData(Uri.parse("https://"+host));
-                    startActivity(i2);
-                break;
-            default:
-                ;
-            }
-        }
-    }
+	private void openPortService(String host, CharSequence port_str) {
+		Pattern port_ptn = Pattern.compile("([0-9]+)/tcp open");
+		Matcher port_mtc = port_ptn.matcher(port_str);
+		if (port_mtc.matches()) {
+			int port = Integer.parseInt(port_mtc.group(1));
+			Intent intent = null;
+			switch (port) {
+			case 80:
+				intent = new Intent(Intent.ACTION_VIEW);
+				intent.setData(Uri.parse("http://" + host + "/"));
+				break;
+			case 443:
+				intent = new Intent(Intent.ACTION_VIEW);
+				intent.setData(Uri.parse("https://" + host + "/"));
+				break;
+			case 445:
+				// Samba explorer
+				break;
+			default:
+				; // Use something like netcat to fetch identification message
+				// of service
+			}
+			if (intent != null) {
+				startActivity(intent);
+			}
+		}
+	}
 
 	/**
 	 * Main

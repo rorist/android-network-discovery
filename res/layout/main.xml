@@ -61,7 +61,7 @@
     <ListView
         android:id="@+id/output"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="0dip"
         android:layout_weight="1"
         android:layout_margin="5dip" />
 
@@ -101,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
                 android:typeface="monospace"
-                android:text="" />
+                android:text="@string/wifi_unknown" />
 
             <TextView
                 android:id="@+id/info_id"
