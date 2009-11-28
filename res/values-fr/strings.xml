@@ -31,4 +31,5 @@
     <string name="preferences_port_start_summary">Le premier port TCP à scanner. 1-65535</string>
     <string name="preferences_port_end_title">Dernier port</string>
     <string name="preferences_port_end_summary">Le dernier port TCP à scanner. 1-65535</string>
+    <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
 </resources>
