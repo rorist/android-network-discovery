@@ -313,7 +313,7 @@ final public class Main extends Activity {
 			WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 			NetInfo net = new NetInfo(WifiService);
 			int cidr = net.getNetCidr();
-			ip_int = net.getIp().hashCode();
+			ip_int = net.getIntFromIp(net.getIp());
 			start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;
 			end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
 			size = end - start + 1;
@@ -532,7 +532,8 @@ final public class Main extends Activity {
 
 	private void openPortService(String host, Long port) {
 		Intent intent = null;
-		switch (port.hashCode()) {
+		int portInt = (int) ((long) port);
+		switch (portInt) {
 		case 80:
 			intent = new Intent(Intent.ACTION_VIEW);
 			intent.setData(Uri.parse("http://" + host + "/"));

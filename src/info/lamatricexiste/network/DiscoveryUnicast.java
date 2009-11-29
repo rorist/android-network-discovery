@@ -58,7 +58,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 	}
 
 	private void launch(int i) {
-		CheckRunnable r = new CheckRunnable(hashToIp(i));
+		CheckRunnable r = new CheckRunnable(intToIp(i));
 		pool.execute(r);
 	}
 
@@ -85,7 +85,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 		}
 	}
 
-	private String hashToIp(int i) {
+	private String intToIp(int i) {
 		return ((i >> 24) & 0xFF) + "." + ((i >> 16) & 0xFF) + "."
 				+ ((i >> 8) & 0xFF) + "." + (i & 0xFF);
 	}
