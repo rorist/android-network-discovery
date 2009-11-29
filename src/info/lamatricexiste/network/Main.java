@@ -1,8 +1,5 @@
 package info.lamatricexiste.network;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +15,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -142,7 +137,7 @@ final public class Main extends Activity {
 		// Fake hosts and ports
 
 		initList();
-		addHost("10.0.10.1");
+		addHost("10.0.2.2"); // EmulatorBridge: 10.0.2.2
 		CharSequence[] port = { "80/tcp open", "443/tcp open" };
 		hosts_ports.set(0, port);
 
@@ -409,51 +404,6 @@ final public class Main extends Activity {
 		hosts_ports.add(null);
 	}
 
-	private String getHardwareAddress(String ip) {
-		String hw = "00:00:00:00:00:00";
-		try {
-			File arp = new File("/proc/net/arp");
-			if (arp.exists() != false && arp.canRead()) {
-				Pattern ptrn = Pattern.compile("^" + ip
-						+ "\\s+0x1\\s+0x2\\s+([:0-9a-z]+)\\s+\\*\\s+tiwlan0$");
-				FileReader fileReader = new FileReader(arp);
-				BufferedReader bufferedReader = new BufferedReader(fileReader,
-						8);
-				String line;
-				Matcher matcher;
-				while ((line = bufferedReader.readLine()) != null) {
-					matcher = ptrn.matcher(line);
-					if (matcher.matches()) {
-						hw = matcher.group(1);
-						break;
-					}
-				}
-				bufferedReader.close();
-				fileReader.close();
-			}
-		} catch (Exception e) {
-			Log.d(TAG, "Can't open file ARP: " + e.getMessage());
-		}
-		return hw;
-	}
-
-	private String getNicVendor(String mac) {
-		String vendor = getString(R.string.info_nic_unknown);
-		HardwareAddress dbHelper = new HardwareAddress(this);
-		SQLiteDatabase db = dbHelper.openDataBase();
-		String macid = mac.replace(":", "").substring(0, 6).toLowerCase();
-		// Db request
-		Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
-				+ "'", null);
-		if (c.getCount() > 0) {
-			c.moveToFirst();
-			vendor = c.getString(c.getColumnIndex("vendor"));
-		}
-		c.close();
-		db.close();
-		return vendor;
-	}
-
 	private void showHostInfo(int hostPosition) {
 		String ip = hosts.get(hostPosition);
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -462,11 +412,13 @@ final public class Main extends Activity {
 		AlertDialog.Builder infoDialog = new AlertDialog.Builder(Main.this);
 		infoDialog.setTitle(ip);
 		// Set info values
-		String macaddr = getHardwareAddress(ip);
+		HardwareAddress hardwareAddress = new HardwareAddress(this);
+		String macaddr = hardwareAddress.getHardwareAddress(ip);
+		String nicvend = hardwareAddress.getNicVendor(macaddr);
 		TextView mac = (TextView) v.findViewById(R.id.info_mac);
-		mac.setText(macaddr);
 		TextView vendor = (TextView) v.findViewById(R.id.info_nic);
-		vendor.setText(getNicVendor(macaddr));
+		mac.setText(macaddr);
+		vendor.setText(nicvend);
 		// Show dialog
 		infoDialog.setView(v);
 		infoDialog.setNegativeButton(R.string.btn_close, null);
