@@ -22,7 +22,7 @@ import java.util.Map;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class PortScan extends AsyncTask<Void, String, Void> {
+public class PortScan extends AsyncTask<Void, Long, Void> {
 
 	private final String TAG = "PortScan";
 	private final int TIMEOUT_SELECT = 500;
@@ -84,6 +84,8 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 			socket.connect(addr);
 			// Register the Channel with port and timestamp as attachement
 			HashMap<Integer, Long> data = new HashMap<Integer, Long>();
+			// FIXME: Trouver un autre moyen de stocker ces infos, car obligé
+			// d'utiliser un long pour le numero de port a cause de ca
 			data.put(0, (long) port);
 			data.put(1, System.currentTimeMillis());
 			socket.register(selector, SelectionKey.OP_CONNECT, data);
@@ -129,10 +131,10 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 		try {
 			if (socket.isConnectionPending()) {
 				socket.finishConnect();
-				publishProgress(new String(port + "/tcp open")); // Open
+				publishProgress(port); // Open
 			}
 		} catch (IOException e) {
-			publishProgress(new String()); // Closed
+			publishProgress(new Long(0)); // Closed
 		} finally {
 			cnt_selected++;
 			key.cancel();
@@ -153,7 +155,7 @@ public class PortScan extends AsyncTask<Void, String, Void> {
 			Map<Integer, Long> map = (HashMap<Integer, Long>) key.attachment();
 			long time = map.get(1);
 			if (key.isValid() && now - time > TIMEOUT_SOCKET) {
-				publishProgress(new String());
+				publishProgress(new Long(0));
 				cnt_selected++;
 				key.cancel();
 				key.channel().close();

@@ -3,8 +3,6 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,7 +44,7 @@ final public class Main extends Activity {
 	// private final int DEFAULT_DISCOVER = 1;
 	private final long VIBRATE = (long) 250;
 	private List<String> hosts = null;
-	private List<CharSequence[]> hosts_ports = null;
+	private List<Long[]> hosts_ports = null;
 	private HostsAdapter adapter;
 	private ListView list;
 	// private Button btn;
@@ -137,8 +135,8 @@ final public class Main extends Activity {
 		// Fake hosts and ports
 
 		initList();
-		addHost("10.0.2.2"); // EmulatorBridge: 10.0.2.2
-		CharSequence[] port = { "80/tcp open", "443/tcp open" };
+		addHost("10.0.10.2"); // EmulatorBridge: 10.0.2.2
+		Long[] port = { (long) 80, (long) 443 };
 		hosts_ports.set(0, port);
 
 		// try {
@@ -395,7 +393,7 @@ final public class Main extends Activity {
 		// setSelectedHosts(false);
 		adapter.clear();
 		hosts = new ArrayList<String>();
-		hosts_ports = new ArrayList<CharSequence[]>();
+		hosts_ports = new ArrayList<Long[]>();
 	}
 
 	private void addHost(String text) {
@@ -432,7 +430,7 @@ final public class Main extends Activity {
 	private class ScanPortTask extends PortScan {
 
 		private ProgressDialog progress = null;
-		private ArrayList<CharSequence> ports = new ArrayList<CharSequence>();
+		private ArrayList<Long> ports = new ArrayList<Long>();
 		private int progress_current = 0;
 
 		ScanPortTask(int position, String host) {
@@ -461,8 +459,7 @@ final public class Main extends Activity {
 
 		@Override
 		protected void onPostExecute(Void unused) {
-			CharSequence[] result = ports
-					.toArray(new CharSequence[ports.size()]);
+			Long[] result = ports.toArray(new Long[ports.size()]);
 			hosts_ports.set(position, result);
 			progress.dismiss();
 			showPorts(result, position, host);
@@ -474,9 +471,9 @@ final public class Main extends Activity {
 		}
 
 		@Override
-		protected void onProgressUpdate(String... values) {
+		protected void onProgressUpdate(Long... values) {
 			if (values.length > 0) {
-				if (!values[0].equals(new String())) {
+				if (!values[0].equals(new Long(0))) {
 					ports.add(values[0]);
 				}
 			}
@@ -493,7 +490,7 @@ final public class Main extends Activity {
 
 	private void scanPort(final int position, boolean force) {
 		String host = hosts.get(position);
-		CharSequence[] ports = hosts_ports.get(position);
+		Long[] ports = hosts_ports.get(position);
 		if (wifiConnectedOrWarn() && (force || ports == null)) {
 			scanPortTask = new ScanPortTask(position, host);
 			scanPortTask.execute();
@@ -502,9 +499,9 @@ final public class Main extends Activity {
 		}
 	}
 
-	private void showPorts(final CharSequence[] ports, final int position,
+	private void showPorts(final Long[] ports, final int position,
 			final String host) {
-		AlertDialog.Builder scanDone = new AlertDialog.Builder(Main.this);
+		final AlertDialog.Builder scanDone = new AlertDialog.Builder(Main.this);
 		scanDone.setTitle(host).setPositiveButton(R.string.btn_rescan,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dlg, int sumthin) {
@@ -512,39 +509,46 @@ final public class Main extends Activity {
 					}
 				}).setNegativeButton(R.string.btn_close, null);
 		if (ports.length > 0) {
-			scanDone.setItems(ports, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					openPortService(host, ports[which]);
-				}
-			});
+			scanDone.setItems(preparePort(ports),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							openPortService(host, ports[which]);
+							scanDone.show();
+						}
+					});
 		} else {
 			scanDone.setMessage(R.string.scan_noport);
 		}
 		scanDone.show();
 	}
 
-	private void openPortService(String host, CharSequence port_str) {
-		Pattern port_ptn = Pattern.compile("([0-9]+)/tcp open");
-		Matcher port_mtc = port_ptn.matcher(port_str);
-		if (port_mtc.matches()) {
-			int port = Integer.parseInt(port_mtc.group(1));
-			Intent intent = null;
-			switch (port) {
-			case 80:
-				intent = new Intent(Intent.ACTION_VIEW);
-				intent.setData(Uri.parse("http://" + host + "/"));
-				break;
-			case 443:
-				intent = new Intent(Intent.ACTION_VIEW);
-				intent.setData(Uri.parse("https://" + host + "/"));
-				break;
-			default:
-				; // Use something like netcat to fetch identification message
-				// of service
-			}
-			if (intent != null) {
-				startActivity(intent);
-			}
+	public static CharSequence[] preparePort(Long[] ports) {
+		CharSequence[] portsChar = new CharSequence[ports.length];
+		for (int i = 0; i < ports.length; i++) {
+			portsChar[i] = (CharSequence) String.valueOf(ports[i])
+					+ "/tcp open";
+		}
+		return portsChar;
+	}
+
+	private void openPortService(String host, Long port) {
+		Intent intent = null;
+		switch (port.hashCode()) {
+		case 80:
+			intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse("http://" + host + "/"));
+			break;
+		case 443:
+			intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse("https://" + host + "/"));
+			break;
+		default:
+			makeToast(R.string.scan_noaction);
+			// Use something like netcat to
+			// fetch identification message of service
+		}
+		if (intent != null) {
+			startActivity(intent);
 		}
 	}
 

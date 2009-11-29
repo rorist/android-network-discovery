@@ -14,13 +14,14 @@ public class Export {
 
 	// private final String TAG = "Export";
 	private List<String> hosts;
-	private List<CharSequence[]> hosts_ports;
+	private List<Long[]> hosts_ports;
 	private NetInfo net;
+	private Context ctxt;
 
-	public Export(Context ctxt, List<String> hosts,
-			List<CharSequence[]> hosts_ports) {
+	public Export(Context ctxt, List<String> hosts, List<Long[]> hosts_ports) {
 		this.hosts = hosts;
 		this.hosts_ports = hosts_ports;
+		this.ctxt = ctxt;
 		net = new NetInfo((WifiManager) ctxt
 				.getSystemService(Context.WIFI_SERVICE));
 	}
@@ -48,18 +49,24 @@ public class Export {
 						.format(new Date())
 				+ "</date>\r\n" // RFC 2822
 				+ "\t\t<network>" + net.getNetIp().getHostAddress() + "/"
-				+ net.getNetCidr() + "</network>\r\n" + "\t\t<ssid>" + net.getSSID()
-				+ "</ssid>\r\n" + "\t\t<bssid>" + net.getBSSID() + "</bssid>\r\n" + "\t\t<ip>"
+				+ net.getNetCidr() + "</network>\r\n" + "\t\t<ssid>"
+				+ net.getSSID() + "</ssid>\r\n" + "\t\t<bssid>"
+				+ net.getBSSID() + "</bssid>\r\n" + "\t\t<ip>"
 				+ net.getIp().getHostAddress() + "</ip>\r\n" + "\t</info>\r\n";
 
-		// Hosts and Ports
+		// Hosts
 		if (hosts != null) {
+			HardwareAddress hw = new HardwareAddress(ctxt);
 			xml += "\t<hosts>\r\n";
 			for (int i = 0; i < hosts.size(); i++) {
+				// Host info
 				String host = hosts.get(i);
-				CharSequence[] ports = hosts_ports.get(i);
-				xml += "\t\t<host value=\"" + host + "\">\r\n";
-				if (ports != null) {
+				xml += "\t\t<host value=\"" + host + "\" mac=\""
+						+ hw.getHardwareAddress(host) + "\">\r\n";
+				// Ports
+				Long[] portsL = hosts_ports.get(i);
+				if (portsL != null) {
+					CharSequence[] ports = Main.preparePort(portsL);
 					for (int j = 0; j < ports.length; j++) {
 						xml += "\t\t\t<port>" + ports[j] + "</port>\r\n";
 					}
