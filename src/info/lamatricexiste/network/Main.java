@@ -315,7 +315,7 @@ final public class Main extends Activity {
 			NetInfo net = new NetInfo(WifiService);
 			int cidr = net.getNetCidr();
 			ip_int = net.getIp().hashCode();
-			start = (ip_int & (1 - (1 << (32 - cidr))));
+			start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;
 			end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
 			size = end - start + 1;
 			setProgress(0);
