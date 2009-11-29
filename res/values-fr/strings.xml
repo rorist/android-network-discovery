@@ -20,6 +20,9 @@
     <string name="discover_canceled">Recherche annulée !</string>
     <string name="scan_start">Scan des ports sur %s</string>
     <string name="scan_noport">Aucun port trouvé !</string>
+    <string name="info_mac">Adresse MAC:</string>
+    <string name="info_nic">Vendeur NIC:</string>
+    <string name="info_nic_unknown">Inconnu</string>
     <string name="export_finished">Fichier sauvegardé !</string>
     <string name="export_choose">Choisir la destination</string>
     <string name="export_save">Sauver</string>

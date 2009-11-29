@@ -31,6 +31,13 @@
     <!--        android:focusableInTouchMode="false" />-->
 
     <Button
+        android:id="@+id/list_info"
+        android:layout_width="80dip"
+        android:layout_height="38dip"
+        android:layout_gravity="center_vertical"
+        android:text="Info" />
+
+    <Button
         android:id="@+id/list_port"
         android:layout_width="80dip"
         android:layout_height="38dip"

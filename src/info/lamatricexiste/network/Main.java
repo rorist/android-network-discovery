@@ -1,5 +1,8 @@
 package info.lamatricexiste.network;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -202,11 +207,19 @@ final public class Main extends Activity {
 				ViewGroup parent) {
 			convertView = super.getView(position, convertView, parent);
 			if (convertView != null) {
+				// Add listeners to the Buttons
 				Button btn_ports = (Button) convertView
 						.findViewById(R.id.list_port);
 				btn_ports.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						scanPort(position, false);
+					}
+				});
+				Button btn_info = (Button) convertView
+						.findViewById(R.id.list_info);
+				btn_info.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						showHostInfo(position);
 					}
 				});
 			}
@@ -383,6 +396,83 @@ final public class Main extends Activity {
 		}
 	}
 
+	private void initList() {
+		// setSelectedHosts(false);
+		adapter.clear();
+		hosts = new ArrayList<String>();
+		hosts_ports = new ArrayList<CharSequence[]>();
+	}
+
+	private void addHost(String text) {
+		adapter.add(text);
+		hosts.add(text);
+		hosts_ports.add(null);
+	}
+
+	private String getHardwareAddress(String ip) {
+		String hw = "00:00:00:00:00:00";
+		try {
+			File arp = new File("/proc/net/arp");
+			if (arp.exists() != false && arp.canRead()) {
+				Pattern ptrn = Pattern.compile("^" + ip
+						+ "\\s+0x1\\s+0x2\\s+([:0-9a-z]+)\\s+\\*\\s+tiwlan0$");
+				FileReader fileReader = new FileReader(arp);
+				BufferedReader bufferedReader = new BufferedReader(fileReader,
+						8);
+				String line;
+				Matcher matcher;
+				while ((line = bufferedReader.readLine()) != null) {
+					matcher = ptrn.matcher(line);
+					if (matcher.matches()) {
+						hw = matcher.group(1);
+						break;
+					}
+				}
+				bufferedReader.close();
+				fileReader.close();
+			}
+		} catch (Exception e) {
+			Log.d(TAG, "Can't open file ARP: " + e.getMessage());
+		}
+		return hw;
+	}
+
+	private String getNicVendor(String mac) {
+		String vendor = getString(R.string.info_nic_unknown);
+		HardwareAddress dbHelper = new HardwareAddress(this);
+		SQLiteDatabase db = dbHelper.openDataBase();
+		String macid = mac.replace(":", "").substring(0, 6).toLowerCase();
+		// Db request
+		Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
+				+ "'", null);
+		if (c.getCount() > 0) {
+			c.moveToFirst();
+			vendor = c.getString(c.getColumnIndex("vendor"));
+		}
+		c.close();
+		db.close();
+		return vendor;
+	}
+
+	private void showHostInfo(int hostPosition) {
+		String ip = hosts.get(hostPosition);
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View v = inflater.inflate(R.layout.info, null);
+		// Build info dialog
+		AlertDialog.Builder infoDialog = new AlertDialog.Builder(Main.this);
+		infoDialog.setTitle(ip);
+		// Set info values
+		String macaddr = getHardwareAddress(ip);
+		TextView mac = (TextView) v.findViewById(R.id.info_mac);
+		mac.setText(macaddr);
+		TextView vendor = (TextView) v.findViewById(R.id.info_nic);
+		vendor.setText(getNicVendor(macaddr));
+		// Show dialog
+		infoDialog.setView(v);
+		infoDialog.setNegativeButton(R.string.btn_close, null);
+		infoDialog.show();
+	}
+
 	/**
 	 * Port Scan
 	 */
@@ -496,9 +586,6 @@ final public class Main extends Activity {
 				intent = new Intent(Intent.ACTION_VIEW);
 				intent.setData(Uri.parse("https://" + host + "/"));
 				break;
-			case 445:
-				// Samba explorer
-				break;
 			default:
 				; // Use something like netcat to fetch identification message
 				// of service
@@ -589,13 +676,6 @@ final public class Main extends Activity {
 		getFileName.show();
 	}
 
-	private void initList() {
-		// setSelectedHosts(false);
-		adapter.clear();
-		hosts = new ArrayList<String>();
-		hosts_ports = new ArrayList<CharSequence[]>();
-	}
-
 	// private void updateList() {
 	// adapter.clear();
 	// listHosts();
@@ -606,12 +686,6 @@ final public class Main extends Activity {
 	// addHost(h);
 	// }
 	// }
-
-	private void addHost(String text) {
-		adapter.add(text);
-		hosts.add(text);
-		hosts_ports.add(null);
-	}
 
 	// private List<String> getSelectedHosts(){
 	// List<String> hosts_s = new ArrayList<String>();
