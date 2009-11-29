@@ -133,11 +133,10 @@ final public class Main extends Activity {
 		// checkRoot();
 
 		// Fake hosts and ports
-
-		initList();
-		addHost("10.0.10.2"); // EmulatorBridge: 10.0.2.2
-		Long[] port = { (long) 80, (long) 443 };
-		hosts_ports.set(0, port);
+		// initList();
+		// addHost("10.0.10.2"); // EmulatorBridge: 10.0.2.2
+		// Long[] port = { (long) 80, (long) 443 };
+		// hosts_ports.set(0, port);
 
 		// try {
 		// File su = new File("/proc/net/arp");
