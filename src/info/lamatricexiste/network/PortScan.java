@@ -84,7 +84,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 			socket.connect(addr);
 			// Register the Channel with port and timestamp as attachement
 			HashMap<Integer, Long> data = new HashMap<Integer, Long>();
-			// FIXME: Trouver un autre moyen de stocker ces infos, car obligé
+			// FIXME: Trouver un autre moyen de stocker ces infos, car oblige
 			// d'utiliser un long pour le numero de port a cause de ca
 			data.put(0, (long) port);
 			data.put(1, System.currentTimeMillis());
