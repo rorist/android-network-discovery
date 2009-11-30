@@ -4,27 +4,21 @@ package info.lamatricexiste.network;
 import java.net.InetAddress;
 
 import android.net.DhcpInfo;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.util.Log;
 
 public class NetInfo {
-	private final String TAG = "NetworkInfo";
-	private WifiManager wifi = null;
-	private DhcpInfo dhcp = null;
+	private WifiManager wifi;
+	private DhcpInfo dhcp;
+	private WifiInfo info;
 
 	NetInfo(WifiManager wifi) {
-		this.wifi = wifi;
-		if (wifi != null && wifi.isWifiEnabled()) {
-			dhcp = wifi.getDhcpInfo();
+		this.setWifi(wifi);
+		if (wifi != null) {
+			dhcp = getWifi().getDhcpInfo();
+			info = getWifi().getConnectionInfo();
 		}
-	}
-
-	public boolean isWifiEnabled() {
-		if (wifi != null && dhcp != null && getSSID() != null
-				&& wifi.getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
-			return true;
-		}
-		return false;
 	}
 
 	public int getNetCidr() {
@@ -52,29 +46,43 @@ public class NetInfo {
 	}
 
 	public String getSSID() {
-		return wifi.getConnectionInfo().getSSID();
+		return info.getSSID();
 	}
 
 	public String getBSSID() {
-		return wifi.getConnectionInfo().getBSSID();
+		return info.getBSSID();
 	}
 
-	private InetAddress getIpFromInt(int ip_int) {
-		byte[] quads = new byte[4];
+	public String getMacAddress() {
+		return info.getMacAddress();
+	}
 
-		for (int k = 0; k < 4; k++)
-			quads[k] = (byte) ((ip_int >> k * 8) & 0xFF);
-		try {
-			return InetAddress.getByAddress(quads);
-		} catch (java.net.UnknownHostException e) {
-			Log.e(TAG, e.getMessage());
-			return null;
-		}
+	public SupplicantState getSupplicantState() {
+		return info.getSupplicantState();
 	}
 
 	public int getIntFromIp(InetAddress ip_addr) {
 		String[] a = ip_addr.getHostAddress().split("\\.");
 		return (Integer.parseInt(a[0]) * 16777216 + Integer.parseInt(a[1])
 				* 65536 + Integer.parseInt(a[2]) * 256 + Integer.parseInt(a[3]));
+	}
+
+	private InetAddress getIpFromInt(int ip_int) {
+		byte[] quads = new byte[4];
+		for (int k = 0; k < 4; k++)
+			quads[k] = (byte) ((ip_int >> k * 8) & 0xFF);
+		try {
+			return InetAddress.getByAddress(quads);
+		} catch (java.net.UnknownHostException e) {
+			return null;
+		}
+	}
+
+	private void setWifi(WifiManager wifi) {
+		this.wifi = wifi;
+	}
+
+	private WifiManager getWifi() {
+		return wifi;
 	}
 }

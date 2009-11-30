@@ -17,7 +17,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.SupplicantState;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -156,7 +155,7 @@ final public class Main extends Activity {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+		filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 		registerReceiver(receiver, filter);
 		networkStateChanged(new Intent());
 	}
@@ -237,9 +236,12 @@ final public class Main extends Activity {
 		setButtonOff(btn_discover);
 		setButtonOff(btn_export);
 
+		WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		NetInfo net = new NetInfo(WifiService);
+
+		// Wifi state
 		String action = intent.getAction();
 		if (action != null) {
-			Log.d(TAG, action);
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				int WifiState = intent.getIntExtra(
 						WifiManager.EXTRA_WIFI_STATE, -1);
@@ -262,31 +264,34 @@ final public class Main extends Activity {
 				}
 			}
 
-			if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-				WifiManager WifiService = (WifiManager) this
-						.getSystemService(Context.WIFI_SERVICE);
-				WifiInfo wifiInfo = WifiService.getConnectionInfo();
-				SupplicantState sstate = wifiInfo.getSupplicantState();
-				Log.d(TAG, "SSTATE=" + sstate);
-				if (sstate == SupplicantState.COMPLETED) {
-					info_nt.setText(R.string.wifi_dhcp);
-				} else if (sstate == SupplicantState.SCANNING) {
+			if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+				SupplicantState sstate = net.getSupplicantState();
+				Log.d(TAG, "SupplicantState=" + sstate);
+				if (sstate == SupplicantState.SCANNING) {
 					info_nt.setText(R.string.wifi_scanning);
 				} else if (sstate == SupplicantState.ASSOCIATING) {
-					info_nt.setText(R.string.wifi_associating);
+					String bssid = net.getBSSID();
+					String ssid = net.getSSID();
+					String mac = net.getMacAddress();
+					String id = ssid != null ? ssid : (bssid != null ? bssid
+							: mac);
+					info_nt.setText(String.format(
+							getString(R.string.wifi_associating), id));
+				} else if (sstate == SupplicantState.COMPLETED) {
+					info_nt.setText(String.format(
+							getString(R.string.wifi_dhcp), net.getSSID()));
 				}
 
 			}
 		}
 
+		// 3G -> Wifi
 		final NetworkInfo network_info = connMgr
 				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		if (network_info != null) {
 			NetworkInfo.State state = network_info.getState();
 			Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
 			if (state == NetworkInfo.State.CONNECTED) {
-				WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-				NetInfo net = new NetInfo(WifiService);
 				info_ip.setText("IP: " + net.getIp().getHostAddress());
 				info_nt.setText("NT: " + net.getNetIp().getHostAddress() + "/"
 						+ net.getNetCidr());
