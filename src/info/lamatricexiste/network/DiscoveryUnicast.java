@@ -13,6 +13,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
 	private final String TAG = "DiscoveryUnicast";
 	private final int TIMEOUT_REACH = 1000;
+	private final int nTHREADS = 64;
 	private int pt_forward;
 	private int pt_backward;
 	private int pt_move = 2; // 1=backward 2=forward
@@ -24,7 +25,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 	protected int size = 0;
 
 	protected Void doInBackground(Void... params) {
-		pool = Executors.newCachedThreadPool();
+		pool = Executors.newFixedThreadPool(nTHREADS);
 
 		// gateway
 		launch(start);
