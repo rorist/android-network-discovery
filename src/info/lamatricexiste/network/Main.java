@@ -2,6 +2,7 @@ package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
@@ -456,13 +457,22 @@ final public class Main extends Activity {
 			progress.setMessage(String.format(getString(R.string.scan_start),
 					host));
 			progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			progress.setCancelable(false);
 			progress.setMax(nb_port);
+			// Cancelable
+			progress.setCancelable(true);
+			progress.setButton(ProgressDialog.BUTTON_NEGATIVE,
+					getString(R.string.btn_discover_cancel),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							scanPortTask.cancel(true);
+						}
+					});
 			progress.show();
 		}
 
 		@Override
 		protected void onPostExecute(Void unused) {
+			Collections.sort(ports);
 			Long[] result = ports.toArray(new Long[ports.size()]);
 			hosts_ports.set(position, result);
 			progress.dismiss();
@@ -634,6 +644,7 @@ final public class Main extends Activity {
 						}
 					}
 				});
+		getFileName.setNegativeButton(R.string.btn_discover_cancel, null);
 		getFileName.show();
 	}
 
