@@ -90,7 +90,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 			data.put(1, System.currentTimeMillis());
 			socket.register(selector, SelectionKey.OP_CONNECT, data);
 		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
+			Log.e(TAG, e.getMessage()); //TODO: host is down ? stop selecting ?
 		}
 	}
 
@@ -170,5 +170,6 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 		} catch (IOException e) {
 			Log.e(TAG, e.getMessage());
 		}
+	    onPostExecute(null);
 	}
 }

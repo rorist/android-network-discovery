@@ -133,21 +133,12 @@ final public class Main extends Activity {
 		// checkRoot();
 
 		// Fake hosts and ports
-		// initList();
-		// addHost("10.0.10.2"); // EmulatorBridge: 10.0.2.2
-		// Long[] port = { (long) 80, (long) 443 };
-		// hosts_ports.set(0, port);
-
-		// try {
-		// File su = new File("/proc/net/arp");
-		// if (su.exists() == false) {
-		// Log.v(TAG, "ARP File is NOT accessible");
-		// } else {
-		// Log.v(TAG, "ARP File is accessible");
-		// }
-		// } catch (Exception e) {
-		// Log.d(TAG, "Can't open file ARP: " + e.getMessage());
-		// }
+		/*
+        initList();
+		addHost("192.168.1.1"); // EmulatorBridge: 10.0.2.2
+		Long[] port = { (long) 80, (long) 443 };
+		hosts_ports.set(0, port);
+        */
 	}
 
 	@Override
@@ -286,7 +277,7 @@ final public class Main extends Activity {
 			}
 		}
 
-		// 3G -> Wifi
+		// 3G(connected) -> Wifi(connected)
 		final NetworkInfo network_info = connMgr
 				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		if (network_info != null) {
@@ -320,8 +311,10 @@ final public class Main extends Activity {
 			NetInfo net = new NetInfo(WifiService);
 			int cidr = net.getNetCidr();
 			ip_int = net.getIntFromIp(net.getIp());
-			start = (ip_int & (1 - (1 << (32 - cidr)))) + 1;
-			end = (ip_int | ((1 << (32 - cidr)) - 1)) - 1;
+            // Network block start/end
+            int shift = (32 - cidr);
+            start = (ip_int >> shift << shift) + 1;
+            end = (start | ((1 << shift) - 1)) - 1;
 			size = end - start + 1;
 			setProgress(0);
 		}
@@ -493,12 +486,6 @@ final public class Main extends Activity {
 			}
 			progress_current++;
 			progress.setProgress(progress_current);
-		}
-
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
-			this.onPostExecute(null);
 		}
 	}
 

@@ -25,6 +25,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 	protected int size = 0;
 
 	protected Void doInBackground(Void... params) {
+        Log.v(TAG, "start="+intToIp(start)+", end="+intToIp(end)+", length="+size);
 		pool = Executors.newFixedThreadPool(nTHREADS);
 
 		// gateway

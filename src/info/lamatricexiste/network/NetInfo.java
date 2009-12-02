@@ -70,7 +70,7 @@ public class NetInfo {
 	private InetAddress getIpFromInt(int ip_int) {
 		byte[] quads = new byte[4];
 		for (int k = 0; k < 4; k++)
-			quads[k] = (byte) ((ip_int >> k * 8) & 0xFF);
+			quads[k] = (byte) ((ip_int >> k * 8) & 0xFF); // 0xFF=255
 		try {
 			return InetAddress.getByAddress(quads);
 		} catch (java.net.UnknownHostException e) {
