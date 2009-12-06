@@ -29,7 +29,7 @@ public class HardwareAddress {
 		this.ctxt = context;
 	}
 
-	public String getHardwareAddress(String ip) {
+	public static String getHardwareAddress(String ip) {
 		String hw = "00:00:00:00:00:00";
 		try {
 			File arp = new File("/proc/net/arp");

@@ -14,13 +14,14 @@ public class Export {
     // private final String TAG = "Export";
     private List<String> hosts;
     private List<Long[]> hosts_ports;
+    private List<String> hosts_haddr;
     private NetInfo net;
-    private Context ctxt;
 
-    public Export(Context ctxt, List<String> hosts, List<Long[]> hosts_ports) {
+    public Export(Context ctxt, List<String> hosts, List<Long[]> hosts_ports,
+            List<String> hosts_haddr) {
         this.hosts = hosts;
         this.hosts_ports = hosts_ports;
-        this.ctxt = ctxt;
+        this.hosts_haddr = hosts_haddr;
         net = new NetInfo(ctxt);
     }
 
@@ -54,13 +55,12 @@ public class Export {
 
         // Hosts
         if (hosts != null) {
-            HardwareAddress hw = new HardwareAddress(ctxt);
             xml += "\t<hosts>\r\n";
             for (int i = 0; i < hosts.size(); i++) {
                 // Host info
                 String host = hosts.get(i);
                 xml += "\t\t<host value=\"" + host + "\" mac=\""
-                        + hw.getHardwareAddress(host) + "\">\r\n";
+                        + hosts_haddr.get(i) + "\">\r\n";
                 // Ports
                 Long[] portsL = hosts_ports.get(i);
                 if (portsL != null) {

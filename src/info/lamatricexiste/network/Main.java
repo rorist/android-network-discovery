@@ -45,6 +45,7 @@ final public class Main extends Activity {
     private final long VIBRATE = (long) 250;
     private List<String> hosts = null;
     private List<Long[]> hosts_ports = null;
+    private List<String> hosts_haddr = null;
     private HostsAdapter adapter;
     private ListView list;
     // private Button btn;
@@ -393,12 +394,14 @@ final public class Main extends Activity {
         adapter.clear();
         hosts = new ArrayList<String>();
         hosts_ports = new ArrayList<Long[]>();
+        hosts_haddr = new ArrayList<String>();
     }
 
-    private void addHost(String text) {
-        adapter.add(text);
-        hosts.add(text);
+    private void addHost(String ip) {
+        adapter.add(ip);
+        hosts.add(ip);
         hosts_ports.add(null);
+        hosts_haddr.add(HardwareAddress.getHardwareAddress(ip));
     }
 
     private void showHostInfo(int hostPosition) {
@@ -410,7 +413,7 @@ final public class Main extends Activity {
         infoDialog.setTitle(ip);
         // Set info values
         HardwareAddress hardwareAddress = new HardwareAddress(this);
-        String macaddr = hardwareAddress.getHardwareAddress(ip);
+        String macaddr = hosts_haddr.get(hostPosition);
         String nicvend = hardwareAddress.getNicVendor(macaddr);
         TextView mac = (TextView) v.findViewById(R.id.info_mac);
         TextView vendor = (TextView) v.findViewById(R.id.info_nic);
@@ -616,7 +619,7 @@ final public class Main extends Activity {
     // }
 
     private void export() {
-        final Export e = new Export(Main.this, hosts, hosts_ports);
+        final Export e = new Export(Main.this, hosts, hosts_ports, hosts_haddr);
         String file = e.getFileName();
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
