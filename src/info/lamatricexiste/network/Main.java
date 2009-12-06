@@ -1,6 +1,5 @@
 package info.lamatricexiste.network;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -236,8 +235,7 @@ final public class Main extends Activity {
         if (action != null) {
             if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 int WifiState = intent.getIntExtra(
-                        WifiManager.EXTRA_WIFI_STATE,
-                        -1);
+                        WifiManager.EXTRA_WIFI_STATE, -1);
                 Log.d(TAG, "WifiState=" + WifiState);
                 switch (WifiState) {
                     case WifiManager.WIFI_STATE_ENABLING:
@@ -269,12 +267,10 @@ final public class Main extends Activity {
                     String id = ssid != null ? ssid : (bssid != null ? bssid
                             : mac);
                     info_nt.setText(String.format(
-                            getString(R.string.wifi_associating),
-                            id));
+                            getString(R.string.wifi_associating), id));
                 } else if (sstate == SupplicantState.COMPLETED) {
                     info_nt.setText(String.format(
-                            getString(R.string.wifi_dhcp),
-                            net.getSSID()));
+                            getString(R.string.wifi_dhcp), net.getSSID()));
                 }
 
             }
@@ -334,8 +330,7 @@ final public class Main extends Activity {
 
         @Override
         protected void onPostExecute(Void unused) {
-            if (prefs.getBoolean(
-                    Prefs.KEY_VIBRATE_FINISH,
+            if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
                     Prefs.DEFAULT_VIBRATE_FINISH) == true) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(VIBRATE);
@@ -409,9 +404,10 @@ final public class Main extends Activity {
             checkHostsTask.cancel(true);
             AlertDialog.Builder infoDialog = new AlertDialog.Builder(Main.this);
             infoDialog.setTitle(R.string.discover_proxy_title);
-            infoDialog.setMessage(String.format(
-                    getString(R.string.discover_proxy_msg),
-                    net.getGatewayIp()));
+            infoDialog
+                    .setMessage(String.format(
+                            getString(R.string.discover_proxy_msg), net
+                                    .getGatewayIp()));
             infoDialog.setNegativeButton(R.string.btn_close, null);
             infoDialog.show();
         }
@@ -455,26 +451,22 @@ final public class Main extends Activity {
         @Override
         protected void onPreExecute() {
             // Get preferences
-            String port_start_pref = prefs.getString(
-                    Prefs.KEY_PORT_START,
+            String port_start_pref = prefs.getString(Prefs.KEY_PORT_START,
                     Prefs.DEFAULT_PORT_START);
-            String port_end_pref = prefs.getString(
-                    Prefs.KEY_PORT_END,
+            String port_end_pref = prefs.getString(Prefs.KEY_PORT_END,
                     Prefs.DEFAULT_PORT_END);
             port_start = Integer.parseInt(port_start_pref);
             port_end = Integer.parseInt(port_end_pref);
             nb_port = port_end - port_start + 1;
             // Set progress
             progress = new ProgressDialog(Main.this);
-            progress.setMessage(String.format(
-                    getString(R.string.scan_start),
+            progress.setMessage(String.format(getString(R.string.scan_start),
                     host));
             progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progress.setMax(nb_port);
             // Cancelable
             progress.setCancelable(true);
-            progress.setButton(
-                    ProgressDialog.BUTTON_NEGATIVE,
+            progress.setButton(ProgressDialog.BUTTON_NEGATIVE,
                     getString(R.string.btn_discover_cancel),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -491,8 +483,7 @@ final public class Main extends Activity {
             hosts_ports.set(position, result);
             progress.dismiss();
             showPorts(result, position, host);
-            if (prefs.getBoolean(
-                    Prefs.KEY_VIBRATE_FINISH,
+            if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
                     Prefs.DEFAULT_VIBRATE_FINISH) == true) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(VIBRATE);
@@ -525,16 +516,14 @@ final public class Main extends Activity {
     private void showPorts(final Long[] ports, final int position,
             final String host) {
         final AlertDialog.Builder scanDone = new AlertDialog.Builder(Main.this);
-        scanDone.setTitle(host).setPositiveButton(
-                R.string.btn_rescan,
+        scanDone.setTitle(host).setPositiveButton(R.string.btn_rescan,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dlg, int sumthin) {
                         scanPort(position, true);
                     }
                 }).setNegativeButton(R.string.btn_close, null);
         if (ports.length > 0) {
-            scanDone.setItems(
-                    preparePort(ports),
+            scanDone.setItems(preparePort(ports),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             openPortService(host, ports[which]);
@@ -633,7 +622,7 @@ final public class Main extends Activity {
 
     private void export() {
         final Export e = new Export(Main.this, hosts, hosts_ports, hosts_haddr);
-        String file = e.getFileName();
+        final String file = e.getFileName();
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.file, null);
@@ -643,16 +632,35 @@ final public class Main extends Activity {
         AlertDialog.Builder getFileName = new AlertDialog.Builder(Main.this);
         getFileName.setTitle(R.string.export_choose);
         getFileName.setView(v);
-        getFileName.setPositiveButton(
-                R.string.export_save,
+        getFileName.setPositiveButton(R.string.export_save,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dlg, int sumthin) {
-                        try {
-                            e.writeToSd((txt.getText()).toString());
-                            makeToast(R.string.export_finished);
-                        } catch (IOException e) {
-                            makeToast("Error: " + e.getMessage());
-                            export();
+                        final String fileEdit = txt.getText().toString();
+                        if (e.fileExists(fileEdit)) {
+                            AlertDialog.Builder fileExists = new AlertDialog.Builder(
+                                    Main.this);
+                            fileExists.setTitle(R.string.export_exists_title);
+                            fileExists.setMessage(R.string.export_exists_msg);
+                            fileExists.setPositiveButton(R.string.btn_yes,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(
+                                                DialogInterface dialog,
+                                                int which) {
+                                            if (e.writeToSd(fileEdit)) {
+                                                makeToast(R.string.export_finished);
+                                            } else {
+                                                export();
+                                            }
+                                        }
+                                    });
+                            fileExists.setNegativeButton(R.string.btn_no, null);
+                            fileExists.show();
+                        } else {
+                            if (e.writeToSd(fileEdit)) {
+                                makeToast(R.string.export_finished);
+                            } else {
+                                export();
+                            }
                         }
                     }
                 });
@@ -695,12 +703,10 @@ final public class Main extends Activity {
     // }
     // }
 
-    private void makeToast(String msg) {
-        Toast.makeText(
-                getApplicationContext(),
-                (CharSequence) msg,
-                Toast.LENGTH_SHORT).show();
-    }
+    // private void makeToast(String msg) {
+    // Toast.makeText(getApplicationContext(), (CharSequence) msg,
+    // Toast.LENGTH_SHORT).show();
+    // }
 
     private void makeToast(int msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();

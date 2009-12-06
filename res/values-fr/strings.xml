@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Network Discovery</string>
+    <string name="btn_yes">Oui</string>
+    <string name="btn_no">Non</string>
     <string name="btn_discover">Rechercher</string>
     <string name="btn_discover_cancel">Annuler</string>
     <string name="btn_export">Exporter</string>
@@ -31,6 +33,8 @@
     <string name="export_finished">Fichier sauvegardé !</string>
     <string name="export_choose">Choisir la destination</string>
     <string name="export_save">Sauver</string>
+    <string name="export_exists_title">Le fichier existe déjà</string>
+    <string name="export_exists_msg">Voulez-vous l'écraser ?</string>
     <string name="preferences_notifications">Notifications</string>
     <string name="preferences_vibrate_title">Vibration</string>
     <string name="preferences_vibrate_summary">Vibre lorsque le Scan est terminé</string>

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Network Discovery</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
     <string name="btn_discover">Discover</string>
     <string name="btn_discover_cancel">Cancel</string>
     <string name="btn_export">Export</string>
@@ -31,6 +33,8 @@
     <string name="export_finished">File saved !</string>
     <string name="export_choose">Choose file destination</string>
     <string name="export_save">Save</string>
+    <string name="export_exists_title">File already exists</string>
+    <string name="export_exists_msg">Do you want to overwrite ?</string>
     <string name="preferences_notifications">Notifications</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Vibrate when Scan is completed</string>

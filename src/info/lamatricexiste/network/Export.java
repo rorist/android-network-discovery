@@ -1,5 +1,6 @@
 package info.lamatricexiste.network;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -8,10 +9,11 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 
 public class Export {
 
-    // private final String TAG = "Export";
+    private final String TAG = "Export";
     private List<String> hosts;
     private List<Long[]> hosts_ports;
     private List<String> hosts_haddr;
@@ -25,12 +27,23 @@ public class Export {
         net = new NetInfo(ctxt);
     }
 
-    public void writeToSd(String file) throws IOException {
+    public boolean writeToSd(String file) {
         String xml = prepareXml();
-        FileWriter f = new FileWriter(file);
-        f.write(xml);
-        f.flush();
-        f.close();
+        try {
+            FileWriter f = new FileWriter(file);
+            f.write(xml);
+            f.flush();
+            f.close();
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean fileExists(String filename) {
+        File file = new File(filename);
+        return file.exists();
     }
 
     public String getFileName() {
