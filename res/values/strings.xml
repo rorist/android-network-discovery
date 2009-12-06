@@ -18,6 +18,10 @@
     <string name="discover_start">Discovery started ...</string>
     <string name="discover_finished">Discovery finished !</string>
     <string name="discover_canceled">Discovery canceled !</string>
+    <string name="discover_proxy_title">Proxy Error</string>
+    <string name="discover_proxy_msg">Discovery is canceled, because you probably are
+        behind a proxy that prevent from discovering hosts on the network.\n\n
+        Go to your Gateway from the browser : http://%s</string>
     <string name="scan_start">Scanning ports on %s</string>
     <string name="scan_noport">No open port found !</string>
     <string name="scan_noaction">No associated action !</string>

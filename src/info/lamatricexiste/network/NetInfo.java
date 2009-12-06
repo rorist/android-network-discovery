@@ -44,6 +44,10 @@ public class NetInfo {
         return getIpFromInt((dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask);
     }
 
+    public Object getGatewayIp() {
+        return getIpFromInt(dhcp.gateway);
+    }
+
     public String getSSID() {
         return info.getSSID();
     }

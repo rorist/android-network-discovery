@@ -313,7 +313,7 @@ final public class Main extends Activity {
 
             NetInfo net = new NetInfo(ctxt);
             int cidr = net.getNetCidr();
-            ip = NetInfo.getIntFromIp(net.getIp()); // DIXME: I know it's ugly
+            ip = NetInfo.getIntFromIp(net.getIp()); // FIXME: I know it's ugly
             start = (ip & (1 - (1 << (32 - cidr)))) + 1;
             end = (ip | ((1 << (32 - cidr)) - 1)) - 1;
             size = end - start + 1;
@@ -398,10 +398,23 @@ final public class Main extends Activity {
     }
 
     private void addHost(String ip) {
-        adapter.add(ip);
-        hosts.add(ip);
-        hosts_ports.add(null);
-        hosts_haddr.add(HardwareAddress.getHardwareAddress(ip));
+        String haddr = HardwareAddress.getHardwareAddress(ip);
+        if (!hosts_haddr.contains(haddr)) {
+            adapter.add(ip);
+            hosts.add(ip);
+            hosts_ports.add(null);
+            hosts_haddr.add(haddr);
+        } else {
+            NetInfo net = new NetInfo(this);
+            checkHostsTask.cancel(true);
+            AlertDialog.Builder infoDialog = new AlertDialog.Builder(Main.this);
+            infoDialog.setTitle(R.string.discover_proxy_title);
+            infoDialog.setMessage(String.format(
+                    getString(R.string.discover_proxy_msg),
+                    net.getGatewayIp()));
+            infoDialog.setNegativeButton(R.string.btn_close, null);
+            infoDialog.show();
+        }
     }
 
     private void showHostInfo(int hostPosition) {

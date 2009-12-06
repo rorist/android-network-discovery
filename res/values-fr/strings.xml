@@ -18,6 +18,10 @@
     <string name="discover_start">Recherche démarrée ...</string>
     <string name="discover_finished">Recherche terminée !</string>
     <string name="discover_canceled">Recherche annulée !</string>
+    <string name="discover_proxy_title">Erreur proxy</string>
+    <string name="discover_proxy_msg">La recherche est annulée car vous êtes probablement 
+        derrière un proxy qui empêche de voir les machines sur le réseau.\n\n
+        Accéder à la passerelle depuis votre navigateur depuis: http://%s</string>
     <string name="scan_start">Scan des ports sur %s</string>
     <string name="scan_noport">Aucun port trouvé !</string>
     <string name="scan_noaction">Aucune action associée !</string>

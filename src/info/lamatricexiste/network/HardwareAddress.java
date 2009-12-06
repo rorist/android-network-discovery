@@ -21,8 +21,8 @@ import android.util.Log;
 public class HardwareAddress {
 
 	private final static String TAG = "HardwareAddress";
-	private final static String DB_PATH = "/data/data/info.lamatricexiste.network/";
-	private final static String DB_NAME = "oui.db";
+	private final String DB_PATH = "/data/data/info.lamatricexiste.network/";
+	private final String DB_NAME = "oui.db";
 	private Context ctxt;
 
 	public HardwareAddress(Context context) {
