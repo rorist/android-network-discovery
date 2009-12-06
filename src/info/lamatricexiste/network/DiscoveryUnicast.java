@@ -25,8 +25,9 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     protected int size = 0;
 
     protected Void doInBackground(Void... params) {
-        Log.v(TAG, "start=" + intToIp(start) + ", end=" + intToIp(end)
-                + ", length=" + size);
+        Log.v(TAG, "start=" + NetInfo.getIpFromIntInverted(start) + " ("
+                + start + "), end=" + NetInfo.getIpFromIntInverted(end) + " ("
+                + end + "), length=" + size);
         pool = Executors.newFixedThreadPool(nTHREADS);
 
         // gateway
@@ -36,17 +37,18 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
         pt_backward = ip - 1;
         pt_forward = ip + 1;
         for (int i = 0; i < size - 2; i++) {
-            if (pt_move == 1 && pt_backward > start) {
-                launch(pt_backward);
-                pt_backward--;
+            if (pt_move == 1) {
+                if (pt_backward > start) {
+                    launch(pt_backward);
+                    pt_backward--;
+                }
                 pt_move = 2;
-            } else if (pt_move == 2 && pt_forward <= end) {
-                launch(pt_forward);
-                pt_forward++;
+            } else if (pt_move == 2) {
+                if (pt_forward <= end) {
+                    launch(pt_forward);
+                    pt_forward++;
+                }
                 pt_move = 1;
-            } else {
-                Log.d(TAG, "Error discovering, move=" + pt_move + ", fw="
-                        + pt_forward + ", bk=" + pt_backward);
             }
         }
 
@@ -61,7 +63,8 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     }
 
     private void launch(int i) {
-        CheckRunnable r = new CheckRunnable(intToIp(i));
+        String ip = NetInfo.getIpFromIntInverted(i);
+        CheckRunnable r = new CheckRunnable(ip);
         pool.execute(r);
     }
 
@@ -86,11 +89,6 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
                 Log.e(TAG, e.getMessage());
             }
         }
-    }
-
-    private String intToIp(int i) {
-        return ((i >> 24) & 0xFF) + "." + ((i >> 16) & 0xFF) + "."
-                + ((i >> 8) & 0xFF) + "." + (i & 0xFF);
     }
 
 }

@@ -1,21 +1,22 @@
 //am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
 package info.lamatricexiste.network;
 
+import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
 public class NetInfo {
-    private WifiManager wifi;
     private DhcpInfo dhcp;
     private WifiInfo info;
 
-    NetInfo(WifiManager wifi) {
-        this.setWifi(wifi);
+    NetInfo(Context ctxt) {
+        WifiManager wifi = (WifiManager) ctxt
+                .getSystemService(Context.WIFI_SERVICE);
         if (wifi != null) {
-            dhcp = getWifi().getDhcpInfo();
-            info = getWifi().getConnectionInfo();
+            dhcp = wifi.getDhcpInfo();
+            info = wifi.getConnectionInfo();
         }
     }
 
@@ -59,18 +60,26 @@ public class NetInfo {
         return info.getSupplicantState();
     }
 
-    public int getIntFromIp(String ip_addr) {
+    public static int getIntFromIp(String ip_addr) {
         String[] a = ip_addr.split("\\.");
         return (Integer.parseInt(a[0]) * 16777216 + Integer.parseInt(a[1])
                 * 65536 + Integer.parseInt(a[2]) * 256 + Integer.parseInt(a[3]));
     }
 
-    private String getIpFromInt(int ip_int) {
+    public static String getIpFromInt(int ip_int) {
         String ip = "";
         for (int k = 0; k < 4; k++) {
             ip = ip + ((ip_int >> k * 8) & 0xFF) + ".";
         }
-        return ip;
+        return ip.substring(0, ip.length() - 1);
+    }
+
+    public static String getIpFromIntInverted(int ip_int) {
+        String ip = "";
+        for (int k = 3; k > -1; k--) {
+            ip = ip + ((ip_int >> k * 8) & 0xFF) + ".";
+        }
+        return ip.substring(0, ip.length() - 1);
     }
 
     // public int getIntFromInet(InetAddress ip_addr) {
@@ -87,12 +96,4 @@ public class NetInfo {
     // return null;
     // }
     // }
-
-    private void setWifi(WifiManager wifi) {
-        this.wifi = wifi;
-    }
-
-    private WifiManager getWifi() {
-        return wifi;
-    }
 }

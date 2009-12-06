@@ -55,6 +55,7 @@ final public class Main extends Activity {
     private ConnectivityManager connMgr;
     private CheckHostsTask checkHostsTask = null;
     private ScanPortTask scanPortTask = null;
+    private Context ctxt;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ final public class Main extends Activity {
         requestWindowFeature(Window.FEATURE_PROGRESS);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
+        ctxt = this;
 
         // Get global preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -226,8 +228,7 @@ final public class Main extends Activity {
         setButtonOff(btn_discover);
         setButtonOff(btn_export);
 
-        WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        NetInfo net = new NetInfo(WifiService);
+        NetInfo net = new NetInfo(ctxt);
 
         // Wifi state
         String action = intent.getAction();
@@ -308,15 +309,14 @@ final public class Main extends Activity {
 
         @Override
         protected void onPreExecute() {
-            WifiManager WifiService = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            NetInfo net = new NetInfo(WifiService);
+
+            NetInfo net = new NetInfo(ctxt);
             int cidr = net.getNetCidr();
-            ip = net.getIntFromIp(net.getIp());
+            ip = NetInfo.getIntFromIp(net.getIp()); // DIXME: I know it's ugly
             start = (ip & (1 - (1 << (32 - cidr)))) + 1;
             end = (ip | ((1 << (32 - cidr)) - 1)) - 1;
             size = end - start + 1;
             setProgress(0);
-            Log.v(TAG, "start=" + start + ", end=" + end);
         }
 
         @Override

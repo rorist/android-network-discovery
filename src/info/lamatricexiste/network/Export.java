@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
-import android.net.wifi.WifiManager;
 import android.os.Environment;
 
 public class Export {
@@ -22,8 +21,7 @@ public class Export {
         this.hosts = hosts;
         this.hosts_ports = hosts_ports;
         this.ctxt = ctxt;
-        net = new NetInfo((WifiManager) ctxt
-                .getSystemService(Context.WIFI_SERVICE));
+        net = new NetInfo(ctxt);
     }
 
     public void writeToSd(String file) throws IOException {
