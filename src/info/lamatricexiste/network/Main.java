@@ -308,10 +308,10 @@ final public class Main extends Activity {
         protected void onPreExecute() {
 
             NetInfo net = new NetInfo(ctxt);
-            int cidr = net.getNetCidr();
+            int shift = (1 << (32 - net.getNetCidr()));
             ip = NetInfo.getIntFromIp(net.getIp()); // FIXME: I know it's ugly
-            start = (ip & (1 - (1 << (32 - cidr)))) + 1;
-            end = (ip | ((1 << (32 - cidr)) - 1)) - 1;
+            start = (ip & (1 - shift) + 1);
+            end = (ip | (shift - 1)) - 1;
             size = end - start + 1;
             setProgress(0);
         }

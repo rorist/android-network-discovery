@@ -36,7 +36,8 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
         // hosts
         pt_backward = ip - 1;
         pt_forward = ip + 1;
-        for (int i = 0; i < size - 2; i++) {
+        int size_hosts = size - 2;
+        for (int i = 0; i < size_hosts; i++) {
             if (pt_move == 1) {
                 if (pt_backward > start) {
                     launch(pt_backward);

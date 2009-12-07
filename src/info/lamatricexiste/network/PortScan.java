@@ -47,7 +47,8 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 		try {
 			step = 127;
 			InetAddress ina = InetAddress.getByName(host);
-			for (int i = port_start; i <= port_end - step; i += step + 1) {
+            int limit = port_end - step;
+			for (int i = port_start; i <= limit; i += step + 1) {
 				scanPorts(ina, i, i + step);
 			}
 		} catch (Exception e) {
@@ -75,7 +76,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         socket.configureBlocking(false);
         socket.connect(addr);
         // Register the Channel with port and timestamp as attachement
-        HashMap<Integer, Long> data = new HashMap<Integer, Long>();
+        HashMap<Integer, Long> data = new HashMap<Integer, Long>(2);
         // FIXME: Trouver un autre moyen de stocker ces infos, car oblige
         // d'utiliser un long pour le numero de port a cause de ca
         data.put(0, (long) port);
