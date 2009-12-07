@@ -10,12 +10,12 @@
     <string name="btn_rescan">Rescanner</string>
     <string name="btn_options">Options</string>
     <string name="wifi_enabled">Wifi activé</string>
-    <string name="wifi_enabling">Wifi en cours d'activation </string>
+    <string name="wifi_enabling">Wifi en cours d\'activation </string>
     <string name="wifi_disabling">Wifi en cours de desactivation</string>
     <string name="wifi_disabled">Wifi desactivé</string>
     <string name="wifi_scanning">Recherche des réseaux wifi</string>
     <string name="wifi_associating">Association en cours avec %s</string>
-    <string name="wifi_dhcp">Demande d'adresse IP à %s</string>
+    <string name="wifi_dhcp">Demande d\'adresse IP à %s</string>
     <string name="wifi_unknown">Etat du Wifi inconnu</string>
     <string name="discover_start">Recherche démarrée ...</string>
     <string name="discover_finished">Recherche terminée !</string>
@@ -34,7 +34,7 @@
     <string name="export_choose">Choisir la destination</string>
     <string name="export_save">Sauver</string>
     <string name="export_exists_title">Le fichier existe déjà</string>
-    <string name="export_exists_msg">Voulez-vous l'écraser ?</string>
+    <string name="export_exists_msg">Voulez-vous l\'écraser ?</string>
     <string name="preferences_notifications">Notifications</string>
     <string name="preferences_vibrate_title">Vibration</string>
     <string name="preferences_vibrate_summary">Vibre lorsque le Scan est terminé</string>
