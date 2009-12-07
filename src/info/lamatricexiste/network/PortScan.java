@@ -51,14 +51,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 				scanPorts(ina, i, i + step);
 			}
 		} catch (Exception e) {
-			Log.e(TAG, e.getMessage());
-			try {
-				if (selector != null) {
-					selector.close();
-				}
-			} catch (IOException e1) {
-				Log.e(TAG, e1.getMessage());
-			}
+            stopSelecting();
 		}
 		return null;
 	}
@@ -74,24 +67,20 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 		doSelect();
 	}
 
-	private void connectSocket(InetAddress ina, int port) {
-		try {
-			// Create the socket
-			InetSocketAddress addr = new InetSocketAddress(ina, port);
-			SocketChannel socket;
-			socket = SocketChannel.open();
-			socket.configureBlocking(false);
-			socket.connect(addr);
-			// Register the Channel with port and timestamp as attachement
-			HashMap<Integer, Long> data = new HashMap<Integer, Long>();
-			// FIXME: Trouver un autre moyen de stocker ces infos, car oblige
-			// d'utiliser un long pour le numero de port a cause de ca
-			data.put(0, (long) port);
-			data.put(1, System.currentTimeMillis());
-			socket.register(selector, SelectionKey.OP_CONNECT, data);
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage()); //TODO: host is down ? stop selecting ?
-		}
+	private void connectSocket(InetAddress ina, int port) throws IOException {
+        // Create the socket
+        InetSocketAddress addr = new InetSocketAddress(ina, port);
+        SocketChannel socket;
+        socket = SocketChannel.open();
+        socket.configureBlocking(false);
+        socket.connect(addr);
+        // Register the Channel with port and timestamp as attachement
+        HashMap<Integer, Long> data = new HashMap<Integer, Long>();
+        // FIXME: Trouver un autre moyen de stocker ces infos, car oblige
+        // d'utiliser un long pour le numero de port a cause de ca
+        data.put(0, (long) port);
+        data.put(1, System.currentTimeMillis());
+        socket.register(selector, SelectionKey.OP_CONNECT, data);
 	}
 
 	private void doSelect() {
@@ -115,11 +104,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 		} catch (IOException e) {
 			Log.e(TAG, e.getMessage());
 		} finally {
-			try {
-				selector.close();
-			} catch (IOException e) {
-				Log.e(TAG, e.getMessage());
-			}
+            stopSelecting();
 		}
 	}
 
@@ -164,12 +149,17 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 	}
 
 	protected void onCancelled() {
-		try {
-			// cancelTimeouts();
-			selector.close();
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-		}
+        stopSelecting();
 	    onPostExecute(null);
 	}
+
+    private void stopSelecting(){
+        try {
+            if(selector!=null){
+                selector.close();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
 }
