@@ -9,6 +9,7 @@
     <string name="btn_close">Close</string>
     <string name="btn_rescan">Rescan</string>
     <string name="btn_options">Options</string>
+    <string name="package_missing">%s must be installed from the market !</string>
     <string name="wifi_enabled">Wifi is enabled</string>
     <string name="wifi_enabling">Wifi is enabling</string>
     <string name="wifi_disabling">Wifi is disabling</string>
@@ -35,6 +36,7 @@
     <string name="export_save">Save</string>
     <string name="export_exists_title">File already exists</string>
     <string name="export_exists_msg">Do you want to overwrite ?</string>
+    <string name="preferences_connection">Connection</string>
     <string name="preferences_notifications">Notifications</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Vibrate when Scan is completed</string>
@@ -44,4 +46,6 @@
     <string name="preferences_port_end_title">Last Port</string>
     <string name="preferences_port_end_summary">Last TCP Port to scan. 1-65535</string>
     <string name="preferences_error1">Error: First port is bigger than Last port</string>
+    <string name="preferences_ssh_user_title">SSH User</string>
+    <string name="preferences_ssh_user_summary">Username for the SSH connection</string>
 </resources>

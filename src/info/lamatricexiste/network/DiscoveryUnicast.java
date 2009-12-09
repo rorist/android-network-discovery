@@ -93,5 +93,4 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
             }
         }
     }
-
 }

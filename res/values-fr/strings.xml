@@ -9,6 +9,7 @@
     <string name="btn_close">Fermer</string>
     <string name="btn_rescan">Rescanner</string>
     <string name="btn_options">Options</string>
+    <string name="package_missing">%s doit être installée depuis le Market !</string>
     <string name="wifi_enabled">Wifi activé</string>
     <string name="wifi_enabling">Wifi en cours d\'activation </string>
     <string name="wifi_disabling">Wifi en cours de desactivation</string>
@@ -35,6 +36,7 @@
     <string name="export_save">Sauver</string>
     <string name="export_exists_title">Le fichier existe déjà</string>
     <string name="export_exists_msg">Voulez-vous l\'écraser ?</string>
+    <string name="preferences_connection">Connection</string>
     <string name="preferences_notifications">Notifications</string>
     <string name="preferences_vibrate_title">Vibration</string>
     <string name="preferences_vibrate_summary">Vibre lorsque le Scan est terminé</string>
@@ -44,4 +46,6 @@
     <string name="preferences_port_end_title">Dernier port</string>
     <string name="preferences_port_end_summary">Le dernier port TCP à scanner. 1-65535</string>
     <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
+    <string name="preferences_ssh_user_title">Nom d'utilisateur SSH</string>
+    <string name="preferences_ssh_user_summary">Utilisateur à utiliser pour se connecter en SSH</string>
 </resources>

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import android.content.pm.ResolveInfo;
-import android.content.pm.PackageManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -15,6 +13,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -44,7 +44,7 @@ final public class Main extends Activity {
     private final String TAG = "NetworkMain";
     // private final int DEFAULT_DISCOVER = 1;
     private final long VIBRATE = (long) 250;
-    private List<String> hosts = null;
+    private List<String> hosts = null; // TODO: Use a HostBean objects list
     private List<Long[]> hosts_ports = null;
     private List<String> hosts_haddr = null;
     private HostsAdapter adapter;
@@ -137,7 +137,7 @@ final public class Main extends Activity {
         // checkRoot();
 
         // Fake hosts
-        //adapter.add("10.0.10.1");
+        // adapter.add("10.0.10.1");
     }
 
     @Override
@@ -148,7 +148,7 @@ final public class Main extends Activity {
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
-        networkStateChanged(new Intent());
+        // networkStateChanged(new Intent()); //FIXME ?
     }
 
     @Override
@@ -281,13 +281,20 @@ final public class Main extends Activity {
         if (network_info != null) {
             NetworkInfo.State state = network_info.getState();
             Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
-            if (state == NetworkInfo.State.CONNECTED) {
+            // Connection check
+            if (net.getSSID() != null && state == NetworkInfo.State.CONNECTED) {
+                // Hack to let the wifi start after wakeup, FIXME ?
+                /*
+                 * if(net.getSSID()==null){ try{ Thread.sleep(2000); } catch
+                 * (InterruptedException e){ Log.e(TAG,
+                 * "Wifi is re-starting="+e.getMessage()); } }
+                 */
                 info_ip.setText("IP: " + net.getIp());
                 info_nt.setText("NT: " + net.getNetIp() + "/"
                         + net.getNetCidr());
                 info_id.setText("SSID: " + net.getSSID());
-                setButtonOn(btn_discover);
-                setButtonOn(btn_export);
+                setButtonOn(btn_discover, R.drawable.discover);
+                setButtonOn(btn_export, R.drawable.export);
             } else if (checkHostsTask != null) {
                 cancelAllTasks();
             }
@@ -306,18 +313,19 @@ final public class Main extends Activity {
         @Override
         protected void onPreExecute() {
 
-            //FIXME: to check with start=192.168.1.2 (-1062731518), end=192.168.1.254 (-1062731266)
+            // FIXME: to check with start=192.168.1.2 (-1062731518),
+            // end=192.168.1.254 (-1062731266)
             // and write the difference between two methods
 
             NetInfo net = new NetInfo(ctxt);
             ip = NetInfo.getLongFromIp(net.getIp()); // FIXME: I know it's ugly
-            //int shift = (1 << (32 - net.getNetCidr()));
-            //start = (ip & (1 - shift)) + 1;
-            //end = (ip | (shift - 1)) - 1;
+            // int shift = (1 << (32 - net.getNetCidr()));
+            // start = (ip & (1 - shift)) + 1;
+            // end = (ip | (shift - 1)) - 1;
             int shift = (32 - net.getNetCidr());
             start = (ip >> shift << shift) + 1;
             end = (start | ((1 << shift) - 1)) - 1;
-            size = (int)(end - start + 1);
+            size = (int) (end - start + 1);
             setProgress(0);
         }
 
@@ -562,17 +570,26 @@ final public class Main extends Activity {
         int portInt = (int) ((long) port);
         switch (portInt) {
             case 22:
-                action = "org.theb.ssh.action.CONNECT_HOST";
-                if(isIntentAvailable(this, action)){
+                action = Intent.ACTION_VIEW;
+                if (isPackageInstalled(this, "org.connectbot")) {
+                    String user = prefs.getString(Prefs.KEY_SSH_USER,
+                            Prefs.DEFAULT_SSH_USER);
                     intent = new Intent(action);
-                    intent.setData(Uri.parse("ssh://root@" + host + ":22"));
+                    intent.setData(Uri.parse("ssh://" + user + "@" + host
+                            + ":22/#" + user + "@" + host + ":22"));
+                } else {
+                    makeToast(String.format(getString(R.string.package_missing,
+                            "ConnectBot")));
                 }
                 break;
             case 23:
-                action = "org.theb.ssh.action.CONNECT_HOST";
-                if(isIntentAvailable(this, action)){
+                action = Intent.ACTION_VIEW;
+                if (isPackageInstalled(this, "org.connectbot")) {
                     intent = new Intent(action);
                     intent.setData(Uri.parse("telnet://" + host + ":23"));
+                } else {
+                    makeToast(String.format(getString(R.string.package_missing,
+                            "ConnectBot")));
                 }
                 break;
             case 80:
@@ -597,13 +614,25 @@ final public class Main extends Activity {
      * Main
      */
 
-    private boolean isIntentAvailable(Context context, String action) {
-        final PackageManager packageManager = context.getPackageManager();
-        final Intent intent = new Intent(action);
-        List<ResolveInfo> list =
-                packageManager.queryIntentActivities(intent,
-                        PackageManager.MATCH_DEFAULT_ONLY);
-        return list.size() > 0;
+    // private boolean isIntentAvailable(Context context, String action) {
+    // final PackageManager packageManager = context.getPackageManager();
+    // final Intent intent = new Intent(action);
+    // List<ResolveInfo> list = packageManager.queryIntentActivities(intent,
+    // PackageManager.GET_RESOLVED_FILTER);
+    // for (int i = 0; i < list.size(); i++) {
+    // Log.v(TAG, list.get(i).activityInfo.packageName);
+    // }
+    // return list.size() > 0;
+    // }
+
+    private boolean isPackageInstalled(Context context, String p) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            packageManager.getPackageInfo(p, 0);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     private boolean wifiConnectedOrWarn() {
@@ -738,10 +767,10 @@ final public class Main extends Activity {
     // }
     // }
 
-    // private void makeToast(String msg) {
-    // Toast.makeText(getApplicationContext(), (CharSequence) msg,
-    // Toast.LENGTH_SHORT).show();
-    // }
+    private void makeToast(String msg) {
+        Toast.makeText(getApplicationContext(), (CharSequence) msg,
+                Toast.LENGTH_SHORT).show();
+    }
 
     private void makeToast(int msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
@@ -750,10 +779,12 @@ final public class Main extends Activity {
     private void setButtonOff(Button b) {
         b.setClickable(false);
         b.setEnabled(false);
+        b.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.disabled, 0, 0);
     }
 
-    private void setButtonOn(Button b) {
+    private void setButtonOn(Button b, int drawable) {
         b.setClickable(true);
         b.setEnabled(true);
+        b.setCompoundDrawablesWithIntrinsicBounds(0, drawable, 0, 0);
     }
 }

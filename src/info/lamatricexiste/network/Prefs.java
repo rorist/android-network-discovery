@@ -17,8 +17,10 @@ public class Prefs extends PreferenceActivity implements
 
 	public final static String KEY_PORT_START = "port_start";
 	public final static String KEY_PORT_END = "port_end";
+    public static final String KEY_SSH_USER = "ssh_user";
 	public final static String DEFAULT_PORT_START = "1";
 	public final static String DEFAULT_PORT_END = "1024";
+    public static final String DEFAULT_SSH_USER = "root";
 
 	private PreferenceScreen preferenceScreen = null;
 

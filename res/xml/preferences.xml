@@ -25,6 +25,15 @@
             android:defaultValue="1024"
             android:inputType="phone" />
     </PreferenceCategory>
+    
+    <PreferenceCategory
+        android:title="@string/preferences_connection">
+        <EditTextPreference
+            android:key="ssh_user"
+            android:title="@string/preferences_ssh_user_title"
+            android:summary="@string/preferences_ssh_user_summary"
+            android:defaultValue="root" />
+    </PreferenceCategory>
 
     <!--<ListPreference-->
     <!--    android:key="discover_method"-->
