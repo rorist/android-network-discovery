@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -556,8 +558,23 @@ final public class Main extends Activity {
 
     private void openPortService(String host, Long port) {
         Intent intent = null;
+        String action = "";
         int portInt = (int) ((long) port);
         switch (portInt) {
+            case 22:
+                action = "org.theb.ssh.action.CONNECT_HOST";
+                if(isIntentAvailable(this, action)){
+                    intent = new Intent(action);
+                    intent.setData(Uri.parse("ssh://root@" + host + ":22"));
+                }
+                break;
+            case 23:
+                action = "org.theb.ssh.action.CONNECT_HOST";
+                if(isIntentAvailable(this, action)){
+                    intent = new Intent(action);
+                    intent.setData(Uri.parse("telnet://" + host + ":23"));
+                }
+                break;
             case 80:
                 intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse("http://" + host + "/"));
@@ -579,6 +596,15 @@ final public class Main extends Activity {
     /**
      * Main
      */
+
+    private boolean isIntentAvailable(Context context, String action) {
+        final PackageManager packageManager = context.getPackageManager();
+        final Intent intent = new Intent(action);
+        List<ResolveInfo> list =
+                packageManager.queryIntentActivities(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
+    }
 
     private boolean wifiConnectedOrWarn() {
         final NetworkInfo network_info = connMgr
