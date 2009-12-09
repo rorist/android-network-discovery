@@ -64,7 +64,7 @@ public class NetInfo {
         return info.getSupplicantState();
     }
 
-    public static int getIntFromIp(String ip_addr) {
+    public static long getLongFromIp(String ip_addr) {
         String[] a = ip_addr.split("\\.");
         return (Integer.parseInt(a[0]) * 16777216 + Integer.parseInt(a[1])
                 * 65536 + Integer.parseInt(a[2]) * 256 + Integer.parseInt(a[3]));
@@ -78,10 +78,10 @@ public class NetInfo {
         return ip.substring(0, ip.length() - 1);
     }
 
-    public static String getIpFromIntInverted(int ip_int) {
+    public static String getIpFromLongInverted(long ip_long) {
         String ip = "";
         for (int k = 3; k > -1; k--) {
-            ip = ip + ((ip_int >> k * 8) & 0xFF) + ".";
+            ip = ip + ((ip_long >> k * 8) & 0xFF) + ".";
         }
         return ip.substring(0, ip.length() - 1);
     }

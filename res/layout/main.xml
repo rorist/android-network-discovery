@@ -9,30 +9,26 @@
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dip"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip">
+        android:paddingTop="5dip"
+        android:paddingLeft="2dip">
 
         <Button
             android:id="@+id/btn_discover"
-            android:layout_width="105dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/btn_discover" />
+            android:drawableTop="@drawable/discover"
+            android:text="@string/btn_discover"
+            style="@style/ButtonTop" />
 
         <Button
             android:id="@+id/btn_export"
-            android:layout_width="105dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/btn_export" />
+            android:drawableTop="@drawable/export"
+            android:text="@string/btn_export"
+            style="@style/ButtonTop" />
 
         <Button
             android:id="@+id/btn_options"
-            android:layout_width="105dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/btn_options" />
+            android:drawableTop="@drawable/settings"
+            android:text="@string/btn_options"
+            style="@style/ButtonTop" />
 
         <!--
             <Button android:id="@+id/btn" android:layout_width="80dip"
@@ -63,29 +59,27 @@
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:layout_margin="5dip" />
+        android:layout_marginTop="10dip"
+        android:layout_marginBottom="10dip" />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dip"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip">
+        android:paddingRight="5dip"
+        android:paddingLeft="2dip">
 
         <Button
             android:id="@+id/btn_wifi"
-            android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="Wifi" />
+            android:drawableTop="@drawable/wifi"
+            android:text="Wifi"
+            style="@style/ButtonBottom" />
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
             android:layout_marginRight="2dip">
 
             <TextView

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Button">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#fff</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:background">@drawable/btn_bg</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:padding">5dip</item>
+    </style>
+    <style name="ButtonTop" parent="@style/Button">
+        <item name="android:layout_width">104dip</item>
+    </style>
+    <style name="ButtonBottom" parent="@style/Button">
+        <item name="android:layout_width">60dip</item>
+        <item name="android:layout_marginRight">5dip</item>
+    </style>
+</resources>

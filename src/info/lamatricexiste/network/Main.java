@@ -134,11 +134,8 @@ final public class Main extends Activity {
         connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         // checkRoot();
 
-        // Fake hosts and ports
-        /*
-         * initList(); addHost("192.168.1.1"); // EmulatorBridge: 10.0.2.2
-         * Long[] port = { (long) 80, (long) 443 }; hosts_ports.set(0, port);
-         */
+        // Fake hosts
+        //adapter.add("10.0.10.1");
     }
 
     @Override
@@ -307,12 +304,18 @@ final public class Main extends Activity {
         @Override
         protected void onPreExecute() {
 
+            //FIXME: to check with start=192.168.1.2 (-1062731518), end=192.168.1.254 (-1062731266)
+            // and write the difference between two methods
+
             NetInfo net = new NetInfo(ctxt);
-            int shift = (1 << (32 - net.getNetCidr()));
-            ip = NetInfo.getIntFromIp(net.getIp()); // FIXME: I know it's ugly
-            start = (ip & (1 - shift)) + 1;
-            end = (ip | (shift - 1)) - 1;
-            size = end - start + 1;
+            ip = NetInfo.getLongFromIp(net.getIp()); // FIXME: I know it's ugly
+            //int shift = (1 << (32 - net.getNetCidr()));
+            //start = (ip & (1 - shift)) + 1;
+            //end = (ip | (shift - 1)) - 1;
+            int shift = (32 - net.getNetCidr());
+            start = (ip >> shift << shift) + 1;
+            end = (start | ((1 << shift) - 1)) - 1;
+            size = (int)(end - start + 1);
             setProgress(0);
         }
 
@@ -354,6 +357,8 @@ final public class Main extends Activity {
         initList();
         checkHostsTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
+        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0,
+                R.drawable.cancel, 0, 0);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 checkHostsTask.cancel(true);
@@ -365,6 +370,8 @@ final public class Main extends Activity {
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
         btn_discover.setText(R.string.btn_discover);
+        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0,
+                R.drawable.discover, 0, 0);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 checkHostsTask = new CheckHostsTask();
@@ -400,8 +407,10 @@ final public class Main extends Activity {
             hosts_ports.add(null);
             hosts_haddr.add(haddr);
         } else {
+            if (checkHostsTask != null) {
+                checkHostsTask.cancel(true);
+            }
             NetInfo net = new NetInfo(this);
-            checkHostsTask.cancel(true);
             AlertDialog.Builder infoDialog = new AlertDialog.Builder(Main.this);
             infoDialog.setTitle(R.string.discover_proxy_title);
             infoDialog

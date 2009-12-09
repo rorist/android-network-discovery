@@ -62,7 +62,7 @@ public class HardwareAddress {
 	public String getNicVendor(String mac) {
 		String vendor = ctxt.getString(R.string.info_nic_unknown);
 		SQLiteDatabase db = openDataBase();
-		String macid = mac.replace(":", "").substring(0, 6).toLowerCase();
+		String macid = mac.replace(":", "").substring(0, 6).toUpperCase();
 		// Db request
 		Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
 				+ "'", null);
