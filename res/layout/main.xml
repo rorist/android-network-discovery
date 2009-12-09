@@ -4,32 +4,27 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dip"
         android:paddingLeft="2dip">
-
         <Button
             android:id="@+id/btn_discover"
             android:drawableTop="@drawable/discover"
             android:text="@string/btn_discover"
             style="@style/ButtonTop" />
-
         <Button
             android:id="@+id/btn_export"
             android:drawableTop="@drawable/export"
             android:text="@string/btn_export"
             style="@style/ButtonTop" />
-
         <Button
             android:id="@+id/btn_options"
             android:drawableTop="@drawable/settings"
             android:text="@string/btn_options"
             style="@style/ButtonTop" />
-
         <!--
             <Button android:id="@+id/btn" android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -61,34 +56,29 @@
         android:layout_weight="1"
         android:layout_marginTop="10dip"
         android:layout_marginBottom="10dip" />
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingRight="5dip"
         android:paddingLeft="2dip">
-
         <Button
             android:id="@+id/btn_wifi"
             android:drawableTop="@drawable/wifi"
             android:text="Wifi"
             style="@style/ButtonBottom" />
-
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginRight="2dip">
-
             <TextView
                 android:id="@+id/info_ip"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
                 android:typeface="monospace" />
-
             <TextView
                 android:id="@+id/info_nt"
                 android:layout_width="fill_parent"
@@ -96,16 +86,12 @@
                 android:textSize="10dip"
                 android:typeface="monospace"
                 android:text="@string/wifi_unknown" />
-
             <TextView
                 android:id="@+id/info_id"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
                 android:typeface="monospace" />
-
         </LinearLayout>
-
     </LinearLayout>
-
 </LinearLayout>

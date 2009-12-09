@@ -16,4 +16,9 @@
         <item name="android:layout_width">60dip</item>
         <item name="android:layout_marginRight">5dip</item>
     </style>
+    <style name="ButtonList" parent="@style/Button">
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_width">68dip</item>
+        <item name="android:layout_height">38dip</item>
+    </style>
 </resources>

@@ -4,7 +4,6 @@
     android:layout_width="fill_parent"
     android:layout_height="45dip"
     android:paddingLeft="3dip">
-
     <TextView
         android:id="@+id/list"
         android:layout_width="0dip"
@@ -29,19 +28,16 @@
     <!--        android:text="List"-->
     <!--        android:focusable="false"-->
     <!--        android:focusableInTouchMode="false" />-->
-
     <Button
         android:id="@+id/list_info"
-        android:layout_width="60dip"
-        android:layout_height="38dip"
         android:layout_gravity="center_vertical"
-        android:text="Info" />
-
+        android:text="Info"
+        android:drawableLeft="@drawable/info"
+        style="@style/ButtonList" />
     <Button
         android:id="@+id/list_port"
-        android:layout_width="60dip"
-        android:layout_height="38dip"
         android:layout_gravity="center_vertical"
-        android:text="Ports" />
-
+        android:text=" Ports"
+        android:drawableLeft="@drawable/firewall"
+        style="@style/ButtonList" />
 </LinearLayout>
