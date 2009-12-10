@@ -1,6 +1,6 @@
 package info.lamatricexiste.network.Utils;
 
-import info.lamatricexiste.network.Main;
+import info.lamatricexiste.network.DiscoverActivity;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -79,7 +79,7 @@ public class Export {
                 // Ports
                 Long[] portsL = hosts_ports.get(i);
                 if (portsL != null) {
-                    CharSequence[] ports = Main.preparePort(portsL); //FIXME: Move to ScanPort
+                    CharSequence[] ports = DiscoverActivity.preparePort(portsL); //FIXME: Move to ScanPort
                     for (int j = 0; j < ports.length; j++) {
                         xml += "\t\t\t<port>" + ports[j] + "</port>\r\n";
                     }

@@ -46,7 +46,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-final public class Main extends Activity {
+final public class DiscoverActivity extends Activity {
 
     private final String TAG = "NetworkMain";
     // private final int DEFAULT_DISCOVER = 1;
@@ -98,7 +98,7 @@ final public class Main extends Activity {
         Button btn_options = (Button) findViewById(R.id.btn_options);
         btn_options.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                startActivity(new Intent(Main.this, Prefs.class));
+                startActivity(new Intent(DiscoverActivity.this, Prefs.class));
             }
         });
 
@@ -424,7 +424,7 @@ final public class Main extends Activity {
                 checkHostsTask.cancel(true);
             }
             NetInfo net = new NetInfo(this);
-            AlertDialog.Builder infoDialog = new AlertDialog.Builder(Main.this);
+            AlertDialog.Builder infoDialog = new AlertDialog.Builder(DiscoverActivity.this);
             infoDialog.setTitle(R.string.discover_proxy_title);
             infoDialog
                     .setMessage(String.format(
@@ -440,7 +440,7 @@ final public class Main extends Activity {
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.info, null);
         // Build info dialog
-        AlertDialog.Builder infoDialog = new AlertDialog.Builder(Main.this);
+        AlertDialog.Builder infoDialog = new AlertDialog.Builder(DiscoverActivity.this);
         infoDialog.setTitle(ip);
         // Set info values
         HardwareAddress hardwareAddress = new HardwareAddress(this);
@@ -481,7 +481,7 @@ final public class Main extends Activity {
             port_end = Integer.parseInt(port_end_pref);
             nb_port = port_end - port_start + 1;
             // Set progress
-            progress = new ProgressDialog(Main.this);
+            progress = new ProgressDialog(DiscoverActivity.this);
             progress.setMessage(String.format(getString(R.string.scan_start),
                     host));
             progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -537,7 +537,7 @@ final public class Main extends Activity {
 
     private void showPorts(final Long[] ports, final int position,
             final String host) {
-        final AlertDialog.Builder scanDone = new AlertDialog.Builder(Main.this);
+        final AlertDialog.Builder scanDone = new AlertDialog.Builder(DiscoverActivity.this);
         scanDone.setTitle(host).setPositiveButton(R.string.btn_rescan,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dlg, int sumthin) {
@@ -644,7 +644,7 @@ final public class Main extends Activity {
         if (network_info.getState() == NetworkInfo.State.CONNECTED) {
             return true;
         }
-        AlertDialog.Builder alert = new AlertDialog.Builder(Main.this);
+        AlertDialog.Builder alert = new AlertDialog.Builder(DiscoverActivity.this);
         alert.setMessage(R.string.wifi_disabled);
         alert.setPositiveButton(R.string.btn_close, null);
         alert.show();
@@ -688,7 +688,7 @@ final public class Main extends Activity {
     // }
 
     private void export() {
-        final Export e = new Export(Main.this, hosts, hosts_ports, hosts_haddr);
+        final Export e = new Export(DiscoverActivity.this, hosts, hosts_ports, hosts_haddr);
         final String file = e.getFileName();
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -696,7 +696,7 @@ final public class Main extends Activity {
         final EditText txt = (EditText) v.findViewById(R.id.export_file);
         txt.setText(file);
 
-        AlertDialog.Builder getFileName = new AlertDialog.Builder(Main.this);
+        AlertDialog.Builder getFileName = new AlertDialog.Builder(DiscoverActivity.this);
         getFileName.setTitle(R.string.export_choose);
         getFileName.setView(v);
         getFileName.setPositiveButton(R.string.export_save,
@@ -705,7 +705,7 @@ final public class Main extends Activity {
                         final String fileEdit = txt.getText().toString();
                         if (e.fileExists(fileEdit)) {
                             AlertDialog.Builder fileExists = new AlertDialog.Builder(
-                                    Main.this);
+                                    DiscoverActivity.this);
                             fileExists.setTitle(R.string.export_exists_title);
                             fileExists.setMessage(R.string.export_exists_msg);
                             fileExists.setPositiveButton(R.string.btn_yes,
