@@ -13,6 +13,11 @@
     <PreferenceCategory
         android:title="@string/preferences_port_scan">
         <EditTextPreference
+            android:key="ssh_user"
+            android:title="@string/preferences_ssh_user_title"
+            android:summary="@string/preferences_ssh_user_summary"
+            android:defaultValue="root" />
+        <EditTextPreference
             android:key="port_start"
             android:title="@string/preferences_port_start_title"
             android:summary="@string/preferences_port_start_summary"
@@ -24,15 +29,6 @@
             android:summary="@string/preferences_port_end_summary"
             android:defaultValue="1024"
             android:inputType="phone" />
-    </PreferenceCategory>
-    
-    <PreferenceCategory
-        android:title="@string/preferences_connection">
-        <EditTextPreference
-            android:key="ssh_user"
-            android:title="@string/preferences_ssh_user_title"
-            android:summary="@string/preferences_ssh_user_summary"
-            android:defaultValue="root" />
     </PreferenceCategory>
     
     <PreferenceCategory

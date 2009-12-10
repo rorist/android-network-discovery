@@ -36,12 +36,11 @@
     <string name="export_save">Save</string>
     <string name="export_exists_title">File already exists</string>
     <string name="export_exists_msg">Do you want to overwrite ?</string>
-    <string name="preferences_connection">Connection</string>
     <string name="preferences_notifications">Notifications</string>
+    <string name="preferences_port_scan">Port Scan</string>
     <string name="preferences_advanced">Advanced Settings</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Vibrate when Scan is completed</string>
-    <string name="preferences_port_scan">Port Scan</string>
     <string name="preferences_port_start_title">First Port</string>
     <string name="preferences_port_start_summary">First TCP Port to scan. 1-65535</string>
     <string name="preferences_port_end_title">Last Port</string>

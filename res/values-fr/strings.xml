@@ -36,12 +36,11 @@
     <string name="export_save">Sauver</string>
     <string name="export_exists_title">Le fichier existe déjà</string>
     <string name="export_exists_msg">Voulez-vous l\'écraser ?</string>
-    <string name="preferences_connection">Connection</string>
     <string name="preferences_notifications">Notifications</string>
+    <string name="preferences_port_scan">Scan de Ports</string>
     <string name="preferences_advanced">Réglages Avancés</string>
     <string name="preferences_vibrate_title">Vibration</string>
     <string name="preferences_vibrate_summary">Vibre lorsque le Scan est terminé</string>
-    <string name="preferences_port_scan">Scan de Ports TCP</string>
     <string name="preferences_port_start_title">Premier port</string>
     <string name="preferences_port_start_summary">Le premier port TCP à scanner. 1-65535</string>
     <string name="preferences_port_end_title">Dernier port</string>
