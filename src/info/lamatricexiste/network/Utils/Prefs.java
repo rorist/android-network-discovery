@@ -1,5 +1,6 @@
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.Utils;
 
+import info.lamatricexiste.network.R;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;

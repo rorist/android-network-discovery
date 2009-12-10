@@ -1,6 +1,8 @@
 // http://standards.ieee.org/regauth/oui/oui.txt
 
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.Utils;
+
+import info.lamatricexiste.network.R;
 
 import java.io.BufferedReader;
 import java.io.File;

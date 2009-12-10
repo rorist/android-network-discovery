@@ -1,4 +1,4 @@
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.HostDiscovery;
 
 public class DiscoveryBroadcast {
 	// private final int PORT = 7;

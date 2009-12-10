@@ -1,5 +1,5 @@
 //am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.Utils;
 
 import android.content.Context;
 import android.net.DhcpInfo;
@@ -11,7 +11,7 @@ public class NetInfo {
     private DhcpInfo dhcp;
     private WifiInfo info;
 
-    NetInfo(Context ctxt) {
+    public NetInfo(Context ctxt) {
         WifiManager wifi = (WifiManager) ctxt
                 .getSystemService(Context.WIFI_SERVICE);
         if (wifi != null) {

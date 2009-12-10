@@ -7,7 +7,7 @@
  * http://weblogs.java.net/blog/2006/09/21/tricks-and-tips-nio-part-v-ssl-and-nio-friend-or-foe
  */
 
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.PortScan;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -38,7 +38,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 	protected String host;
 	protected int position;
 
-	PortScan(int position, String host) {
+	protected PortScan(int position, String host) {
 		this.position = position;
 		this.host = host;
 	}

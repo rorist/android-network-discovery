@@ -1,4 +1,8 @@
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.HostDiscovery;
+
+import info.lamatricexiste.network.Utils.NetInfo;
+import info.lamatricexiste.network.Utils.Prefs;
+import info.lamatricexiste.network.Utils.Reachable;
 
 import java.io.IOException;
 import java.net.InetAddress;

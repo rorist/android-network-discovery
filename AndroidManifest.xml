@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Prefs"
+            android:name=".Utils.Prefs"
             android:label="@string/app_name" />
     </application>
     <supports-screens />

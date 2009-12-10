@@ -1,4 +1,4 @@
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
