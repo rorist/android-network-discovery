@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -13,12 +14,12 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "DiscoveryUnicast";
     private final int TIMEOUT_REACH = 1000;
-    private final int nTHREADS = 64;
     private final int DISCOVER_RATE = 0;
     private long pt_forward;
     private long pt_backward;
     private int pt_move = 2; // 1=backward 2=forward
 
+    protected SharedPreferences prefsMgr;
     protected ExecutorService pool;
     protected long ip;
     protected long start;
@@ -29,7 +30,8 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
         Log.v(TAG, "start=" + NetInfo.getIpFromLongInverted(start) + " ("
                 + start + "), end=" + NetInfo.getIpFromLongInverted(end) + " ("
                 + end + "), length=" + size);
-        pool = Executors.newFixedThreadPool(nTHREADS);
+        pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr.getString(
+                Prefs.KEY_NTHREADS, Prefs.KEY_NTHREADS)));
 
         try {
             // gateway

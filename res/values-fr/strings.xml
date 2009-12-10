@@ -45,7 +45,10 @@
     <string name="preferences_port_start_summary">Le premier port TCP à scanner. 1-65535</string>
     <string name="preferences_port_end_title">Dernier port</string>
     <string name="preferences_port_end_summary">Le dernier port TCP à scanner. 1-65535</string>
-    <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
     <string name="preferences_ssh_user_title">Nom d'utilisateur SSH</string>
     <string name="preferences_ssh_user_summary">Utilisateur à utiliser pour se connecter en SSH</string>
+    <string name="preferences_threads_title">Discovery Threads</string>
+    <string name="preferences_threads_summary">Nombre maximum de threads à utiliser lors de la découverte de machines (1-256)</string>
+    <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
+    <string name="preferences_error2">Erreur: Le nombre de Threads doit être entre 1 et 256 !</string>
 </resources>

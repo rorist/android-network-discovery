@@ -312,11 +312,7 @@ final public class Main extends Activity {
 
         @Override
         protected void onPreExecute() {
-
-            // FIXME: to check with start=192.168.1.2 (-1062731518),
-            // end=192.168.1.254 (-1062731266)
-            // and write the difference between two methods
-
+            prefsMgr = prefs;
             NetInfo net = new NetInfo(ctxt);
             ip = NetInfo.getLongFromIp(net.getIp()); // FIXME: I know it's ugly
             // int shift = (1 << (32 - net.getNetCidr()));
