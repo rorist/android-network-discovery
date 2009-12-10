@@ -1,11 +1,5 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
-        <EditTextPreference
-            android:key="nthreads"
-            android:title="@string/preferences_threads_title"
-            android:summary="@string/preferences_threads_summary"
-            android:defaultValue="32"
-            android:inputType="number" />
 
     <PreferenceCategory
         android:title="@string/preferences_notifications">
@@ -39,6 +33,16 @@
             android:title="@string/preferences_ssh_user_title"
             android:summary="@string/preferences_ssh_user_summary"
             android:defaultValue="root" />
+    </PreferenceCategory>
+    
+    <PreferenceCategory
+        android:title="@string/preferences_advanced">
+        <EditTextPreference
+            android:key="nthreads"
+            android:title="@string/preferences_threads_title"
+            android:summary="@string/preferences_threads_summary"
+            android:defaultValue="32"
+            android:inputType="number" />
     </PreferenceCategory>
 
     <!--<ListPreference-->
