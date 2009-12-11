@@ -1,6 +1,6 @@
 package info.lamatricexiste.network.Utils;
 
-import info.lamatricexiste.network.DiscoverActivity;
+import info.lamatricexiste.network.PortScanActivity;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,11 +17,11 @@ public class Export {
 
     private final String TAG = "Export";
     private List<String> hosts;
-    private List<Long[]> hosts_ports;
+    private List<long[]> hosts_ports;
     private List<String> hosts_haddr;
     private NetInfo net;
 
-    public Export(Context ctxt, List<String> hosts, List<Long[]> hosts_ports,
+    public Export(Context ctxt, List<String> hosts, List<long[]> hosts_ports,
             List<String> hosts_haddr) {
         this.hosts = hosts;
         this.hosts_ports = hosts_ports;
@@ -77,9 +77,9 @@ public class Export {
                 xml += "\t\t<host value=\"" + host + "\" mac=\""
                         + hosts_haddr.get(i) + "\">\r\n";
                 // Ports
-                Long[] portsL = hosts_ports.get(i);
-                if (portsL != null) {
-                    CharSequence[] ports = DiscoverActivity.preparePort(portsL); //FIXME: Move to ScanPort
+                long[] portsArray = hosts_ports.get(i);
+                if (portsArray != null) {
+                    String[] ports = PortScanActivity.preparePort(portsArray);
                     for (int j = 0; j < ports.length; j++) {
                         xml += "\t\t\t<port>" + ports[j] + "</port>\r\n";
                     }

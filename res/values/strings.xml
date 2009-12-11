@@ -36,8 +36,8 @@
     <string name="export_save">Save</string>
     <string name="export_exists_title">File already exists</string>
     <string name="export_exists_msg">Do you want to overwrite ?</string>
-    <string name="preferences_notifications">Notifications</string>
-    <string name="preferences_port_scan">Port Scan</string>
+    <string name="preferences_notifications">Notifications settings</string>
+    <string name="preferences_port_scan">Port Scan settings</string>
     <string name="preferences_advanced">Advanced Settings</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Vibrate when Scan is completed</string>

@@ -19,6 +19,9 @@
         <activity
             android:name=".Utils.Prefs"
             android:label="@string/app_name" />
+        <activity
+            android:name=".PortScanActivity"
+            android:label="@string/app_name" />
     </application>
     <supports-screens />
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />

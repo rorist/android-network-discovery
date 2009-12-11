@@ -1,30 +1,24 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.HostDiscovery.DiscoveryUnicast;
-import info.lamatricexiste.network.PortScan.PortScan;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -50,9 +44,10 @@ final public class DiscoverActivity extends Activity {
 
     private final String TAG = "NetworkMain";
     // private final int DEFAULT_DISCOVER = 1;
-    private final long VIBRATE = (long) 250;
+    public final static long VIBRATE = (long) 250;
+    private final int SCAN_PORT_RESULT = 1;
     private List<String> hosts = null; // TODO: Use a HostBean objects list
-    private List<Long[]> hosts_ports = null;
+    private List<long[]> hosts_ports = null;
     private List<String> hosts_haddr = null;
     private HostsAdapter adapter;
     private ListView list;
@@ -63,7 +58,6 @@ final public class DiscoverActivity extends Activity {
     // private boolean rooted = false;
     private ConnectivityManager connMgr;
     private CheckHostsTask checkHostsTask = null;
-    private ScanPortTask scanPortTask = null;
     private Context ctxt;
 
     @Override
@@ -184,6 +178,21 @@ final public class DiscoverActivity extends Activity {
         return (super.onOptionsItemSelected(item));
     }
 
+    // Sub Activity result
+    // Listen for results.
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (resultCode) {
+            case SCAN_PORT_RESULT:
+                if (resultCode == RESULT_CANCELED) {
+                    // crash
+                } else {
+                    // Save new ports
+                }
+            default:
+                break;
+        }
+    }
+
     // Custom ArrayAdapter
     private class HostsAdapter extends ArrayAdapter<String> {
         public HostsAdapter(Context context, int resource,
@@ -201,7 +210,11 @@ final public class DiscoverActivity extends Activity {
                         .findViewById(R.id.list_port);
                 btn_ports.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        scanPort(position, false);
+                        Intent intent = new Intent(DiscoverActivity.this,
+                                PortScanActivity.class);
+                        intent.putExtra("host", hosts.get(position));
+                        intent.putExtra("ports", hosts_ports.get(position));
+                        startActivityForResult(intent, SCAN_PORT_RESULT);
                     }
                 });
                 Button btn_info = (Button) convertView
@@ -398,17 +411,13 @@ final public class DiscoverActivity extends Activity {
             checkHostsTask.cancel(true);
             checkHostsTask = null;
         }
-        if (scanPortTask != null) {
-            scanPortTask.cancel(true);
-            scanPortTask = null;
-        }
     }
 
     private void initList() {
         // setSelectedHosts(false);
         adapter.clear();
         hosts = new ArrayList<String>();
-        hosts_ports = new ArrayList<Long[]>();
+        hosts_ports = new ArrayList<long[]>();
         hosts_haddr = new ArrayList<String>();
     }
 
@@ -424,7 +433,8 @@ final public class DiscoverActivity extends Activity {
                 checkHostsTask.cancel(true);
             }
             NetInfo net = new NetInfo(this);
-            AlertDialog.Builder infoDialog = new AlertDialog.Builder(DiscoverActivity.this);
+            AlertDialog.Builder infoDialog = new AlertDialog.Builder(
+                    DiscoverActivity.this);
             infoDialog.setTitle(R.string.discover_proxy_title);
             infoDialog
                     .setMessage(String.format(
@@ -440,7 +450,8 @@ final public class DiscoverActivity extends Activity {
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.info, null);
         // Build info dialog
-        AlertDialog.Builder infoDialog = new AlertDialog.Builder(DiscoverActivity.this);
+        AlertDialog.Builder infoDialog = new AlertDialog.Builder(
+                DiscoverActivity.this);
         infoDialog.setTitle(ip);
         // Set info values
         HardwareAddress hardwareAddress = new HardwareAddress(this);
@@ -457,199 +468,8 @@ final public class DiscoverActivity extends Activity {
     }
 
     /**
-     * Port Scan
-     */
-
-    private class ScanPortTask extends PortScan {
-
-        private ProgressDialog progress = null;
-        private ArrayList<Long> ports = new ArrayList<Long>();
-        private int progress_current = 0;
-
-        ScanPortTask(int position, String host) {
-            super(position, host);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            // Get preferences
-            String port_start_pref = prefs.getString(Prefs.KEY_PORT_START,
-                    Prefs.DEFAULT_PORT_START);
-            String port_end_pref = prefs.getString(Prefs.KEY_PORT_END,
-                    Prefs.DEFAULT_PORT_END);
-            port_start = Integer.parseInt(port_start_pref);
-            port_end = Integer.parseInt(port_end_pref);
-            nb_port = port_end - port_start + 1;
-            // Set progress
-            progress = new ProgressDialog(DiscoverActivity.this);
-            progress.setMessage(String.format(getString(R.string.scan_start),
-                    host));
-            progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progress.setMax(nb_port);
-            // Cancelable
-            progress.setCancelable(true);
-            progress.setButton(ProgressDialog.BUTTON_NEGATIVE,
-                    getString(R.string.btn_discover_cancel),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            scanPortTask.cancel(true);
-                        }
-                    });
-            progress.show();
-        }
-
-        @Override
-        protected void onPostExecute(Void unused) {
-            Collections.sort(ports);
-            Long[] result = ports.toArray(new Long[ports.size()]);
-            hosts_ports.set(position, result);
-            progress.dismiss();
-            showPorts(result, position, host);
-            if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
-                    Prefs.DEFAULT_VIBRATE_FINISH) == true) {
-                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(VIBRATE);
-            }
-        }
-
-        @Override
-        protected void onProgressUpdate(Long... values) {
-            if (values.length > 0) {
-                if (!values[0].equals(new Long(0))) {
-                    ports.add(values[0]);
-                }
-            }
-            progress_current++;
-            progress.setProgress(progress_current);
-        }
-    }
-
-    private void scanPort(final int position, boolean force) {
-        String host = hosts.get(position);
-        Long[] ports = hosts_ports.get(position);
-        if (wifiConnectedOrWarn() && (force || ports == null)) {
-            scanPortTask = new ScanPortTask(position, host);
-            scanPortTask.execute();
-        } else if (ports != null) {
-            showPorts(ports, position, host);
-        }
-    }
-
-    private void showPorts(final Long[] ports, final int position,
-            final String host) {
-        final AlertDialog.Builder scanDone = new AlertDialog.Builder(DiscoverActivity.this);
-        scanDone.setTitle(host).setPositiveButton(R.string.btn_rescan,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dlg, int sumthin) {
-                        scanPort(position, true);
-                    }
-                }).setNegativeButton(R.string.btn_close, null);
-        if (ports.length > 0) {
-            scanDone.setItems(preparePort(ports),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            openPortService(host, ports[which]);
-                            scanDone.show();
-                        }
-                    });
-        } else {
-            scanDone.setMessage(R.string.scan_noport);
-        }
-        scanDone.show();
-    }
-
-    public static CharSequence[] preparePort(Long[] ports) {
-        CharSequence[] portsChar = new CharSequence[ports.length];
-        for (int i = 0; i < ports.length; i++) {
-            portsChar[i] = (CharSequence) String.valueOf(ports[i])
-                    + "/tcp open";
-        }
-        return portsChar;
-    }
-
-    private void openPortService(String host, Long port) {
-        Intent intent = null;
-        String action = "";
-        int portInt = (int) ((long) port);
-        switch (portInt) {
-            case 22:
-                action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(this, "org.connectbot")) {
-                    String user = prefs.getString(Prefs.KEY_SSH_USER,
-                            Prefs.DEFAULT_SSH_USER);
-                    intent = new Intent(action);
-                    intent.setData(Uri.parse("ssh://" + user + "@" + host
-                            + ":22/#" + user + "@" + host + ":22"));
-                } else {
-                    makeToast(String.format(getString(R.string.package_missing,
-                            "ConnectBot")));
-                }
-                break;
-            case 23:
-                action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(this, "org.connectbot")) {
-                    intent = new Intent(action);
-                    intent.setData(Uri.parse("telnet://" + host + ":23"));
-                } else {
-                    makeToast(String.format(getString(R.string.package_missing,
-                            "ConnectBot")));
-                }
-                break;
-            case 80:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("http://" + host + "/"));
-                break;
-            case 443:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://" + host + "/"));
-                break;
-            default:
-                makeToast(R.string.scan_noaction);
-                // Use something like netcat to
-                // fetch identification message of service
-        }
-        if (intent != null) {
-            startActivity(intent);
-        }
-    }
-
-    /**
      * Main
      */
-
-    // private boolean isIntentAvailable(Context context, String action) {
-    // final PackageManager packageManager = context.getPackageManager();
-    // final Intent intent = new Intent(action);
-    // List<ResolveInfo> list = packageManager.queryIntentActivities(intent,
-    // PackageManager.GET_RESOLVED_FILTER);
-    // for (int i = 0; i < list.size(); i++) {
-    // Log.v(TAG, list.get(i).activityInfo.packageName);
-    // }
-    // return list.size() > 0;
-    // }
-
-    private boolean isPackageInstalled(Context context, String p) {
-        PackageManager packageManager = context.getPackageManager();
-        try {
-            packageManager.getPackageInfo(p, 0);
-        } catch (NameNotFoundException e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean wifiConnectedOrWarn() {
-        final NetworkInfo network_info = connMgr
-                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (network_info.getState() == NetworkInfo.State.CONNECTED) {
-            return true;
-        }
-        AlertDialog.Builder alert = new AlertDialog.Builder(DiscoverActivity.this);
-        alert.setMessage(R.string.wifi_disabled);
-        alert.setPositiveButton(R.string.btn_close, null);
-        alert.show();
-        return false;
-    }
 
     // private void checkRoot() {
     // // Borrowed here: http://bit.ly/754iGA
@@ -688,7 +508,8 @@ final public class DiscoverActivity extends Activity {
     // }
 
     private void export() {
-        final Export e = new Export(DiscoverActivity.this, hosts, hosts_ports, hosts_haddr);
+        final Export e = new Export(DiscoverActivity.this, hosts, hosts_ports,
+                hosts_haddr);
         final String file = e.getFileName();
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -696,7 +517,8 @@ final public class DiscoverActivity extends Activity {
         final EditText txt = (EditText) v.findViewById(R.id.export_file);
         txt.setText(file);
 
-        AlertDialog.Builder getFileName = new AlertDialog.Builder(DiscoverActivity.this);
+        AlertDialog.Builder getFileName = new AlertDialog.Builder(
+                DiscoverActivity.this);
         getFileName.setTitle(R.string.export_choose);
         getFileName.setView(v);
         getFileName.setPositiveButton(R.string.export_save,
@@ -770,10 +592,10 @@ final public class DiscoverActivity extends Activity {
     // }
     // }
 
-    private void makeToast(String msg) {
-        Toast.makeText(getApplicationContext(), (CharSequence) msg,
-                Toast.LENGTH_SHORT).show();
-    }
+    // private void makeToast(String msg) {
+    // Toast.makeText(getApplicationContext(), (CharSequence) msg,
+    // Toast.LENGTH_SHORT).show();
+    // }
 
     private void makeToast(int msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
