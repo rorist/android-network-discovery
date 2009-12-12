@@ -6,23 +6,22 @@ import info.lamatricexiste.network.Utils.Prefs;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 // TODO: Activity.finish(); button ?
@@ -32,10 +31,10 @@ final public class PortScanActivity extends ListActivity {
     // private final String TAG = "PortScanActivity";
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
-    private ConnectivityManager connMgr;
+    // private ConnectivityManager connMgr;
     private ArrayAdapter<String> adapter;
     private String host;
-    private long[] ports;
+    private ArrayList<Long> ports = null;
     private Button btn_scan;
 
     @Override
@@ -48,7 +47,7 @@ final public class PortScanActivity extends ListActivity {
 
         Bundle extra = getIntent().getExtras();
         host = extra.getString("host");
-        ports = extra.getLongArray("ports");
+        populatePorts(extra.getLongArray("ports"));
 
         // Scan
         btn_scan = (Button) findViewById(R.id.btn_discover);
@@ -59,9 +58,11 @@ final public class PortScanActivity extends ListActivity {
         });
 
         // List
-        adapter = new ArrayAdapter<String>(this, R.layout.list, R.id.list,
-                preparePort(ports));
+        adapter = new PortsAdapter(this, R.layout.list_port, R.id.list,
+                preparePort());
         setListAdapter(adapter);
+        ListView list = (ListView) findViewById(android.R.id.list);
+        list.setItemsCanFocus(true);
 
         // Start scan if ports empty
         if (ports == null) {
@@ -69,9 +70,16 @@ final public class PortScanActivity extends ListActivity {
         }
     }
 
-    private class ScanPortTask extends PortScan {
+    private void populatePorts(long[] longArray) {
+        if (longArray != null) {
+            ports = new ArrayList<Long>();
+            for (int i = 0; i < longArray.length; i++) {
+                ports.add(longArray[i]);
+            }
+        }
+    }
 
-        private ArrayList<Long> ports = new ArrayList<Long>();
+    private class ScanPortTask extends PortScan {
         private int progress_current = 0;
 
         ScanPortTask(String host) {
@@ -88,6 +96,7 @@ final public class PortScanActivity extends ListActivity {
             port_start = Integer.parseInt(port_start_pref);
             port_end = Integer.parseInt(port_end_pref);
             nb_port = port_end - port_start + 1;
+            setProgress(0);
         }
 
         @Override
@@ -123,6 +132,7 @@ final public class PortScanActivity extends ListActivity {
         setProgressBarVisibility(true);
         setProgressBarIndeterminateVisibility(true);
         adapter.clear();
+        ports = new ArrayList<Long>();
         scanPortTask = new ScanPortTask(host);
         scanPortTask.execute();
         btn_scan.setText(R.string.btn_discover_cancel);
@@ -148,24 +158,58 @@ final public class PortScanActivity extends ListActivity {
         });
     }
 
-    // scanPortTask = new ScanPortTask(position, host);
-    // scanPortTask.execute();
-
-    // new DialogInterface.OnClickListener() {
-    // public void onClick(DialogInterface dialog, int which) {
-    // openPortService(host, ports[which]);
-    // scanDone.show();
-    // }
-    // }
-
-    public static List<String> preparePort(long[] ports) {
+    private List<String> preparePort() {
         List<String> portsChar = new ArrayList<String>();
         if (ports != null) {
-            for (int i = 0; i < ports.length; i++) {
-                portsChar.add(i, String.valueOf(ports[i]) + "/tcp open");
+            for (Long port : ports) {
+                portsChar.add(String.valueOf(port) + "/tcp open");
             }
         }
         return portsChar;
+    }
+
+    public static List<String> preparePortPublic(long[] portsArray) {
+        List<String> portsChar = new ArrayList<String>();
+        if (portsArray != null) {
+            for (int i = 0; i < portsArray.length; i++) {
+                portsChar.add(String.valueOf(portsArray[i]) + "/tcp open");
+            }
+        }
+        return portsChar;
+    }
+
+    static class ViewHolder {
+        Button btn_connect;
+    }
+
+    // Custom ArrayAdapter
+    private class PortsAdapter extends ArrayAdapter<String> {
+        public PortsAdapter(Context context, int resource,
+                int textViewresourceId, List<String> objects) {
+            super(context, resource, textViewresourceId, objects);
+        }
+
+        @Override
+        public View getView(final int position, View convertView,
+                ViewGroup parent) {
+
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = super.getView(position, convertView, parent);
+                holder = new ViewHolder();
+                holder.btn_connect = (Button) convertView
+                        .findViewById(R.id.list_connect);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.btn_connect.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    openPortService(host, ports.get(position));
+                }
+            });
+            return convertView;
+        }
     }
 
     private void openPortService(String host, Long port) {
@@ -214,19 +258,19 @@ final public class PortScanActivity extends ListActivity {
         }
     }
 
-    private boolean wifiConnectedOrWarn() {
-        final NetworkInfo network_info = connMgr
-                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (network_info.getState() == NetworkInfo.State.CONNECTED) {
-            return true;
-        }
-        AlertDialog.Builder alert = new AlertDialog.Builder(
-                PortScanActivity.this);
-        alert.setMessage(R.string.wifi_disabled);
-        alert.setPositiveButton(R.string.btn_close, null);
-        alert.show();
-        return false;
-    }
+    // private boolean wifiConnectedOrWarn() {
+    // final NetworkInfo network_info = connMgr
+    // .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+    // if (network_info.getState() == NetworkInfo.State.CONNECTED) {
+    // return true;
+    // }
+    // AlertDialog.Builder alert = new AlertDialog.Builder(
+    // PortScanActivity.this);
+    // alert.setMessage(R.string.wifi_disabled);
+    // alert.setPositiveButton(R.string.btn_close, null);
+    // alert.show();
+    // return false;
+    // }
 
     private boolean isPackageInstalled(Context context, String p) {
         PackageManager packageManager = context.getPackageManager();

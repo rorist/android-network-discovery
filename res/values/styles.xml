@@ -21,4 +21,9 @@
         <item name="android:layout_width">68dip</item>
         <item name="android:layout_height">38dip</item>
     </style>
+    <style name="ButtonConnect" parent="@style/Button">
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_width">85dip</item>
+        <item name="android:layout_height">38dip</item>
+    </style>
 </resources>

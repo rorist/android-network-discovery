@@ -128,7 +128,7 @@ final public class DiscoverActivity extends Activity {
         // });
 
         // Hosts list
-        adapter = new HostsAdapter(this, R.layout.list, R.id.list);
+        adapter = new HostsAdapter(this, R.layout.list_host, R.id.list);
         ListView list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
         list.setItemsCanFocus(true);

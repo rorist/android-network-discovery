@@ -80,7 +80,7 @@ public class Export {
                 long[] portsArray = hosts_ports.get(i);
                 if (portsArray != null) {
                     List<String> ports = PortScanActivity
-                            .preparePort(portsArray);
+                            .preparePortPublic(portsArray);
                     for (int j = 0; j < ports.size(); j++) {
                         xml += "\t\t\t<port>" + ports.get(j) + "</port>\r\n";
                     }
