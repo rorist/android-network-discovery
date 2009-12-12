@@ -19,9 +19,8 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     private final String TAG = "DiscoveryUnicast";
     private final int TIMEOUT_REACH = 1000;
     private final int DISCOVER_RATE = 0;
-    private long pt_forward;
-    private long pt_backward;
     private int pt_move = 2; // 1=backward 2=forward
+    private Reachable reachable; // TODO: This is a test of reuse (less GC)
 
     protected SharedPreferences prefsMgr;
     protected ExecutorService pool;
@@ -34,29 +33,34 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
         Log.v(TAG, "start=" + NetInfo.getIpFromLongInverted(start) + " ("
                 + start + "), end=" + NetInfo.getIpFromLongInverted(end) + " ("
                 + end + "), length=" + size);
-        pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr.getString(
-                Prefs.KEY_NTHREADS, Prefs.KEY_NTHREADS)));
+        pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr
+                .getString(Prefs.KEY_NTHREADS, Prefs.KEY_NTHREADS)));
+        reachable = new Reachable();
 
         try {
             // gateway
             launch(start);
 
             // hosts
-            pt_backward = ip - 1;
-            pt_forward = ip + 1;
+            long pt_backward = ip - 1;
+            long pt_forward = ip + 1;
             int size_hosts = size - 2;
+
             for (int i = 0; i < size_hosts; i++) {
+                // Set pointer if of limits
+                if (pt_backward <= start) {
+                    pt_move = 2;
+                } else if (pt_forward > end) {
+                    pt_move = 1;
+                }
+                // Move back and forth
                 if (pt_move == 1) {
-                    if (pt_backward > start) {
-                        launch(pt_backward);
-                        pt_backward--;
-                    }
+                    launch(pt_backward);
+                    pt_backward--;
                     pt_move = 2;
                 } else if (pt_move == 2) {
-                    if (pt_forward <= end) {
-                        launch(pt_forward);
-                        pt_forward++;
-                    }
+                    launch(pt_forward);
+                    pt_forward++;
                     pt_move = 1;
                 }
             }
@@ -78,17 +82,16 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     }
 
     private class CheckRunnable implements Runnable {
-        String host;
+        private String host;
 
         CheckRunnable(String host) {
             this.host = host;
         }
 
         public void run() {
-            Reachable r = new Reachable();
             try {
                 InetAddress h = InetAddress.getByName(host);
-                if (h.isReachable(TIMEOUT_REACH) || r.request(h)) {
+                if (h.isReachable(TIMEOUT_REACH) || reachable.request(h)) {
                     publishProgress(host);
                 } else {
                     publishProgress(new String());
