@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_ports"
+    android:layout_width="fill_parent"
+    android:layout_height="45dip"
+    android:paddingLeft="3dip">
+    <TextView
+        android:id="@+id/list"
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:paddingLeft="12dip"
+        android:textSize="12dip"
+        android:typeface="monospace"
+        android:text="List"
+        android:focusable="false"
+        android:focusableInTouchMode="false" />
+    <Button
+        android:id="@+id/list_connect"
+        android:layout_gravity="center_vertical"
+        android:text="@string/scan_connect"
+        android:drawableLeft="@drawable/connect"
+        style="@style/ButtonConnect" />
+</LinearLayout>
