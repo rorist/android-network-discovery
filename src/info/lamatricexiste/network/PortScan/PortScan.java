@@ -15,12 +15,11 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.SparseArray;
 
 public class PortScan extends AsyncTask<Void, Long, Void> {
 
@@ -74,11 +73,11 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         socket.configureBlocking(false);
         socket.connect(addr);
         // Register the Channel with port and timestamp as attachement
-        HashMap<Integer, Long> data = new HashMap<Integer, Long>(2);
-        // FIXME: Trouver un autre moyen de stocker ces infos, car oblige
+        SparseArray<Long> data = new SparseArray<Long>(2);
+        // FIXME: Trouver un autre moyen de stocker ces infos ? car oblige
         // d'utiliser un long pour le numero de port a cause de ca
-        data.put(0, (long) port);
-        data.put(1, System.currentTimeMillis());
+        data.append(0, (long) port);
+        data.append(1, System.currentTimeMillis());
         socket.register(selector, SelectionKey.OP_CONNECT, data);
     }
 
@@ -110,7 +109,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
     @SuppressWarnings("unchecked")
     protected void handleConnect(SelectionKey key) {
         SocketChannel socket = (SocketChannel) key.channel();
-        Map<Integer, Long> map = (HashMap<Integer, Long>) key.attachment();
+        SparseArray<Long> map = (SparseArray<Long>) key.attachment();
         Long port = map.get(0);
         try {
             if (socket.isConnectionPending()) {
@@ -136,7 +135,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         // http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
         long now = System.currentTimeMillis();
         for (SelectionKey key : selector.keys()) {
-            Map<Integer, Long> map = (HashMap<Integer, Long>) key.attachment();
+            SparseArray<Long> map = (SparseArray<Long>) key.attachment();
             long time = map.get(1);
             if (key.isValid() && now - time > TIMEOUT_SOCKET) {
                 publishProgress(new Long(0));

@@ -193,6 +193,11 @@ final public class DiscoverActivity extends Activity {
         }
     }
 
+    static class ViewHolder {
+        Button btn_ports;
+        Button btn_info;
+    }
+
     // Custom ArrayAdapter
     private class HostsAdapter extends ArrayAdapter<String> {
         public HostsAdapter(Context context, int resource,
@@ -203,28 +208,33 @@ final public class DiscoverActivity extends Activity {
         @Override
         public View getView(final int position, View convertView,
                 ViewGroup parent) {
-            convertView = super.getView(position, convertView, parent);
-            if (convertView != null) {
-                // Add listeners to the Buttons
-                Button btn_ports = (Button) convertView
+
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = super.getView(position, convertView, parent);
+                holder = new ViewHolder();
+                holder.btn_ports = (Button) convertView
                         .findViewById(R.id.list_port);
-                btn_ports.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        Intent intent = new Intent(DiscoverActivity.this,
-                                PortScanActivity.class);
-                        intent.putExtra("host", hosts.get(position));
-                        intent.putExtra("ports", hosts_ports.get(position));
-                        startActivityForResult(intent, SCAN_PORT_RESULT);
-                    }
-                });
-                Button btn_info = (Button) convertView
+                holder.btn_info = (Button) convertView
                         .findViewById(R.id.list_info);
-                btn_info.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        showHostInfo(position);
-                    }
-                });
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
             }
+            holder.btn_ports.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent(DiscoverActivity.this,
+                            PortScanActivity.class);
+                    intent.putExtra("host", hosts.get(position));
+                    intent.putExtra("ports", hosts_ports.get(position));
+                    startActivityForResult(intent, SCAN_PORT_RESULT);
+                }
+            });
+            holder.btn_info.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    showHostInfo(position);
+                }
+            });
             return convertView;
         }
     }
