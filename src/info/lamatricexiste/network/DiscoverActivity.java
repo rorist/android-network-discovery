@@ -50,7 +50,6 @@ final public class DiscoverActivity extends Activity {
     private List<long[]> hosts_ports = null;
     private List<String> hosts_haddr = null;
     private HostsAdapter adapter;
-    private ListView list;
     // private Button btn;
     private Button btn_discover;
     private Button btn_export;
@@ -130,7 +129,7 @@ final public class DiscoverActivity extends Activity {
 
         // Hosts list
         adapter = new HostsAdapter(this, R.layout.list, R.id.list);
-        list = (ListView) findViewById(R.id.output);
+        ListView list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
         list.setItemsCanFocus(true);
 

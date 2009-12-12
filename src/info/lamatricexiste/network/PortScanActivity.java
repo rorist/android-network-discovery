@@ -4,6 +4,7 @@ import info.lamatricexiste.network.PortScan.PortScan;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -157,16 +158,14 @@ final public class PortScanActivity extends ListActivity {
     // }
     // }
 
-    public static String[] preparePort(long[] ports) {
+    public static List<String> preparePort(long[] ports) {
+        List<String> portsChar = new ArrayList<String>();
         if (ports != null) {
-            String[] portsChar = new String[ports.length];
             for (int i = 0; i < ports.length; i++) {
-                portsChar[i] = (CharSequence) String.valueOf(ports[i])
-                        + "/tcp open";
+                portsChar.add(i, String.valueOf(ports[i]) + "/tcp open");
             }
-            return portsChar;
         }
-        return new String[0];
+        return portsChar;
     }
 
     private void openPortService(String host, Long port) {

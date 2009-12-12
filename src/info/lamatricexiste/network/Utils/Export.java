@@ -79,9 +79,10 @@ public class Export {
                 // Ports
                 long[] portsArray = hosts_ports.get(i);
                 if (portsArray != null) {
-                    String[] ports = PortScanActivity.preparePort(portsArray);
-                    for (int j = 0; j < ports.length; j++) {
-                        xml += "\t\t\t<port>" + ports[j] + "</port>\r\n";
+                    List<String> ports = PortScanActivity
+                            .preparePort(portsArray);
+                    for (int j = 0; j < ports.size(); j++) {
+                        xml += "\t\t\t<port>" + ports.get(j) + "</port>\r\n";
                     }
                 }
                 xml += "\t\t</host>\r\n";
