@@ -7,8 +7,9 @@
     <string name="btn_discover_cancel">Cancel</string>
     <string name="btn_export">Export</string>
     <string name="btn_close">Close</string>
-    <string name="btn_rescan">Rescan</string>
+    <string name="btn_scan">Scan</string>
     <string name="btn_options">Options</string>
+    <string name="btn_back">Back</string>
     <string name="package_missing">%s must be installed from the market !</string>
     <string name="wifi_enabled">Wifi is enabled</string>
     <string name="wifi_enabling">Wifi is enabling</string>
@@ -25,13 +26,13 @@
     <string name="discover_proxy_msg">Discovery is canceled, because you probably are
         behind a proxy that prevent from discovering hosts on the network.\n\n
         Go to your Gateway from the browser : http://%s</string>
-    <string name="scan_start">Scanning ports on %s</string>
     <string name="scan_noport">No open port found !</string>
     <string name="scan_noaction">No associated action !</string>
     <string name="scan_connect">Connect</string>
+    <string name="info_hostname">Hostname:</string>
     <string name="info_mac">MAC Address:</string>
     <string name="info_nic">NIC vendor:</string>
-    <string name="info_nic_unknown">Unknown</string>
+    <string name="info_unknown">Unknown</string>
     <string name="export_finished">File saved !</string>
     <string name="export_choose">Choose file destination</string>
     <string name="export_save">Save</string>

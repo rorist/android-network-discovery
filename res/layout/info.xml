@@ -18,6 +18,30 @@
             android:paddingRight="6dip"
             android:textSize="12dip"
             android:typeface="monospace"
+            android:text="@string/info_hostname" />
+
+        <TextView
+            android:id="@+id/info_hostname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12dip"
+            android:typeface="monospace"
+            android:text="@string/info_unknown" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <TextView
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingRight="6dip"
+            android:textSize="12dip"
+            android:typeface="monospace"
             android:text="@string/info_mac" />
 
         <TextView
@@ -50,7 +74,7 @@
             android:layout_height="wrap_content"
             android:textSize="12dip"
             android:typeface="monospace"
-            android:text="@string/info_nic_unknown" />
+            android:text="@string/info_unknown" />
 
     </LinearLayout>
 

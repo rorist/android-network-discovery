@@ -24,8 +24,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-// TODO: Activity.finish(); button ?
-
 final public class PortScanActivity extends ListActivity {
 
     // private final String TAG = "PortScanActivity";
@@ -50,10 +48,19 @@ final public class PortScanActivity extends ListActivity {
         populatePorts(extra.getLongArray("ports"));
 
         // Scan
-        btn_scan = (Button) findViewById(R.id.btn_discover);
+        btn_scan = (Button) findViewById(R.id.btn_scan);
         btn_scan.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 scanPortTask = new ScanPortTask(host);
+            }
+        });
+
+        // Back
+        Button btn_back = (Button) findViewById(R.id.btn_back);
+        btn_back.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                stopScan();
+                finish();
             }
         });
 
@@ -109,6 +116,9 @@ final public class PortScanActivity extends ListActivity {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(DiscoverActivity.VIBRATE);
             }
+            if (ports.size() == 0) {
+                makeToast(R.string.scan_noport);
+            }
             stopScan();
         }
 
@@ -148,7 +158,7 @@ final public class PortScanActivity extends ListActivity {
     private void stopScan() {
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
-        btn_scan.setText(R.string.btn_discover);
+        btn_scan.setText(R.string.btn_scan);
         btn_scan.setCompoundDrawablesWithIntrinsicBounds(0,
                 R.drawable.discover, 0, 0);
         btn_scan.setOnClickListener(new View.OnClickListener() {

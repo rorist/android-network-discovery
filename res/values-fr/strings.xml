@@ -7,8 +7,9 @@
     <string name="btn_discover_cancel">Annuler</string>
     <string name="btn_export">Exporter</string>
     <string name="btn_close">Fermer</string>
-    <string name="btn_rescan">Rescanner</string>
+    <string name="btn_scan">Scanner</string>
     <string name="btn_options">Options</string>
+    <string name="btn_back">Retour</string>
     <string name="package_missing">%s doit être installée depuis le Market !</string>
     <string name="wifi_enabled">Wifi activé</string>
     <string name="wifi_enabling">Wifi en cours d\'activation </string>
@@ -25,13 +26,13 @@
     <string name="discover_proxy_msg">La recherche est annulée car vous êtes probablement 
         derrière un proxy qui empêche de voir les machines sur le réseau.\n\n
         Accéder à la passerelle depuis votre navigateur depuis: http://%s</string>
-    <string name="scan_start">Scan des ports sur %s</string>
     <string name="scan_noport">Aucun port trouvé !</string>
     <string name="scan_noaction">Aucune action associée !</string>
     <string name="scan_connect">Ouvrir</string>
+    <string name="info_hostname">Nom d\'hôte:</string>
     <string name="info_mac">Adresse MAC:</string>
     <string name="info_nic">Vendeur NIC:</string>
-    <string name="info_nic_unknown">Inconnu</string>
+    <string name="info_unknown">Inconnu</string>
     <string name="export_finished">Fichier sauvegardé !</string>
     <string name="export_choose">Choisir la destination</string>
     <string name="export_save">Sauver</string>

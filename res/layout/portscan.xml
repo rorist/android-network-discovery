@@ -11,9 +11,22 @@
         android:paddingTop="5dip"
         android:paddingLeft="2dip">
         <Button
-            android:id="@+id/btn_discover"
+            android:id="@+id/btn_scan"
             android:drawableTop="@drawable/discover"
-            android:text="@string/btn_discover"
+            android:text="@string/btn_scan"
+            style="@style/ButtonTop" />
+        <TextView
+            android:id="@+id/host"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16dip"
+            android:typeface="monospace"
+            android:text="hostname (0.0.0.0)" />
+        <Button
+            android:id="@+id/btn_back"
+            android:drawableTop="@drawable/back"
+            android:text="@string/btn_back"
             style="@style/ButtonTop" />
     </LinearLayout>
     <ListView
