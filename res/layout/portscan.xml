@@ -22,7 +22,7 @@
             android:layout_weight="1"
             android:textSize="16dip"
             android:typeface="monospace"
-            android:text="hostname (0.0.0.0)" />
+            android:text="0.0.0.0" />
         <Button
             android:id="@+id/btn_back"
             android:drawableTop="@drawable/back"

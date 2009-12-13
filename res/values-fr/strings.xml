@@ -29,7 +29,9 @@
     <string name="scan_noport">Aucun port trouvé !</string>
     <string name="scan_noaction">Aucune action associée !</string>
     <string name="scan_connect">Ouvrir</string>
-    <string name="info_hostname">Nom d\'hôte:</string>
+    <string name="scan_start">Scan démarré ...</string>
+    <string name="scan_finished">Scan terminé !</string>
+    <string name="scan_canceled">Scan annulé !</string>
     <string name="info_mac">Adresse MAC:</string>
     <string name="info_nic">Vendeur NIC:</string>
     <string name="info_unknown">Inconnu</string>

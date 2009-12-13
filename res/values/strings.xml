@@ -29,7 +29,9 @@
     <string name="scan_noport">No open port found !</string>
     <string name="scan_noaction">No associated action !</string>
     <string name="scan_connect">Connect</string>
-    <string name="info_hostname">Hostname:</string>
+    <string name="scan_start">Scan started ...</string>
+    <string name="scan_finished">Scan finished !</string>
+    <string name="scan_canceled">Scan canceled !</string>
     <string name="info_mac">MAC Address:</string>
     <string name="info_nic">NIC vendor:</string>
     <string name="info_unknown">Unknown</string>

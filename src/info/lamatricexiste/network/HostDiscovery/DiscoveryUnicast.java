@@ -34,7 +34,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
                 + start + "), end=" + NetInfo.getIpFromLongInverted(end) + " ("
                 + end + "), length=" + size);
         pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr
-                .getString(Prefs.KEY_NTHREADS, Prefs.KEY_NTHREADS)));
+                .getString(Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
         reachable = new Reachable();
 
         try {

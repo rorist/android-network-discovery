@@ -148,7 +148,6 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     protected void onCancelled() {
         stopSelecting();
-        onPostExecute(null);
     }
 
     private void stopSelecting() {

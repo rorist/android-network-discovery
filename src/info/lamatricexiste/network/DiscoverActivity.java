@@ -6,6 +6,9 @@ import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
+import java.lang.ref.WeakReference;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +48,7 @@ final public class DiscoverActivity extends Activity {
     private final String TAG = "NetworkMain";
     // private final int DEFAULT_DISCOVER = 1;
     public final static long VIBRATE = (long) 250;
-    private final int SCAN_PORT_RESULT = 1;
+    public final static int SCAN_PORT_RESULT = 1;
     private List<String> hosts = null; // TODO: Use a HostBean objects list
     private List<long[]> hosts_ports = null;
     private List<String> hosts_haddr = null;
@@ -65,16 +68,16 @@ final public class DiscoverActivity extends Activity {
         requestWindowFeature(Window.FEATURE_PROGRESS);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
-        ctxt = this;
+        ctxt = getApplicationContext();
 
         // Get global preferences
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
 
         // Discover
         btn_discover = (Button) findViewById(R.id.btn_discover);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                checkHostsTask = new CheckHostsTask();
+                checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
                 startDiscovering();
             }
         });
@@ -91,7 +94,7 @@ final public class DiscoverActivity extends Activity {
         Button btn_options = (Button) findViewById(R.id.btn_options);
         btn_options.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                startActivity(new Intent(DiscoverActivity.this, Prefs.class));
+                startActivity(new Intent(ctxt, Prefs.class));
             }
         });
 
@@ -128,7 +131,7 @@ final public class DiscoverActivity extends Activity {
         // });
 
         // Hosts list
-        adapter = new HostsAdapter(this, R.layout.list_host, R.id.list);
+        adapter = new HostsAdapter(ctxt, R.layout.list_host, R.id.list);
         ListView list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
         list.setItemsCanFocus(true);
@@ -171,7 +174,7 @@ final public class DiscoverActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.settings) {
-            startActivity(new Intent(this, Prefs.class));
+            startActivity(new Intent(ctxt, Prefs.class));
             return true;
         }
         return (super.onOptionsItemSelected(item));
@@ -180,12 +183,13 @@ final public class DiscoverActivity extends Activity {
     // Sub Activity result
     // Listen for results.
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (resultCode) {
+        // Log.v(TAG, "result=" + resultCode + "(" + RESULT_OK + ")");
+        switch (requestCode) {
             case SCAN_PORT_RESULT:
-                if (resultCode == RESULT_CANCELED) {
-                    // crash
-                } else {
-                    // Save new ports
+                if (resultCode == RESULT_OK) {
+                    Bundle extra = data.getExtras();
+                    hosts_ports.set(extra.getInt("position"), extra
+                            .getLongArray("ports"));
                 }
             default:
                 break;
@@ -222,9 +226,9 @@ final public class DiscoverActivity extends Activity {
             }
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    Intent intent = new Intent(DiscoverActivity.this,
-                            PortScanActivity.class);
-                    intent.putExtra("host", hosts.get(position));
+                    Intent intent = new Intent(ctxt, PortScanActivity.class);
+                    intent.putExtra("position", position);
+                    intent.putExtra("hostip", hosts.get(position));
                     intent.putExtra("ports", hosts_ports.get(position));
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }
@@ -336,13 +340,19 @@ final public class DiscoverActivity extends Activity {
      * Discover hosts
      */
 
-    private class CheckHostsTask extends DiscoveryUnicast {
+    private static class CheckHostsTask extends DiscoveryUnicast {
+        private WeakReference<DiscoverActivity> mDiscover;
         private int hosts_done = 0;
+
+        public CheckHostsTask(DiscoverActivity discover) {
+            mDiscover = new WeakReference<DiscoverActivity>(discover);
+        }
 
         @Override
         protected void onPreExecute() {
-            prefsMgr = prefs;
-            NetInfo net = new NetInfo(ctxt);
+            final DiscoverActivity discover = mDiscover.get();
+            prefsMgr = discover.prefs;
+            NetInfo net = new NetInfo(discover);
             ip = NetInfo.getLongFromIp(net.getIp()); // FIXME: I know it's ugly
             // int shift = (1 << (32 - net.getNetCidr()));
             // start = (ip & (1 - shift)) + 1;
@@ -351,37 +361,41 @@ final public class DiscoverActivity extends Activity {
             start = (ip >> shift << shift) + 1;
             end = (start | ((1 << shift) - 1)) - 1;
             size = (int) (end - start + 1);
-            setProgress(0);
+            discover.setProgress(0);
         }
 
         @Override
         protected void onProgressUpdate(String... item) {
+            final DiscoverActivity discover = mDiscover.get();
             if (!isCancelled()) {
                 String host = item[0];
                 if (!host.equals(new String())) {
-                    addHost(host);
+                    discover.addHost(host);
                 }
                 hosts_done++;
-                setProgress(hosts_done * 10000 / size);
+                discover.setProgress(hosts_done * 10000 / size);
             }
         }
 
         @Override
         protected void onPostExecute(Void unused) {
-            if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
+            final DiscoverActivity discover = mDiscover.get();
+            if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
                     Prefs.DEFAULT_VIBRATE_FINISH) == true) {
-                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                Vibrator v = (Vibrator) discover
+                        .getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(VIBRATE);
             }
-            makeToast(R.string.discover_finished);
-            stopDiscovering();
+            discover.makeToast(R.string.discover_finished);
+            discover.stopDiscovering();
         }
 
         @Override
         protected void onCancelled() {
+            final DiscoverActivity discover = mDiscover.get();
             pool.shutdownNow();
-            makeToast(R.string.discover_canceled);
-            stopDiscovering();
+            discover.makeToast(R.string.discover_canceled);
+            discover.stopDiscovering();
         }
     }
 
@@ -409,7 +423,7 @@ final public class DiscoverActivity extends Activity {
                 R.drawable.discover, 0, 0);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                checkHostsTask = new CheckHostsTask();
+                checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
                 startDiscovering();
             }
         });
@@ -441,9 +455,8 @@ final public class DiscoverActivity extends Activity {
             if (checkHostsTask != null) {
                 checkHostsTask.cancel(true);
             }
-            NetInfo net = new NetInfo(this);
-            AlertDialog.Builder infoDialog = new AlertDialog.Builder(
-                    DiscoverActivity.this);
+            NetInfo net = new NetInfo(ctxt);
+            AlertDialog.Builder infoDialog = new AlertDialog.Builder(ctxt);
             infoDialog.setTitle(R.string.discover_proxy_title);
             infoDialog
                     .setMessage(String.format(
@@ -463,22 +476,16 @@ final public class DiscoverActivity extends Activity {
                 DiscoverActivity.this);
         infoDialog.setTitle(ip);
         // Set info values
-        HardwareAddress hardwareAddress = new HardwareAddress(this);
+        HardwareAddress hardwareAddress = new HardwareAddress(ctxt);
         String macaddr = hosts_haddr.get(hostPosition);
-        String nicvend = hardwareAddress.getNicVendor(macaddr);
-        TextView mac = (TextView) v.findViewById(R.id.info_mac);
-        TextView vendor = (TextView) v.findViewById(R.id.info_nic);
-        mac.setText(macaddr);
-        vendor.setText(nicvend);
+        ((TextView) v.findViewById(R.id.info_mac)).setText(macaddr);
+        ((TextView) v.findViewById(R.id.info_nic)).setText(hardwareAddress
+                .getNicVendor(macaddr));
         // Show dialog
         infoDialog.setView(v);
         infoDialog.setNegativeButton(R.string.btn_close, null);
         infoDialog.show();
     }
-
-    /**
-     * Main
-     */
 
     // private void checkRoot() {
     // // Borrowed here: http://bit.ly/754iGA
@@ -499,7 +506,7 @@ final public class DiscoverActivity extends Activity {
     // final CharSequence[] items = {"Ping (ICMP)","Samba exploit"};
     // setButtonOff(btn);
     // @SuppressWarnings("unused")
-    // AlertDialog dialog = new AlertDialog.Builder(this)
+    // AlertDialog dialog = new AlertDialog.Builder(ctxt)
     // .setTitle("Select method")
     // .setItems(items, new DialogInterface.OnClickListener() {
     // public void onClick(DialogInterface dialog, int item) {
@@ -517,8 +524,7 @@ final public class DiscoverActivity extends Activity {
     // }
 
     private void export() {
-        final Export e = new Export(DiscoverActivity.this, hosts, hosts_ports,
-                hosts_haddr);
+        final Export e = new Export(ctxt, hosts, hosts_ports, hosts_haddr);
         final String file = e.getFileName();
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -526,8 +532,7 @@ final public class DiscoverActivity extends Activity {
         final EditText txt = (EditText) v.findViewById(R.id.export_file);
         txt.setText(file);
 
-        AlertDialog.Builder getFileName = new AlertDialog.Builder(
-                DiscoverActivity.this);
+        AlertDialog.Builder getFileName = new AlertDialog.Builder(ctxt);
         getFileName.setTitle(R.string.export_choose);
         getFileName.setView(v);
         getFileName.setPositiveButton(R.string.export_save,
@@ -536,7 +541,7 @@ final public class DiscoverActivity extends Activity {
                         final String fileEdit = txt.getText().toString();
                         if (e.fileExists(fileEdit)) {
                             AlertDialog.Builder fileExists = new AlertDialog.Builder(
-                                    DiscoverActivity.this);
+                                    ctxt);
                             fileExists.setTitle(R.string.export_exists_title);
                             fileExists.setMessage(R.string.export_exists_msg);
                             fileExists.setPositiveButton(R.string.btn_yes,

@@ -22,6 +22,7 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 final public class PortScanActivity extends ListActivity {
@@ -29,8 +30,8 @@ final public class PortScanActivity extends ListActivity {
     // private final String TAG = "PortScanActivity";
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
-    // private ConnectivityManager connMgr;
     private ArrayAdapter<String> adapter;
+    private int position;
     private String host;
     private ArrayList<Long> ports = null;
     private Button btn_scan;
@@ -44,37 +45,45 @@ final public class PortScanActivity extends ListActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         Bundle extra = getIntent().getExtras();
-        host = extra.getString("host");
+        position = extra.getInt("position");
+        host = extra.getString("hostip");
         populatePorts(extra.getLongArray("ports"));
+
+        // Title
+        ((TextView) findViewById(R.id.host)).setText(host);
 
         // Scan
         btn_scan = (Button) findViewById(R.id.btn_scan);
         btn_scan.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                scanPortTask = new ScanPortTask(host);
+                startScan();
             }
         });
 
         // Back
-        Button btn_back = (Button) findViewById(R.id.btn_back);
-        btn_back.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                stopScan();
-                finish();
-            }
-        });
+        ((Button) findViewById(R.id.btn_back))
+                .setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        finish();
+                    }
+                });
 
         // List
         adapter = new PortsAdapter(this, R.layout.list_port, R.id.list,
                 preparePort());
         setListAdapter(adapter);
-        ListView list = (ListView) findViewById(android.R.id.list);
-        list.setItemsCanFocus(true);
+        ((ListView) findViewById(android.R.id.list)).setItemsCanFocus(true);
 
         // Start scan if ports empty
         if (ports == null) {
             startScan();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        scanPortTask.cancel(true);
+        super.onStop();
     }
 
     private void populatePorts(long[] longArray) {
@@ -107,10 +116,20 @@ final public class PortScanActivity extends ListActivity {
         }
 
         @Override
+        protected void onProgressUpdate(Long... values) {
+            if (values.length > 0) {
+                if (!values[0].equals(new Long(0))) {
+                    ports.add(values[0]);
+                    adapter.add(values[0] + "/tcp open");
+                    // Set entry icon/etc
+                }
+            }
+            progress_current++;
+            setProgress(progress_current * 10000 / nb_port);
+        }
+
+        @Override
         protected void onPostExecute(Void unused) {
-            // Collections.sort(ports);
-            // Long[] result = ports.toArray(new Long[ports.size()]);
-            // hosts_ports.set(position, result);
             if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
                     Prefs.DEFAULT_VIBRATE_FINISH) == true) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -120,25 +139,19 @@ final public class PortScanActivity extends ListActivity {
                 makeToast(R.string.scan_noport);
             }
             stopScan();
+            makeToast(R.string.scan_finished);
         }
 
         @Override
-        protected void onProgressUpdate(Long... values) {
-            if (values.length > 0) {
-                if (!values[0].equals(new Long(0))) {
-                    ports.add(values[0]);
-                    adapter.add(values[0] + "/tcp open");
-                    // Set entry icon/etc
-                    // Set action here
-                }
-            }
-            progress_current++;
-            setProgress(progress_current * 10000 / nb_port);
+        protected void onCancelled() {
+            super.onCancelled();
+            makeToast(R.string.scan_canceled);
+            stopScan();
         }
     }
 
     private void startScan() {
-        makeToast(R.string.discover_start);
+        makeToast(R.string.scan_start);
         setProgressBarVisibility(true);
         setProgressBarIndeterminateVisibility(true);
         adapter.clear();
@@ -156,6 +169,12 @@ final public class PortScanActivity extends ListActivity {
     }
 
     private void stopScan() {
+        // Set result
+        Intent intent = new Intent();
+        intent.putExtra("position", position);
+        intent.putExtra("ports", portsToLongArray());
+        setResult(RESULT_OK, intent);
+        // Reset scan
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
         btn_scan.setText(R.string.btn_scan);
@@ -176,6 +195,14 @@ final public class PortScanActivity extends ListActivity {
             }
         }
         return portsChar;
+    }
+
+    private long[] portsToLongArray() {
+        long[] portsArray = new long[ports.size()];
+        for (int i = 0; i < ports.size(); i++) {
+            portsArray[i] = ports.get(i);
+        }
+        return portsArray;
     }
 
     public static List<String> preparePortPublic(long[] portsArray) {
