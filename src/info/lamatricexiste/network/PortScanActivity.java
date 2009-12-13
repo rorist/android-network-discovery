@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -35,6 +36,8 @@ final public class PortScanActivity extends ListActivity {
     private String host;
     private ArrayList<Long> ports = null;
     private Button btn_scan;
+    private LayoutInflater mInflater;
+    private Context ctxt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,9 @@ final public class PortScanActivity extends ListActivity {
         requestWindowFeature(Window.FEATURE_PROGRESS);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.portscan);
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        ctxt = getApplicationContext();
+        prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
+        mInflater = LayoutInflater.from(ctxt);
 
         Bundle extra = getIntent().getExtras();
         position = extra.getInt("position");
@@ -69,7 +74,7 @@ final public class PortScanActivity extends ListActivity {
                 });
 
         // List
-        adapter = new PortsAdapter(this, R.layout.list_port, R.id.list,
+        adapter = new PortsAdapter(ctxt, R.layout.list_port, R.id.list,
                 preparePort());
         setListAdapter(adapter);
         ((ListView) findViewById(android.R.id.list)).setItemsCanFocus(true);
@@ -82,8 +87,47 @@ final public class PortScanActivity extends ListActivity {
 
     @Override
     protected void onStop() {
-        scanPortTask.cancel(true);
+        if (scanPortTask != null) {
+            scanPortTask.cancel(true);
+        }
         super.onStop();
+    }
+
+    static class ViewHolder {
+        TextView port;
+        Button btn_connect;
+    }
+
+    // Custom ArrayAdapter
+    private class PortsAdapter extends ArrayAdapter<String> {
+        public PortsAdapter(Context context, int resource,
+                int textViewresourceId, List<String> objects) {
+            super(context, resource, textViewresourceId, objects);
+        }
+
+        @Override
+        public View getView(final int position, View convertView,
+                ViewGroup parent) {
+
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.list_port, null);
+                holder = new ViewHolder();
+                holder.port = (TextView) convertView.findViewById(R.id.list);
+                holder.btn_connect = (Button) convertView
+                        .findViewById(R.id.list_connect);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.port.setText(ports.get(position) + "/tcp open");
+            holder.btn_connect.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    openPortService(host, ports.get(position));
+                }
+            });
+            return convertView;
+        }
     }
 
     private void populatePorts(long[] longArray) {
@@ -120,7 +164,7 @@ final public class PortScanActivity extends ListActivity {
             if (values.length > 0) {
                 if (!values[0].equals(new Long(0))) {
                     ports.add(values[0]);
-                    adapter.add(values[0] + "/tcp open");
+                    adapter.add(String.valueOf(values[0]));
                     // Set entry icon/etc
                 }
             }
@@ -215,40 +259,6 @@ final public class PortScanActivity extends ListActivity {
         return portsChar;
     }
 
-    static class ViewHolder {
-        Button btn_connect;
-    }
-
-    // Custom ArrayAdapter
-    private class PortsAdapter extends ArrayAdapter<String> {
-        public PortsAdapter(Context context, int resource,
-                int textViewresourceId, List<String> objects) {
-            super(context, resource, textViewresourceId, objects);
-        }
-
-        @Override
-        public View getView(final int position, View convertView,
-                ViewGroup parent) {
-
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = super.getView(position, convertView, parent);
-                holder = new ViewHolder();
-                holder.btn_connect = (Button) convertView
-                        .findViewById(R.id.list_connect);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-            holder.btn_connect.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    openPortService(host, ports.get(position));
-                }
-            });
-            return convertView;
-        }
-    }
-
     private void openPortService(String host, Long port) {
         Intent intent = null;
         String action = "";
@@ -256,7 +266,7 @@ final public class PortScanActivity extends ListActivity {
         switch (portInt) {
             case 22:
                 action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(this, "org.connectbot")) {
+                if (isPackageInstalled(ctxt, "org.connectbot")) {
                     String user = prefs.getString(Prefs.KEY_SSH_USER,
                             Prefs.DEFAULT_SSH_USER);
                     intent = new Intent(action);
@@ -269,7 +279,7 @@ final public class PortScanActivity extends ListActivity {
                 break;
             case 23:
                 action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(this, "org.connectbot")) {
+                if (isPackageInstalled(ctxt, "org.connectbot")) {
                     intent = new Intent(action);
                     intent.setData(Uri.parse("telnet://" + host + ":23"));
                 } else {

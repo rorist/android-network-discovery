@@ -7,8 +7,6 @@ import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.lang.ref.WeakReference;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +59,7 @@ final public class DiscoverActivity extends Activity {
     private ConnectivityManager connMgr;
     private CheckHostsTask checkHostsTask = null;
     private Context ctxt;
+    private LayoutInflater mInflater;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,9 +68,8 @@ final public class DiscoverActivity extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
         ctxt = getApplicationContext();
-
-        // Get global preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
+        mInflater = LayoutInflater.from(ctxt);
 
         // Discover
         btn_discover = (Button) findViewById(R.id.btn_discover);
@@ -131,7 +129,7 @@ final public class DiscoverActivity extends Activity {
         // });
 
         // Hosts list
-        adapter = new HostsAdapter(ctxt, R.layout.list_host, R.id.list);
+        adapter = new HostsAdapter(ctxt);
         ListView list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
         list.setItemsCanFocus(true);
@@ -197,25 +195,25 @@ final public class DiscoverActivity extends Activity {
     }
 
     static class ViewHolder {
+        TextView host;
         Button btn_ports;
         Button btn_info;
     }
 
     // Custom ArrayAdapter
     private class HostsAdapter extends ArrayAdapter<String> {
-        public HostsAdapter(Context context, int resource,
-                int textViewresourceId) {
-            super(context, resource, textViewresourceId);
+        public HostsAdapter(Context ctxt) {
+            super(ctxt, R.layout.list_host, R.id.list);
         }
 
         @Override
         public View getView(final int position, View convertView,
                 ViewGroup parent) {
-
             ViewHolder holder;
             if (convertView == null) {
-                convertView = super.getView(position, convertView, parent);
+                convertView = mInflater.inflate(R.layout.list_host, null);
                 holder = new ViewHolder();
+                holder.host = (TextView) convertView.findViewById(R.id.list);
                 holder.btn_ports = (Button) convertView
                         .findViewById(R.id.list_port);
                 holder.btn_info = (Button) convertView
@@ -224,6 +222,7 @@ final public class DiscoverActivity extends Activity {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+            holder.host.setText(hosts.get(position));
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, PortScanActivity.class);
@@ -447,10 +446,10 @@ final public class DiscoverActivity extends Activity {
     private void addHost(String ip) {
         String haddr = HardwareAddress.getHardwareAddress(ip);
         if (!hosts_haddr.contains(haddr)) {
-            adapter.add(ip);
             hosts.add(ip);
             hosts_ports.add(null);
             hosts_haddr.add(haddr);
+            adapter.add(ip);
         } else {
             if (checkHostsTask != null) {
                 checkHostsTask.cancel(true);
@@ -469,8 +468,7 @@ final public class DiscoverActivity extends Activity {
 
     private void showHostInfo(int hostPosition) {
         String ip = hosts.get(hostPosition);
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.info, null);
+        View v = mInflater.inflate(R.layout.info, null);
         // Build info dialog
         AlertDialog.Builder infoDialog = new AlertDialog.Builder(
                 DiscoverActivity.this);
@@ -527,8 +525,7 @@ final public class DiscoverActivity extends Activity {
         final Export e = new Export(ctxt, hosts, hosts_ports, hosts_haddr);
         final String file = e.getFileName();
 
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.file, null);
+        View v = mInflater.inflate(R.layout.file, null);
         final EditText txt = (EditText) v.findViewById(R.id.export_file);
         txt.setText(file);
 
