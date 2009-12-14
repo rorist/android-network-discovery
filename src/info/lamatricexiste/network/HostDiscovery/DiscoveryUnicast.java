@@ -29,8 +29,8 @@ public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
     protected int size = 0;
 
     protected Void doInBackground(Void... params) {
-        Log.v(TAG, "start=" + NetInfo.getIpFromLongInverted(start) + " ("
-                + start + "), end=" + NetInfo.getIpFromLongInverted(end) + " ("
+        Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " ("
+                + start + "), end=" + NetInfo.getIpFromLongUnsigned(end) + " ("
                 + end + "), length=" + size);
         pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr
                 .getString(Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
@@ -75,7 +75,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
 
     private void launch(long i) throws InterruptedException {
         Thread.sleep(DISCOVER_RATE);
-        String ip = NetInfo.getIpFromLongInverted(i);
+        String ip = NetInfo.getIpFromLongUnsigned(i);
         CheckRunnable r = new CheckRunnable(ip);
         pool.execute(r);
     }

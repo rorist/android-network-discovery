@@ -353,10 +353,7 @@ final public class DiscoverActivity extends Activity {
             final DiscoverActivity discover = mDiscover.get();
             prefsMgr = discover.prefs;
             NetInfo net = new NetInfo(discover);
-            ip = NetInfo.getLongFromIp(net.getIp()); // FIXME: I know it's ugly
-            // int shift = (1 << (32 - net.getNetCidr()));
-            // start = (ip & (1 - shift)) + 1;
-            // end = (ip | (shift - 1)) - 1;
+            ip = NetInfo.getUnsignedLongFromIp(net.getIp());
             int shift = (32 - net.getNetCidr());
             start = (ip >> shift << shift) + 1;
             end = (start | ((1 << shift) - 1)) - 1;

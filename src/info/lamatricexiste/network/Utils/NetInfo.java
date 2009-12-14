@@ -29,23 +29,23 @@ public class NetInfo {
     }
 
     public String getIp() {
-        return getIpFromInt(dhcp.ipAddress);
+        return getIpFromIntSigned(dhcp.ipAddress);
     }
 
     public String getNetmask() {
-        return getIpFromInt(dhcp.netmask);
+        return getIpFromIntSigned(dhcp.netmask);
     }
 
     public String getNetIp() {
-        return getIpFromInt(dhcp.ipAddress & dhcp.netmask);
+        return getIpFromIntSigned(dhcp.ipAddress & dhcp.netmask);
     }
 
     public String getBroadcastIp() {
-        return getIpFromInt((dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask);
+        return getIpFromIntSigned((dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask);
     }
 
     public Object getGatewayIp() {
-        return getIpFromInt(dhcp.gateway);
+        return getIpFromIntSigned(dhcp.gateway);
     }
 
     public String getSSID() {
@@ -64,13 +64,13 @@ public class NetInfo {
         return info.getSupplicantState();
     }
 
-    public static long getLongFromIp(String ip_addr) {
+    public static long getUnsignedLongFromIp(String ip_addr) {
         String[] a = ip_addr.split("\\.");
         return (Integer.parseInt(a[0]) * 16777216 + Integer.parseInt(a[1])
                 * 65536 + Integer.parseInt(a[2]) * 256 + Integer.parseInt(a[3]));
     }
 
-    public static String getIpFromInt(int ip_int) {
+    public static String getIpFromIntSigned(int ip_int) {
         String ip = "";
         for (int k = 0; k < 4; k++) {
             ip = ip + ((ip_int >> k * 8) & 0xFF) + ".";
@@ -78,7 +78,7 @@ public class NetInfo {
         return ip.substring(0, ip.length() - 1);
     }
 
-    public static String getIpFromLongInverted(long ip_long) {
+    public static String getIpFromLongUnsigned(long ip_long) {
         String ip = "";
         for (int k = 3; k > -1; k--) {
             ip = ip + ((ip_long >> k * 8) & 0xFF) + ".";
