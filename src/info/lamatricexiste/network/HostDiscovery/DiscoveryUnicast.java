@@ -13,7 +13,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
+public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
 
     private final String TAG = "DiscoveryUnicast";
     private final int TIMEOUT_REACH = 1000;
@@ -91,12 +91,12 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
             try {
                 InetAddress h = InetAddress.getByName(host);
                 if (h.isReachable(TIMEOUT_REACH) || reachable.request(h)) {
-                    publishProgress(host);
+                    publishProgress(h);
                 } else {
-                    publishProgress(new String());
+                    publishProgress((InetAddress)null);
                 }
             } catch (IOException e) {
-                publishProgress(new String());
+                publishProgress((InetAddress)null);
                 Log.e(TAG, e.getMessage());
             }
         }

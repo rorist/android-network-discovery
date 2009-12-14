@@ -1,6 +1,8 @@
 // Inspired by http://connectbot.googlecode.com/svn/trunk/connectbot/src/org/connectbot/bean/HostBean.java
 package info.lamatricexiste.network.HostDiscovery;
 
+import java.net.InetAddress;
+
 public class HostBean {
     private InetAddress inetAddress = null;
     private String hardwareAddress = "00:00:00:00:00:00";

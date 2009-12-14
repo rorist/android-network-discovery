@@ -2,6 +2,7 @@ package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.HostDiscovery.PortScan;
+import info.lamatricexiste.network.HostDiscovery.HostBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +33,8 @@ final public class PortScanActivity extends ListActivity {
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
     private ArrayAdapter<String> adapter;
-    private int position;
     private String host;
+    private int position;
     private ArrayList<Long> ports = null;
     private Button btn_scan;
     private LayoutInflater mInflater;
@@ -50,8 +51,8 @@ final public class PortScanActivity extends ListActivity {
         mInflater = LayoutInflater.from(ctxt);
 
         Bundle extra = getIntent().getExtras();
+        host = extra.getString("host");
         position = extra.getInt("position");
-        host = extra.getString("hostip");
         populatePorts(extra.getLongArray("ports"));
 
         // Title
@@ -123,7 +124,7 @@ final public class PortScanActivity extends ListActivity {
             holder.port.setText(ports.get(position) + "/tcp open");
             holder.btn_connect.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    openPortService(host, ports.get(position));
+                    openPortService(ports.get(position));
                 }
             });
             return convertView;
@@ -259,7 +260,7 @@ final public class PortScanActivity extends ListActivity {
         return portsChar;
     }
 
-    private void openPortService(String host, Long port) {
+    private void openPortService(Long port) {
         Intent intent = null;
         String action = "";
         int portInt = (int) ((long) port);
@@ -271,7 +272,7 @@ final public class PortScanActivity extends ListActivity {
                             Prefs.DEFAULT_SSH_USER);
                     intent = new Intent(action);
                     intent.setData(Uri.parse("ssh://" + user + "@" + host
-                            + ":22/#" + user + "@" + host + ":22"));
+                            + ":22/#" + user + "@" + host+ ":22"));
                 } else {
                     makeToast(String.format(getString(R.string.package_missing,
                             "ConnectBot")));
@@ -281,7 +282,7 @@ final public class PortScanActivity extends ListActivity {
                 action = Intent.ACTION_VIEW;
                 if (isPackageInstalled(ctxt, "org.connectbot")) {
                     intent = new Intent(action);
-                    intent.setData(Uri.parse("telnet://" + host + ":23"));
+                    intent.setData(Uri.parse("telnet://" + host+ ":23"));
                 } else {
                     makeToast(String.format(getString(R.string.package_missing,
                             "ConnectBot")));
@@ -289,11 +290,11 @@ final public class PortScanActivity extends ListActivity {
                 break;
             case 80:
                 intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("http://" + host + "/"));
+                intent.setData(Uri.parse("http://" + host+ "/"));
                 break;
             case 443:
                 intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://" + host + "/"));
+                intent.setData(Uri.parse("https://" + host+ "/"));
                 break;
             default:
                 makeToast(R.string.scan_noaction);

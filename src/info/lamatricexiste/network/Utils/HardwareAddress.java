@@ -4,6 +4,7 @@ package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.R;
 
+import java.net.InetAddress;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,14 +26,30 @@ public class HardwareAddress {
 	private final static String TAG = "HardwareAddress";
 	private final String DB_PATH = "/data/data/info.lamatricexiste.network/";
 	private final String DB_NAME = "oui.db";
+    private InetAddress addr;
 	private Context ctxt;
+    private String hw;
+    private String ni;
 
-	public HardwareAddress(Context context) {
-		this.ctxt = context;
+	public HardwareAddress(Context ctxt, InetAddress addr) {
+		this.ctxt = ctxt;
+        this.addr = addr;
+        hw = "00:00:00:00:00:00";
+        ni = ctxt.getString(R.string.info_unknown);
+        setHardwareAddress();
+        setNicVendor();
 	}
 
-	public static String getHardwareAddress(String ip) {
-		String hw = "00:00:00:00:00:00";
+    public String getHardwareAddress(){
+        return hw;
+    }
+
+    public String getNicVendor(){
+        return ni;
+    }
+
+	public void setHardwareAddress() {
+        String ip = addr.getHostAddress();
 		try {
 			File arp = new File("/proc/net/arp");
 			if (arp.exists() != false && arp.canRead()) {
@@ -58,30 +75,27 @@ public class HardwareAddress {
 		} catch (Exception e) {
 			Log.d(TAG, "Can't open file ARP: " + e.getMessage());
 		}
-		return hw;
 	}
 
-	public String getNicVendor(String mac) {
-		String vendor = ctxt.getString(R.string.info_unknown);
+	public void setNicVendor() {
 		SQLiteDatabase db = openDataBase();
-		String macid = mac.replace(":", "").substring(0, 6).toUpperCase();
+		String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
 		// Db request
 		Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
 				+ "'", null);
 		if (c.getCount() > 0) {
 			c.moveToFirst();
-			vendor = c.getString(c.getColumnIndex("vendor"));
+			ni = c.getString(c.getColumnIndex("vendor"));
 		}
 		c.close();
 		db.close();
-		return vendor;
 	}
 
 	/**
 	 * MAC Database
 	 */
 
-	public SQLiteDatabase openDataBase() throws SQLException {
+	private SQLiteDatabase openDataBase() throws SQLException {
 		if (!checkDataBase()) {
 			copyDataBase();
 		}

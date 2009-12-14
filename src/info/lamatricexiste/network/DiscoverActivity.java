@@ -1,6 +1,7 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.HostDiscovery.DiscoveryUnicast;
+import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.NetInfo;
@@ -9,6 +10,7 @@ import info.lamatricexiste.network.Utils.Prefs;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.InetAddress;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -47,9 +49,7 @@ final public class DiscoverActivity extends Activity {
     // private final int DEFAULT_DISCOVER = 1;
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
-    private List<String> hosts = null; // TODO: Use a HostBean objects list
-    private List<long[]> hosts_ports = null;
-    private List<String> hosts_haddr = null;
+    private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     // private Button btn;
     private Button btn_discover;
@@ -149,7 +149,6 @@ final public class DiscoverActivity extends Activity {
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
-        // networkStateChanged(new Intent()); //FIXME ?
     }
 
     @Override
@@ -186,8 +185,10 @@ final public class DiscoverActivity extends Activity {
             case SCAN_PORT_RESULT:
                 if (resultCode == RESULT_OK) {
                     Bundle extra = data.getExtras();
-                    hosts_ports.set(extra.getInt("position"), extra
-                            .getLongArray("ports"));
+                    int position = extra.getInt("position");
+                    HostBean host = hosts.get(position);
+                    host.setPorts(extra.getLongArray("ports"));
+                    // reset host in List ?
                 }
             default:
                 break;
@@ -222,13 +223,13 @@ final public class DiscoverActivity extends Activity {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            holder.host.setText(hosts.get(position));
+            final HostBean host = hosts.get(position);
+            holder.host.setText(host.getInetAddress().getHostAddress());
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, PortScanActivity.class);
                     intent.putExtra("position", position);
-                    intent.putExtra("hostip", hosts.get(position));
-                    intent.putExtra("ports", hosts_ports.get(position));
+                    intent.putExtra("ports", host.getPorts());
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }
             });
@@ -364,11 +365,11 @@ final public class DiscoverActivity extends Activity {
         }
 
         @Override
-        protected void onProgressUpdate(String... item) {
+        protected void onProgressUpdate(InetAddress... item) {
             final DiscoverActivity discover = mDiscover.get();
             if (!isCancelled()) {
-                String host = item[0];
-                if (!host.equals(new String())) {
+                InetAddress host = item[0];
+                if (host!=null) {
                     discover.addHost(host);
                 }
                 hosts_done++;
@@ -438,19 +439,21 @@ final public class DiscoverActivity extends Activity {
     private void initList() {
         // setSelectedHosts(false);
         adapter.clear();
-        hosts = new ArrayList<String>();
-        hosts_ports = new ArrayList<long[]>();
-        hosts_haddr = new ArrayList<String>();
+        hosts = new ArrayList<HostBean>();
     }
 
-    private void addHost(String ip) {
-        String haddr = HardwareAddress.getHardwareAddress(ip);
-        if (!hosts_haddr.contains(haddr)) {
-            hosts.add(ip);
-            hosts_ports.add(null);
-            hosts_haddr.add(haddr);
-            adapter.add(ip);
-        } else {
+    private void addHost(InetAddress addr) {
+        //if (!hosts_haddr.contains(haddr)) {
+        HardwareAddress hw = new HardwareAddress(ctxt, addr);
+        HostBean host = new HostBean();
+        host.setHardwareAddress(hw.getHardwareAddress());
+        host.setNicVendor(hw.getNicVendor());
+        host.setInetAddress(addr);
+        host.setPosition(hosts.size());
+        hosts.add(host);
+        adapter.add("nothing to see here");
+        //FIXME: Reintroduce this check !
+        /*} else {
             if (checkHostsTask != null) {
                 checkHostsTask.cancel(true);
             }
@@ -463,22 +466,18 @@ final public class DiscoverActivity extends Activity {
                                     .getGatewayIp()));
             infoDialog.setNegativeButton(R.string.btn_close, null);
             infoDialog.show();
-        }
+        }*/
     }
 
-    private void showHostInfo(int hostPosition) {
-        String ip = hosts.get(hostPosition);
+    private void showHostInfo(int pos) {
+        HostBean host = hosts.get(pos);
         View v = mInflater.inflate(R.layout.info, null);
         // Build info dialog
         AlertDialog.Builder infoDialog = new AlertDialog.Builder(
                 DiscoverActivity.this);
-        infoDialog.setTitle(ip);
-        // Set info values
-        HardwareAddress hardwareAddress = new HardwareAddress(ctxt);
-        String macaddr = hosts_haddr.get(hostPosition);
-        ((TextView) v.findViewById(R.id.info_mac)).setText(macaddr);
-        ((TextView) v.findViewById(R.id.info_nic)).setText(hardwareAddress
-                .getNicVendor(macaddr));
+        infoDialog.setTitle(host.getInetAddress().getHostAddress());
+        ((TextView) v.findViewById(R.id.info_mac)).setText(host.getHardwareAddress());
+        ((TextView) v.findViewById(R.id.info_nic)).setText(host.getNicVendor());
         // Show dialog
         infoDialog.setView(v);
         infoDialog.setNegativeButton(R.string.btn_close, null);
@@ -522,7 +521,7 @@ final public class DiscoverActivity extends Activity {
     // }
 
     private void export() {
-        final Export e = new Export(ctxt, hosts, hosts_ports, hosts_haddr);
+        final Export e = new Export(ctxt, hosts);
         final String file = e.getFileName();
 
         View v = mInflater.inflate(R.layout.file, null);

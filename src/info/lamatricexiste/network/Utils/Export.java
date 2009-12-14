@@ -1,6 +1,7 @@
 package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.PortScanActivity;
+import info.lamatricexiste.network.HostDiscovery.HostBean;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,16 +17,11 @@ import android.util.Log;
 public class Export {
 
     private final String TAG = "Export";
-    private List<String> hosts;
-    private List<long[]> hosts_ports;
-    private List<String> hosts_haddr;
+    private List<HostBean> hosts;
     private NetInfo net;
 
-    public Export(Context ctxt, List<String> hosts, List<long[]> hosts_ports,
-            List<String> hosts_haddr) {
+    public Export(Context ctxt, List<HostBean> hosts) {
         this.hosts = hosts;
-        this.hosts_ports = hosts_ports;
-        this.hosts_haddr = hosts_haddr;
         net = new NetInfo(ctxt);
     }
 
@@ -73,11 +69,11 @@ public class Export {
             xml += "\t<hosts>\r\n";
             for (int i = 0; i < hosts.size(); i++) {
                 // Host info
-                String host = hosts.get(i);
-                xml += "\t\t<host value=\"" + host + "\" mac=\""
-                        + hosts_haddr.get(i) + "\">\r\n";
+                HostBean host = hosts.get(i);
+                xml += "\t\t<host value=\"" + host.getInetAddress().getHostAddress() + "\" mac=\""
+                        + host.getHardwareAddress() + "\">\r\n";
                 // Ports
-                long[] portsArray = hosts_ports.get(i);
+                long[] portsArray = host.getPorts();
                 if (portsArray != null) {
                     List<String> ports = PortScanActivity
                             .preparePortPublic(portsArray);
