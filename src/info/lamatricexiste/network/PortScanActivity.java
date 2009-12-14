@@ -1,7 +1,7 @@
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.PortScan.PortScan;
 import info.lamatricexiste.network.Utils.Prefs;
+import info.lamatricexiste.network.HostDiscovery.PortScan;
 
 import java.util.ArrayList;
 import java.util.List;

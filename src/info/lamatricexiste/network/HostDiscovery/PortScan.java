@@ -7,7 +7,7 @@
  * http://weblogs.java.net/blog/2006/09/21/tricks-and-tips-nio-part-v-ssl-and-nio-friend-or-foe
  */
 
-package info.lamatricexiste.network.PortScan;
+package info.lamatricexiste.network.HostDiscovery;
 
 import java.io.IOException;
 import java.net.InetAddress;
