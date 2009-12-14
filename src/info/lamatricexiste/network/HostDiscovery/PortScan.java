@@ -15,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import android.os.AsyncTask;
@@ -114,7 +115,18 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         try {
             if (socket.isConnectionPending()) {
                 socket.finishConnect();
-                publishProgress(port); // Open
+                publishProgress(port); // Open FIXME: use Bundle instead of Long
+                // trying to read data
+                ByteBuffer buf = ByteBuffer.allocateDirect(1024);
+                int numRead = 0;
+                while(numRead>=0){
+                    buf.rewind();
+                    numRead = socket.read(buf);
+                    buf.rewind();
+                    Log.v(TAG, new String(buf.array()));
+                }
+                int numBytesRead = socket.read(buf);
+
             }
         } catch (IOException e) {
             publishProgress(new Long(0)); // Closed
