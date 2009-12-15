@@ -188,7 +188,7 @@ final public class DiscoverActivity extends Activity {
                     int position = extra.getInt("position");
                     HostBean host = hosts.get(position);
                     host.setPorts(extra.getLongArray("ports"));
-                    // reset host in List ?
+                    // FIXME: reset host in List ?
                 }
             default:
                 break;
@@ -229,6 +229,7 @@ final public class DiscoverActivity extends Activity {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, PortScanActivity.class);
                     intent.putExtra("position", position);
+                    intent.putExtra("host", host.getInetAddress().getHostAddress());
                     intent.putExtra("ports", host.getPorts());
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }

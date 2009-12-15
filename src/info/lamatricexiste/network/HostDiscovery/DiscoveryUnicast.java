@@ -19,8 +19,8 @@ public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
     private final int TIMEOUT_REACH = 1000;
     private final int DISCOVER_RATE = 0;
     private int pt_move = 2; // 1=backward 2=forward
-    private Reachable reachable; // TODO: This is a test of reuse (less GC)
-
+    private Reachable reachable; 
+    
     protected SharedPreferences prefsMgr;
     protected ExecutorService pool;
     protected long ip;

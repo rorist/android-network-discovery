@@ -1,8 +1,7 @@
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.HostDiscovery.PortScan;
-import info.lamatricexiste.network.HostDiscovery.HostBean;
+import info.lamatricexiste.network.Utils.Prefs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -165,7 +164,7 @@ final public class PortScanActivity extends ListActivity {
             if (values.length > 0) {
                 if (!values[0].equals(new Long(0))) {
                     ports.add(values[0]);
-                    adapter.add(String.valueOf(values[0]));
+                    adapter.add("nothing important here FIXME");
                     // Set entry icon/etc
                 }
             }

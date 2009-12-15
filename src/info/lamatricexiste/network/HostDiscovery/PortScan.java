@@ -15,7 +15,6 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import android.os.AsyncTask;
@@ -90,8 +89,15 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
                         .iterator();
                 while (iterator.hasNext()) {
                     SelectionKey key = (SelectionKey) iterator.next();
-                    if (key.isValid() && key.isConnectable()) {
-                        handleConnect(key);
+                    if (key.isValid()) {
+                        if (key.isConnectable()) {
+                            handleConnect(key);
+                        } else if (key.isReadable()) {
+                            Log.v(TAG, "key is readable=" + key.toString());
+                            cnt_selected++;
+                            key.channel().close();
+                            key.cancel();
+                        }
                     }
                     iterator.remove();
                 }
@@ -113,24 +119,27 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         SparseArray<Long> map = (SparseArray<Long>) key.attachment();
         Long port = map.get(0);
         try {
-            if (socket.isConnectionPending()) {
+            if (socket.isConnectionPending()) { //FIXME: not clear if it's neededs
                 socket.finishConnect();
-                publishProgress(port); // Open FIXME: use Bundle instead of Long
-                // trying to read data
-                ByteBuffer buf = ByteBuffer.allocateDirect(1024);
-                int numRead = 0;
-                while(numRead>=0){
-                    buf.rewind();
-                    numRead = socket.read(buf);
-                    buf.rewind();
-                    Log.v(TAG, new String(buf.array()));
-                }
-                int numBytesRead = socket.read(buf);
+                SparseArray<Long> data = new SparseArray<Long>(2);
+                data.append(0, (long) port);
+                data.append(1, System.currentTimeMillis());
 
+                // trying to read data
+                /*
+                 * try { ByteBuffer buf = ByteBuffer.allocateDirect(1024); int
+                 * numRead = 0; while(numRead>=0){ buf.rewind(); numRead =
+                 * socket.read(buf); buf.rewind(); Log.v(TAG,
+                 * "ReadFromSocket="+(new String(buf.array()))); } }
+                 * catch(Exception e){ Log.e(TAG, "port="+port+", "+
+                 * e.getMessage()); } finally { socket.finishConnect();
+                 * publishProgress(port); // Open FIXME: use Bundle instead of
+                 * Long }
+                 */
+                publishProgress(port); // Open FIXME: use Bundle instead of Long
             }
         } catch (IOException e) {
             publishProgress(new Long(0)); // Closed
-        } finally {
             cnt_selected++;
             key.cancel();
             try {
