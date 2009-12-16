@@ -6,11 +6,12 @@ import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
+import info.lamatricexiste.network.Utils.UpdateNicDb;
 
 import java.lang.ref.WeakReference;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.net.InetAddress;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -70,6 +72,14 @@ final public class DiscoverActivity extends Activity {
         ctxt = getApplicationContext();
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         mInflater = LayoutInflater.from(ctxt);
+
+        // Check NIC db
+        if (prefs.getString("resetdb", Prefs.DEFAULT_RESETDB) == "1") {
+            new UpdateNicDb(ctxt);
+            Editor edit = prefs.edit();
+            edit.putString(Prefs.KEY_RESETDB, "0");
+            edit.commit();
+        }
 
         // Discover
         btn_discover = (Button) findViewById(R.id.btn_discover);
@@ -229,7 +239,8 @@ final public class DiscoverActivity extends Activity {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, PortScanActivity.class);
                     intent.putExtra("position", position);
-                    intent.putExtra("host", host.getInetAddress().getHostAddress());
+                    intent.putExtra("host", host.getInetAddress()
+                            .getHostAddress());
                     intent.putExtra("ports", host.getPorts());
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }
@@ -367,7 +378,7 @@ final public class DiscoverActivity extends Activity {
             final DiscoverActivity discover = mDiscover.get();
             if (!isCancelled()) {
                 InetAddress host = item[0];
-                if (host!=null) {
+                if (host != null) {
                     discover.addHost(host);
                 }
                 hosts_done++;
@@ -441,7 +452,7 @@ final public class DiscoverActivity extends Activity {
     }
 
     private void addHost(InetAddress addr) {
-        //if (!hosts_haddr.contains(haddr)) {
+        // if (!hosts_haddr.contains(haddr)) {
         HardwareAddress hw = new HardwareAddress(ctxt, addr);
         HostBean host = new HostBean();
         host.setHardwareAddress(hw.getHardwareAddress());
@@ -450,21 +461,17 @@ final public class DiscoverActivity extends Activity {
         host.setPosition(hosts.size());
         hosts.add(host);
         adapter.add("nothing to see here");
-        //FIXME: Reintroduce this check !
-        /*} else {
-            if (checkHostsTask != null) {
-                checkHostsTask.cancel(true);
-            }
-            NetInfo net = new NetInfo(ctxt);
-            AlertDialog.Builder infoDialog = new AlertDialog.Builder(ctxt);
-            infoDialog.setTitle(R.string.discover_proxy_title);
-            infoDialog
-                    .setMessage(String.format(
-                            getString(R.string.discover_proxy_msg), net
-                                    .getGatewayIp()));
-            infoDialog.setNegativeButton(R.string.btn_close, null);
-            infoDialog.show();
-        }*/
+        // FIXME: Reintroduce this check !
+        /*
+         * } else { if (checkHostsTask != null) { checkHostsTask.cancel(true); }
+         * NetInfo net = new NetInfo(ctxt); AlertDialog.Builder infoDialog = new
+         * AlertDialog.Builder(ctxt);
+         * infoDialog.setTitle(R.string.discover_proxy_title); infoDialog
+         * .setMessage(String.format( getString(R.string.discover_proxy_msg),
+         * net .getGatewayIp()));
+         * infoDialog.setNegativeButton(R.string.btn_close, null);
+         * infoDialog.show(); }
+         */
     }
 
     private void showHostInfo(int pos) {
@@ -474,7 +481,8 @@ final public class DiscoverActivity extends Activity {
         AlertDialog.Builder infoDialog = new AlertDialog.Builder(
                 DiscoverActivity.this);
         infoDialog.setTitle(host.getInetAddress().getHostAddress());
-        ((TextView) v.findViewById(R.id.info_mac)).setText(host.getHardwareAddress());
+        ((TextView) v.findViewById(R.id.info_mac)).setText(host
+                .getHardwareAddress());
         ((TextView) v.findViewById(R.id.info_nic)).setText(host.getNicVendor());
         // Show dialog
         infoDialog.setView(v);
@@ -521,12 +529,13 @@ final public class DiscoverActivity extends Activity {
     private void export() {
         final Export e = new Export(ctxt, hosts);
         final String file = e.getFileName();
+        final Context ctxtActivity = this;
 
         View v = mInflater.inflate(R.layout.file, null);
         final EditText txt = (EditText) v.findViewById(R.id.export_file);
         txt.setText(file);
 
-        AlertDialog.Builder getFileName = new AlertDialog.Builder(ctxt);
+        AlertDialog.Builder getFileName = new AlertDialog.Builder(ctxtActivity);
         getFileName.setTitle(R.string.export_choose);
         getFileName.setView(v);
         getFileName.setPositiveButton(R.string.export_save,
@@ -535,7 +544,7 @@ final public class DiscoverActivity extends Activity {
                         final String fileEdit = txt.getText().toString();
                         if (e.fileExists(fileEdit)) {
                             AlertDialog.Builder fileExists = new AlertDialog.Builder(
-                                    ctxt);
+                                    ctxtActivity);
                             fileExists.setTitle(R.string.export_exists_title);
                             fileExists.setMessage(R.string.export_exists_msg);
                             fileExists.setPositiveButton(R.string.btn_yes,

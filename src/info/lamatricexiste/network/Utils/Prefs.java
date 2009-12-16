@@ -1,12 +1,18 @@
 package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.R;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.widget.Toast;
 
 public class Prefs extends PreferenceActivity implements
@@ -28,16 +34,43 @@ public class Prefs extends PreferenceActivity implements
     public static final String KEY_NTHREADS = "nthreads";
     public static final String DEFAULT_NTHREADS = "32";
 
+    public static final String KEY_RESETDB = "resetdb";
+    public static final String DEFAULT_RESETDB = "1";
+
     private PreferenceScreen preferenceScreen = null;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final Context ctxt = this;
 
         addPreferencesFromResource(R.xml.preferences);
 
         preferenceScreen = getPreferenceScreen();
         preferenceScreen.getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
+
+        // Action preference
+        Preference resetdb = (Preference) preferenceScreen
+                .findPreference(KEY_RESETDB);
+        resetdb.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(ctxt);
+                dialog.setTitle(R.string.preferences_resetdb_action);
+                dialog.setPositiveButton(R.string.btn_yes,
+                        new OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                    int which) {
+                                new UpdateNicDb(ctxt);
+                                Toast.makeText(getApplicationContext(),
+                                        R.string.preferences_resetdb_ok,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                dialog.setNegativeButton(R.string.btn_no, null);
+                dialog.show();
+                return false;
+            }
+        });
     }
 
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {

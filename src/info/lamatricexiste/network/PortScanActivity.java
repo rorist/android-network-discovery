@@ -260,45 +260,48 @@ final public class PortScanActivity extends ListActivity {
     }
 
     private void openPortService(Long port) {
-        Intent intent = null;
+        String pk = "";
         String action = "";
+        Intent intent = null;
         int portInt = (int) ((long) port);
         switch (portInt) {
             case 22:
+                pk = "org.connectbot";
                 action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(ctxt, "org.connectbot")) {
+                if (isPackageInstalled(ctxt, pk)) {
                     String user = prefs.getString(Prefs.KEY_SSH_USER,
                             Prefs.DEFAULT_SSH_USER);
                     intent = new Intent(action);
                     intent.setData(Uri.parse("ssh://" + user + "@" + host
-                            + ":22/#" + user + "@" + host+ ":22"));
+                            + ":22/#" + user + "@" + host + ":22"));
                 } else {
                     makeToast(String.format(getString(R.string.package_missing,
                             "ConnectBot")));
+                    intent = new Intent(Intent.ACTION_VIEW).setData(Uri
+                            .parse("market://search?q=pname:" + pk));
                 }
                 break;
             case 23:
                 action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(ctxt, "org.connectbot")) {
+                if (isPackageInstalled(ctxt, pk)) {
                     intent = new Intent(action);
-                    intent.setData(Uri.parse("telnet://" + host+ ":23"));
+                    intent.setData(Uri.parse("telnet://" + host + ":23"));
                 } else {
                     makeToast(String.format(getString(R.string.package_missing,
                             "ConnectBot")));
+                    intent = new Intent(Intent.ACTION_VIEW).setData(Uri
+                            .parse("market://search?q=pname:" + pk));
                 }
                 break;
             case 80:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("http://" + host+ "/"));
-                break;
             case 443:
                 intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://" + host+ "/"));
+                intent.setData(Uri.parse("http://" + host + ":" + portInt));
                 break;
             default:
                 makeToast(R.string.scan_noaction);
-                // Use something like netcat to
-                // fetch identification message of service
+                // TODO: Use something like netcat to fetch identification
+                // message of service
         }
         if (intent != null) {
             startActivity(intent);

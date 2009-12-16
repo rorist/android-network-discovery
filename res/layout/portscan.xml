@@ -20,7 +20,8 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="16dip"
+            android:layout_gravity="center_vertical"
+            android:textSize="14dip"
             android:typeface="monospace"
             android:text="0.0.0.0" />
         <Button

@@ -10,7 +10,9 @@
     <string name="btn_scan">Scan</string>
     <string name="btn_options">Options</string>
     <string name="btn_back">Back</string>
+ 
     <string name="package_missing">%s must be installed from the market !</string>
+    
     <string name="wifi_enabled">Wifi is enabled</string>
     <string name="wifi_enabling">Wifi is enabling</string>
     <string name="wifi_disabling">Wifi is disabling</string>
@@ -19,6 +21,7 @@
     <string name="wifi_associating">Wifi is associating with %s</string>
     <string name="wifi_dhcp">Obtaining IP address from %s</string>
     <string name="wifi_unknown">Wifi state unknown</string>
+    
     <string name="discover_start">Discovery started ...</string>
     <string name="discover_finished">Discovery finished !</string>
     <string name="discover_canceled">Discovery canceled !</string>
@@ -26,20 +29,24 @@
     <string name="discover_proxy_msg">Discovery is canceled, because you probably are
         behind a proxy that prevent from discovering hosts on the network.\n\n
         Go to your Gateway from the browser : http://%s</string>
+        
     <string name="scan_noport">No open port found !</string>
     <string name="scan_noaction">No associated action !</string>
     <string name="scan_connect">Connect</string>
     <string name="scan_start">Scan started ...</string>
     <string name="scan_finished">Scan finished !</string>
     <string name="scan_canceled">Scan canceled !</string>
+    
     <string name="info_mac">MAC Address:</string>
     <string name="info_nic">NIC vendor:</string>
     <string name="info_unknown">Unknown</string>
+    
     <string name="export_finished">File saved !</string>
     <string name="export_choose">Choose file destination</string>
     <string name="export_save">Save</string>
     <string name="export_exists_title">File already exists</string>
     <string name="export_exists_msg">Do you want to overwrite ?</string>
+    
     <string name="preferences_notifications">Notifications settings</string>
     <string name="preferences_port_scan">Port Scan settings</string>
     <string name="preferences_advanced">Advanced Settings</string>
@@ -53,6 +60,10 @@
     <string name="preferences_ssh_user_summary">Username for the SSH connection</string>
     <string name="preferences_threads_title">Discovery Threads</string>
     <string name="preferences_threads_summary">Maximum number of threads to use in host discovery (1-256)</string>
+    <string name="preferences_resetdb_title">Reinstall NIC Database</string>
+    <string name="preferences_resetdb_summary">Pull and update MAC addresses database</string>
+    <string name="preferences_resetdb_action">Do you want to reinstall NIC database ?</string>
+    <string name="preferences_resetdb_ok">Database updated !</string>
     <string name="preferences_error1">Error: First port is bigger than Last port !</string>
     <string name="preferences_error2">Error: Number of Threads must be between 1 and 256 !</string>
 </resources>

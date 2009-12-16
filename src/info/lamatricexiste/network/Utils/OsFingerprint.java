@@ -5,12 +5,12 @@ import android.content.Context;
 
 public class OsFingerprint {
 
-	private final static String TAG = "OsFingerprint";
-    private HostBean host;
-    private Context ctxt;
+    // private final static String TAG = "OsFingerprint";
+    // private HostBean host;
+    // private Context ctxt;
 
-	public OsFingerprint(Context ctxt, HostBean host) {
-		this.ctxt = ctxt;
-        this.host = host;
-	}
+    public OsFingerprint(Context ctxt, HostBean host) {
+        // this.ctxt = ctxt;
+        // this.host = host;
+    }
 }

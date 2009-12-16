@@ -103,7 +103,9 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
                 }
                 cancelTimeouts(); // Filtered
                 if (cnt_selected == step) {
-                    selector.close();
+                    syncronized(selector){
+                        selector.close();
+                    }
                 }
             }
         } catch (IOException e) {
@@ -173,8 +175,10 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     private void stopSelecting() {
         try {
-            if (selector != null) {
-                selector.close();
+            syncronised(selector){
+                if (selector != null) {
+                    selector.close();
+                }
             }
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());

@@ -39,6 +39,11 @@
             android:summary="@string/preferences_threads_summary"
             android:defaultValue="32"
             android:inputType="number" />
+        <Preference
+            android:key="resetdb"
+            android:title="@string/preferences_resetdb_title"
+            android:summary="@string/preferences_resetdb_summary"
+            android:defaultValue="1"/>
     </PreferenceCategory>
 
     <!--<ListPreference-->
