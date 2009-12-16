@@ -103,7 +103,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
                 }
                 cancelTimeouts(); // Filtered
                 if (cnt_selected == step) {
-                    syncronized(selector){
+                    synchronized(selector){
                         selector.close();
                     }
                 }
@@ -175,7 +175,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     private void stopSelecting() {
         try {
-            syncronised(selector){
+            synchronized(selector){
                 if (selector != null) {
                     selector.close();
                 }

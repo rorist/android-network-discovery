@@ -62,8 +62,9 @@
     <string name="preferences_threads_summary">Maximum number of threads to use in host discovery (1-256)</string>
     <string name="preferences_resetdb_title">Reinstall NIC Database</string>
     <string name="preferences_resetdb_summary">Pull and update MAC addresses database</string>
-    <string name="preferences_resetdb_action">Do you want to reinstall NIC database ?</string>
+    <string name="preferences_resetdb_action">Do you want to download NIC database ? (~500k)</string>
     <string name="preferences_resetdb_ok">Database updated !</string>
     <string name="preferences_error1">Error: First port is bigger than Last port !</string>
     <string name="preferences_error2">Error: Number of Threads must be between 1 and 256 !</string>
+    <string name="preferences_error3">Error: File transfer failed, please try again !</string>
 </resources>

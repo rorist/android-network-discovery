@@ -1,9 +1,19 @@
 #!/usr/bin/env python
 import sqlite3
 import os
+import urllib
 
-db = 'oui.db'
+db = '/var/www/lamatricexiste.info/htdocs/oui.db'
+url = 'http://standards.ieee.org/regauth/oui/oui.txt'
 
+#Download the file
+webFile = urllib.urlopen(url)
+localFile = open(url.split('/')[-1], 'w')
+localFile.write(webFile.read())
+webFile.close()
+localFile.close()
+
+#Create the DB
 try:
   os.remove(db)
 except OSError, err:
@@ -23,7 +33,7 @@ for line in open("oui.txt"):
     except sqlite3.OperationalError, err:
       print err 
 
-print "%s records"%i
+#print "%s records"%i
 
 conn.commit()
 c.close()

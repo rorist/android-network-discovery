@@ -1,5 +1,7 @@
 package info.lamatricexiste.network.Utils;
 
+import info.lamatricexiste.network.Utils.DownloadFile;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,16 +13,17 @@ import android.util.Log;
 public class UpdateNicDb {
 
     private final static String TAG = "UpdateNicDb";
-    private final String DB_PATH = "/data/data/info.lamatricexiste.network/";
-    private final String DB_NAME = "oui.db";
+    private final static String DB_REMOTE = "http://download.lamatricexiste.info/oui.db";
+    private final static String DB_PATH = "/data/data/info.lamatricexiste.network/";
+    private final static String DB_NAME = "oui.db";
 
-    public UpdateNicDb(Context ctxt) {
-        // TODO: Remote fetch the db file
-        copyDataBase(ctxt);
+    public static void remoteCopy() throws IOException {
+        Log.v(TAG, "Copying oui.db remotly");
+        new DownloadFile(DB_REMOTE, DB_PATH + DB_NAME);
     }
 
-    private void copyDataBase(Context ctxt) {
-        Log.v(TAG, "Creating oui.db");
+    public static void localCopy(Context ctxt) {
+        Log.v(TAG, "Copying oui.db locally");
         try {
             InputStream myInput = ctxt.getAssets().open(DB_NAME);
             OutputStream myOutput = new FileOutputStream(DB_PATH + DB_NAME);

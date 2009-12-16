@@ -75,7 +75,7 @@ final public class DiscoverActivity extends Activity {
 
         // Check NIC db
         if (prefs.getString("resetdb", Prefs.DEFAULT_RESETDB) == "1") {
-            new UpdateNicDb(ctxt);
+            UpdateNicDb.localCopy(ctxt);
             Editor edit = prefs.edit();
             edit.putString(Prefs.KEY_RESETDB, "0");
             edit.commit();

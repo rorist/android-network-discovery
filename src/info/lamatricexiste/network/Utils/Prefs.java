@@ -1,6 +1,9 @@
 package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.R;
+
+import java.io.IOException;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,11 +16,12 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.util.Log;
 import android.widget.Toast;
 
 public class Prefs extends PreferenceActivity implements
         OnSharedPreferenceChangeListener {
-    // private final String TAG = "Prefs";
+    private final String TAG = "Prefs";
 
     public final static String KEY_VIBRATE_FINISH = "vibrate_finish";
     public final static boolean DEFAULT_VIBRATE_FINISH = true;
@@ -60,10 +64,17 @@ public class Prefs extends PreferenceActivity implements
                         new OnClickListener() {
                             public void onClick(DialogInterface dialog,
                                     int which) {
-                                new UpdateNicDb(ctxt);
-                                Toast.makeText(getApplicationContext(),
-                                        R.string.preferences_resetdb_ok,
-                                        Toast.LENGTH_SHORT).show();
+                                try {
+                                    UpdateNicDb.remoteCopy();
+                                    Toast.makeText(getApplicationContext(),
+                                            R.string.preferences_resetdb_ok,
+                                            Toast.LENGTH_SHORT).show();
+                                } catch (IOException e) {
+                                    Log.e(TAG, e.getMessage());
+                                    Toast.makeText(getApplicationContext(),
+                                            R.string.preferences_error3,
+                                            Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
                 dialog.setNegativeButton(R.string.btn_no, null);
