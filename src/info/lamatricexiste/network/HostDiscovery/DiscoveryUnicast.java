@@ -13,14 +13,14 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
+public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "DiscoveryUnicast";
     private final int TIMEOUT_REACH = 1000;
     private final int DISCOVER_RATE = 0;
     private int pt_move = 2; // 1=backward 2=forward
-    private Reachable reachable; 
-    
+    private Reachable reachable;
+
     protected SharedPreferences prefsMgr;
     protected ExecutorService pool;
     protected long ip;
@@ -29,11 +29,10 @@ public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
     protected int size = 0;
 
     protected Void doInBackground(Void... params) {
-        Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " ("
-                + start + "), end=" + NetInfo.getIpFromLongUnsigned(end) + " ("
-                + end + "), length=" + size);
-        pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr
-                .getString(Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
+        Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start + "), end="
+                + NetInfo.getIpFromLongUnsigned(end) + " (" + end + "), length=" + size);
+        pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr.getString(Prefs.KEY_NTHREADS,
+                Prefs.DEFAULT_NTHREADS)));
         reachable = new Reachable();
 
         try {
@@ -76,8 +75,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
     private void launch(long i) throws InterruptedException {
         Thread.sleep(DISCOVER_RATE);
         String ip = NetInfo.getIpFromLongUnsigned(i);
-        CheckRunnable r = new CheckRunnable(ip);
-        pool.execute(r);
+        pool.execute(new CheckRunnable(ip));
     }
 
     private class CheckRunnable implements Runnable {
@@ -90,15 +88,47 @@ public class DiscoveryUnicast extends AsyncTask<Void, InetAddress, Void> {
         public void run() {
             try {
                 InetAddress h = InetAddress.getByName(host);
-                if (h.isReachable(TIMEOUT_REACH) || reachable.request(h)) {
-                    publishProgress(h);
-                } else {
-                    publishProgress((InetAddress)null);
+                // Native InetAddress check
+                if (h.isReachable(TIMEOUT_REACH)) {
+                    publishProgress(host);
+                    return;
                 }
+                // Custom check
+                if (reachable.request(h)) {
+                    publishProgress(host);
+                    return;
+                }
+                publishProgress((String) null);
+
             } catch (IOException e) {
-                publishProgress((InetAddress)null);
+                publishProgress((String) null);
                 Log.e(TAG, e.getMessage());
             }
         }
     }
+
+    // private float getHostResponseTime(String host) {
+    // try {
+    // File ping = new File("/system/bin/ping");
+    // if (ping.exists() == true) {
+    // String line;
+    // Matcher matcher;
+    // Process p = Runtime.getRuntime().exec("ping -c 2 " + host);
+    // BufferedReader r = new BufferedReader(new
+    // InputStreamReader(p.getInputStream()), 1);
+    // while ((line = r.readLine()) != null) {
+    // matcher = Pattern
+    // .compile(
+    // "^rtt min\\/avg\\/max\\/mdev = ([0-9\\.]+)\\/[0-9\\.]+\\/[0-9\\.]+\\/[0-9\\.]+ ms$")
+    // .matcher(line);
+    // if (matcher.matches()) {
+    // return Float.parseFloat(matcher.group(1));
+    // }
+    // }
+    // }
+    // } catch (Exception e) {
+    // Log.e(TAG, "Can't use native ping: " + e.getMessage());
+    // }
+    // return 0;
+    // }
 }

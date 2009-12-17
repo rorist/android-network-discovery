@@ -1,64 +1,62 @@
 // Inspired by http://connectbot.googlecode.com/svn/trunk/connectbot/src/org/connectbot/bean/HostBean.java
 package info.lamatricexiste.network.HostDiscovery;
 
-import java.net.InetAddress;
-
 public class HostBean {
-    private InetAddress inetAddress = null;
+    private String ipAddress = null;
     private String hardwareAddress = "00:00:00:00:00:00";
     private String nicVendor = "Unknown";
-    private int responseTime = 0;
+    private float responseTime = 0;
     private int position = 0;
     private long[] ports = null;
-   
-    public HostBean(){
+
+    public HostBean() {
     }
 
-    public InetAddress getInetAddress(){
-        return inetAddress;
-    }
-
-    public void setInetAddress(InetAddress addr){
-        inetAddress = addr;
-    }
-
-    public String getHardwareAddress(){
+    public String getHardwareAddress() {
         return hardwareAddress;
     }
 
-    public void setHardwareAddress(String addr){
+    public void setHardwareAddress(String addr) {
         hardwareAddress = addr;
     }
 
-    public String getNicVendor(){
+    public String getNicVendor() {
         return nicVendor;
     }
 
-    public void setNicVendor(String vendor){
+    public void setNicVendor(String vendor) {
         nicVendor = vendor;
     }
 
-    public int getResponseTime(){
+    public float getResponseTime() {
         return responseTime;
     }
 
-    public void setResponseTime(int response){
+    public void setResponseTime(float response) {
         responseTime = response;
     }
 
-    public int getPosition(){
+    public int getPosition() {
         return position;
     }
 
-    public void setPosition(int pos){
+    public void setPosition(int pos) {
         position = pos;
     }
 
-    public long[] getPorts(){
+    public long[] getPorts() {
         return ports;
     }
 
-    public void setPorts(long[] p){
+    public void setPorts(long[] p) {
         ports = p;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
     }
 }

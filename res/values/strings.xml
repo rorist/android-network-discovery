@@ -37,6 +37,7 @@
     <string name="scan_finished">Scan finished !</string>
     <string name="scan_canceled">Scan canceled !</string>
     
+    <string name="info_time">Response time:</string>
     <string name="info_mac">MAC Address:</string>
     <string name="info_nic">NIC vendor:</string>
     <string name="info_unknown">Unknown</string>

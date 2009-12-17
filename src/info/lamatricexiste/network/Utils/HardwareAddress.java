@@ -7,7 +7,6 @@ import info.lamatricexiste.network.R;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.InetAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +23,7 @@ public class HardwareAddress {
     private String hw;
     private String ni;
 
-    public HardwareAddress(Context ctxt, InetAddress addr) {
+    public HardwareAddress(Context ctxt, String addr) {
         hw = "00:00:00:00:00:00";
         ni = ctxt.getString(R.string.info_unknown);
         setHardwareAddress(addr);
@@ -39,8 +38,7 @@ public class HardwareAddress {
         return ni;
     }
 
-    public void setHardwareAddress(InetAddress addr) {
-        String ip = addr.getHostAddress();
+    public void setHardwareAddress(String ip) {
         try {
             File arp = new File("/proc/net/arp");
             if (arp.exists() != false && arp.canRead()) {

@@ -12,8 +12,7 @@ public class NetInfo {
     private WifiInfo info;
 
     public NetInfo(Context ctxt) {
-        WifiManager wifi = (WifiManager) ctxt
-                .getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = (WifiManager) ctxt.getSystemService(Context.WIFI_SERVICE);
         if (wifi != null) {
             dhcp = wifi.getDhcpInfo();
             info = wifi.getConnectionInfo();
@@ -24,8 +23,8 @@ public class NetInfo {
         int i = dhcp.netmask;
         i = i - ((i >> 1) & 0x55555555);
         i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
-        return ((i + (i >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
-        // return 26;
+        // return ((i + (i >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
+        return 24;
     }
 
     public String getIp() {
@@ -66,8 +65,8 @@ public class NetInfo {
 
     public static long getUnsignedLongFromIp(String ip_addr) {
         String[] a = ip_addr.split("\\.");
-        return (Integer.parseInt(a[0]) * 16777216 + Integer.parseInt(a[1])
-                * 65536 + Integer.parseInt(a[2]) * 256 + Integer.parseInt(a[3]));
+        return (Integer.parseInt(a[0]) * 16777216 + Integer.parseInt(a[1]) * 65536
+                + Integer.parseInt(a[2]) * 256 + Integer.parseInt(a[3]));
     }
 
     public static String getIpFromIntSigned(int ip_int) {

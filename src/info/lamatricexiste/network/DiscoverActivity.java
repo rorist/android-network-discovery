@@ -9,7 +9,6 @@ import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 
 import java.lang.ref.WeakReference;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -218,36 +217,32 @@ final public class DiscoverActivity extends Activity {
         }
 
         @Override
-        public View getView(final int position, View convertView,
-                ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.list_host, null);
                 holder = new ViewHolder();
                 holder.host = (TextView) convertView.findViewById(R.id.list);
-                holder.btn_ports = (Button) convertView
-                        .findViewById(R.id.list_port);
-                holder.btn_info = (Button) convertView
-                        .findViewById(R.id.list_info);
+                holder.btn_ports = (Button) convertView.findViewById(R.id.list_port);
+                holder.btn_info = (Button) convertView.findViewById(R.id.list_info);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
-            holder.host.setText(host.getInetAddress().getHostAddress());
+            holder.host.setText(host.getIpAddress());
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, PortScanActivity.class);
                     intent.putExtra("position", position);
-                    intent.putExtra("host", host.getInetAddress()
-                            .getHostAddress());
+                    intent.putExtra("host", host.getIpAddress());
                     intent.putExtra("ports", host.getPorts());
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }
             });
             holder.btn_info.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    showHostInfo(position);
+                    showHostInfo(host);
                 }
             });
             return convertView;
@@ -278,8 +273,7 @@ final public class DiscoverActivity extends Activity {
         String action = intent.getAction();
         if (action != null) {
             if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-                int WifiState = intent.getIntExtra(
-                        WifiManager.EXTRA_WIFI_STATE, -1);
+                int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
                 Log.d(TAG, "WifiState=" + WifiState);
                 switch (WifiState) {
                     case WifiManager.WIFI_STATE_ENABLING:
@@ -308,21 +302,17 @@ final public class DiscoverActivity extends Activity {
                     String bssid = net.getBSSID();
                     String ssid = net.getSSID();
                     String mac = net.getMacAddress();
-                    String id = ssid != null ? ssid : (bssid != null ? bssid
-                            : mac);
-                    info_nt.setText(String.format(
-                            getString(R.string.wifi_associating), id));
+                    String id = ssid != null ? ssid : (bssid != null ? bssid : mac);
+                    info_nt.setText(String.format(getString(R.string.wifi_associating), id));
                 } else if (sstate == SupplicantState.COMPLETED) {
-                    info_nt.setText(String.format(
-                            getString(R.string.wifi_dhcp), net.getSSID()));
+                    info_nt.setText(String.format(getString(R.string.wifi_dhcp), net.getSSID()));
                 }
 
             }
         }
 
         // 3G(connected) -> Wifi(connected)
-        final NetworkInfo network_info = connMgr
-                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (network_info != null) {
             NetworkInfo.State state = network_info.getState();
             Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
@@ -335,8 +325,7 @@ final public class DiscoverActivity extends Activity {
                  * "Wifi is re-starting="+e.getMessage()); } }
                  */
                 info_ip.setText("IP: " + net.getIp());
-                info_nt.setText("NT: " + net.getNetIp() + "/"
-                        + net.getNetCidr());
+                info_nt.setText("NT: " + net.getNetIp() + "/" + net.getNetCidr());
                 info_id.setText("SSID: " + net.getSSID());
                 setButtonOn(btn_discover, R.drawable.discover);
                 setButtonOn(btn_export, R.drawable.export);
@@ -374,12 +363,11 @@ final public class DiscoverActivity extends Activity {
         }
 
         @Override
-        protected void onProgressUpdate(InetAddress... item) {
+        protected void onProgressUpdate(String... item) {
             final DiscoverActivity discover = mDiscover.get();
             if (!isCancelled()) {
-                InetAddress host = item[0];
-                if (host != null) {
-                    discover.addHost(host);
+                if (item[0] != null) {
+                    discover.addHost(item[0]);
                 }
                 hosts_done++;
                 discover.setProgress(hosts_done * 10000 / size);
@@ -389,10 +377,8 @@ final public class DiscoverActivity extends Activity {
         @Override
         protected void onPostExecute(Void unused) {
             final DiscoverActivity discover = mDiscover.get();
-            if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH,
-                    Prefs.DEFAULT_VIBRATE_FINISH) == true) {
-                Vibrator v = (Vibrator) discover
-                        .getSystemService(Context.VIBRATOR_SERVICE);
+            if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
+                Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(VIBRATE);
             }
             discover.makeToast(R.string.discover_finished);
@@ -415,8 +401,7 @@ final public class DiscoverActivity extends Activity {
         initList();
         checkHostsTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
-        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0,
-                R.drawable.cancel, 0, 0);
+        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cancel, 0, 0);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 checkHostsTask.cancel(true);
@@ -428,8 +413,7 @@ final public class DiscoverActivity extends Activity {
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
         btn_discover.setText(R.string.btn_discover);
-        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0,
-                R.drawable.discover, 0, 0);
+        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.discover, 0, 0);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
@@ -451,13 +435,13 @@ final public class DiscoverActivity extends Activity {
         hosts = new ArrayList<HostBean>();
     }
 
-    private void addHost(InetAddress addr) {
+    private void addHost(String addr) {
         // if (!hosts_haddr.contains(haddr)) {
         HardwareAddress hw = new HardwareAddress(ctxt, addr);
         HostBean host = new HostBean();
         host.setHardwareAddress(hw.getHardwareAddress());
         host.setNicVendor(hw.getNicVendor());
-        host.setInetAddress(addr);
+        host.setIpAddress(addr);
         host.setPosition(hosts.size());
         hosts.add(host);
         adapter.add("nothing to see here");
@@ -474,15 +458,12 @@ final public class DiscoverActivity extends Activity {
          */
     }
 
-    private void showHostInfo(int pos) {
-        HostBean host = hosts.get(pos);
+    private void showHostInfo(HostBean host) {
         View v = mInflater.inflate(R.layout.info, null);
         // Build info dialog
-        AlertDialog.Builder infoDialog = new AlertDialog.Builder(
-                DiscoverActivity.this);
-        infoDialog.setTitle(host.getInetAddress().getHostAddress());
-        ((TextView) v.findViewById(R.id.info_mac)).setText(host
-                .getHardwareAddress());
+        AlertDialog.Builder infoDialog = new AlertDialog.Builder(DiscoverActivity.this);
+        infoDialog.setTitle(host.getIpAddress());
+        ((TextView) v.findViewById(R.id.info_mac)).setText(host.getHardwareAddress());
         ((TextView) v.findViewById(R.id.info_nic)).setText(host.getNicVendor());
         // Show dialog
         infoDialog.setView(v);
@@ -538,52 +519,37 @@ final public class DiscoverActivity extends Activity {
         AlertDialog.Builder getFileName = new AlertDialog.Builder(ctxtActivity);
         getFileName.setTitle(R.string.export_choose);
         getFileName.setView(v);
-        getFileName.setPositiveButton(R.string.export_save,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dlg, int sumthin) {
-                        final String fileEdit = txt.getText().toString();
-                        if (e.fileExists(fileEdit)) {
-                            AlertDialog.Builder fileExists = new AlertDialog.Builder(
-                                    ctxtActivity);
-                            fileExists.setTitle(R.string.export_exists_title);
-                            fileExists.setMessage(R.string.export_exists_msg);
-                            fileExists.setPositiveButton(R.string.btn_yes,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(
-                                                DialogInterface dialog,
-                                                int which) {
-                                            if (e.writeToSd(fileEdit)) {
-                                                makeToast(R.string.export_finished);
-                                            } else {
-                                                export();
-                                            }
-                                        }
-                                    });
-                            fileExists.setNegativeButton(R.string.btn_no, null);
-                            fileExists.show();
-                        } else {
-                            if (e.writeToSd(fileEdit)) {
-                                makeToast(R.string.export_finished);
-                            } else {
-                                export();
-                            }
-                        }
+        getFileName.setPositiveButton(R.string.export_save, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dlg, int sumthin) {
+                final String fileEdit = txt.getText().toString();
+                if (e.fileExists(fileEdit)) {
+                    AlertDialog.Builder fileExists = new AlertDialog.Builder(ctxtActivity);
+                    fileExists.setTitle(R.string.export_exists_title);
+                    fileExists.setMessage(R.string.export_exists_msg);
+                    fileExists.setPositiveButton(R.string.btn_yes,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if (e.writeToSd(fileEdit)) {
+                                        makeToast(R.string.export_finished);
+                                    } else {
+                                        export();
+                                    }
+                                }
+                            });
+                    fileExists.setNegativeButton(R.string.btn_no, null);
+                    fileExists.show();
+                } else {
+                    if (e.writeToSd(fileEdit)) {
+                        makeToast(R.string.export_finished);
+                    } else {
+                        export();
                     }
-                });
+                }
+            }
+        });
         getFileName.setNegativeButton(R.string.btn_discover_cancel, null);
         getFileName.show();
     }
-
-    // private void updateList() {
-    // adapter.clear();
-    // listHosts();
-    // }
-    //
-    // private void listHosts() {
-    // for (String h : hosts) {
-    // addHost(h);
-    // }
-    // }
 
     // private List<String> getSelectedHosts(){
     // List<String> hosts_s = new ArrayList<String>();

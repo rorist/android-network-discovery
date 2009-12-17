@@ -70,7 +70,7 @@ public class Export {
             for (int i = 0; i < hosts.size(); i++) {
                 // Host info
                 HostBean host = hosts.get(i);
-                xml += "\t\t<host value=\"" + host.getInetAddress().getHostAddress() + "\" mac=\""
+                xml += "\t\t<host value=\"" + host.getIpAddress() + "\" mac=\""
                         + host.getHardwareAddress() + "\">\r\n";
                 // Ports
                 long[] portsArray = host.getPorts();
