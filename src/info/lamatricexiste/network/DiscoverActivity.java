@@ -234,6 +234,9 @@ final public class DiscoverActivity extends Activity {
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, PortScanActivity.class);
+                    if (wifiConnected() == false) {
+                        intent.putExtra("wifiDisabled", true);
+                    }
                     intent.putExtra("position", position);
                     intent.putExtra("host", host.getIpAddress());
                     intent.putExtra("ports", host.getPorts());
@@ -335,6 +338,19 @@ final public class DiscoverActivity extends Activity {
         } else if (checkHostsTask != null) {
             cancelAllTasks();
         }
+    }
+
+    private boolean wifiConnected() {
+        final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (network_info.getState() == NetworkInfo.State.CONNECTED) {
+            return true;
+        }
+        // AlertDialog.Builder alert = new
+        // AlertDialog.Builder(DiscoverActivity.this);
+        // alert.setMessage(R.string.wifi_disabled);
+        // alert.setPositiveButton(R.string.btn_close, null);
+        // alert.show();
+        return false;
     }
 
     /**
