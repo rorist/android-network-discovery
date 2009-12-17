@@ -11,7 +11,7 @@ public class Reachable {
 	final int timeout = 300;
 	final int len = ports.length;
 
-	public boolean request(InetAddress host) {
+	public boolean isReachable(InetAddress host) {
 		for (int i = 0; i < len; i++) {
 			try {
 				Socket s = new Socket();

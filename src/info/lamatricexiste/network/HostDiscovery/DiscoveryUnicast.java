@@ -94,7 +94,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
                     return;
                 }
                 // Custom check
-                if (reachable.request(h)) {
+                if (reachable.isReachable(h)) {
                     publishProgress(host);
                     return;
                 }
