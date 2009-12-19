@@ -85,8 +85,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         try {
             while (selector.isOpen()) {
                 selector.select(TIMEOUT_SELECT);
-                Iterator<SelectionKey> iterator = selector.selectedKeys()
-                        .iterator();
+                Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                 while (iterator.hasNext()) {
                     SelectionKey key = (SelectionKey) iterator.next();
                     if (key.isValid()) {
@@ -103,7 +102,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
                 }
                 cancelTimeouts(); // Filtered
                 if (cnt_selected == step) {
-                    synchronized(selector){
+                    synchronized (selector) {
                         selector.close();
                     }
                 }
@@ -117,39 +116,39 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     @SuppressWarnings("unchecked")
     protected void handleConnect(SelectionKey key) {
-        SocketChannel socket = (SocketChannel) key.channel();
+        // SocketChannel socket = (SocketChannel) key.channel();
         SparseArray<Long> map = (SparseArray<Long>) key.attachment();
         Long port = map.get(0);
-        try {
-            if (socket.isConnectionPending()) { //FIXME: not clear if it's neededs
-                socket.finishConnect();
-                SparseArray<Long> data = new SparseArray<Long>(2);
-                data.append(0, (long) port);
-                data.append(1, System.currentTimeMillis());
+        // try {
+        // if (!socket.isConnectionPending()) { // FIXME: not clear if it's
+        // neededs
+        // socket.finishConnect();
+        SparseArray<Long> data = new SparseArray<Long>(2);
+        data.append(0, (long) port);
+        data.append(1, System.currentTimeMillis());
 
-                // trying to read data
-                /*
-                 * try { ByteBuffer buf = ByteBuffer.allocateDirect(1024); int
-                 * numRead = 0; while(numRead>=0){ buf.rewind(); numRead =
-                 * socket.read(buf); buf.rewind(); Log.v(TAG,
-                 * "ReadFromSocket="+(new String(buf.array()))); } }
-                 * catch(Exception e){ Log.e(TAG, "port="+port+", "+
-                 * e.getMessage()); } finally { socket.finishConnect();
-                 * publishProgress(port); // Open FIXME: use Bundle instead of
-                 * Long }
-                 */
-                publishProgress(port); // Open FIXME: use Bundle instead of Long
-            }
-        } catch (IOException e) {
-            publishProgress(new Long(0)); // Closed
-            cnt_selected++;
-            key.cancel();
-            try {
-                socket.close();
-            } catch (IOException e1) {
-                Log.e(TAG, e1.getMessage());
-            }
-        }
+        // trying to read data
+        /*
+         * try { ByteBuffer buf = ByteBuffer.allocateDirect(1024); int numRead =
+         * 0; while(numRead>=0){ buf.rewind(); numRead = socket.read(buf);
+         * buf.rewind(); Log.v(TAG, "ReadFromSocket="+(new
+         * String(buf.array()))); } } catch(Exception e){ Log.e(TAG,
+         * "port="+port+", "+ e.getMessage()); } finally {
+         * socket.finishConnect(); publishProgress(port); // Open FIXME: use
+         * Bundle instead of Long }
+         */
+        publishProgress(port); // Open FIXME: use Bundle instead of Long
+        // }
+        // } catch (IOException e) {
+        // publishProgress(new Long(0)); // Closed
+        // cnt_selected++;
+        // key.cancel();
+        // try {
+        // socket.close();
+        // } catch (IOException e1) {
+        // Log.e(TAG, e1.getMessage());
+        // }
+        // }
     }
 
     @SuppressWarnings("unchecked")
@@ -175,7 +174,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     private void stopSelecting() {
         try {
-            synchronized(selector){
+            synchronized (selector) {
                 if (selector != null) {
                     selector.close();
                 }

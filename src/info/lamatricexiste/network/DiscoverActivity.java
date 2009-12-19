@@ -5,6 +5,7 @@ import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.NetInfo;
+import info.lamatricexiste.network.Utils.OsFingerprint;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 
@@ -193,11 +194,13 @@ final public class DiscoverActivity extends Activity {
         switch (requestCode) {
             case SCAN_PORT_RESULT:
                 if (resultCode == RESULT_OK) {
+                    // Get scannde ports
                     Bundle extra = data.getExtras();
                     int position = extra.getInt("position");
                     HostBean host = hosts.get(position);
                     host.setPorts(extra.getLongArray("ports"));
-                    // FIXME: reset host in List ?
+                    // OS Fingerprint check
+                    host.setOs(OsFingerprint.finger(extra.getLongArray("ports")));
                 }
             default:
                 break;
@@ -321,12 +324,6 @@ final public class DiscoverActivity extends Activity {
             Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
             // Connection check
             if (net.getSSID() != null && state == NetworkInfo.State.CONNECTED) {
-                // Hack to let the wifi start after wakeup, FIXME ?
-                /*
-                 * if(net.getSSID()==null){ try{ Thread.sleep(2000); } catch
-                 * (InterruptedException e){ Log.e(TAG,
-                 * "Wifi is re-starting="+e.getMessage()); } }
-                 */
                 info_ip.setText("IP: " + net.getIp());
                 info_nt.setText("NT: " + net.getNetIp() + "/" + net.getNetCidr());
                 info_id.setText("SSID: " + net.getSSID());
@@ -345,11 +342,6 @@ final public class DiscoverActivity extends Activity {
         if (network_info.getState() == NetworkInfo.State.CONNECTED) {
             return true;
         }
-        // AlertDialog.Builder alert = new
-        // AlertDialog.Builder(DiscoverActivity.this);
-        // alert.setMessage(R.string.wifi_disabled);
-        // alert.setPositiveButton(R.string.btn_close, null);
-        // alert.show();
         return false;
     }
 

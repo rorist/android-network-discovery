@@ -8,6 +8,7 @@ public class HostBean {
     private float responseTime = 0;
     private int position = 0;
     private long[] ports = null;
+    private String os = "Unknown";
 
     public HostBean() {
     }
@@ -58,5 +59,13 @@ public class HostBean {
 
     public String getIpAddress() {
         return ipAddress;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
+    }
+
+    public String getOs() {
+        return os;
     }
 }

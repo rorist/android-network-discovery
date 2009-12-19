@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,7 @@ import android.widget.Toast;
 
 final public class PortScanActivity extends ListActivity {
 
-    // private final String TAG = "PortScanActivity";
+    private final String TAG = "PortScanActivity";
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
     private ArrayAdapter<String> adapter;
@@ -151,12 +152,16 @@ final public class PortScanActivity extends ListActivity {
 
         @Override
         protected void onPreExecute() {
-            // Get preferences
-            String port_start_pref = prefs
-                    .getString(Prefs.KEY_PORT_START, Prefs.DEFAULT_PORT_START);
-            String port_end_pref = prefs.getString(Prefs.KEY_PORT_END, Prefs.DEFAULT_PORT_END);
-            port_start = Integer.parseInt(port_start_pref);
-            port_end = Integer.parseInt(port_end_pref);
+            // Get start/end ports
+            try {
+                port_start = Integer.parseInt(prefs.getString(Prefs.KEY_PORT_START,
+                        Prefs.DEFAULT_PORT_START));
+                port_end = Integer.parseInt(prefs.getString(Prefs.KEY_PORT_END,
+                        Prefs.DEFAULT_PORT_END));
+            } catch (NumberFormatException e) {
+                port_start = Integer.parseInt(Prefs.DEFAULT_PORT_START);
+                port_end = Integer.parseInt(Prefs.DEFAULT_PORT_END);
+            }
             nb_port = port_end - port_start + 1;
             setProgress(0);
         }
