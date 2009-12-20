@@ -25,7 +25,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 500;
-    private final int TIMEOUT_SOCKET = 600;
+    private final int TIMEOUT_SOCKET = 2000;
     private final int SCAN_RATE = 0;
     private int step;
     private int cnt_selected;
@@ -44,25 +44,38 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         try {
             step = 127;
             InetAddress ina = InetAddress.getByName(host);
-            int limit = port_end - step;
-            for (int i = port_start; i <= limit; i += step + 1) {
-                scanPorts(ina, i, i + step);
+            if (nb_port > step) {
+                int limit = port_end - step;
+                for (int i = port_start; i <= limit; i += step + 1) {
+                    scanPorts(ina, i, i + ((i + step - 1 <= port_end) ? i + step - 1 : port_end));
+                }
+            } else {
+                scanPorts(ina, port_start, port_end);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        } finally {
             stopSelecting();
         }
         return null;
     }
 
-    private void scanPorts(InetAddress ina, int PORT_START, int PORT_END)
+    protected void onCancelled() {
+        stopSelecting();
+    }
+
+    private void scanPorts(InetAddress ina, final int PORT_START, final int PORT_END)
             throws InterruptedException, IOException {
+        Log.d(TAG, "scanPorts: start=" + PORT_START + ", end=" + PORT_END);
         cnt_selected = 0;
         selector = Selector.open();
-        for (int i = PORT_START; i < PORT_END; i++) {
+        for (int i = PORT_START; i <= PORT_END; i++) {
             connectSocket(ina, i);
             Thread.sleep(SCAN_RATE);
         }
-        doSelect();
+        doSelect(PORT_END - PORT_START);
     }
 
     private void connectSocket(InetAddress ina, int port) throws IOException {
@@ -81,30 +94,27 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         socket.register(selector, SelectionKey.OP_CONNECT, data);
     }
 
-    private void doSelect() {
+    private void doSelect(int STEP) {
         try {
             while (selector.isOpen()) {
+                Log.d(TAG, "selectLoop, cnt=" + cnt_selected);
                 selector.select(TIMEOUT_SELECT);
                 Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                 while (iterator.hasNext()) {
                     SelectionKey key = (SelectionKey) iterator.next();
-                    if (key.isValid()) {
-                        if (key.isConnectable()) {
-                            handleConnect(key);
-                        } else if (key.isReadable()) {
-                            Log.v(TAG, "key is readable=" + key.toString());
-                            cnt_selected++;
-                            key.channel().close();
-                            key.cancel();
-                        }
-                    }
                     iterator.remove();
+                    if (!key.isValid()) {
+                        continue;
+                    }
+                    if (key.isConnectable()) {
+                        handleConnect(key);
+                    } else if (key.isReadable()) {
+                        handleRead(key);
+                    }
                 }
                 cancelTimeouts(); // Filtered
-                if (cnt_selected == step) {
-                    synchronized (selector) {
-                        selector.close();
-                    }
+                if (cnt_selected >= STEP) {
+                    stopSelecting();
                 }
             }
         } catch (IOException e) {
@@ -115,40 +125,43 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
     }
 
     @SuppressWarnings("unchecked")
-    protected void handleConnect(SelectionKey key) {
-        // SocketChannel socket = (SocketChannel) key.channel();
-        SparseArray<Long> map = (SparseArray<Long>) key.attachment();
-        Long port = map.get(0);
-        // try {
-        // if (!socket.isConnectionPending()) { // FIXME: not clear if it's
-        // neededs
-        // socket.finishConnect();
-        SparseArray<Long> data = new SparseArray<Long>(2);
-        data.append(0, (long) port);
-        data.append(1, System.currentTimeMillis());
+    private void handleRead(SelectionKey key) {
+        publishProgress(((SparseArray<Long>) key.attachment()).get(0));
+        finishKey(key);
 
-        // trying to read data
-        /*
-         * try { ByteBuffer buf = ByteBuffer.allocateDirect(1024); int numRead =
-         * 0; while(numRead>=0){ buf.rewind(); numRead = socket.read(buf);
-         * buf.rewind(); Log.v(TAG, "ReadFromSocket="+(new
-         * String(buf.array()))); } } catch(Exception e){ Log.e(TAG,
-         * "port="+port+", "+ e.getMessage()); } finally {
-         * socket.finishConnect(); publishProgress(port); // Open FIXME: use
-         * Bundle instead of Long }
-         */
-        publishProgress(port); // Open FIXME: use Bundle instead of Long
-        // }
-        // } catch (IOException e) {
-        // publishProgress(new Long(0)); // Closed
-        // cnt_selected++;
-        // key.cancel();
+        // ByteBuffer buf = ByteBuffer.allocateDirect(2);
+        // buf.clear();
+        // int numRead = 0;
         // try {
-        // socket.close();
-        // } catch (IOException e1) {
-        // Log.e(TAG, e1.getMessage());
+        // numRead = ((SocketChannel) key.channel()).read(buf);
+        // } catch (IOException e) {
+        // Log.e(TAG, e.getMessage());
+        // } finally {
+        // if (numRead > 0) {
+        // try {
+        // Log.v(TAG, "read=" + new String(buf.array()));
+        // } catch (UnsupportedOperationException e) {
+        // Log.e(TAG, "UnsupportedOperationException");
         // }
         // }
+        // finishKey(key);
+        // }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void handleConnect(SelectionKey key) {
+        SocketChannel socket = (SocketChannel) key.channel();
+        try {
+            socket.finishConnect();
+            // Register for reading
+            SparseArray<Long> data = (SparseArray<Long>) key.attachment();
+            data.setValueAt(1, System.currentTimeMillis());
+            // socket.register(selector, SelectionKey.OP_READ, data);
+            key.interestOps(SelectionKey.OP_READ);
+        } catch (IOException e) {
+            publishProgress(new Long(0));
+            finishKey(key);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -161,26 +174,40 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
             long time = map.get(1);
             if (key.isValid() && now - time > TIMEOUT_SOCKET) {
                 publishProgress(new Long(0));
-                cnt_selected++;
-                key.cancel();
-                key.channel().close();
+                finishKey(key);
             }
         }
     }
 
-    protected void onCancelled() {
-        stopSelecting();
+    private void finishKey(SelectionKey key) {
+        try {
+            key.channel().close();
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        } finally {
+            key.cancel();
+            cnt_selected++;
+            Log.v(TAG, "finishKey");
+        }
     }
 
     private void stopSelecting() {
-        try {
-            synchronized (selector) {
-                if (selector != null) {
-                    selector.close();
-                }
+        Log.d(TAG, "stopSelecting");
+        // synchronized (selector) {
+        if (selector != null && selector.isOpen()) {
+            Log.d(TAG, "selector still open");
+            // Force invalidate keys
+            Iterator<SelectionKey> iterator = selector.keys().iterator();
+            while (iterator.hasNext()) {
+                finishKey((SelectionKey) iterator.next());
             }
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
+            // Close the selector
+            try {
+                selector.close();
+            } catch (IOException e) {
+            }
+            Log.d(TAG, "selector closed");
         }
+        // }
     }
 }

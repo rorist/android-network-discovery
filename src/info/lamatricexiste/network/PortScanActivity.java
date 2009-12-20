@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,7 @@ import android.widget.Toast;
 
 final public class PortScanActivity extends ListActivity {
 
-    private final String TAG = "PortScanActivity";
+    // private final String TAG = "PortScanActivity";
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
     private ArrayAdapter<String> adapter;
@@ -226,6 +225,7 @@ final public class PortScanActivity extends ListActivity {
         // Reset scan
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
+        setProgress(10000);
         btn_scan.setText(R.string.btn_scan);
         btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.discover, 0, 0);
         btn_scan.setOnClickListener(new View.OnClickListener() {
