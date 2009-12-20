@@ -5,7 +5,6 @@ import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.NetInfo;
-import info.lamatricexiste.network.Utils.OsFingerprint;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 
@@ -30,7 +29,6 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,7 +45,7 @@ import android.widget.Toast;
 
 final public class DiscoverActivity extends Activity {
 
-    private final String TAG = "NetworkMain";
+    // private final String TAG = "NetworkMain";
     // private final int DEFAULT_DISCOVER = 1;
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
@@ -200,7 +198,7 @@ final public class DiscoverActivity extends Activity {
                     HostBean host = hosts.get(position);
                     host.setPorts(extra.getLongArray("ports"));
                     // OS Fingerprint check
-                    host.setOs(OsFingerprint.finger(extra.getLongArray("ports")));
+                    // host.setOs(OsFingerprint.finger(extra.getLongArray("ports")));
                 }
             default:
                 break;
@@ -280,7 +278,7 @@ final public class DiscoverActivity extends Activity {
         if (action != null) {
             if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-                Log.d(TAG, "WifiState=" + WifiState);
+                // Log.d(TAG, "WifiState=" + WifiState);
                 switch (WifiState) {
                     case WifiManager.WIFI_STATE_ENABLING:
                         info_nt.setText(R.string.wifi_enabling);
@@ -301,7 +299,7 @@ final public class DiscoverActivity extends Activity {
 
             if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
                 SupplicantState sstate = net.getSupplicantState();
-                Log.d(TAG, "SupplicantState=" + sstate);
+                // Log.d(TAG, "SupplicantState=" + sstate);
                 if (sstate == SupplicantState.SCANNING) {
                     info_nt.setText(R.string.wifi_scanning);
                 } else if (sstate == SupplicantState.ASSOCIATING) {
@@ -321,7 +319,8 @@ final public class DiscoverActivity extends Activity {
         final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (network_info != null) {
             NetworkInfo.State state = network_info.getState();
-            Log.d(TAG, "netinfo=" + state + " with " + network_info.getType());
+            // Log.d(TAG, "netinfo=" + state + " with " +
+            // network_info.getType());
             // Connection check
             if (net.getSSID() != null && state == NetworkInfo.State.CONNECTED) {
                 info_ip.setText("IP: " + net.getIp());
