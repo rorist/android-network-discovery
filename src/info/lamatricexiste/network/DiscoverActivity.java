@@ -212,7 +212,7 @@ final public class DiscoverActivity extends Activity {
     }
 
     // Custom ArrayAdapter
-    private class HostsAdapter extends ArrayAdapter<String> {
+    private class HostsAdapter extends ArrayAdapter<Void> {
         public HostsAdapter(Context ctxt) {
             super(ctxt, R.layout.list_host, R.id.list);
         }
@@ -451,7 +451,7 @@ final public class DiscoverActivity extends Activity {
         host.setIpAddress(addr);
         host.setPosition(hosts.size());
         hosts.add(host);
-        adapter.add("nothing to see here");
+        adapter.add(null);
         // FIXME: Reintroduce this check !
         /*
          * } else { if (checkHostsTask != null) { checkHostsTask.cancel(true); }

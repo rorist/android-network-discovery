@@ -170,8 +170,7 @@ final public class PortScanActivity extends ListActivity {
             if (values.length > 0) {
                 if (!values[0].equals(new Long(0))) {
                     ports.add(values[0]);
-                    adapter.add("nothing important here FIXME");
-                    // Set entry icon/etc
+                    adapter.add(null);
                 }
             }
             progress_current++;
@@ -295,9 +294,12 @@ final public class PortScanActivity extends ListActivity {
                 }
                 break;
             case 80:
+                intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("http://" + host));
+                break;
             case 443:
                 intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("http://" + host + ":" + portInt));
+                intent.setData(Uri.parse("https://" + host));
                 break;
             default:
                 makeToast(R.string.scan_noaction);
