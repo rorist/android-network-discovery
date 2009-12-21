@@ -443,26 +443,38 @@ final public class DiscoverActivity extends Activity {
     }
 
     private void addHost(String addr) {
-        // if (!hosts_haddr.contains(haddr)) {
         HardwareAddress hw = new HardwareAddress(ctxt, addr);
-        HostBean host = new HostBean();
-        host.setHardwareAddress(hw.getHardwareAddress());
-        host.setNicVendor(hw.getNicVendor());
-        host.setIpAddress(addr);
-        host.setPosition(hosts.size());
-        hosts.add(host);
-        adapter.add(null);
-        // FIXME: Reintroduce this check !
-        /*
-         * } else { if (checkHostsTask != null) { checkHostsTask.cancel(true); }
-         * NetInfo net = new NetInfo(ctxt); AlertDialog.Builder infoDialog = new
-         * AlertDialog.Builder(ctxt);
-         * infoDialog.setTitle(R.string.discover_proxy_title); infoDialog
-         * .setMessage(String.format( getString(R.string.discover_proxy_msg),
-         * net .getGatewayIp()));
-         * infoDialog.setNegativeButton(R.string.btn_close, null);
-         * infoDialog.show(); }
-         */
+        String haddr = hw.getHardwareAddress();
+        if (!hardwareAddressAlreadyExists(haddr)) {
+            HostBean host = new HostBean();
+            host.setHardwareAddress(haddr);
+            host.setNicVendor(hw.getNicVendor());
+            host.setIpAddress(addr);
+            host.setPosition(hosts.size());
+            hosts.add(host);
+            adapter.add(null);
+        } else {
+            if (checkHostsTask != null) {
+                checkHostsTask.cancel(true);
+            }
+            NetInfo net = new NetInfo(ctxt);
+            AlertDialog.Builder infoDialog = new AlertDialog.Builder(ctxt);
+            infoDialog.setTitle(R.string.discover_proxy_title);
+            infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg), net
+                    .getGatewayIp()));
+            infoDialog.setNegativeButton(R.string.btn_close, null);
+            infoDialog.show();
+        }
+    }
+
+    private boolean hardwareAddressAlreadyExists(String addr) {
+        // TODO: Find a more performant method
+        for (HostBean host : hosts) {
+            if (host.getHardwareAddress() == addr) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void showHostInfo(HostBean host) {
