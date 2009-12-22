@@ -246,6 +246,8 @@ final public class PortScanActivity extends TabActivity {
         setProgressBarIndeterminateVisibility(true);
         adapter_open.clear();
         adapter_closed.clear();
+        cnt_open = 0;
+        cnt_closed = 0;
         ports_open = new ArrayList<Long>();
         ports_closed = new ArrayList<Long>();
         scanPortTask = new ScanPortTask(host);
