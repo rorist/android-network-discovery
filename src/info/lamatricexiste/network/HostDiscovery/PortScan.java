@@ -127,7 +127,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
     private void handleConnect(SelectionKey key) {
         try {
             if (((SocketChannel) key.channel()).finishConnect()) { // Open
-                publishProgress(((SparseArray<Long>) key.attachment()).get(0));
+                publishProgress(((SparseArray<Long>) key.attachment()).get(0), (long) 1);
                 finishKey(key);
                 // Register for reading
                 // SparseArray<Long> data = (SparseArray<Long>)
@@ -139,7 +139,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
                 // Log.v(TAG, "port=" + data.get(0));
             }
         } catch (IOException e) { // Closed
-            publishProgress(new Long(0));
+            publishProgress(((SparseArray<Long>) key.attachment()).get(0), (long) 0);
             finishKey(key);
         }
     }
@@ -202,13 +202,15 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
     }
 
     private void finishKey(SelectionKey key) {
-        try {
-            ((SocketChannel) key.channel()).close();
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
-        } finally {
-            key.cancel();
-            cnt_selected++;
+        synchronized (key) {
+            try {
+                ((SocketChannel) key.channel()).close();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } finally {
+                key.cancel();
+                cnt_selected++;
+            }
         }
     }
 }

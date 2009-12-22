@@ -36,6 +36,8 @@
     <string name="scan_start">Scan démarré ...</string>
     <string name="scan_finished">Scan terminé !</string>
     <string name="scan_canceled">Scan annulé !</string>
+    <string name="scan_open">Ouvert (%s)</string>
+    <string name="scan_closed">Fermé (%s)</string>
     
     <string name="info_time">Temps de réponse:</string>
     <string name="info_mac">Adresse MAC:</string>

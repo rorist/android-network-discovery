@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.TabActivity;
-import android.widget.TabHost;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,23 +24,28 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-final public class PortScanActivity extends TabActivity{
+final public class PortScanActivity extends TabActivity {
 
     // private final String TAG = "PortScanActivity";
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
     private String host;
     private int position;
-    private ArrayAdapter<String> adapter_open;
-    private ArrayAdapter<String> adapter_closed;
+    private PortsAdapter adapter_open;
+    private PortsAdapter adapter_closed;
     private ArrayList<Long> ports_open = null;
     private ArrayList<Long> ports_closed = null;
+    private int cnt_open;
+    private int cnt_closed;
     private Button btn_scan;
     private LayoutInflater mInflater;
     private Context ctxt;
+    private TextView mTabOpen;
+    private TextView mTabClosed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,8 @@ final public class PortScanActivity extends TabActivity{
         position = extra.getInt("position");
         ports_open = portsToArrayList(extra.getLongArray("ports_o"));
         ports_closed = portsToArrayList(extra.getLongArray("ports_c"));
+        cnt_open = (ports_open == null) ? 0 : ports_open.size();
+        cnt_closed = (ports_closed == null) ? 0 : ports_closed.size();
 
         // Title
         ((TextView) findViewById(R.id.host)).setText(host);
@@ -85,20 +91,28 @@ final public class PortScanActivity extends TabActivity{
 
         // Tabs
         TabHost tabHost = getTabHost();
-        tabHost.addTab(tabHost.newTabSpec("tab_open").setIndicator("Open").setContent(R.id.list_open));
-        tabHost.addTab(tabHost.newTabSpec("tab_closed").setIndicator("Closed").setContent(R.id.list_closed));
+        tabHost.addTab(tabHost.newTabSpec("tab_open").setIndicator(
+                String.format(getString(R.string.scan_open), cnt_open),
+                getResources().getDrawable(R.drawable.open)).setContent(R.id.list_open));
+        tabHost.addTab(tabHost.newTabSpec("tab_closed").setIndicator(
+                String.format(getString(R.string.scan_closed), cnt_closed),
+                getResources().getDrawable(R.drawable.closed)).setContent(R.id.list_closed));
         tabHost.setCurrentTab(0);
+        // Ugly hack to have the view holding the tabs
+        mTabOpen = (TextView) tabHost.getTabWidget().getChildAt(0).findViewById(android.R.id.title);
+        mTabClosed = (TextView) tabHost.getTabWidget().getChildAt(1).findViewById(
+                android.R.id.title);
 
         // Lists
-        adapter_open = new PortsAdapter(ctxt, R.layout.list_port, R.id.list_open, preparePort(ports_open, "open"), "open");
+        adapter_open = new PortsAdapter(ctxt, preparePort(ports_open, "open"), "open");
         ListView list_open = (ListView) findViewById(R.id.list_open);
-        list_open.setItemsCanFocus(true);
         list_open.setAdapter(adapter_open);
-        
-        adapter_closed = new PortsAdapter(ctxt, R.layout.list_port, R.id.list_closed, preparePort(ports_closed, "closed"), "closed");
+        list_open.setItemsCanFocus(true);
+
+        adapter_closed = new PortsAdapter(ctxt, preparePort(ports_closed, "closed"), "closed");
         ListView list_closed = (ListView) findViewById(R.id.list_closed);
-        list_closed.setItemsCanFocus(true);
         list_closed.setAdapter(adapter_closed);
+        list_closed.setItemsCanFocus(true);
 
         // Start scan if ports empty
         if (ports_open == null && ports_closed == null) {
@@ -123,14 +137,15 @@ final public class PortScanActivity extends TabActivity{
     private class PortsAdapter extends ArrayAdapter<String> {
         private String type;
 
-        public PortsAdapter(Context context, int resource, int textViewresourceId,
-                List<String> objects, String type) {
-            super(context, resource, textViewresourceId, objects);
+        public PortsAdapter(Context context, List<String> objects, String type) {
+            super(context, R.layout.list_port, R.id.list, objects);
             this.type = type;
         }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
+            final long port = (type == "open") ? ports_open.get(position) : ports_closed
+                    .get(position);
 
             ViewHolder holder;
             if (convertView == null) {
@@ -142,8 +157,7 @@ final public class PortScanActivity extends TabActivity{
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            final long port = (type=="open")?ports_open.get(position):ports_closed.get(position);
-            holder.port.setText(port + "/tcp "+type);
+            holder.port.setText(port + "/tcp " + type);
             holder.btn_connect.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     openPortService(port);
@@ -180,12 +194,18 @@ final public class PortScanActivity extends TabActivity{
         protected void onProgressUpdate(Long... values) {
             if (values.length > 0) {
                 if (!values[0].equals(new Long(0))) {
-                    if(values[1]==1){
+                    if (values[1] == 1) {
                         ports_open.add(values[0]);
-                        adapter_open.add(null);
-                    } else if(values[1]==0){
+                        adapter_open.add("placeholder");
+                        cnt_open++;
+                        mTabOpen.setText(String.format(getString(R.string.scan_open), cnt_open));
+
+                    } else if (values[1] == 0) {
                         ports_closed.add(values[0]);
-                        adapter_closed.add(null);
+                        adapter_closed.add("placeholder");
+                        cnt_closed++;
+                        mTabClosed.setText(String.format(getString(R.string.scan_closed),
+                                cnt_closed));
                     }
                 }
             }
@@ -257,7 +277,7 @@ final public class PortScanActivity extends TabActivity{
         List<String> portsChar = new ArrayList<String>();
         if (ports != null) {
             for (Long port : ports) {
-                portsChar.add(String.valueOf(port) + "/tcp "+state);
+                portsChar.add(String.valueOf(port) + "/tcp " + state);
             }
         }
         return portsChar;
@@ -277,15 +297,16 @@ final public class PortScanActivity extends TabActivity{
             for (int i = 0; i < longArray.length; i++) {
                 ports.add(longArray[i]);
             }
+            return ports;
         }
-        return ports;
+        return null;
     }
 
     public static List<String> preparePortPublic(long[] portsArray, String state) {
         List<String> portsChar = new ArrayList<String>();
         if (portsArray != null) {
             for (int i = 0; i < portsArray.length; i++) {
-                portsChar.add(String.valueOf(portsArray[i]) + "/tcp "+state);
+                portsChar.add(String.valueOf(portsArray[i]) + "/tcp " + state);
             }
         }
         return portsChar;

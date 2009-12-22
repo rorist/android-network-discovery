@@ -36,7 +36,9 @@
         <TabWidget
             android:id="@android:id/tabs"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dip"
+            android:layout_marginBottom="5dip" />
         <FrameLayout
             android:id="@android:id/tabcontent"
             android:layout_width="fill_parent"
@@ -44,17 +46,11 @@
             <ListView
                 android:id="@+id/list_open"
                 android:layout_width="fill_parent" 
-                android:layout_height="0dip"
-                android:layout_weight="1"
-                android:drawSelectorOnTop="false"
-                android:layout_marginBottom="10dip" />
+                android:layout_height="fill_parent" />
             <ListView
                 android:id="@+id/list_closed"
                 android:layout_width="fill_parent" 
-                android:layout_height="0dip"
-                android:layout_weight="1"
-                android:drawSelectorOnTop="false"
-                android:layout_marginBottom="10dip" />
+                android:layout_height="fill_parent" />
         </FrameLayout>
     </LinearLayout>
 </TabHost>
