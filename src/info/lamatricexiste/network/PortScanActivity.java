@@ -90,15 +90,15 @@ final public class PortScanActivity extends TabActivity{
         tabHost.setCurrentTab(0);
 
         // Lists
-        adapter_open = new PortsAdapter(ctxt, R.layout.list_port, R.id.list, preparePort(ports_open, "open"));
-        ListView list_open = (ListView) findViewById(android.R.id.list);
+        adapter_open = new PortsAdapter(ctxt, R.layout.list_port, R.id.list_open, preparePort(ports_open, "open"), "open");
+        ListView list_open = (ListView) findViewById(R.id.list_open);
         list_open.setItemsCanFocus(true);
         list_open.setAdapter(adapter_open);
         
-        // adapter_closed = new PortsAdapter(ctxt, R.layout.list_port, R.id.list, preparePort(ports_closed, "closed"));
-        // ListView list_closed = (ListView) findViewById(android.R.id.list);
-        // list_closed.setItemsCanFocus(true);
-        // list_closed.setAdapter(adapter_closed);
+        adapter_closed = new PortsAdapter(ctxt, R.layout.list_port, R.id.list_closed, preparePort(ports_closed, "closed"), "closed");
+        ListView list_closed = (ListView) findViewById(R.id.list_closed);
+        list_closed.setItemsCanFocus(true);
+        list_closed.setAdapter(adapter_closed);
 
         // Start scan if ports empty
         if (ports_open == null && ports_closed == null) {
@@ -121,9 +121,12 @@ final public class PortScanActivity extends TabActivity{
 
     // Custom ArrayAdapter
     private class PortsAdapter extends ArrayAdapter<String> {
+        private String type;
+
         public PortsAdapter(Context context, int resource, int textViewresourceId,
-                List<String> objects) {
+                List<String> objects, String type) {
             super(context, resource, textViewresourceId, objects);
+            this.type = type;
         }
 
         @Override
@@ -139,10 +142,11 @@ final public class PortScanActivity extends TabActivity{
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            holder.port.setText(ports_open.get(position) + "/tcp open");
+            final long port = (type=="open")?ports_open.get(position):ports_closed.get(position);
+            holder.port.setText(port + "/tcp "+type);
             holder.btn_connect.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    openPortService(ports_open.get(position));
+                    openPortService(port);
                 }
             });
             return convertView;
