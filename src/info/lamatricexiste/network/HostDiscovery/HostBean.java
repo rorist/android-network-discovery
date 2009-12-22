@@ -7,7 +7,8 @@ public class HostBean {
     private String nicVendor = "Unknown";
     private float responseTime = 0;
     private int position = 0;
-    private long[] ports = null;
+    private long[] portsOpen = null;
+    private long[] portsClosed = null;
     private String os = "Unknown";
 
     public HostBean() {
@@ -45,12 +46,20 @@ public class HostBean {
         position = pos;
     }
 
-    public long[] getPorts() {
-        return ports;
+    public long[] getPortsOpen() {
+        return portsOpen;
     }
 
-    public void setPorts(long[] p) {
-        ports = p;
+    public void setPortsOpen(long[] p) {
+        portsOpen = p;
+    }
+
+    public long[] getPortsClosed() {
+        return portsClosed;
+    }
+
+    public void setPortsClosed(long[] p) {
+        portsClosed = p;
     }
 
     public void setIpAddress(String ipAddress) {

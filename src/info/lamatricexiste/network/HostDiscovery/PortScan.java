@@ -111,7 +111,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
                         // }
                     }
                 }
-                cancelTimeouts(); // Filtered
+                cancelTimeouts(); // Filtered or Unresponsive
                 if (cnt_selected >= STEP) {
                     stopSelecting();
                 }

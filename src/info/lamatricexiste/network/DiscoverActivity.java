@@ -196,7 +196,8 @@ final public class DiscoverActivity extends Activity {
                     Bundle extra = data.getExtras();
                     int position = extra.getInt("position");
                     HostBean host = hosts.get(position);
-                    host.setPorts(extra.getLongArray("ports"));
+                    host.setPortsOpen(extra.getLongArray("ports_o"));
+                    host.setPortsClosed(extra.getLongArray("ports_c"));
                     // OS Fingerprint check
                     // host.setOs(OsFingerprint.finger(extra.getLongArray("ports")));
                 }
@@ -240,7 +241,8 @@ final public class DiscoverActivity extends Activity {
                     }
                     intent.putExtra("position", position);
                     intent.putExtra("host", host.getIpAddress());
-                    intent.putExtra("ports", host.getPorts());
+                    intent.putExtra("ports_o", host.getPortsOpen());
+                    intent.putExtra("ports_c", host.getPortsClosed());
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }
             });

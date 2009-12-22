@@ -72,11 +72,11 @@ public class Export {
                 HostBean host = hosts.get(i);
                 xml += "\t\t<host value=\"" + host.getIpAddress() + "\" mac=\""
                         + host.getHardwareAddress() + "\">\r\n";
-                // Ports
-                long[] portsArray = host.getPorts();
+                // Open Ports //TODO: rething the XML structure to include close and filtered ports
+                long[] portsArray = host.getPortsOpen();
                 if (portsArray != null) {
                     List<String> ports = PortScanActivity
-                            .preparePortPublic(portsArray);
+                            .preparePortPublic(portsArray, "open");
                     for (int j = 0; j < ports.size(); j++) {
                         xml += "\t\t\t<port>" + ports.get(j) + "</port>\r\n";
                     }
