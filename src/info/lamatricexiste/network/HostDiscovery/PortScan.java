@@ -185,20 +185,20 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     private void stopSelecting() {
         // Log.d(TAG, "stopSelecting");
-        // synchronized (selector) {
-        if (selector != null && selector.isOpen()) {
-            // Force invalidate keys
-            Iterator<SelectionKey> iterator = selector.keys().iterator();
-            while (iterator.hasNext()) {
-                finishKey((SelectionKey) iterator.next());
-            }
-            // Close the selector
-            try {
-                selector.close();
-            } catch (IOException e) {
+        synchronized (selector) {
+            if (selector != null && selector.isOpen()) {
+                // Force invalidate keys
+                Iterator<SelectionKey> iterator = selector.keys().iterator();
+                while (iterator.hasNext()) {
+                    finishKey((SelectionKey) iterator.next());
+                }
+                // Close the selector
+                try {
+                    selector.close();
+                } catch (IOException e) {
+                }
             }
         }
-        // }
     }
 
     private void finishKey(SelectionKey key) {
