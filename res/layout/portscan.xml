@@ -1,41 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="5dip"
-        android:paddingLeft="2dip">
-        <Button
-            android:id="@+id/btn_scan"
-            android:drawableTop="@drawable/discover"
-            android:text="@string/btn_scan"
-            style="@style/ButtonTop" />
-        <TextView
-            android:id="@+id/host"
-            android:layout_width="0dip"
+        android:layout_height="fill_parent">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical"
-            android:textSize="14dip"
-            android:typeface="monospace"
-            android:text="0.0.0.0" />
-        <Button
-            android:id="@+id/btn_back"
-            android:drawableTop="@drawable/back"
-            android:text="@string/btn_back"
-            style="@style/ButtonTop" />
+            android:paddingTop="5dip"
+            android:paddingLeft="2dip">
+            <Button
+                android:id="@+id/btn_scan"
+                android:drawableTop="@drawable/discover"
+                android:text="@string/btn_scan"
+                style="@style/ButtonTop" />
+            <TextView
+                android:id="@+id/host"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:textSize="14dip"
+                android:typeface="monospace"
+                android:text="0.0.0.0" />
+            <Button
+                android:id="@+id/btn_back"
+                android:drawableTop="@drawable/back"
+                android:text="@string/btn_back"
+                style="@style/ButtonTop" />
+        </LinearLayout>
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+            <ListView
+                android:id="@+id/list_open"
+                android:layout_width="fill_parent" 
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:drawSelectorOnTop="false"
+                android:layout_marginBottom="10dip" />
+            <ListView
+                android:id="@+id/list_closed"
+                android:layout_width="fill_parent" 
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:drawSelectorOnTop="false"
+                android:layout_marginBottom="10dip" />
+        </FrameLayout>
     </LinearLayout>
-    <ListView
-        android:id="@id/android:list"
-        android:layout_width="fill_parent" 
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        android:drawSelectorOnTop="false"
-        android:layout_marginTop="10dip"
-        android:layout_marginBottom="10dip" />
-</LinearLayout>
+</TabHost>

@@ -7,7 +7,8 @@ import info.lamatricexiste.network.Utils.Prefs;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
+import android.app.TabActivity;
+import android.widget.TabHost;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,7 +28,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-final public class PortScanActivity extends Activity{
+final public class PortScanActivity extends TabActivity{
 
     // private final String TAG = "PortScanActivity";
     private SharedPreferences prefs;
@@ -81,6 +82,12 @@ final public class PortScanActivity extends Activity{
                 finish();
             }
         });
+
+        // Tabs
+        TabHost tabHost = getTabHost();
+        tabHost.addTab(tabHost.newTabSpec("tab_open").setIndicator("Open").setContent(R.id.list_open));
+        tabHost.addTab(tabHost.newTabSpec("tab_closed").setIndicator("Closed").setContent(R.id.list_closed));
+        tabHost.setCurrentTab(0);
 
         // Lists
         adapter_open = new PortsAdapter(ctxt, R.layout.list_port, R.id.list, preparePort(ports_open, "open"));
