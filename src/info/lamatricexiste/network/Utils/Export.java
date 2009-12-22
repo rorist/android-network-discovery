@@ -1,6 +1,5 @@
 package info.lamatricexiste.network.Utils;
 
-import info.lamatricexiste.network.PortScanActivity;
 import info.lamatricexiste.network.HostDiscovery.HostBean;
 
 import java.io.File;
@@ -45,24 +44,20 @@ public class Export {
     }
 
     public String getFileName() {
-        return Environment.getExternalStorageDirectory().toString()
-                + "/discovery-" + net.getNetIp() + ".xml";
+        return Environment.getExternalStorageDirectory().toString() + "/discovery-"
+                + net.getNetIp() + ".xml";
     }
 
     private String prepareXml() {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-                + "<NetworkDiscovery>\r\n";
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + "<NetworkDiscovery>\r\n";
         // Network Information
         xml += "\t<info>\r\n"
                 + "\t\t<date>"
-                + (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"))
-                        .format(new Date())
+                + (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")).format(new Date())
                 + "</date>\r\n" // RFC 2822
-                + "\t\t<network>" + net.getNetIp() + "/" + net.getNetCidr()
-                + "</network>\r\n" + "\t\t<ssid>" + net.getSSID()
-                + "</ssid>\r\n" + "\t\t<bssid>" + net.getBSSID()
-                + "</bssid>\r\n" + "\t\t<ip>" + net.getIp() + "</ip>\r\n"
-                + "\t</info>\r\n";
+                + "\t\t<network>" + net.getNetIp() + "/" + net.getNetCidr() + "</network>\r\n"
+                + "\t\t<ssid>" + net.getSSID() + "</ssid>\r\n" + "\t\t<bssid>" + net.getBSSID()
+                + "</bssid>\r\n" + "\t\t<ip>" + net.getIp() + "</ip>\r\n" + "\t</info>\r\n";
 
         // Hosts
         if (hosts != null) {
@@ -72,13 +67,12 @@ public class Export {
                 HostBean host = hosts.get(i);
                 xml += "\t\t<host value=\"" + host.getIpAddress() + "\" mac=\""
                         + host.getHardwareAddress() + "\">\r\n";
-                // Open Ports //TODO: rething the XML structure to include close and filtered ports
-                long[] portsArray = host.getPortsOpen();
-                if (portsArray != null) {
-                    List<String> ports = PortScanActivity
-                            .preparePortPublic(portsArray, "open");
-                    for (int j = 0; j < ports.size(); j++) {
-                        xml += "\t\t\t<port>" + ports.get(j) + "</port>\r\n";
+                // Open Ports //TODO: rething the XML structure to include close
+                // and filtered ports
+                long[] ports = host.getPortsOpen();
+                if (ports != null) {
+                    for (long port : ports) {
+                        xml += "\t\t\t<port>" + port + "/tcp open</port>\r\n";
                     }
                 }
                 xml += "\t\t</host>\r\n";

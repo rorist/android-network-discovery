@@ -5,6 +5,7 @@ import info.lamatricexiste.network.HostDiscovery.PortScan;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.app.TabActivity;
@@ -115,6 +116,7 @@ final public class PortScanActivity extends TabActivity {
         list_closed.setItemsCanFocus(true);
 
         // Start scan if ports empty
+        // FIXME: does not work if only open ports are discovered ?
         if (ports_open == null && ports_closed == null) {
             startScan();
         }
@@ -195,14 +197,12 @@ final public class PortScanActivity extends TabActivity {
             if (values.length > 0) {
                 if (!values[0].equals(new Long(0))) {
                     if (values[1] == 1) {
-                        ports_open.add(values[0]);
-                        adapter_open.add("placeholder");
+                        addPort(ports_open, adapter_open, values[0]);
                         cnt_open++;
                         mTabOpen.setText(String.format(getString(R.string.scan_open), cnt_open));
 
                     } else if (values[1] == 0) {
-                        ports_closed.add(values[0]);
-                        adapter_closed.add("placeholder");
+                        addPort(ports_closed, adapter_closed, values[0]);
                         cnt_closed++;
                         mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                 cnt_closed));
@@ -231,6 +231,12 @@ final public class PortScanActivity extends TabActivity {
             super.onCancelled();
             makeToast(R.string.scan_canceled);
             stopScan();
+        }
+
+        private void addPort(ArrayList<Long> ports, PortsAdapter adapter, Long value) {
+            ports.add(value);
+            Collections.sort(ports);
+            adapter.insert("placeholder", ports.indexOf(value));
         }
     }
 
@@ -300,16 +306,6 @@ final public class PortScanActivity extends TabActivity {
             return ports;
         }
         return null;
-    }
-
-    public static List<String> preparePortPublic(long[] portsArray, String state) {
-        List<String> portsChar = new ArrayList<String>();
-        if (portsArray != null) {
-            for (int i = 0; i < portsArray.length; i++) {
-                portsChar.add(String.valueOf(portsArray[i]) + "/tcp " + state);
-            }
-        }
-        return portsChar;
     }
 
     private void openPortService(Long port) {
