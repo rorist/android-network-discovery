@@ -17,13 +17,13 @@
                 android:id="@+id/btn_scan"
                 android:drawableTop="@drawable/discover"
                 android:text="@string/btn_scan"
+                android:layout_alignParentLeft="true"
                 style="@style/ButtonTop" />
             <TextView
                 android:id="@+id/host"
-                android:layout_width="0dip"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center_vertical"
+                android:layout_centerInParent="true"
                 android:textSize="14dip"
                 android:typeface="monospace"
                 android:text="0.0.0.0" />
@@ -31,6 +31,7 @@
                 android:id="@+id/btn_back"
                 android:drawableTop="@drawable/back"
                 android:text="@string/btn_back"
+                android:layout_alignParentRight="true"
                 style="@style/ButtonTop" />
         </LinearLayout>
         <TabWidget
