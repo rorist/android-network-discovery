@@ -31,7 +31,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +48,9 @@ final public class DiscoverActivity extends Activity {
     // private final int DEFAULT_DISCOVER = 1;
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
+    public static final int MENU_SCAN_SINGLE = 0;
+    public static final int MENU_OPTIONS = 1;
+    private static LayoutInflater mInflater;
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     // private Button btn;
@@ -59,7 +61,6 @@ final public class DiscoverActivity extends Activity {
     private ConnectivityManager connMgr;
     private CheckHostsTask checkHostsTask = null;
     private Context ctxt;
-    private LayoutInflater mInflater;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -172,17 +173,22 @@ final public class DiscoverActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(getApplication()).inflate(R.menu.options, menu);
-        return (super.onCreateOptionsMenu(menu));
+        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(android.R.drawable.ic_menu_mylocation);
+        menu.add(0, DiscoverActivity.MENU_OPTIONS, 0, "Options").setIcon(android.R.drawable.ic_menu_preferences);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.settings) {
-            startActivity(new Intent(ctxt, Prefs.class));
-            return true;
+        switch(item.getItemId()){
+            case DiscoverActivity.MENU_SCAN_SINGLE:
+                scanSingle(this);
+                return true;
+            case DiscoverActivity.MENU_OPTIONS:
+                startActivity(new Intent(ctxt, Prefs.class));
+                return true;
         }
-        return (super.onOptionsItemSelected(item));
+        return false;
     }
 
     // Sub Activity result
@@ -460,7 +466,7 @@ final public class DiscoverActivity extends Activity {
                 checkHostsTask.cancel(true);
             }
             NetInfo net = new NetInfo(ctxt);
-            AlertDialog.Builder infoDialog = new AlertDialog.Builder(ctxt);
+            AlertDialog.Builder infoDialog = new AlertDialog.Builder(this);
             infoDialog.setTitle(R.string.discover_proxy_title);
             infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg), net
                     .getGatewayIp()));
@@ -528,23 +534,41 @@ final public class DiscoverActivity extends Activity {
     // .show();
     // }
 
+    public static void scanSingle(final Context ctxt){
+        // Alert dialog
+        View v = mInflater.inflate(R.layout.scan_single, null);
+        final EditText txt = (EditText) v.findViewById(R.id.ip);
+        AlertDialog.Builder dialogIp = new AlertDialog.Builder(ctxt);
+        dialogIp.setTitle(R.string.scan_single_title);
+        dialogIp.setMessage(R.string.scan_single_summary);
+        dialogIp.setView(v);
+        dialogIp.setPositiveButton(R.string.btn_scan, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dlg, int sumthin) {
+                // start scanportactivity
+                Intent intent = new Intent(ctxt, PortScanActivity.class);
+                intent.putExtra("host", txt.getText().toString());
+                ctxt.startActivity(intent);
+            }
+        });
+        dialogIp.show();
+    }
+
     private void export() {
         final Export e = new Export(ctxt, hosts);
         final String file = e.getFileName();
-        final Context ctxtActivity = this;
 
         View v = mInflater.inflate(R.layout.file, null);
         final EditText txt = (EditText) v.findViewById(R.id.export_file);
         txt.setText(file);
 
-        AlertDialog.Builder getFileName = new AlertDialog.Builder(ctxtActivity);
+        AlertDialog.Builder getFileName = new AlertDialog.Builder(this);
         getFileName.setTitle(R.string.export_choose);
         getFileName.setView(v);
         getFileName.setPositiveButton(R.string.export_save, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dlg, int sumthin) {
                 final String fileEdit = txt.getText().toString();
                 if (e.fileExists(fileEdit)) {
-                    AlertDialog.Builder fileExists = new AlertDialog.Builder(ctxtActivity);
+                    AlertDialog.Builder fileExists = new AlertDialog.Builder(DiscoverActivity.this);
                     fileExists.setTitle(R.string.export_exists_title);
                     fileExists.setMessage(R.string.export_exists_msg);
                     fileExists.setPositiveButton(R.string.btn_yes,

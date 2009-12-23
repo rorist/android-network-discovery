@@ -11,6 +11,7 @@ package info.lamatricexiste.network.HostDiscovery;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -51,6 +52,8 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
             } else {
                 scanPorts(ina, port_start, port_end);
             }
+        } catch (UnknownHostException e) {
+            publishProgress((long) -1, (long) -1);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         } catch (InterruptedException e) {
@@ -185,17 +188,19 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     private void stopSelecting() {
         // Log.d(TAG, "stopSelecting");
-        synchronized (selector) {
-            if (selector != null && selector.isOpen()) {
-                // Force invalidate keys
-                Iterator<SelectionKey> iterator = selector.keys().iterator();
-                while (iterator.hasNext()) {
-                    finishKey((SelectionKey) iterator.next());
-                }
-                // Close the selector
-                try {
-                    selector.close();
-                } catch (IOException e) {
+        if(selector != null) {
+            synchronized (selector) {
+                if (selector.isOpen()) {
+                    // Force invalidate keys
+                    Iterator<SelectionKey> iterator = selector.keys().iterator();
+                    while (iterator.hasNext()) {
+                        finishKey((SelectionKey) iterator.next());
+                    }
+                    // Close the selector
+                    try {
+                        selector.close();
+                    } catch (IOException e) {
+                    }
                 }
             }
         }

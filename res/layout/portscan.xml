@@ -37,12 +37,14 @@
             android:id="@android:id/tabs"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dip"
-            android:layout_marginBottom="5dip" />
+            android:layout_marginTop="5dip"/>
         <FrameLayout
             android:id="@android:id/tabcontent"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:paddingTop="5dip"
+            android:stretchColumns="*"
+            android:background="#ff0000">
             <ListView
                 android:id="@+id/list_open"
                 android:layout_width="fill_parent" 

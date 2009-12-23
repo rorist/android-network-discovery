@@ -30,6 +30,8 @@
         derrière un proxy qui empêche de voir les machines sur le réseau.\n\n
         Accéder à la passerelle depuis votre navigateur depuis: http://%s</string>
         
+    <string name="scan_single_title">Scanner une IP</string>
+    <string name="scan_single_summary">Entrez une adresse IP interne ou externe pour effectuer un scan de ports</string>
     <string name="scan_noport">Aucun port trouvé !</string>
     <string name="scan_noaction">Aucune action associée !</string>
     <string name="scan_connect">Ouvrir</string>
@@ -38,6 +40,7 @@
     <string name="scan_canceled">Scan annulé !</string>
     <string name="scan_open">Ouvert (%s)</string>
     <string name="scan_closed">Fermé (%s)</string>
+    <string name="scan_host_unreachable">L\'hôte n\'est pas atteignable !</string>
     
     <string name="info_time">Temps de réponse:</string>
     <string name="info_mac">Adresse MAC:</string>

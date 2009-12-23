@@ -28,6 +28,8 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuItem;
 
 final public class PortScanActivity extends TabActivity {
 
@@ -130,6 +132,22 @@ final public class PortScanActivity extends TabActivity {
         super.onStop();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(android.R.drawable.ic_menu_mylocation);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case DiscoverActivity.MENU_SCAN_SINGLE:
+                DiscoverActivity.scanSingle(this);
+                return true;
+        }
+        return false;
+    }
+
     static class ViewHolder {
         TextView port;
         Button btn_connect;
@@ -194,23 +212,28 @@ final public class PortScanActivity extends TabActivity {
 
         @Override
         protected void onProgressUpdate(Long... values) {
-            if (values.length > 0) {
-                if (!values[0].equals(new Long(0))) {
-                    if (values[1] == 1) {
-                        addPort(ports_open, adapter_open, values[0]);
-                        cnt_open++;
-                        mTabOpen.setText(String.format(getString(R.string.scan_open), cnt_open));
+            if(!isCancelled()){
+                if (values.length > 0) {
+                    if (!values[0].equals(new Long(0))) {
+                        if (values[1] == 1) {
+                            addPort(ports_open, adapter_open, values[0]);
+                            cnt_open++;
+                            mTabOpen.setText(String.format(getString(R.string.scan_open), cnt_open));
 
-                    } else if (values[1] == 0) {
-                        addPort(ports_closed, adapter_closed, values[0]);
-                        cnt_closed++;
-                        mTabClosed.setText(String.format(getString(R.string.scan_closed),
-                                cnt_closed));
+                        } else if (values[1] == 0) {
+                            addPort(ports_closed, adapter_closed, values[0]);
+                            cnt_closed++;
+                            mTabClosed.setText(String.format(getString(R.string.scan_closed),
+                                    cnt_closed));
+                        } else if (values[1] == -1) {
+                            // If host is unknown
+                            makeToast(R.string.scan_host_unreachable);
+                        }
                     }
                 }
+                progress_current++;
+                setProgress(progress_current * 10000 / nb_port);
             }
-            progress_current++;
-            setProgress(progress_current * 10000 / nb_port);
         }
 
         @Override
