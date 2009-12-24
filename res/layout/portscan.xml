@@ -7,7 +7,7 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-        <LinearLayout
+        <RelativeLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -24,6 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:layout_gravity="center_vertical"
                 android:textSize="14dip"
                 android:typeface="monospace"
                 android:text="0.0.0.0" />
@@ -33,7 +34,7 @@
                 android:text="@string/btn_back"
                 android:layout_alignParentRight="true"
                 style="@style/ButtonTop" />
-        </LinearLayout>
+        </RelativeLayout>
         <TabWidget
             android:id="@android:id/tabs"
             android:layout_width="fill_parent"
@@ -43,9 +44,7 @@
             android:id="@android:id/tabcontent"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:paddingTop="5dip"
-            android:stretchColumns="*"
-            android:background="#ff0000">
+            android:paddingTop="5dip">
             <ListView
                 android:id="@+id/list_open"
                 android:layout_width="fill_parent" 

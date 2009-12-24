@@ -31,7 +31,7 @@
         Accéder à la passerelle depuis votre navigateur depuis: http://%s</string>
         
     <string name="scan_single_title">Scanner une IP</string>
-    <string name="scan_single_summary">Entrez une adresse IP interne ou externe pour effectuer un scan de ports</string>
+    <string name="scan_single_summary">Entrez une adresse IP ou un nom d\'hôte sur lequel effectuer un scan de ports, p.ex. scanme.nmap.org</string>
     <string name="scan_noport">Aucun port trouvé !</string>
     <string name="scan_noaction">Aucune action associée !</string>
     <string name="scan_connect">Ouvrir</string>

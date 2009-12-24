@@ -173,16 +173,18 @@ final public class DiscoverActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(android.R.drawable.ic_menu_mylocation);
-        menu.add(0, DiscoverActivity.MENU_OPTIONS, 0, "Options").setIcon(android.R.drawable.ic_menu_preferences);
+        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+                android.R.drawable.ic_menu_mylocation);
+        menu.add(0, DiscoverActivity.MENU_OPTIONS, 0, "Options").setIcon(
+                android.R.drawable.ic_menu_preferences);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
+        switch (item.getItemId()) {
             case DiscoverActivity.MENU_SCAN_SINGLE:
-                scanSingle(this);
+                scanSingle(this, null);
                 return true;
             case DiscoverActivity.MENU_OPTIONS:
                 startActivity(new Intent(ctxt, Prefs.class));
@@ -534,13 +536,15 @@ final public class DiscoverActivity extends Activity {
     // .show();
     // }
 
-    public static void scanSingle(final Context ctxt){
+    public static void scanSingle(final Context ctxt, String ip) {
         // Alert dialog
         View v = mInflater.inflate(R.layout.scan_single, null);
         final EditText txt = (EditText) v.findViewById(R.id.ip);
+        if (ip != null) {
+            txt.setText(ip);
+        }
         AlertDialog.Builder dialogIp = new AlertDialog.Builder(ctxt);
         dialogIp.setTitle(R.string.scan_single_title);
-        dialogIp.setMessage(R.string.scan_single_summary);
         dialogIp.setView(v);
         dialogIp.setPositiveButton(R.string.btn_scan, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dlg, int sumthin) {
@@ -550,6 +554,7 @@ final public class DiscoverActivity extends Activity {
                 ctxt.startActivity(intent);
             }
         });
+        dialogIp.setNegativeButton(R.string.btn_discover_cancel, null);
         dialogIp.show();
     }
 

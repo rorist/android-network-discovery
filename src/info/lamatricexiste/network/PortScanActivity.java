@@ -134,15 +134,16 @@ final public class PortScanActivity extends TabActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(android.R.drawable.ic_menu_mylocation);
+        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+                android.R.drawable.ic_menu_mylocation);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
+        switch (item.getItemId()) {
             case DiscoverActivity.MENU_SCAN_SINGLE:
-                DiscoverActivity.scanSingle(this);
+                DiscoverActivity.scanSingle(this, host);
                 return true;
         }
         return false;
@@ -212,13 +213,14 @@ final public class PortScanActivity extends TabActivity {
 
         @Override
         protected void onProgressUpdate(Long... values) {
-            if(!isCancelled()){
+            if (!isCancelled()) {
                 if (values.length > 0) {
                     if (!values[0].equals(new Long(0))) {
                         if (values[1] == 1) {
                             addPort(ports_open, adapter_open, values[0]);
                             cnt_open++;
-                            mTabOpen.setText(String.format(getString(R.string.scan_open), cnt_open));
+                            mTabOpen
+                                    .setText(String.format(getString(R.string.scan_open), cnt_open));
 
                         } else if (values[1] == 0) {
                             addPort(ports_closed, adapter_closed, values[0]);

@@ -188,7 +188,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
 
     private void stopSelecting() {
         // Log.d(TAG, "stopSelecting");
-        if(selector != null) {
+        if (selector != null) {
             synchronized (selector) {
                 if (selector.isOpen()) {
                     // Force invalidate keys

@@ -31,7 +31,7 @@
         Go to your Gateway from the browser : http://%s</string>
         
     <string name="scan_single_title">Scan IP</string>
-    <string name="scan_single_summary">Enter an internal or exteranl IP address to scan</string>
+    <string name="scan_single_summary">Enter an IP address or FQDN to scan, i.e. scanme.nmap.org</string>
     <string name="scan_noport">No open port found !</string>
     <string name="scan_noaction">No associated action !</string>
     <string name="scan_connect">Connect</string>
