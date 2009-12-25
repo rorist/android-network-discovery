@@ -22,13 +22,13 @@
             android:title="@string/preferences_port_start_title"
             android:summary="@string/preferences_port_start_summary"
             android:defaultValue="1"
-            android:inputType="phone" />
+            android:inputType="number" />
         <EditTextPreference
             android:key="port_end"
             android:title="@string/preferences_port_end_title"
             android:summary="@string/preferences_port_end_summary"
             android:defaultValue="1024"
-            android:inputType="phone" />
+            android:inputType="number" />
     </PreferenceCategory>
     
     <PreferenceCategory

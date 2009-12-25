@@ -69,7 +69,7 @@
     <string name="preferences_resetdb_title">Reinstaller la base des NIC</string>
     <string name="preferences_resetdb_summary">Syncroniser et installer la base des adresses MAC</string>
     <string name="preferences_resetdb_action">Voulez-vous télécharger la base de donnée ? (~500k)</string>
-    <string name="preferences_resetdb_ok">Base de donnée mise à jour !</string>
+    <string name="preferences_resetdb_ok">Base de donnée mise à jour ! %S nouveaux éléments ...</string>
     <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
     <string name="preferences_error2">Erreur: Le nombre de Threads doit être entre 1 et 256 !</string>
     <string name="preferences_error3">Erreur: Le fichier n\'a pas été téléchargé correctement !</string>

@@ -1,13 +1,13 @@
 package info.lamatricexiste.network.Utils;
 
-import info.lamatricexiste.network.Utils.DownloadFile;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 public class UpdateNicDb {
@@ -38,6 +38,20 @@ public class UpdateNicDb {
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }
+    }
+
+    public static int countEntries() {
+        int nb = 0;
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
+                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        Cursor c = db.rawQuery("select count(mac) from oui", null);
+        if (c.getCount() > 0) {
+            c.moveToFirst();
+            nb = c.getInt(0);
+        }
+        c.close();
+        db.close();
+        return nb;
     }
 
 }
