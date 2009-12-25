@@ -73,7 +73,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
                     Toast.makeText(
                             ctxt,
                             String.format(getString(R.string.preferences_resetdb_ok), (UpdateNicDb
-                                    .countEntries() - nb)), Toast.LENGTH_SHORT).show();
+                                    .countEntries() - nb)), Toast.LENGTH_LONG).show();
                 } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                     Toast.makeText(ctxt, R.string.preferences_error3, Toast.LENGTH_SHORT).show();
