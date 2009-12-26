@@ -4,6 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -17,9 +19,11 @@ public class UpdateNicDb {
     private final static String DB_PATH = "/data/data/info.lamatricexiste.network/";
     private final static String DB_NAME = "oui.db";
 
-    public static void remoteCopy() throws IOException {
+    public static void remoteCopy(Context ctxt) throws IOException {
         Log.v(TAG, "Copying oui.db remotly");
-        new DownloadFile(DB_REMOTE, DB_PATH + DB_NAME);
+        if(isConnected(ctxt)){
+            new DownloadFile(DB_REMOTE, DB_PATH + DB_NAME);
+        }
     }
 
     public static void localCopy(Context ctxt) {
@@ -52,6 +56,15 @@ public class UpdateNicDb {
         c.close();
         db.close();
         return nb;
+    }
+
+    private static boolean isConnected(Context ctxt){
+        //TODO: Move to NetInfo and factorize with DiscoveryActivity
+        NetworkInfo nfo = ((ConnectivityManager) ctxt.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if(nfo!=null){
+            return nfo.isConnected();
+        }
+        return false;
     }
 
 }

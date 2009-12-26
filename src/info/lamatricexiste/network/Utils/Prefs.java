@@ -69,7 +69,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
             public void onClick(DialogInterface dialog, int which) {
                 try {
                     int nb = UpdateNicDb.countEntries();
-                    UpdateNicDb.remoteCopy();
+                    UpdateNicDb.remoteCopy(ctxt);
                     Toast.makeText(
                             ctxt,
                             String.format(getString(R.string.preferences_resetdb_ok), (UpdateNicDb
