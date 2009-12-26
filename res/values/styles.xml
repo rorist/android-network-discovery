@@ -26,4 +26,14 @@
         <item name="android:layout_width">85dip</item>
         <item name="android:layout_height">38dip</item>
     </style>
+    <style name="help_title">
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_marginTop">10dip</item>
+        <item name="android:layout_marginBottom">10dip</item>
+        <item name="android:typeface">monospace</item>
+    </style>
+    <style name="help_content">
+        <item name="android:textSize">10sp</item>
+        <item name="android:typeface">monospace</item>
+    </style>
 </resources>

@@ -2,6 +2,7 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.HostDiscovery.PortScan;
+import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -28,8 +31,6 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.Menu;
-import android.view.MenuItem;
 
 final public class PortScanActivity extends TabActivity {
 
@@ -136,6 +137,10 @@ final public class PortScanActivity extends TabActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
+        menu.add(0, DiscoverActivity.MENU_OPTIONS, 0, "Options").setIcon(
+                android.R.drawable.ic_menu_preferences);
+        menu.add(0, DiscoverActivity.MENU_HELP, 0, R.string.preferences_help).setIcon(
+                android.R.drawable.ic_menu_help);
         return true;
     }
 
@@ -144,6 +149,12 @@ final public class PortScanActivity extends TabActivity {
         switch (item.getItemId()) {
             case DiscoverActivity.MENU_SCAN_SINGLE:
                 DiscoverActivity.scanSingle(this, host);
+                return true;
+            case DiscoverActivity.MENU_OPTIONS:
+                startActivity(new Intent(ctxt, Prefs.class));
+                return true;
+            case DiscoverActivity.MENU_HELP:
+                startActivity(new Intent(ctxt, Help.class));
                 return true;
         }
         return false;

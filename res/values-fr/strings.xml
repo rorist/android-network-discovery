@@ -53,6 +53,14 @@
     <string name="export_exists_title">Le fichier existe déjà</string>
     <string name="export_exists_msg">Voulez-vous l\'écraser ?</string>
     
+    <string name="help_discovery_title">Découverte de machines</string>
+    <string name="help_discovery_content">La méthode utilisé, ne requiert pas les privilèges root. Dans les versions futures, des techniques plus avancées seront utilisée, une fois que l\'aspect non-root fonctionnera bien.\n\nVoici comment cela fonctionne:\n1. Calcule de la plage d\'IP du sous-réseau\n2. Iteration sur les adresses IP et lance une requête\n3. D\'abord cela execute la méthode InetAddress.isReachable(), qui lance un ping ICMP ou un Echo sur le port tcp/7\n4. Puis si cela n\'aboutit pas, on essaie de se connecter sur des ports connus (tcp connect()) tels que: 135, 139, 22, 111, 80\n5. Si aucune des méthodes n\'aboutit, la machine n\'est pas découverte</string>
+    <string name="help_portscan_title">Scan de ports</string>
+    <string name="help_portscan_content">Le scan de ports est orienté évènements, en utilisant les Selector et SocketChannel de Java.\nLe timeout est simulé en enregistrant le temps en ms lors de la création du socket et en vérifiant régulérement cette valeur.\n\nLa méthode de scan, tout comme pour la découverte de machine, utilise une connection tcp complète. (d\'autres méthodes de scan arriveront avec les fonctionnalités root)\nUn maximum de 127 sockets sont ouverts en même temps, la méthode n\'est donc pas toujours précise, mais relativement rapide.\nCela sera amélioré notement grâce à une future méthode de vérification de la congestion du réseau, se basant sur les temps de réponse des machines.\n\nUn port est consideré ouvert lorsque la connection tcp est complète, fermé lorsque la connection est établie mais qu\'aucun service n\'est actif sur le port et filtré après que le timeout soit écoulé.</string>
+    <string name="help_links_title">Liens</string>
+    <string name="help_links_content">- Méthodes de scan de ports de Nmap: http://nmap.org/man/fr/man-port-scanning-techniques.html\n\n- Découverte de machines dans nmap: http://nmap.org/man/fr/man-host-discovery.html</string>
+    
+    <string name="preferences_help">Aide</string>
     <string name="preferences_notifications">Options de Notifications</string>
     <string name="preferences_port_scan">Options du Scan de Ports</string>
     <string name="preferences_advanced">Options Avancés</string>

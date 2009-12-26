@@ -4,6 +4,7 @@ import info.lamatricexiste.network.HostDiscovery.DiscoveryUnicast;
 import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
+import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
@@ -50,6 +51,7 @@ final public class DiscoverActivity extends Activity {
     public final static int SCAN_PORT_RESULT = 1;
     public static final int MENU_SCAN_SINGLE = 0;
     public static final int MENU_OPTIONS = 1;
+    public static final int MENU_HELP = 2;
     private static LayoutInflater mInflater;
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
@@ -177,6 +179,8 @@ final public class DiscoverActivity extends Activity {
                 android.R.drawable.ic_menu_mylocation);
         menu.add(0, DiscoverActivity.MENU_OPTIONS, 0, "Options").setIcon(
                 android.R.drawable.ic_menu_preferences);
+        menu.add(0, DiscoverActivity.MENU_HELP, 0, R.string.preferences_help).setIcon(
+                android.R.drawable.ic_menu_help);
         return true;
     }
 
@@ -188,6 +192,9 @@ final public class DiscoverActivity extends Activity {
                 return true;
             case DiscoverActivity.MENU_OPTIONS:
                 startActivity(new Intent(ctxt, Prefs.class));
+                return true;
+            case DiscoverActivity.MENU_HELP:
+                startActivity(new Intent(ctxt, Help.class));
                 return true;
         }
         return false;

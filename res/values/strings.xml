@@ -53,6 +53,14 @@
     <string name="export_exists_title">File already exists</string>
     <string name="export_exists_msg">Do you want to overwrite ?</string>
     
+    <string name="help_discovery_title">Hosts discovery</string>
+    <string name="help_discovery_content">The method that is being used, does not need to have root privileges. In future release there will be more advanced techniques, once the non-root ones are polished.\n\nHere is how it works: \n1. Calculate the subnetwork range\n2. Iterate throught IP and query them\n3. First it sends an ICMP ping or Echo on tcp/7 (with InetAddress.isReachable())\n4. If it does not work, it tries to connect() on well known open tcp ports such as: 135, 139, 22, 111, 80\n5. If none of the above is successful, the host is not discovered</string>
+    <string name="help_portscan_title">Port scan</string>
+    <string name="help_portscan_content">Port scan is event driven, using Java\'s Selector and SocketChannel.\nThere is a fake timeout by registrering the time in ms at socket\'s creation and checking regularly this value.\nThe port scan method, as discovery, uses full tcp connection check. (will be more granular in the future with root features.)\n\nA maximum of 127 Sockets are opened at a time, so this is not always accurate, but quite fast. Again, a new feature is coming that will adapt times between requests according to host response time (kind of software network congestion control)\n\nA port is considered open when tcp connect() is fully successful, closed when no service is listening on the other end, or filtered when the timeout is reached.</string>
+    <string name="help_links_title">Links</string>
+    <string name="help_links_content">- TCP connect scan: http://nmap.org/book/man-port-scanning-techniques.html#id421401\n\n- Host discovery: http://nmap.org/book/man-host-discovery.html</string>
+    
+    <string name="preferences_help">Help</string>
     <string name="preferences_notifications">Notifications settings</string>
     <string name="preferences_port_scan">Port Scan settings</string>
     <string name="preferences_advanced">Advanced Settings</string>
