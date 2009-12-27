@@ -3,6 +3,7 @@ package info.lamatricexiste.network.HostDiscovery;
 
 public class HostBean {
     private String ipAddress = null;
+    private String hostname = null;
     private String hardwareAddress = "00:00:00:00:00:00";
     private String nicVendor = "Unknown";
     private float responseTime = 0;
@@ -20,6 +21,17 @@ public class HostBean {
 
     public void setHardwareAddress(String addr) {
         hardwareAddress = addr;
+    }
+
+    public String getHostname() {
+        if(hostname!=null){
+            return hostname;
+        }
+        return getIpAddress();
+    }
+
+    public void setHostname(String hostname) {
+        hostname = hostname;
     }
 
     public String getNicVendor() {

@@ -33,6 +33,13 @@
     
     <PreferenceCategory
         android:title="@string/preferences_advanced">
+        
+        <CheckBoxPreference
+            android:key="resolve_name"
+            android:title="@string/preferences_resolve_name_title"
+            android:summary="@string/preferences_resolve_name_summary"
+            android:defaultValue="false" />
+
         <EditTextPreference
             android:key="nthreads"
             android:title="@string/preferences_threads_title"

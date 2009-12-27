@@ -8,10 +8,12 @@ import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
+import java.net.UnknownHostException;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.InetAddress;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -247,7 +249,12 @@ final public class DiscoverActivity extends Activity {
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
-            holder.host.setText(host.getIpAddress());
+            //FIXME: Is it efficient in long lists  ?
+            if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
+                holder.host.setText(host.getHostname());
+            } else {
+                holder.host.setText(host.getIpAddress());
+            }
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, PortScanActivity.class);
@@ -256,6 +263,7 @@ final public class DiscoverActivity extends Activity {
                     }
                     intent.putExtra("position", position);
                     intent.putExtra("host", host.getIpAddress());
+                    intent.putExtra("hostname", host.getHostname());
                     intent.putExtra("ports_o", host.getPortsOpen());
                     intent.putExtra("ports_c", host.getPortsClosed());
                     startActivityForResult(intent, SCAN_PORT_RESULT);
@@ -468,6 +476,13 @@ final public class DiscoverActivity extends Activity {
             host.setNicVendor(hw.getNicVendor());
             host.setIpAddress(addr);
             host.setPosition(hosts.size());
+            if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
+                try {
+                    host.setHostname((InetAddress.getByName(addr)).getCanonicalHostName());
+                } catch (UnknownHostException e) {
+                    return;
+                }
+            } 
             hosts.add(host);
             adapter.add(null);
         } else {

@@ -64,6 +64,8 @@
     <string name="preferences_notifications">Notifications settings</string>
     <string name="preferences_port_scan">Port Scan settings</string>
     <string name="preferences_advanced">Advanced Settings</string>
+    <string name="preferences_resolve_name_title">Resolve Hostname</string>
+    <string name="preferences_resolve_name_summary">Produce more traffic on the network</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Vibrate when Scan is completed</string>
     <string name="preferences_port_start_title">First Port</string>
