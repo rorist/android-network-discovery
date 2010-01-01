@@ -88,7 +88,6 @@ final public class DiscoverActivity extends Activity {
         btn_discover = (Button) findViewById(R.id.btn_discover);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
                 startDiscovering();
             }
         });
@@ -209,7 +208,7 @@ final public class DiscoverActivity extends Activity {
         switch (requestCode) {
             case SCAN_PORT_RESULT:
                 if (resultCode == RESULT_OK) {
-                    // Get scannde ports
+                    // Get scanned ports
                     Bundle extra = data.getExtras();
                     int position = extra.getInt("position");
                     HostBean host = hosts.get(position);
@@ -249,7 +248,7 @@ final public class DiscoverActivity extends Activity {
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
-            //FIXME: Is it efficient in long lists  ?
+            // FIXME: Is it efficient in long lists ?
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
                 holder.host.setText(host.getHostname());
             } else {
@@ -427,6 +426,7 @@ final public class DiscoverActivity extends Activity {
     }
 
     private void startDiscovering() {
+        checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
         makeToast(R.string.discover_start);
         setProgressBarVisibility(true);
         setProgressBarIndeterminateVisibility(true);
@@ -442,13 +442,13 @@ final public class DiscoverActivity extends Activity {
     }
 
     private void stopDiscovering() {
+        checkHostsTask = null;
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
         btn_discover.setText(R.string.btn_discover);
         btn_discover.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.discover, 0, 0);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
                 startDiscovering();
             }
         });
@@ -482,7 +482,7 @@ final public class DiscoverActivity extends Activity {
                 } catch (UnknownHostException e) {
                     return;
                 }
-            } 
+            }
             hosts.add(host);
             adapter.add(null);
         } else {

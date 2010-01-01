@@ -17,23 +17,29 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "DiscoveryUnicast";
     private final int TIMEOUT_REACH = 1000;
-    private final int DISCOVER_RATE = 0;
+    private double discover_rate;
     private int pt_move = 2; // 1=backward 2=forward
-    private Reachable reachable;
+    private Reachable mReachable;
 
     protected SharedPreferences prefsMgr;
     protected ExecutorService pool;
+    protected RateControl mRateControl;
     protected long ip;
     protected long start;
     protected long end;
     protected int size = 0;
+
+    public DiscoveryUnicast() {
+        mRateControl = new RateControl();
+        discover_rate = mRateControl.getRate();
+    }
 
     protected Void doInBackground(Void... params) {
         Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start + "), end="
                 + NetInfo.getIpFromLongUnsigned(end) + " (" + end + "), length=" + size);
         pool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr.getString(Prefs.KEY_NTHREADS,
                 Prefs.DEFAULT_NTHREADS)));
-        reachable = new Reachable();
+        mReachable = new Reachable();
 
         try {
             // gateway
@@ -73,7 +79,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     }
 
     private void launch(long i) throws InterruptedException {
-        Thread.sleep(DISCOVER_RATE);
+        Thread.sleep((int) discover_rate);
         String ip = NetInfo.getIpFromLongUnsigned(i);
         pool.execute(new CheckRunnable(ip));
     }
@@ -91,11 +97,23 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
                 // Native InetAddress check
                 if (h.isReachable(TIMEOUT_REACH)) {
                     publishProgress(host);
+                    if (!mRateControl.isIndicatorDiscovered()) {
+                        mRateControl.setIndicator(host);
+                        mRateControl.adaptRate();
+                        discover_rate = mRateControl.getRate();
+                    }
                     return;
                 }
                 // Custom check
-                if (reachable.isReachable(h)) {
+                int port = -1;
+                if ((port = mReachable.isReachable(h)) > -1) {
+                    Log.v(TAG, "used Reachable object");
                     publishProgress(host);
+                    if (!mRateControl.isIndicatorDiscovered()) {
+                        mRateControl.setIndicator(host, String.valueOf(port));
+                        // mRateControl.adaptRate();
+                        // discover_rate = mRateControl.getRate();
+                    }
                     return;
                 }
                 publishProgress((String) null);
@@ -107,28 +125,4 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
         }
     }
 
-    // private float getHostResponseTime(String host) {
-    // try {
-    // File ping = new File("/system/bin/ping");
-    // if (ping.exists() == true) {
-    // String line;
-    // Matcher matcher;
-    // Process p = Runtime.getRuntime().exec("ping -c 2 " + host);
-    // BufferedReader r = new BufferedReader(new
-    // InputStreamReader(p.getInputStream()), 1);
-    // while ((line = r.readLine()) != null) {
-    // matcher = Pattern
-    // .compile(
-    // "^rtt min\\/avg\\/max\\/mdev = ([0-9\\.]+)\\/[0-9\\.]+\\/[0-9\\.]+\\/[0-9\\.]+ ms$")
-    // .matcher(line);
-    // if (matcher.matches()) {
-    // return Float.parseFloat(matcher.group(1));
-    // }
-    // }
-    // }
-    // } catch (Exception e) {
-    // Log.e(TAG, "Can't use native ping: " + e.getMessage());
-    // }
-    // return 0;
-    // }
 }

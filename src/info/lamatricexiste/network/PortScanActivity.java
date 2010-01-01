@@ -62,6 +62,7 @@ final public class PortScanActivity extends TabActivity {
         mInflater = LayoutInflater.from(ctxt);
 
         Bundle extra = getIntent().getExtras();
+        host = extra.getString("host");
         position = extra.getInt("position");
         ports_open = portsToArrayList(extra.getLongArray("ports_o"));
         ports_closed = portsToArrayList(extra.getLongArray("ports_c"));
@@ -72,7 +73,7 @@ final public class PortScanActivity extends TabActivity {
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
             ((TextView) findViewById(R.id.host)).setText(extra.getString("hostname"));
         } else {
-            ((TextView) findViewById(R.id.host)).setText(extra.getString("host"));
+            ((TextView) findViewById(R.id.host)).setText(host);
         }
 
         // Scan

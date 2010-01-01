@@ -42,13 +42,11 @@ public class HardwareAddress {
         try {
             File arp = new File("/proc/net/arp");
             if (arp.exists() != false && arp.canRead()) {
-                String ptrn = "^"
-                        + ip.replace(".", "\\.")
+                String ptrn = "^" + ip.replace(".", "\\.")
                         + "\\s+0x1\\s+0x2\\s+([:0-9a-fA-F]+)\\s+\\*\\s+(tiwlan0|eth0)$";
                 Pattern pattern = Pattern.compile(ptrn);
                 FileReader fileReader = new FileReader(arp);
-                BufferedReader bufferedReader = new BufferedReader(fileReader,
-                        16);
+                BufferedReader bufferedReader = new BufferedReader(fileReader, 16);
                 String line;
                 Matcher matcher;
                 while ((line = bufferedReader.readLine()) != null) {
@@ -67,12 +65,11 @@ public class HardwareAddress {
     }
 
     public void setNicVendor() {
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME,
-                null, SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
+                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
         // Db request
-        Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
-                + "'", null);
+        Cursor c = db.rawQuery("select vendor from oui where mac='" + macid + "'", null);
         if (c.getCount() > 0) {
             c.moveToFirst();
             ni = c.getString(c.getColumnIndex("vendor"));

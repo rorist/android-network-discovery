@@ -21,7 +21,7 @@ public class UpdateNicDb {
 
     public static void remoteCopy(Context ctxt) throws IOException {
         Log.v(TAG, "Copying oui.db remotly");
-        if(isConnected(ctxt)){
+        if (isConnected(ctxt)) {
             new DownloadFile(DB_REMOTE, DB_PATH + DB_NAME);
         }
     }
@@ -58,10 +58,11 @@ public class UpdateNicDb {
         return nb;
     }
 
-    private static boolean isConnected(Context ctxt){
-        //TODO: Move to NetInfo and factorize with DiscoveryActivity
-        NetworkInfo nfo = ((ConnectivityManager) ctxt.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-        if(nfo!=null){
+    private static boolean isConnected(Context ctxt) {
+        // TODO: Move to NetInfo and factorize with DiscoveryActivity
+        NetworkInfo nfo = ((ConnectivityManager) ctxt
+                .getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if (nfo != null) {
             return nfo.isConnected();
         }
         return false;

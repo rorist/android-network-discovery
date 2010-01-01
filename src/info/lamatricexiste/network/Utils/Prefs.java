@@ -21,7 +21,7 @@ import android.widget.Toast;
 
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
     private final String TAG = "Prefs";
-    
+
     public final static String KEY_RESOLVE_NAME = "resolve_name";
     public final static boolean DEFAULT_RESOLVE_NAME = false;
 

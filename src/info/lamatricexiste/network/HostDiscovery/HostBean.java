@@ -24,14 +24,14 @@ public class HostBean {
     }
 
     public String getHostname() {
-        if(hostname!=null){
+        if (hostname != null) {
             return hostname;
         }
         return getIpAddress();
     }
 
     public void setHostname(String hostname) {
-        hostname = hostname;
+        this.hostname = hostname;
     }
 
     public String getNicVendor() {
