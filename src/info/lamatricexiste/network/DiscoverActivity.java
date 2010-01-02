@@ -57,6 +57,7 @@ final public class DiscoverActivity extends Activity {
     private static LayoutInflater mInflater;
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
+    private HardwareAddress mHardwareAddress;
     // private Button btn;
     private Button btn_discover;
     private Button btn_export;
@@ -75,6 +76,7 @@ final public class DiscoverActivity extends Activity {
         ctxt = getApplicationContext();
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         mInflater = LayoutInflater.from(ctxt);
+        mHardwareAddress = new HardwareAddress();
 
         // Check NIC db
         if (prefs.getString("resetdb", Prefs.DEFAULT_RESETDB) == "1") {
@@ -468,12 +470,11 @@ final public class DiscoverActivity extends Activity {
     }
 
     private void addHost(String addr) {
-        HardwareAddress hw = new HardwareAddress(ctxt, addr);
-        String haddr = hw.getHardwareAddress();
+        String haddr = mHardwareAddress.getHardwareAddress(addr);
         if (!hardwareAddressAlreadyExists(haddr)) {
             HostBean host = new HostBean();
             host.setHardwareAddress(haddr);
-            host.setNicVendor(hw.getNicVendor());
+            host.setNicVendor(mHardwareAddress.getNicVendor(ctxt, haddr));
             host.setIpAddress(addr);
             host.setPosition(hosts.size());
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
@@ -573,6 +574,12 @@ final public class DiscoverActivity extends Activity {
                 // start scanportactivity
                 Intent intent = new Intent(ctxt, PortScanActivity.class);
                 intent.putExtra("host", txt.getText().toString());
+                try {
+                    intent.putExtra("hostname", (InetAddress.getByName(txt.getText().toString())
+                            .getHostName()));
+                } catch (UnknownHostException e) {
+                    intent.putExtra("hostname", txt.getText().toString());
+                }
                 ctxt.startActivity(intent);
             }
         });

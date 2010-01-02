@@ -10,20 +10,21 @@ import java.util.regex.Pattern;
 
 public class RateControl {
 
-    private final String TAG = "RateControl";
-    private final double RATE_BASE = 500;
     // TODO: Calculate a rounded up value from experiments in different networks
     // FIXME: calculate real overhead between java's ping and native ping (at
     // runtime?)
-    private double rate_mult = 1.5; // Slow start
+    private final String TAG = "RateControl";
+    private final double RATE_BASE = 1000;
+    private double rate = RATE_BASE; // Slow start
     private String[] indicator;
     private boolean indicator_discovered = false;
 
-    public RateControl() {
+    public double getRate() {
+        return rate;
     }
 
-    public double getRate() {
-        return (RATE_BASE * rate_mult);
+    public void setRate(double rate) {
+        this.rate = rate;
     }
 
     public void setIndicator(String... indicator) {
@@ -38,27 +39,17 @@ public class RateControl {
         return indicator_discovered;
     }
 
-    public double adaptRate() {
+    public void adaptRate() {
         double response_time = 0;
         if (indicator.length > 1) {
             Log.v(TAG, "use a socket here, port=" + getIndicator()[1]);
         } else {
-            if ((response_time = getAvgResponseTime(getIndicator()[0], 5)) > 0) {
-                setRateMult(rate_mult * response_time / RATE_BASE); // TODO: is
-                                                                    // it
-                                                                    // accurate
-                                                                    // in all
-                                                                    // situations
-                                                                    // ?
-                Log.v(TAG, "rate=" + getRate() + ", ping=" + response_time);
-                // indicator_discovered = true;
+            indicator_discovered = true;
+            if ((response_time = getAvgResponseTime(getIndicator()[0], 3)) > 0) {
+                setRate(response_time);
+                Log.v(TAG, "rate=" + response_time);
             }
         }
-        return getRate();
-    }
-
-    private void setRateMult(double rate_mult) {
-        this.rate_mult = rate_mult;
     }
 
     private double getAvgResponseTime(String host, int count) {
@@ -67,7 +58,7 @@ public class RateControl {
             if (ping.exists() == true) {
                 String line;
                 Matcher matcher;
-                Process p = Runtime.getRuntime().exec("ping -c " + count + " " + host);
+                Process p = Runtime.getRuntime().exec("ping -q -n -W 2 -c " + count + " " + host);
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
                 while ((line = r.readLine()) != null) {
                     matcher = Pattern

@@ -26,9 +26,7 @@
     <string name="discover_finished">Recherche terminée !</string>
     <string name="discover_canceled">Recherche annulée !</string>
     <string name="discover_proxy_title">Erreur proxy</string>
-    <string name="discover_proxy_msg">La recherche est annulée car vous êtes probablement 
-        derrière un proxy qui empêche de voir les machines sur le réseau.\n\n
-        Accéder à la passerelle depuis votre navigateur depuis: http://%s</string>
+    <string name="discover_proxy_msg">La recherche est annulée car une adresse mac est apparue plusieurs fois, vous êtes probablement derrière un proxy.\n\nAccédez à la passerelle depuis votre navigateur: http://%s</string>
         
     <string name="scan_single_title">Scanner une IP</string>
     <string name="scan_single_summary">Entrez une adresse IP ou un nom d\'hôte sur lequel effectuer un scan de ports, p.ex. scanme.nmap.org</string>

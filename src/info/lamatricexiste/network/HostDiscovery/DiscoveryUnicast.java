@@ -17,13 +17,12 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "DiscoveryUnicast";
     private final int TIMEOUT_REACH = 1000;
-    private double discover_rate;
     private int pt_move = 2; // 1=backward 2=forward
     private Reachable mReachable;
+    private RateControl mRateControl;
 
     protected SharedPreferences prefsMgr;
     protected ExecutorService pool;
-    protected RateControl mRateControl;
     protected long ip;
     protected long start;
     protected long end;
@@ -31,7 +30,6 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
     public DiscoveryUnicast() {
         mRateControl = new RateControl();
-        discover_rate = mRateControl.getRate();
     }
 
     protected Void doInBackground(Void... params) {
@@ -79,9 +77,8 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     }
 
     private void launch(long i) throws InterruptedException {
-        Thread.sleep((int) discover_rate);
-        String ip = NetInfo.getIpFromLongUnsigned(i);
-        pool.execute(new CheckRunnable(ip));
+        Thread.sleep((int) mRateControl.getRate());
+        pool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
     }
 
     private class CheckRunnable implements Runnable {
@@ -100,7 +97,6 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
                     if (!mRateControl.isIndicatorDiscovered()) {
                         mRateControl.setIndicator(host);
                         mRateControl.adaptRate();
-                        discover_rate = mRateControl.getRate();
                     }
                     return;
                 }
@@ -124,5 +120,4 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
             }
         }
     }
-
 }
