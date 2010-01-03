@@ -76,7 +76,6 @@ final public class DiscoverActivity extends Activity {
         ctxt = getApplicationContext();
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         mInflater = LayoutInflater.from(ctxt);
-        mHardwareAddress = new HardwareAddress();
 
         // Check NIC db
         if (prefs.getString("resetdb", Prefs.DEFAULT_RESETDB) == "1") {
@@ -212,12 +211,12 @@ final public class DiscoverActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     // Get scanned ports
                     Bundle extra = data.getExtras();
-                    int position = extra.getInt("position");
+                    int position = extra.getInt(HostBean.EXTRA_POSITION);
                     HostBean host = hosts.get(position);
-                    host.setPortsOpen(extra.getLongArray("ports_o"));
-                    host.setPortsClosed(extra.getLongArray("ports_c"));
+                    host.setPortsOpen(extra.getLongArray(HostBean.EXTRA_PORTSO));
+                    host.setPortsClosed(extra.getLongArray(HostBean.EXTRA_PORTSC));
                     // OS Fingerprint check
-                    // host.setOs(OsFingerprint.finger(extra.getLongArray("ports")));
+                    // host.setOs(OsFingerprint.finger(extra.getLongArray(HostBean.EXTRA_)));
                 }
             default:
                 break;
@@ -262,11 +261,11 @@ final public class DiscoverActivity extends Activity {
                     if (wifiConnected() == false) {
                         intent.putExtra("wifiDisabled", true);
                     }
-                    intent.putExtra("position", position);
-                    intent.putExtra("host", host.getIpAddress());
-                    intent.putExtra("hostname", host.getHostname());
-                    intent.putExtra("ports_o", host.getPortsOpen());
-                    intent.putExtra("ports_c", host.getPortsClosed());
+                    intent.putExtra(HostBean.EXTRA_POSITION, position);
+                    intent.putExtra(HostBean.EXTRA_HOST, host.getIpAddress());
+                    intent.putExtra(HostBean.EXTRA_HOSTNAME, host.getHostname());
+                    intent.putExtra(HostBean.EXTRA_PORTSO, host.getPortsOpen());
+                    intent.putExtra(HostBean.EXTRA_PORTSC, host.getPortsClosed());
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }
             });
@@ -403,7 +402,7 @@ final public class DiscoverActivity extends Activity {
                     discover.addHost(item[0]);
                 }
                 hosts_done++;
-                discover.setProgress(hosts_done * 10000 / size);
+                discover.setProgress(hosts_done * 10000 / (int) size);
             }
         }
 
@@ -429,6 +428,7 @@ final public class DiscoverActivity extends Activity {
 
     private void startDiscovering() {
         checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
+        mHardwareAddress = new HardwareAddress();
         makeToast(R.string.discover_start);
         setProgressBarVisibility(true);
         setProgressBarIndeterminateVisibility(true);
@@ -444,6 +444,7 @@ final public class DiscoverActivity extends Activity {
     }
 
     private void stopDiscovering() {
+        mHardwareAddress.dbClose();
         checkHostsTask = null;
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
@@ -573,12 +574,12 @@ final public class DiscoverActivity extends Activity {
             public void onClick(DialogInterface dlg, int sumthin) {
                 // start scanportactivity
                 Intent intent = new Intent(ctxt, PortScanActivity.class);
-                intent.putExtra("host", txt.getText().toString());
+                intent.putExtra(HostBean.EXTRA_HOST, txt.getText().toString());
                 try {
-                    intent.putExtra("hostname", (InetAddress.getByName(txt.getText().toString())
-                            .getHostName()));
+                    intent.putExtra(HostBean.EXTRA_HOSTNAME, (InetAddress.getByName(txt.getText()
+                            .toString()).getHostName()));
                 } catch (UnknownHostException e) {
-                    intent.putExtra("hostname", txt.getText().toString());
+                    intent.putExtra(HostBean.EXTRA_HOSTNAME, txt.getText().toString());
                 }
                 ctxt.startActivity(intent);
             }

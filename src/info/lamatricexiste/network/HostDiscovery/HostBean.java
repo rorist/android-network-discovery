@@ -11,9 +11,12 @@ public class HostBean {
     private long[] portsOpen = null;
     private long[] portsClosed = null;
     private String os = "Unknown";
-
-    public HostBean() {
-    }
+    
+    public static String EXTRA_POSITION = "position";
+    public static String EXTRA_HOST = "host";
+    public static String EXTRA_HOSTNAME = "hostname";
+    public static String EXTRA_PORTSO = "ports_o";
+    public static String EXTRA_PORTSC = "ports_c";
 
     public String getHardwareAddress() {
         return hardwareAddress;

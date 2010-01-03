@@ -26,7 +26,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     protected long ip;
     protected long start;
     protected long end;
-    protected int size = 0;
+    protected long size = 0;
 
     public DiscoveryUnicast() {
         mRateControl = new RateControl();
@@ -46,7 +46,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
             // hosts
             long pt_backward = ip - 1;
             long pt_forward = ip + 1;
-            int size_hosts = size - 2;
+            long size_hosts = size - 2;
 
             for (int i = 0; i < size_hosts; i++) {
                 // Set pointer if of limits
@@ -66,18 +66,15 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
                     pt_move = 1;
                 }
             }
-
             pool.shutdown();
             pool.awaitTermination(3600L, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Log.e(TAG, "Got Interrupted");
         }
-
         return null;
     }
 
-    private void launch(long i) throws InterruptedException {
-        Thread.sleep((int) mRateControl.getRate());
+    private void launch(long i) {
         pool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
     }
 
@@ -90,6 +87,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
 
         public void run() {
             try {
+                Thread.sleep((int) mRateControl.getRate());
                 InetAddress h = InetAddress.getByName(host);
                 // Native InetAddress check
                 if (h.isReachable(TIMEOUT_REACH)) {
@@ -115,6 +113,9 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
                 publishProgress((String) null);
 
             } catch (IOException e) {
+                publishProgress((String) null);
+                Log.e(TAG, e.getMessage());
+            } catch (InterruptedException e) {
                 publishProgress((String) null);
                 Log.e(TAG, e.getMessage());
             }

@@ -5,7 +5,6 @@ package info.lamatricexiste.network.Utils;
 import info.lamatricexiste.network.R;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -21,15 +20,25 @@ public class HardwareAddress {
     private final String TAG = "HardwareAddress";
     private final String DB_PATH = "/data/data/info.lamatricexiste.network/";
     private final String DB_NAME = "oui.db";
+    private SQLiteDatabase db;
+
+    public HardwareAddress() {
+        db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
+                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+    }
+
+    public void dbClose() {
+        db.close();
+    }
 
     public String getHardwareAddress(String ip) {
         String hw = "00:00:00:00:00:00";
         try {
-            FileReader fileReader = new FileReader(new File("/proc/net/arp"));
+            FileReader fileReader = new FileReader("/proc/net/arp");
             String ptrn = "^" + ip.replace(".", "\\.")
                     + "\\s+0x1\\s+0x2\\s+([:0-9a-fA-F]+)\\s+\\*\\s+(tiwlan0|eth0)$";
             Pattern pattern = Pattern.compile(ptrn);
-            BufferedReader bufferedReader = new BufferedReader(fileReader, 16);
+            BufferedReader bufferedReader = new BufferedReader(fileReader, 2);
             String line;
             Matcher matcher;
             while ((line = bufferedReader.readLine()) != null) {
@@ -41,15 +50,13 @@ public class HardwareAddress {
             bufferedReader.close();
             fileReader.close();
         } catch (IOException e) {
-            Log.d(TAG, "Can't open file ARP: " + e.getMessage());
+            Log.d(TAG, "Can't open/read file ARP: " + e.getMessage());
         }
         return hw;
     }
 
     public String getNicVendor(Context ctxt, String hw) {
         String ni = ctxt.getString(R.string.info_unknown);
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
-                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
         // Db request
         Cursor c = db.rawQuery("select vendor from oui where mac='" + macid + "'", null);
@@ -58,7 +65,6 @@ public class HardwareAddress {
             ni = c.getString(c.getColumnIndex("vendor"));
         }
         c.close();
-        db.close();
         return ni;
     }
 }

@@ -1,6 +1,7 @@
 // TODO: Detect wifi status
 package info.lamatricexiste.network;
 
+import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.HostDiscovery.PortScan;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
@@ -62,16 +63,16 @@ final public class PortScanActivity extends TabActivity {
         mInflater = LayoutInflater.from(ctxt);
 
         Bundle extra = getIntent().getExtras();
-        host = extra.getString("host");
-        position = extra.getInt("position");
-        ports_open = portsToArrayList(extra.getLongArray("ports_o"));
-        ports_closed = portsToArrayList(extra.getLongArray("ports_c"));
+        host = extra.getString(HostBean.EXTRA_HOST);
+        position = extra.getInt(HostBean.EXTRA_POSITION);
+        ports_open = portsToArrayList(extra.getLongArray(HostBean.EXTRA_PORTSO));
+        ports_closed = portsToArrayList(extra.getLongArray(HostBean.EXTRA_PORTSC));
         cnt_open = (ports_open == null) ? 0 : ports_open.size();
         cnt_closed = (ports_closed == null) ? 0 : ports_closed.size();
 
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
-            ((TextView) findViewById(R.id.host)).setText(extra.getString("hostname"));
+            ((TextView) findViewById(R.id.host)).setText(extra.getString(HostBean.EXTRA_HOSTNAME));
         } else {
             ((TextView) findViewById(R.id.host)).setText(host);
         }
@@ -304,9 +305,9 @@ final public class PortScanActivity extends TabActivity {
     private void stopScan() {
         // Set result
         Intent intent = new Intent();
-        intent.putExtra("position", position);
-        intent.putExtra("ports_o", portsToLongArray(ports_open));
-        intent.putExtra("ports_c", portsToLongArray(ports_closed));
+        intent.putExtra(HostBean.EXTRA_POSITION, position);
+        intent.putExtra(HostBean.EXTRA_PORTSO, portsToLongArray(ports_open));
+        intent.putExtra(HostBean.EXTRA_PORTSC, portsToLongArray(ports_closed));
         setResult(RESULT_OK, intent);
         // Reset scan
         setProgressBarVisibility(false);
