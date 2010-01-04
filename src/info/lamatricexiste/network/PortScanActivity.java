@@ -215,6 +215,7 @@ final public class PortScanActivity extends TabActivity {
             } else {
                 holder.btn_connect.setText(null);
                 holder.btn_connect.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                holder.btn_connect.setOnClickListener(null);
             }
             return convertView;
         }

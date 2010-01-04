@@ -249,7 +249,6 @@ final public class DiscoverActivity extends Activity {
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
-            // FIXME: Is it efficient in long lists ?
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
                 holder.host.setText(host.getHostname());
             } else {
