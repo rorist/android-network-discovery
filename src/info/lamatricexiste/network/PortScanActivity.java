@@ -51,6 +51,7 @@ final public class PortScanActivity extends TabActivity {
     private Context ctxt;
     private TextView mTabOpen;
     private TextView mTabClosed;
+    private List<Long> openPortsConnect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +123,12 @@ final public class PortScanActivity extends TabActivity {
         ListView list_closed = (ListView) findViewById(R.id.list_closed);
         list_closed.setAdapter(adapter_closed);
         list_closed.setItemsCanFocus(true);
+
+        openPortsConnect = new ArrayList<Long>(4);
+        openPortsConnect.add((long) 22);
+        openPortsConnect.add((long) 23);
+        openPortsConnect.add((long) 80);
+        openPortsConnect.add((long) 443);
 
         // Start scan if ports empty
         // FIXME: does not work if only open ports are discovered ?
@@ -195,11 +202,20 @@ final public class PortScanActivity extends TabActivity {
                 holder = (ViewHolder) convertView.getTag();
             }
             holder.port.setText(port + "/tcp " + type);
-            holder.btn_connect.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    openPortService(port);
-                }
-            });
+            if (openPortsConnect.contains(port)) {
+                // That is an awful hack
+                holder.btn_connect.setText(R.string.scan_connect);
+                holder.btn_connect.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connect, 0,
+                        0, 0);
+                holder.btn_connect.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        openPortService(port);
+                    }
+                });
+            } else {
+                holder.btn_connect.setText(null);
+                holder.btn_connect.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            }
             return convertView;
         }
     }
@@ -372,6 +388,7 @@ final public class PortScanActivity extends TabActivity {
                 }
                 break;
             case 23:
+                pk = "org.connectbot";
                 action = Intent.ACTION_VIEW;
                 if (isPackageInstalled(ctxt, pk)) {
                     intent = new Intent(action);

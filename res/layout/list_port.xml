@@ -4,7 +4,8 @@
     android:id="@+id/list_ports"
     android:layout_width="fill_parent"
     android:layout_height="45dip"
-    android:paddingLeft="3dip">
+    android:padding="3dip"
+    android:focusable="false">
     <TextView
         android:id="@+id/list"
         android:layout_width="0dip"
@@ -20,7 +21,5 @@
     <Button
         android:id="@+id/list_connect"
         android:layout_gravity="center_vertical"
-        android:text="@string/scan_connect"
-        android:drawableLeft="@drawable/connect"
         style="@style/ButtonConnect" />
 </LinearLayout>
