@@ -11,8 +11,6 @@ import java.util.regex.Pattern;
 public class RateControl {
 
     // TODO: Calculate a rounded up value from experiments in different networks
-    // FIXME: calculate real overhead between java's ping and native ping (at
-    // runtime?)
     private final String TAG = "RateControl";
     private final double RATE_BASE = 1000;
     private double rate = RATE_BASE; // Slow start
@@ -41,21 +39,21 @@ public class RateControl {
 
     public void adaptRate() {
         double response_time = 0;
-        if (indicator.length > 1) {
-            Log.v(TAG, "use a socket here, port=" + getIndicator()[1]);
-        } else {
-            indicator_discovered = true;
-            if ((response_time = getAvgResponseTime(getIndicator()[0], 3)) > 0) {
-                setRate(response_time);
-                Log.v(TAG, "rate=" + response_time);
-            }
+        // TODO: Use an indicator with a port, calculate java round trip time
+        // if (indicator.length > 1) {
+        // Log.v(TAG, "use a socket here, port=" + getIndicator()[1]);
+        // } else {
+        indicator_discovered = true;
+        if ((response_time = getAvgResponseTime(getIndicator()[0], 3)) > 0) {
+            setRate(response_time);
+            Log.v(TAG, "rate=" + response_time);
         }
+        // }
     }
 
     private double getAvgResponseTime(String host, int count) {
         try {
-            File ping = new File("/system/bin/ping");
-            if (ping.exists() == true) {
+            if ((new File("/system/bin/ping")).exists() == true) {
                 String line;
                 Matcher matcher;
                 Process p = Runtime.getRuntime().exec("ping -q -n -W 2 -c " + count + " " + host);

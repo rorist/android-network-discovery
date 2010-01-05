@@ -7,7 +7,7 @@ import java.net.Socket;
 
 public class Reachable {
 
-    final int[] ports = { 135, 139, 22, 111, 80 };
+    final int[] ports = { 445, 22, 80, 111 };
     final int timeout = 800; // FIXME: Point of failure, MUST use NIO
     final int len = ports.length;
 
@@ -18,7 +18,7 @@ public class Reachable {
                 s.bind(null);
                 s.connect(new InetSocketAddress(host, ports[i]), timeout);
                 s.close();
-                return i;
+                return ports[i];
             } catch (IOException e) {
                 // Log.e("Reachable", e.getMessage());
             }

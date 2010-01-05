@@ -8,12 +8,11 @@ import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
-import java.net.UnknownHostException;
 
-import java.lang.ref.WeakReference;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.net.InetAddress;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -29,7 +28,6 @@ import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -61,10 +59,10 @@ final public class DiscoverActivity extends Activity {
     // private Button btn;
     private Button btn_discover;
     private Button btn_export;
-    private SharedPreferences prefs = null;
+    public SharedPreferences prefs = null;
     // private boolean rooted = false;
     private ConnectivityManager connMgr;
-    private CheckHostsTask checkHostsTask = null;
+    private DiscoveryUnicast mDiscoveryTask = null;
     private Context ctxt;
 
     @Override
@@ -352,11 +350,11 @@ final public class DiscoverActivity extends Activity {
                 info_id.setText("SSID: " + net.getSSID());
                 setButtonOn(btn_discover, R.drawable.discover);
                 setButtonOn(btn_export, R.drawable.export);
-            } else if (checkHostsTask != null) {
-                cancelAllTasks();
+            } else if (mDiscoveryTask != null) {
+                cancelTasks();
             }
-        } else if (checkHostsTask != null) {
-            cancelAllTasks();
+        } else if (mDiscoveryTask != null) {
+            cancelTasks();
         }
     }
 
@@ -371,80 +369,26 @@ final public class DiscoverActivity extends Activity {
     /**
      * Discover hosts
      */
-
-    private static class CheckHostsTask extends DiscoveryUnicast {
-        private WeakReference<DiscoverActivity> mDiscover;
-        private int hosts_done = 0;
-
-        public CheckHostsTask(DiscoverActivity discover) {
-            mDiscover = new WeakReference<DiscoverActivity>(discover);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            final DiscoverActivity discover = mDiscover.get();
-            prefsMgr = discover.prefs;
-            NetInfo net = new NetInfo(discover);
-            ip = NetInfo.getUnsignedLongFromIp(net.getIp());
-            int shift = (32 - net.getNetCidr());
-            start = (ip >> shift << shift) + 1;
-            end = (start | ((1 << shift) - 1)) - 1;
-            size = (int) (end - start + 1);
-            discover.setProgress(0);
-        }
-
-        @Override
-        protected void onProgressUpdate(String... item) {
-            final DiscoverActivity discover = mDiscover.get();
-            if (!isCancelled()) {
-                if (item[0] != null) {
-                    discover.addHost(item[0]);
-                }
-                hosts_done++;
-                discover.setProgress(hosts_done * 10000 / (int) size);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Void unused) {
-            final DiscoverActivity discover = mDiscover.get();
-            if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
-                Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(VIBRATE);
-            }
-            discover.makeToast(R.string.discover_finished);
-            discover.stopDiscovering();
-        }
-
-        @Override
-        protected void onCancelled() {
-            final DiscoverActivity discover = mDiscover.get();
-            pool.shutdownNow();
-            discover.makeToast(R.string.discover_canceled);
-            discover.stopDiscovering();
-        }
-    }
-
     private void startDiscovering() {
-        checkHostsTask = new CheckHostsTask(DiscoverActivity.this);
+        mDiscoveryTask = new DiscoveryUnicast(DiscoverActivity.this);
         mHardwareAddress = new HardwareAddress();
         makeToast(R.string.discover_start);
         setProgressBarVisibility(true);
         setProgressBarIndeterminateVisibility(true);
         initList();
-        checkHostsTask.execute();
+        mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
         btn_discover.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cancel, 0, 0);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                checkHostsTask.cancel(true);
+                cancelTasks();
             }
         });
     }
 
-    private void stopDiscovering() {
+    public void stopDiscovering() {
         mHardwareAddress.dbClose();
-        checkHostsTask = null;
+        mDiscoveryTask = null;
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
         btn_discover.setText(R.string.btn_discover);
@@ -456,10 +400,10 @@ final public class DiscoverActivity extends Activity {
         });
     }
 
-    private void cancelAllTasks() {
-        if (checkHostsTask != null) {
-            checkHostsTask.cancel(true);
-            checkHostsTask = null;
+    private void cancelTasks() {
+        if (mDiscoveryTask != null) {
+            mDiscoveryTask.cancel(true);
+            mDiscoveryTask = null;
         }
     }
 
@@ -469,7 +413,7 @@ final public class DiscoverActivity extends Activity {
         hosts = new ArrayList<HostBean>();
     }
 
-    private void addHost(String addr) {
+    public void addHost(String addr) {
         String haddr = mHardwareAddress.getHardwareAddress(addr);
         if (!hardwareAddressAlreadyExists(haddr)) {
             HostBean host = new HostBean();
@@ -487,8 +431,8 @@ final public class DiscoverActivity extends Activity {
             hosts.add(host);
             adapter.add(null);
         } else {
-            if (checkHostsTask != null) {
-                checkHostsTask.cancel(true);
+            if (mDiscoveryTask != null) {
+                cancelTasks();
             }
             NetInfo net = new NetInfo(ctxt);
             AlertDialog.Builder infoDialog = new AlertDialog.Builder(this);
@@ -659,7 +603,7 @@ final public class DiscoverActivity extends Activity {
     // Toast.LENGTH_SHORT).show();
     // }
 
-    private void makeToast(int msg) {
+    public void makeToast(int msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 

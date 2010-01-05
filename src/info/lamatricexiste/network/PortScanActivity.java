@@ -131,7 +131,6 @@ final public class PortScanActivity extends TabActivity {
         openPortsConnect.add((long) 443);
 
         // Start scan if ports empty
-        // FIXME: does not work if only open ports are discovered ?
         if (ports_open == null && ports_closed == null) {
             startScan();
         }
