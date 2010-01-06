@@ -1,26 +1,21 @@
 package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.R;
-
-import java.io.IOException;
-
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.util.Log;
+import android.view.Window;
 import android.widget.Toast;
 
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-    private final String TAG = "Prefs";
+    // private final String TAG = "Prefs";
 
     public final static String KEY_RESOLVE_NAME = "resolve_name";
     public final static boolean DEFAULT_RESOLVE_NAME = false;
@@ -41,12 +36,13 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String DEFAULT_NTHREADS = "32";
 
     public static final String KEY_RESETDB = "resetdb";
-    public static final String DEFAULT_RESETDB = "1";
+    public static final int DEFAULT_RESETDB = 1;
 
     private Context ctxt;
     private PreferenceScreen preferenceScreen = null;
 
     public void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
@@ -59,32 +55,10 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         Preference resetdb = (Preference) preferenceScreen.findPreference(KEY_RESETDB);
         resetdb.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                updateNicDb();
+                new UpdateNicDb(Prefs.this, PreferenceManager.getDefaultSharedPreferences(ctxt));
                 return false;
             }
         });
-    }
-
-    private void updateNicDb() {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(Prefs.this);
-        dialog.setTitle(R.string.preferences_resetdb_action);
-        dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    int nb = UpdateNicDb.countEntries();
-                    UpdateNicDb.remoteCopy(ctxt);
-                    Toast.makeText(
-                            ctxt,
-                            String.format(getString(R.string.preferences_resetdb_ok), (UpdateNicDb
-                                    .countEntries() - nb)), Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    Log.e(TAG, e.getMessage());
-                    Toast.makeText(ctxt, R.string.preferences_error3, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        dialog.setNegativeButton(R.string.btn_no, null);
-        dialog.show();
     }
 
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {

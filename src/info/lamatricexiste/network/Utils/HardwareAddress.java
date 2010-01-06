@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 public class HardwareAddress {
@@ -23,12 +24,18 @@ public class HardwareAddress {
     private SQLiteDatabase db;
 
     public HardwareAddress() {
-        db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
-                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        try {
+            db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
+                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        } catch (SQLiteException e) {
+            db = null;
+        }
     }
 
     public void dbClose() {
-        db.close();
+        if (db != null) {
+            db.close();
+        }
     }
 
     public String getHardwareAddress(String ip) {
@@ -57,14 +64,16 @@ public class HardwareAddress {
 
     public String getNicVendor(Context ctxt, String hw) {
         String ni = ctxt.getString(R.string.info_unknown);
-        String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
-        // Db request
-        Cursor c = db.rawQuery("select vendor from oui where mac='" + macid + "'", null);
-        if (c.getCount() > 0) {
-            c.moveToFirst();
-            ni = c.getString(c.getColumnIndex("vendor"));
+        if (db != null) {
+            String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
+            // Db request
+            Cursor c = db.rawQuery("select vendor from oui where mac='" + macid + "'", null);
+            if (c.getCount() > 0) {
+                c.moveToFirst();
+                ni = c.getString(c.getColumnIndex("vendor"));
+            }
+            c.close();
         }
-        c.close();
         return ni;
     }
 }

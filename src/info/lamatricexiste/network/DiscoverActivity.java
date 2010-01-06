@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -45,7 +46,7 @@ import android.widget.Toast;
 
 final public class DiscoverActivity extends Activity {
 
-    // private final String TAG = "NetworkMain";
+    private final String TAG = "info.lamatricexiste.network";
     // private final int DEFAULT_DISCOVER = 1;
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
@@ -76,10 +77,15 @@ final public class DiscoverActivity extends Activity {
         mInflater = LayoutInflater.from(ctxt);
 
         // Check NIC db
-        if (prefs.getString("resetdb", Prefs.DEFAULT_RESETDB) == "1") {
-            UpdateNicDb.localCopy(ctxt);
+        try {
+            if (prefs.getInt(Prefs.KEY_RESETDB, Prefs.DEFAULT_RESETDB) != getPackageManager()
+                    .getPackageInfo(TAG, 0).versionCode) {
+                new UpdateNicDb(DiscoverActivity.this, prefs);
+            }
+        } catch (NameNotFoundException e) {
+        } catch (ClassCastException e) {
             Editor edit = prefs.edit();
-            edit.putString(Prefs.KEY_RESETDB, "0");
+            edit.putInt(Prefs.KEY_RESETDB, 1);
             edit.commit();
         }
 
