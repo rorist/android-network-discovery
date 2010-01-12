@@ -159,7 +159,7 @@ final public class DiscoverActivity extends Activity {
         // adapter.add("10.0.10.1");
 
         // FIXME:This is a test
-        NativeTask.socket();
+        NativeTask.scan();
     }
 
     @Override

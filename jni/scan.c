@@ -94,3 +94,53 @@ void Java_info_lamatricexiste_network_Utils_NativeTask_socket( JNIEnv* env, jobj
     start();
 }
 
+int main(const int argc, const char *argv[]) {    
+    char buf[BUFFER_MAX];
+    struct sockaddr addr;
+    socklen_t alen;
+    int lsocket, s, count;
+
+    lsocket = android_get_control_socket(SOCKET_PATH);
+    if (lsocket < 0) {
+        LOGE("Failed to get socket from environment: %s\n", strerror(errno));
+        exit(1);
+    }
+    if (listen(lsocket, 5)) {
+        LOGE("Listen on socket failed: %s\n", strerror(errno));
+        exit(1);
+    }
+    fcntl(lsocket, F_SETFD, FD_CLOEXEC);
+
+    for (;;) {
+        alen = sizeof(addr);
+        s = accept(lsocket, &addr, &alen);
+        if (s < 0) {
+            LOGE("Accept failed: %s\n", strerror(errno));
+            continue;
+        }
+        fcntl(s, F_SETFD, FD_CLOEXEC);
+
+        LOGI("new connection\n");
+        for (;;) {
+            unsigned short count;
+            if (readx(s, &count, sizeof(count))) {
+                LOGE("failed to read size\n");
+                break;
+            }
+            if ((count < 1) || (count >= BUFFER_MAX)) {
+                LOGE("invalid size %d\n", count);
+                break;
+            }
+            if (readx(s, buf, count)) {
+                LOGE("failed to read command\n");
+                break;
+            }
+            buf[count] = 0;
+            if (execute(s, buf)) break;
+        }
+        LOGI("closing connection\n");
+        close(s);
+    }
+
+    return 0;
+}
