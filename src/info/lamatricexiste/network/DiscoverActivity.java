@@ -5,6 +5,7 @@ import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
+import info.lamatricexiste.network.Utils.NativeTask;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
@@ -31,7 +32,6 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,13 +66,6 @@ final public class DiscoverActivity extends Activity {
     private ConnectivityManager connMgr;
     private DiscoveryUnicast mDiscoveryTask = null;
     private Context ctxt;
-
-    // FIXME: This is a test
-    public native String stringFromJNI();
-
-    static { 
-        System.loadLibrary("socket-test");
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -166,7 +159,7 @@ final public class DiscoverActivity extends Activity {
         // adapter.add("10.0.10.1");
 
         // FIXME:This is a test
-        Log.v(TAG, "JNI=" + stringFromJNI());
+        NativeTask.socket();
     }
 
     @Override
