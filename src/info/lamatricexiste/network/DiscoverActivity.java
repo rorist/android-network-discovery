@@ -31,6 +31,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,6 +66,13 @@ final public class DiscoverActivity extends Activity {
     private ConnectivityManager connMgr;
     private DiscoveryUnicast mDiscoveryTask = null;
     private Context ctxt;
+
+    // FIXME: This is a test
+    public native String stringFromJNI();
+
+    static { 
+        System.loadLibrary("socket-test");
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -156,6 +164,9 @@ final public class DiscoverActivity extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
+
+        // FIXME:This is a test
+        Log.v(TAG, "JNI=" + stringFromJNI());
     }
 
     @Override
@@ -344,6 +355,7 @@ final public class DiscoverActivity extends Activity {
         }
 
         // 3G(connected) -> Wifi(connected)
+        // TODO: Support Ethernet, with ConnectivityManager.TYPE_ETHER=3
         final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (network_info != null) {
             NetworkInfo.State state = network_info.getState();
