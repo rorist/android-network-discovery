@@ -1,12 +1,11 @@
 #!/bin/sh
 PATH_TO_APP='/home/rorist/workspace/SmbExploit'
-PATH_TO_NDK='/opt/android-ndk'
-APP_NAME='net'
+PATH_TO_SRC='/opt/android-src'
 
-cd $PATH_TO_NDK
-if [ -d "apps/$APP_NAME"! ]; then
-  mkdir apps/$APP_NAME
-  ln -s $PATH_TO_APP/jni/Application.mk apps/$APP_NAME/.
-fi
-make APP=$APP_NAME -B
-cd -
+cd $PATH_TO_SRC
+rm -rf frameworks/base/cmds/scand
+cp -R $PATH_TO_APP/jni frameworks/base/cmds/scand
+make scand
+cp out/target/product/generic/system/bin/scand $PATH_TO_APP/assets/scand
+cd $PATH_TO_APP
+adb push assets/scand /system/bin/scand

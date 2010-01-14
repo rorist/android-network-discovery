@@ -5,16 +5,21 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := libscan
 LOCAL_SRC_FILE  := libscan.c
-#LOCAL_LDLIBS    := -llog
+LOCAL_LDLIBS    := -llog
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
+#include $(BUILD_SHARED_LIBRARY)
 
 # Scan daemon
-#include $(CLEAR_VARS)
+include $(CLEAR_VARS)
 
-#LOCAL_SRC_FILES         := scand.c
+LOCAL_MODULE            := scand
+LOCAL_SRC_FILES         := scand.c
+LOCAL_STATIC_LIBRARIES  := libscan
 #LOCAL_SHARED_LIBRARIES  := libscan
-#LOCAL_LDLIBS            := -llog
-#LOCAL_MODULE            := scand
 
-#include $(BUILD_EXECUTABLE)
+LOCAL_C_INCLUDES := $(call include-path-for, system-core)/cutils
+LOCAL_SHARED_LIBRARIES := libcutils
+
+
+include $(BUILD_EXECUTABLE)

@@ -1,0 +1,22 @@
+## Build scand
+1. Get AOSP sources
+2. Setup your environment (see below for Ubuntu 9.10)
+3. link scand in the sources: ln -s /path/to/networkdiscovery/jni /path/to/aosp/frameworks/base/cmds/scand
+4. cd /path/to/aosp; . build/envsetup.sh
+5. make scand
+
+## Build under Ubuntu 9.10 with Java 5
+
+1. add jaunty repo to /etc/apt/sources.list
+  deb http://us.archive.ubuntu.com/ubuntu/ jaunty main restricted universe multiverse
+  deb-src http://us.archive.ubuntu.com/ubuntu/ jaunty main restricted universe multiverse
+  
+2. Update and Install java 5
+  sudo apt-get update & sudo apt-get install sun-java5-jdk
+  
+3. Use java 5
+  sudo update-java-alternatives -s java-1.5.0-sun
+  
+4. Comment jaunty repo in your sources.list
+5. Follow instructions according to your arch
+  http://source.android.com/download#TOC-Setting-up-your-machine
