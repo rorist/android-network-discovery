@@ -124,6 +124,13 @@ done:
 }
 
 int main(const int argc, const char *argv[]) {
+    // Daemonize
+    int i = fork();
+    if (i<0) exit(1); /* fork error */
+    if (i>0) exit(0); /* parent exits */
+    //setsid();
+    
+    //main    
     char buf[BUFFER_MAX];
     struct sockaddr addr;
     socklen_t alen;
@@ -131,6 +138,8 @@ int main(const int argc, const char *argv[]) {
 
     struct sockaddr_un local, remote;
     char str[100];
+    
+    LOGI("Start program");
 
     if ((lsocket = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         LOGE("create socket");

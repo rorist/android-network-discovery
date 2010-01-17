@@ -157,9 +157,8 @@ final public class DiscoverActivity extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-
-        // FIXME:This is a test
-        NativeTask.scan();
+        NativeTask nt = new NativeTask(ctxt);
+        nt.install();
     }
 
     @Override
