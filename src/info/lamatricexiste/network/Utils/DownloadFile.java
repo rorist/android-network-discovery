@@ -30,27 +30,23 @@ public class DownloadFile {
     public DownloadFile(String url, String dst) throws IOException {
         Log.i(TAG, "Downloading " + url + " to " + dst);
         httpclient = new DefaultHttpClient();
-
-        Log.d(TAG, "Opening url " + url);
         InputStream in = openURL(url);
-
-        Log.d(TAG, "Opening destination file " + dst);
         OutputStream out = new FileOutputStream(dst);
-
-        Log.d(TAG, "Writing file");
         final ReadableByteChannel inputChannel = Channels.newChannel(in);
         final WritableByteChannel outputChannel = Channels.newChannel(out);
 
-        fastChannelCopy(inputChannel, outputChannel);
-
-        inputChannel.close();
-        outputChannel.close();
-
-        Log.d(TAG, "Closing HTTP connection");
-        in.close();
-
-        Log.d(TAG, "Closing file");
-        out.close();
+        try {
+            fastChannelCopy(inputChannel, outputChannel);
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (NullPointerException e) {
+            Log.e(TAG, e.getMessage());
+        } finally {
+            inputChannel.close();
+            outputChannel.close();
+            in.close();
+            out.close();
+        }
     }
 
     private InputStream openURL(String url) {
@@ -73,16 +69,16 @@ public class DownloadFile {
                 return entity.getContent();
             }
         } catch (ClientProtocolException e) {
-            Log.e("REST", "There was a protocol based error", e);
+            Log.e(TAG, "There was a protocol based error", e);
         } catch (IOException e) {
-            Log.e("REST", "There was an IO Stream related error", e);
+            Log.e(TAG, "There was an IO Stream related error", e);
         }
 
         return null;
     }
 
-    public static void fastChannelCopy(final ReadableByteChannel src,
-            final WritableByteChannel dest) throws IOException {
+    public static void fastChannelCopy(final ReadableByteChannel src, final WritableByteChannel dest)
+            throws IOException, NullPointerException {
         if (src != null) {
             final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
             while (src.read(buffer) != -1) {
