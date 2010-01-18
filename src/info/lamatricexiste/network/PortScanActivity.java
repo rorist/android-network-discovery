@@ -71,6 +71,13 @@ final public class PortScanActivity extends TabActivity {
         cnt_open = (ports_open == null) ? 0 : ports_open.size();
         cnt_closed = (ports_closed == null) ? 0 : ports_closed.size();
 
+        // Adapt title size
+        // DisplayMetrics metrics = new DisplayMetrics();
+        // getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        // ((TextView) findViewById(R.id.host))
+        // .setWidth((int) (metrics.widthPixels - (2 * 104 * (metrics.density /
+        // 160))));
+
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
             ((TextView) findViewById(R.id.host)).setText(extra.getString(HostBean.EXTRA_HOSTNAME));
@@ -292,7 +299,7 @@ final public class PortScanActivity extends TabActivity {
 
         private void addPort(ArrayList<Long> ports, PortsAdapter adapter, Long value) {
             ports.add(value);
-            Collections.sort(ports); //FIXME: Bad bad bad, cause GC to collect
+            Collections.sort(ports); // FIXME: Bad bad bad, cause GC to collect
             adapter.insert("placeholder", ports.indexOf(value));
         }
     }
