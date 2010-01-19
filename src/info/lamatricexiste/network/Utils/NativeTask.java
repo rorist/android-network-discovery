@@ -49,7 +49,7 @@ public class NativeTask {
 
     private void execute() {
         try {
-            Runtime.getRuntime().exec("su -c " + APP_PATH + DAEMON);
+            Runtime.getRuntime().exec("su -c daemonize " + APP_PATH + DAEMON);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }

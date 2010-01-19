@@ -5,7 +5,6 @@ import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
-import info.lamatricexiste.network.Utils.NativeTask;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
