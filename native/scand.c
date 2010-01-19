@@ -1,3 +1,5 @@
+//TODO: http://www-theorie.physik.unizh.ch/~dpotter/howto/daemonize
+
 // from AOSP, frameworks/base/cmds/installd/installd.*
 
 #include "libscan.h"
@@ -124,10 +126,11 @@ done:
 }
 
 int main(const int argc, const char *argv[]) {
-    // Daemonize
-    int i = fork();
-    if (i<0) exit(1); /* fork error */
-    if (i>0) exit(0); /* parent exits */
+    // Daemonize: Now handled by the daemonize command
+    //int i;
+    //i = fork();
+    //if (i<0) exit(1); /* fork error */
+    //if (i>0) exit(0); /* parent exits */
     //setsid();
     
     //main    
