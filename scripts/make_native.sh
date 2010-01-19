@@ -7,5 +7,4 @@ rm -rf frameworks/base/cmds/scand
 cp -R $PATH_TO_APP/native frameworks/base/cmds/scand
 make scand
 cp out/target/product/generic/system/bin/scand $PATH_TO_APP/assets/scand
-cd $PATH_TO_APP
-adb push assets/scand /system/bin/scand
+adb push $PATH_TO_APP/assets/scand /system/bin/scand
