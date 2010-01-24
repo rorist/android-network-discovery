@@ -3,6 +3,7 @@ package info.lamatricexiste.network.Utils;
 import info.lamatricexiste.network.DiscoverActivity;
 import info.lamatricexiste.network.R;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,12 +29,6 @@ public class NativeTask extends AsyncTask<Void, Void, Void> {
         mDiscover = new WeakReference<DiscoverActivity>(discover);
         final DiscoverActivity d = mDiscover.get();
         path = d.getFilesDir().getParent() + "/bin/";
-
-        try {
-            System.loadLibrary("command");
-        } catch (UnsatisfiedLinkError e) {
-            Log.e(TAG, e.getMessage());
-        }
     }
 
     @Override
@@ -46,9 +41,12 @@ public class NativeTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         String file = path + DAEMON;
-        Log.d(TAG, "command returned: " + runCommand(file));
-        // String[] cmds = { "chmod 755 " + file, "chown root " + file, file };
-        // execute(cmds);
+        String[] cmds = { "chmod 755 " + file, "chown root " + file, file };
+        try {
+            execute(cmds);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
         return null;
     }
 
@@ -72,44 +70,16 @@ public class NativeTask extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    // private void setPermissions(String file) {
-    // try {
-    // Runtime.getRuntime().exec("chmod 0755 " + file);
-    // } catch (IOException e) {
-    // Log.e(TAG + ":setPermissions", e.getMessage());
-    // }
-    // }
-
-    // private void execute(String command) {
-    // try {
-    // Runtime.getRuntime().exec(command);
-    // } catch (SecurityException e) {
-    // Log.e(TAG + ":execute", e.getMessage());
-    // } catch (IOException e) {
-    // Log.e(TAG + "execute", e.getMessage());
-    // }
-    // // Check if the process is running fine
-    // }
-
-    // Found here: http://code.google.com/p/market-enabler/wiki/ShellCommands
-    // private List<String> execute(String[] commands) {
-    // List<String> res = new ArrayList<String>();
-    // try {
-    // Process process = Runtime.getRuntime().exec("su");
-    // DataOutputStream os = new DataOutputStream(process.getOutputStream());
-    // DataInputStream osRes = new DataInputStream(process.getInputStream());
-    // for (String single : commands) {
-    // os.writeBytes(single + "\n");
-    // os.flush();
-    // res.add(osRes.readLine());
-    // Log.i(TAG, res.get(res.size()));
-    // }
-    // os.writeBytes("exit\n");
-    // os.flush();
-    // process.waitFor();
-    // } catch (IOException e) {
-    // } catch (InterruptedException e) {
-    // }
-    // return res;
-    // }
+    void execute(String[] cmds) throws Exception {
+        Process process = Runtime.getRuntime().exec("su");
+        DataOutputStream os = new DataOutputStream(process.getOutputStream());
+        for (String cmd : cmds) {
+            Log.v(TAG, "run=" + cmd);
+            os.writeBytes(cmd + "\n");
+        }
+        os.writeBytes("exit\n");
+        os.flush();
+        os.close();
+        process.waitFor();
+    }
 }
