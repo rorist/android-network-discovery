@@ -52,9 +52,6 @@ public class DownloadFile {
     private InputStream openURL(String url) {
         HttpGet httpget = new HttpGet(url);
         HttpResponse response;
-
-        Log.i(TAG, "GET " + url);
-
         try {
             try {
                 response = httpclient.execute(httpget);

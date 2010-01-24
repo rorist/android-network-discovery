@@ -1,6 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
-# Library
+# Static library
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := libscan
@@ -20,6 +20,5 @@ LOCAL_STATIC_LIBRARIES  := libscan
 
 LOCAL_C_INCLUDES := $(call include-path-for, system-core)/cutils
 LOCAL_SHARED_LIBRARIES := libcutils
-
 
 include $(BUILD_EXECUTABLE)

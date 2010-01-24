@@ -127,11 +127,14 @@ done:
 
 int main(const int argc, const char *argv[]) {
     // Daemonize: Now handled by the daemonize command
-    //int i;
-    //i = fork();
-    //if (i<0) exit(1); /* fork error */
-    //if (i>0) exit(0); /* parent exits */
-    //setsid();
+    LOGI("Start process");
+    pid_t i;
+    i = fork();
+    if (i<0) exit(1); /* fork error */
+    if (i>0) exit(0); /* parent exits */
+    setsid();
+    
+    LOGI("Start child");
     
     //main    
     char buf[BUFFER_MAX];
