@@ -14,10 +14,9 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
-public class NativeTask extends AsyncTask<Void, Void, Void> {
+public class NativeTask {
     private final String TAG = "NativeTask";
     private final String DAEMON = "scand";
     private String path;
@@ -31,23 +30,14 @@ public class NativeTask extends AsyncTask<Void, Void, Void> {
         path = d.getFilesDir().getParent() + "/bin/";
     }
 
-    @Override
-    protected void onPreExecute() {
+    public void install() {
         createDir(path);
         copyFile(path + DAEMON, R.raw.scand);
-        // setPermissions(path + DAEMON);
+        execute(new String[] { "chmod 755 " + path + DAEMON, "chown root " + path + DAEMON });
     }
 
-    @Override
-    protected Void doInBackground(Void... params) {
-        String file = path + DAEMON;
-        String[] cmds = { "chmod 755 " + file, "chown root " + file, file };
-        try {
-            execute(cmds);
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-        return null;
+    public void startDaemon() {
+        execute(new String[] { path + DAEMON });
     }
 
     private void createDir(String dirname) {
@@ -70,16 +60,26 @@ public class NativeTask extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    void execute(String[] cmds) throws Exception {
-        Process process = Runtime.getRuntime().exec("su");
-        DataOutputStream os = new DataOutputStream(process.getOutputStream());
-        for (String cmd : cmds) {
-            Log.v(TAG, "run=" + cmd);
-            os.writeBytes(cmd + "\n");
-        }
-        os.writeBytes("exit\n");
-        os.flush();
-        os.close();
-        process.waitFor();
+    void execute(final String[] cmds) {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Process process = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(process.getOutputStream());
+                    for (String cmd : cmds) {
+                        Log.v(TAG, "run=" + cmd);
+                        os.writeBytes(cmd + "\n");
+                    }
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    os.close();
+                    process.waitFor();
+                } catch (IOException e) {
+                    Log.e(TAG + ":execute", e.getMessage());
+                } catch (InterruptedException e) {
+                    Log.e(TAG + ":execute", e.getMessage());
+                }
+            }
+        });
     }
 }
