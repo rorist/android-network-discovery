@@ -2,7 +2,7 @@ package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.HostDiscovery.DiscoveryUnicast;
 import info.lamatricexiste.network.HostDiscovery.HostBean;
-import info.lamatricexiste.network.Utils.NativeTask;
+import info.lamatricexiste.network.Utils.RootDaemon;
 
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
@@ -158,7 +158,7 @@ final public class DiscoverActivity extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-        NativeTask nt = new NativeTask(this);
+        RootDaemon nt = new RootDaemon(this);
         nt.install();
         nt.startDaemon();
     }

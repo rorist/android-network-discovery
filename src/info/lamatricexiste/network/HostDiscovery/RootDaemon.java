@@ -16,15 +16,15 @@ import java.nio.channels.WritableByteChannel;
 
 import android.util.Log;
 
-public class NativeTask {
-    private final String TAG = "NativeTask";
+public class RootDaemon {
+    private final String TAG = "RootDaemon";
     private final String DAEMON = "scand";
     private String path;
     private WeakReference<DiscoverActivity> mDiscover;
 
     public static native int runCommand(String command);
 
-    public NativeTask(DiscoverActivity discover) {
+    public RootDaemon(DiscoverActivity discover) {
         mDiscover = new WeakReference<DiscoverActivity>(discover);
         final DiscoverActivity d = mDiscover.get();
         path = d.getFilesDir().getParent() + "/bin/";
