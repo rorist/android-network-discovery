@@ -60,7 +60,7 @@ public class RootDaemon {
         }
     }
 
-    void execute(final String[] cmds) {
+    private void execute(final String[] cmds) {
         new Thread(new Runnable() {
             public void run() {
                 try {

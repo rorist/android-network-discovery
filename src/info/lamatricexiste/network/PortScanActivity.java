@@ -299,8 +299,9 @@ final public class PortScanActivity extends TabActivity {
 
         private void addPort(ArrayList<Long> ports, PortsAdapter adapter, Long value) {
             ports.add(value);
-            Collections.sort(ports); // FIXME: Bad bad bad, cause GC to collect
-            adapter.insert("placeholder", ports.indexOf(value));
+            adapter.add("placeholder");
+            //Collections.sort(ports); // FIXME: cause GC to collect
+            //adapter.insert("placeholder", ports.indexOf(value));
         }
     }
 
