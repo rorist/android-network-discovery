@@ -2,8 +2,7 @@ package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.HostDiscovery.DiscoveryUnicast;
 import info.lamatricexiste.network.HostDiscovery.HostBean;
-import info.lamatricexiste.network.Utils.RootDaemon;
-
+import info.lamatricexiste.network.HostDiscovery.RootDaemon;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
@@ -67,6 +66,7 @@ final public class DiscoverActivity extends Activity {
     private ConnectivityManager connMgr;
     private DiscoveryUnicast mDiscoveryTask = null;
     private Context ctxt;
+    private RootDaemon mRootDaemon;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -158,9 +158,13 @@ final public class DiscoverActivity extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-        RootDaemon nt = new RootDaemon(this);
-        nt.install();
-        nt.startDaemon();
+        mRootDaemon = new RootDaemon(this);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mRootDaemon.start();
     }
 
     @Override
@@ -182,6 +186,7 @@ final public class DiscoverActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        mRootDaemon.killDaemon();
     }
 
     @Override

@@ -1,7 +1,8 @@
-package info.lamatricexiste.network.Utils;
+package info.lamatricexiste.network.HostDiscovery;
 
 import info.lamatricexiste.network.DiscoverActivity;
 import info.lamatricexiste.network.R;
+import info.lamatricexiste.network.Utils.DownloadFile;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -22,21 +23,33 @@ public class RootDaemon {
     private String path;
     private WeakReference<DiscoverActivity> mDiscover;
 
-    public static native int runCommand(String command);
-
     public RootDaemon(DiscoverActivity discover) {
         mDiscover = new WeakReference<DiscoverActivity>(discover);
         final DiscoverActivity d = mDiscover.get();
         path = d.getFilesDir().getParent() + "/bin/";
     }
 
-    public void install() {
-        createDir(path);
-        copyFile(path + DAEMON, R.raw.scand);
-        execute(new String[] { "chmod 755 " + path + DAEMON, "chown root " + path + DAEMON });
+    public void start() {
+        File daemon = new File(path + DAEMON);
+        if (daemon.exists() == false) {
+            installAndStartDaemon();
+        } else {
+            startDaemon();
+        }
     }
 
-    public void startDaemon() {
+    public void killDaemon() {
+        execute(new String[] { "killall -9 " + DAEMON });
+    }
+
+    private void installAndStartDaemon() {
+        createDir(path);
+        copyFile(path + DAEMON, R.raw.scand);
+        execute(new String[] { "chmod 755 " + path + DAEMON, "chown root " + path + DAEMON,
+                path + DAEMON });
+    }
+
+    private void startDaemon() {
         execute(new String[] { path + DAEMON });
     }
 
@@ -80,6 +93,6 @@ public class RootDaemon {
                     Log.e(TAG + ":execute", e.getMessage());
                 }
             }
-        });
+        }).start();
     }
 }
