@@ -2,9 +2,9 @@ package info.lamatricexiste.network.HostDiscovery;
 
 import info.lamatricexiste.network.DiscoverActivity;
 import info.lamatricexiste.network.R;
+import info.lamatricexiste.network.Utils.Command;
 import info.lamatricexiste.network.Utils.DownloadFile;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,42 +15,52 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import android.content.Intent;
 import android.util.Log;
 
 public class RootDaemon {
     private final String TAG = "RootDaemon";
     private final String DAEMON = "scand";
-    private String path;
     private WeakReference<DiscoverActivity> mDiscover;
 
     public RootDaemon(DiscoverActivity discover) {
         mDiscover = new WeakReference<DiscoverActivity>(discover);
-        final DiscoverActivity d = mDiscover.get();
-        path = d.getFilesDir().getParent() + "/bin/";
     }
 
     public void start() {
-        File daemon = new File(path + DAEMON);
-        if (daemon.exists() == false) {
-            installAndStartDaemon();
-        } else {
-            startDaemon();
+        if ((new File(getDir() + DAEMON)).exists() == true) {
+            installDaemon();
+            restart();
+            // return;
         }
+        startDaemon();
     }
 
     public void killDaemon() {
-        execute(new String[] { "killall -9 " + DAEMON });
+        execute("su -c 'killall -9 " + DAEMON + "'");
     }
 
-    private void installAndStartDaemon() {
-        createDir(path);
-        copyFile(path + DAEMON, R.raw.scand);
-        execute(new String[] { "chmod 755 " + path + DAEMON, "chown root " + path + DAEMON,
-                path + DAEMON });
+    private void installDaemon() {
+        createDir(getDir());
+        copyFile(getDir() + DAEMON, R.raw.scand);
+        execute("su -c 'chmod 755 " + getDir() + DAEMON + "'");
+        execute("su -c 'chown root " + getDir() + DAEMON + "'");
     }
 
     private void startDaemon() {
-        execute(new String[] { path + DAEMON });
+        execute("su -c " + getDir() + DAEMON);
+    }
+
+    private void restart() {
+        final DiscoverActivity d = mDiscover.get();
+        Intent intent = d.getIntent();
+        d.startActivity(intent);
+        // d.finish();
+    }
+
+    private String getDir() {
+        final DiscoverActivity d = mDiscover.get();
+        return d.getFilesDir().getParent() + "/bin/";
     }
 
     private void createDir(String dirname) {
@@ -73,26 +83,30 @@ public class RootDaemon {
         }
     }
 
-    private void execute(final String[] cmds) {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Process process = Runtime.getRuntime().exec("su");
-                    DataOutputStream os = new DataOutputStream(process.getOutputStream());
-                    for (String cmd : cmds) {
-                        Log.v(TAG, "run=" + cmd);
-                        os.writeBytes(cmd + "\n");
-                    }
-                    os.writeBytes("exit\n");
-                    os.flush();
-                    os.close();
-                    process.waitFor();
-                } catch (IOException e) {
-                    Log.e(TAG + ":execute", e.getMessage());
-                } catch (InterruptedException e) {
-                    Log.e(TAG + ":execute", e.getMessage());
-                }
-            }
-        }).start();
+    private void execute(final String cmd) {
+        int ret = Command.runCommand(cmd);
+        Log.i(TAG, "cmd=" + cmd + ", ret=" + ret);
     }
+    // private void execute(final String[] cmds) {
+    // new Thread(new Runnable() {
+    // public void run() {
+    // try {
+    // Process process = Runtime.getRuntime().exec("su");
+    // DataOutputStream os = new DataOutputStream(process.getOutputStream());
+    // for (String cmd : cmds) {
+    // Log.v(TAG, "run=" + cmd);
+    // os.writeBytes(cmd + "\n");
+    // }
+    // os.writeBytes("exit\n");
+    // os.flush();
+    // os.close();
+    // process.waitFor();
+    // } catch (IOException e) {
+    // Log.e(TAG + ":execute", e.getMessage());
+    // } catch (InterruptedException e) {
+    // Log.e(TAG + ":execute", e.getMessage());
+    // }
+    // }
+    // }).start();
+    // }
 }

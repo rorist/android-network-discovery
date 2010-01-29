@@ -168,6 +168,12 @@ final public class DiscoverActivity extends Activity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        mRootDaemon.killDaemon();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter();
@@ -181,12 +187,6 @@ final public class DiscoverActivity extends Activity {
     public void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mRootDaemon.killDaemon();
     }
 
     @Override
