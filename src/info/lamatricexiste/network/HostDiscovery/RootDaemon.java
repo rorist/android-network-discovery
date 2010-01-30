@@ -15,7 +15,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-import android.content.Intent;
 import android.util.Log;
 
 public class RootDaemon {
@@ -28,33 +27,33 @@ public class RootDaemon {
     }
 
     public void start() {
-        if ((new File(getDir() + DAEMON)).exists() == true) {
-            installDaemon();
+        String dir = getDir();
+        Log.d(TAG, "dir=" + dir); // FIXME: Remove me after debug
+        if ((new File(dir + DAEMON)).exists() == false) {
+            installDaemon(dir);
             restart();
-            // return;
+            return;
         }
-        startDaemon();
+        startDaemon(dir);
     }
 
     public void killDaemon() {
         execute("su -c 'killall -9 " + DAEMON + "'");
     }
 
-    private void installDaemon() {
-        createDir(getDir());
-        copyFile(getDir() + DAEMON, R.raw.scand);
-        execute("su -c 'chmod 755 " + getDir() + DAEMON + "'");
-        execute("su -c 'chown root " + getDir() + DAEMON + "'");
+    private void installDaemon(String dir) {
+        createDir(dir);
+        copyFile(dir + DAEMON, R.raw.scand);
+        execute("su -c 'chmod 755 " + dir + DAEMON + "; chown root " + dir + DAEMON + "'");
     }
 
-    private void startDaemon() {
-        execute("su -c " + getDir() + DAEMON);
+    private void startDaemon(String dir) {
+        execute("su -c " + dir + DAEMON);
     }
 
     private void restart() {
         final DiscoverActivity d = mDiscover.get();
-        Intent intent = d.getIntent();
-        d.startActivity(intent);
+        d.startActivity(d.getIntent());
         // d.finish();
     }
 
