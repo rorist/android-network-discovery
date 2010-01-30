@@ -8,7 +8,7 @@
         android:id="@+id/list"
         android:layout_width="0dip"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:layout_gravity="center_vertical"
         android:paddingLeft="12dip"
         android:textSize="12dip"
@@ -30,13 +30,11 @@
     <!--        android:focusableInTouchMode="false" />-->
     <Button
         android:id="@+id/list_info"
-        android:layout_gravity="center_vertical"
         android:text="Info"
         android:drawableLeft="@drawable/info"
         style="@style/ButtonList" />
     <Button
         android:id="@+id/list_port"
-        android:layout_gravity="center_vertical"
         android:text=" Ports"
         android:drawableLeft="@drawable/firewall"
         style="@style/ButtonList" />

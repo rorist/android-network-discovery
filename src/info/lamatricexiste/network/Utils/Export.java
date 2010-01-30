@@ -34,6 +34,7 @@ public class Export {
             return true;
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }

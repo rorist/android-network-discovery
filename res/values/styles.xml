@@ -18,8 +18,10 @@
     </style>
     <style name="ButtonList" parent="@style/Button">
         <item name="android:textSize">12sp</item>
-        <item name="android:layout_width">68dip</item>
+        <item name="android:layout_width">0dip</item>
         <item name="android:layout_height">38dip</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_gravity">center_vertical</item>
     </style>
     <style name="ButtonConnect" parent="@style/Button">
         <item name="android:textSize">12sp</item>
