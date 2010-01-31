@@ -33,9 +33,10 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
     private long size = 0;
     private WeakReference<DiscoverActivity> mDiscover;
     private Reachable mReachable;
-    private RateControl mRateControl;
     private ExecutorService mPool;
     private SharedPreferences prefsMgr;
+
+    protected RateControl mRateControl;
 
     public DiscoveryUnicast(DiscoverActivity discover) {
         mDiscover = new WeakReference<DiscoverActivity>(discover);
@@ -159,7 +160,7 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
         final DiscoverActivity discover = mDiscover.get();
         if (!isCancelled()) {
             if (item[0] != null) {
-                discover.addHost(item[0]);
+                discover.addHost(item[0], mRateControl.getRate());
             }
             hosts_done++;
             discover.setProgress((int) (hosts_done * 10000 / size));

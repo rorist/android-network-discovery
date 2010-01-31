@@ -12,16 +12,16 @@ public class RateControl {
 
     // TODO: Calculate a rounded up value from experiments in different networks
     private final String TAG = "RateControl";
-    private final double RATE_BASE = 1000;
-    private double rate = RATE_BASE; // Slow start
+    private final long RATE_BASE = 1000;
+    private long rate = RATE_BASE; // Slow start
     private String[] indicator;
     private boolean indicator_discovered = false;
 
-    public double getRate() {
+    public long getRate() {
         return rate;
     }
 
-    public void setRate(double rate) {
+    public void setRate(long rate) {
         this.rate = rate;
     }
 
@@ -38,20 +38,21 @@ public class RateControl {
     }
 
     public void adaptRate() {
-        double response_time = 0;
+        long response_time = 0;
         // TODO: Use an indicator with a port, calculate java round trip time
         // if (indicator.length > 1) {
         // Log.v(TAG, "use a socket here, port=" + getIndicator()[1]);
         // } else {
         indicator_discovered = true;
         if ((response_time = getAvgResponseTime(getIndicator()[0], 3)) > 0) {
-            setRate(response_time);
-            Log.v(TAG, "rate=" + response_time);
+            // Add 30% to the response time
+            setRate(response_time + (response_time * 3 / 10));
+            Log.v(TAG, "rate=" + getRate());
         }
         // }
     }
 
-    private double getAvgResponseTime(String host, int count) {
+    private long getAvgResponseTime(String host, int count) {
         try {
             if ((new File("/system/bin/ping")).exists() == true) {
                 String line;
@@ -64,7 +65,7 @@ public class RateControl {
                                     "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+\\/[0-9\\.]+ ms$")
                             .matcher(line);
                     if (matcher.matches()) {
-                        return Float.parseFloat(matcher.group(1));
+                        return Long.parseLong(matcher.group(1));
                     }
                 }
             }

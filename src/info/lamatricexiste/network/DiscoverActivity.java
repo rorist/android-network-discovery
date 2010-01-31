@@ -2,7 +2,6 @@ package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.HostDiscovery.DiscoveryUnicast;
 import info.lamatricexiste.network.HostDiscovery.HostBean;
-import info.lamatricexiste.network.HostDiscovery.RootDaemon;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
@@ -66,7 +65,8 @@ final public class DiscoverActivity extends Activity {
     private ConnectivityManager connMgr;
     private DiscoveryUnicast mDiscoveryTask = null;
     private Context ctxt;
-    private RootDaemon mRootDaemon;
+
+    // private RootDaemon mRootDaemon;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -158,19 +158,19 @@ final public class DiscoverActivity extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-        mRootDaemon = new RootDaemon(this);
+        // mRootDaemon = new RootDaemon(this);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        mRootDaemon.start();
+        // mRootDaemon.start();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mRootDaemon.killDaemon();
+        // mRootDaemon.killDaemon();
     }
 
     @Override
@@ -227,8 +227,8 @@ final public class DiscoverActivity extends Activity {
                     Bundle extra = data.getExtras();
                     int position = extra.getInt(HostBean.EXTRA_POSITION);
                     HostBean host = hosts.get(position);
-                    host.setPortsOpen(extra.getLongArray(HostBean.EXTRA_PORTSO));
-                    host.setPortsClosed(extra.getLongArray(HostBean.EXTRA_PORTSC));
+                    host.setPortsOpen(extra.getIntArray(HostBean.EXTRA_PORTSO));
+                    host.setPortsClosed(extra.getIntArray(HostBean.EXTRA_PORTSC));
                     // OS Fingerprint check
                     // host.setOs(OsFingerprint.finger(extra.getLongArray(HostBean.EXTRA_)));
                 }
@@ -274,6 +274,7 @@ final public class DiscoverActivity extends Activity {
                     if (wifiConnected() == false) {
                         intent.putExtra("wifiDisabled", true);
                     }
+                    intent.putExtra(HostBean.EXTRA_TIMEOUT, (int) host.getResponseTime());
                     intent.putExtra(HostBean.EXTRA_POSITION, position);
                     intent.putExtra(HostBean.EXTRA_HOST, host.getIpAddress());
                     intent.putExtra(HostBean.EXTRA_HOSTNAME, host.getHostname());
@@ -430,7 +431,7 @@ final public class DiscoverActivity extends Activity {
         hosts = new ArrayList<HostBean>();
     }
 
-    public void addHost(String addr) {
+    public void addHost(String addr, long timeout) {
         String haddr = mHardwareAddress.getHardwareAddress(addr);
         if (!hardwareAddressAlreadyExists(haddr)) {
             HostBean host = new HostBean();
@@ -438,6 +439,7 @@ final public class DiscoverActivity extends Activity {
             host.setNicVendor(mHardwareAddress.getNicVendor(ctxt, haddr));
             host.setIpAddress(addr);
             host.setPosition(hosts.size());
+            host.setResponseTime(timeout);
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
                 try {
                     host.setHostname((InetAddress.getByName(addr)).getCanonicalHostName());

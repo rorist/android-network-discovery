@@ -11,8 +11,8 @@ package info.lamatricexiste.network.HostDiscovery;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -22,14 +22,15 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.util.SparseArray;
 
-public class PortScan extends AsyncTask<Void, Long, Void> {
+public class PortScan extends AsyncTask<Void, Integer, Void> {
 
     private final String TAG = "PortScan";
-    private final int TIMEOUT_SELECT = 500;
-    private final int TIMEOUT_SOCKET = 1500;
+    private final int TIMEOUT_SELECT = 100;
     private final int SCAN_RATE = 0;
+    private int TIMEOUT_SOCKET = 1000;
     private int step;
     private int cnt_selected;
+    private long time;
     private Selector selector = null;
 
     protected int port_start;
@@ -41,19 +42,26 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         this.host = host;
     }
 
+    protected PortScan(String host, final int timeout) {
+        this.host = host;
+        TIMEOUT_SOCKET = timeout;
+    }
+
     protected Void doInBackground(Void... params) {
         try {
             step = 127;
             InetAddress ina = InetAddress.getByName(host);
             if (nb_port > step) {
                 for (int i = port_start; i <= port_end - step; i += step + 1) {
+                    time = System.currentTimeMillis();
                     scanPorts(ina, i, i + ((i + step <= port_end - step) ? step : port_end - i));
                 }
             } else {
+                time = System.currentTimeMillis();
                 scanPorts(ina, port_start, port_end);
             }
         } catch (UnknownHostException e) {
-            publishProgress((long) -1, (long) -1);
+            publishProgress((int) -1, (int) -1);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         } catch (InterruptedException e) {
@@ -68,13 +76,53 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         stopSelecting();
     }
 
+    // Borrowed here:
+    // http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
+    private void cancelTimeouts() throws IOException {
+        if ((System.currentTimeMillis() - time) > TIMEOUT_SOCKET) {
+            stopSelecting();
+        }
+    }
+
+    private void stopSelecting() {
+        // Log.d(TAG, "stopSelecting");
+        if (selector != null) {
+            synchronized (selector) {
+                if (selector.isOpen()) {
+                    // Force invalidate keys
+                    Iterator<SelectionKey> iterator = selector.keys().iterator();
+                    while (iterator.hasNext()) {
+                        publishProgress(0, -2);
+                        finishKey((SelectionKey) iterator.next());
+                    }
+                    // Close the selector
+                    try {
+                        selector.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    private void finishKey(SelectionKey key) {
+        synchronized (key) {
+            try {
+                ((SocketChannel) key.channel()).close();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } finally {
+                key.cancel();
+                cnt_selected++;
+            }
+        }
+    }
+
     private void scanPorts(InetAddress ina, final int PORT_START, final int PORT_END)
             throws InterruptedException, IOException {
-        // Log.d(TAG, "scanPorts: start=" + PORT_START + ", end=" + PORT_END);
         cnt_selected = 0;
         selector = Selector.open();
         for (int i = PORT_START; i <= PORT_END; i++) {
-            // Log.v(TAG, "port=" + i);
             connectSocket(ina, i);
             Thread.sleep(SCAN_RATE);
         }
@@ -88,12 +136,9 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
         socket = SocketChannel.open();
         socket.configureBlocking(false);
         socket.connect(addr);
-        // Register the Channel with port and timestamp as attachement
-        SparseArray<Long> data = new SparseArray<Long>(2);
-        // TODO: Trouver un autre moyen de stocker ces infos ? car oblige
-        // d'utiliser un long pour le numero de port a cause de ca
-        data.append(0, (long) port);
-        data.append(1, System.currentTimeMillis());
+        // Register the Channel with port as attachement
+        SparseArray<Integer> data = new SparseArray<Integer>(1);
+        data.append(0, port);
         socket.register(selector, SelectionKey.OP_CONNECT, data);
     }
 
@@ -130,7 +175,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
     private void handleConnect(SelectionKey key) {
         try {
             if (((SocketChannel) key.channel()).finishConnect()) { // Open
-                publishProgress(((SparseArray<Long>) key.attachment()).get(0), (long) 1);
+                publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 1);
                 finishKey(key);
                 // Register for reading
                 // SparseArray<Long> data = (SparseArray<Long>)
@@ -142,7 +187,7 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
                 // Log.v(TAG, "port=" + data.get(0));
             }
         } catch (IOException e) { // Closed
-            publishProgress(((SparseArray<Long>) key.attachment()).get(0), (long) 0);
+            publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 0);
             finishKey(key);
         }
     }
@@ -170,52 +215,4 @@ public class PortScan extends AsyncTask<Void, Long, Void> {
     // finishKey(key);
     // }
     // }
-
-    @SuppressWarnings("unchecked")
-    private void cancelTimeouts() throws IOException {
-        // Borrowed here
-        // http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
-        long now = System.currentTimeMillis();
-        for (SelectionKey key : selector.keys()) {
-            SparseArray<Long> map = (SparseArray<Long>) key.attachment();
-            long time = map.get(1);
-            if (key.isValid() && (now - time) > TIMEOUT_SOCKET) {
-                publishProgress(new Long(0));
-                finishKey(key);
-            }
-        }
-    }
-
-    private void stopSelecting() {
-        // Log.d(TAG, "stopSelecting");
-        if (selector != null) {
-            synchronized (selector) {
-                if (selector.isOpen()) {
-                    // Force invalidate keys
-                    Iterator<SelectionKey> iterator = selector.keys().iterator();
-                    while (iterator.hasNext()) {
-                        finishKey((SelectionKey) iterator.next());
-                    }
-                    // Close the selector
-                    try {
-                        selector.close();
-                    } catch (IOException e) {
-                    }
-                }
-            }
-        }
-    }
-
-    private void finishKey(SelectionKey key) {
-        synchronized (key) {
-            try {
-                ((SocketChannel) key.channel()).close();
-            } catch (IOException e) {
-                Log.e(TAG, e.getMessage());
-            } finally {
-                key.cancel();
-                cnt_selected++;
-            }
-        }
-    }
 }

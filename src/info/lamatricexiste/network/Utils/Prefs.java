@@ -28,6 +28,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
     public final static String KEY_PORT_END = "port_end";
     public final static String DEFAULT_PORT_END = "1024";
+    public final static int MAX_PORT_END = 65535;
 
     public static final String KEY_SSH_USER = "ssh_user";
     public static final String DEFAULT_SSH_USER = "root";
@@ -40,6 +41,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
     private Context ctxt;
     private PreferenceScreen preferenceScreen = null;
+    private String before_port_start;
+    private String before_port_end;
 
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -59,6 +62,11 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
                 return false;
             }
         });
+
+        // Before change values
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
+        before_port_start = prefs.getString(KEY_PORT_START, DEFAULT_PORT_START);
+        before_port_end = prefs.getString(KEY_PORT_END, DEFAULT_PORT_END);
     }
 
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
@@ -75,12 +83,18 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
                 .findPreference(KEY_PORT_START);
         EditTextPreference portEndEdit = (EditTextPreference) preferenceScreen
                 .findPreference(KEY_PORT_END);
-        int portStart = Integer.parseInt(portStartEdit.getText());
-        int portEnd = Integer.parseInt(portEndEdit.getText());
-        if (portStart >= portEnd) {
-            portStartEdit.setText(DEFAULT_PORT_START);
-            portEndEdit.setText(DEFAULT_PORT_END);
-            Toast.makeText(ctxt, R.string.preferences_error1, Toast.LENGTH_LONG).show();
+        try {
+            int portStart = Integer.parseInt(portStartEdit.getText());
+            int portEnd = Integer.parseInt(portEndEdit.getText());
+            if (portStart >= portEnd) {
+                portStartEdit.setText(before_port_start);
+                portEndEdit.setText(before_port_end);
+                Toast.makeText(ctxt, R.string.preferences_error1, Toast.LENGTH_LONG).show();
+            }
+        } catch (NumberFormatException e) {
+            portStartEdit.setText(before_port_start);
+            portEndEdit.setText(before_port_end);
+            Toast.makeText(ctxt, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
     }
 

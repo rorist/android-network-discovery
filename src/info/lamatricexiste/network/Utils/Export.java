@@ -70,9 +70,9 @@ public class Export {
                         + host.getHardwareAddress() + "\">\r\n";
                 // Open Ports //TODO: rething the XML structure to include close
                 // and filtered ports
-                long[] ports = host.getPortsOpen();
+                int[] ports = host.getPortsOpen();
                 if (ports != null) {
-                    for (long port : ports) {
+                    for (int port : ports) {
                         xml += "\t\t\t<port>" + port + "/tcp open</port>\r\n";
                     }
                 }

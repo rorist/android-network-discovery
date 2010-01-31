@@ -6,17 +6,18 @@ public class HostBean {
     private String hostname = null;
     private String hardwareAddress = "00:00:00:00:00:00";
     private String nicVendor = "Unknown";
-    private float responseTime = 0;
+    private long responseTime = 0;
     private int position = 0;
-    private long[] portsOpen = null;
-    private long[] portsClosed = null;
+    private int[] portsOpen = null;
+    private int[] portsClosed = null;
     private String os = "Unknown";
     
-    public static String EXTRA_POSITION = "position";
-    public static String EXTRA_HOST = "host";
-    public static String EXTRA_HOSTNAME = "hostname";
-    public static String EXTRA_PORTSO = "ports_o";
-    public static String EXTRA_PORTSC = "ports_c";
+    public static final String EXTRA_POSITION = "position";
+    public static final String EXTRA_HOST = "host";
+    public static final String EXTRA_TIMEOUT = "timeout";
+    public static final String EXTRA_HOSTNAME = "hostname";
+    public static final String EXTRA_PORTSO = "ports_o";
+    public static final String EXTRA_PORTSC = "ports_c";
 
     public String getHardwareAddress() {
         return hardwareAddress;
@@ -45,12 +46,12 @@ public class HostBean {
         nicVendor = vendor;
     }
 
-    public float getResponseTime() {
+    public long getResponseTime() {
         return responseTime;
     }
 
-    public void setResponseTime(float response) {
-        responseTime = response;
+    public void setResponseTime(long timeout) {
+        responseTime = timeout;
     }
 
     public int getPosition() {
@@ -61,19 +62,19 @@ public class HostBean {
         position = pos;
     }
 
-    public long[] getPortsOpen() {
+    public int[] getPortsOpen() {
         return portsOpen;
     }
 
-    public void setPortsOpen(long[] p) {
-        portsOpen = p;
+    public void setPortsOpen(int[] is) {
+        portsOpen = is;
     }
 
-    public long[] getPortsClosed() {
+    public int[] getPortsClosed() {
         return portsClosed;
     }
 
-    public void setPortsClosed(long[] p) {
+    public void setPortsClosed(int[] p) {
         portsClosed = p;
     }
 

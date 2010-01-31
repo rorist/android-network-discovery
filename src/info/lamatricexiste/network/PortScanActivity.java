@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,10 +40,11 @@ final public class PortScanActivity extends TabActivity {
     private ScanPortTask scanPortTask;
     private String host;
     private int position;
+    private int timeout;
     private PortsAdapter adapter_open;
     private PortsAdapter adapter_closed;
-    private ArrayList<Long> ports_open = null;
-    private ArrayList<Long> ports_closed = null;
+    private ArrayList<Integer> ports_open = null;
+    private ArrayList<Integer> ports_closed = null;
     private int cnt_open;
     private int cnt_closed;
     private Button btn_scan;
@@ -50,7 +52,7 @@ final public class PortScanActivity extends TabActivity {
     private Context ctxt;
     private TextView mTabOpen;
     private TextView mTabClosed;
-    private List<Long> openPortsConnect;
+    private List<Integer> openPortsConnect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +67,9 @@ final public class PortScanActivity extends TabActivity {
         Bundle extra = getIntent().getExtras();
         host = extra.getString(HostBean.EXTRA_HOST);
         position = extra.getInt(HostBean.EXTRA_POSITION);
-        ports_open = portsToArrayList(extra.getLongArray(HostBean.EXTRA_PORTSO));
-        ports_closed = portsToArrayList(extra.getLongArray(HostBean.EXTRA_PORTSC));
+        timeout = extra.getInt(HostBean.EXTRA_TIMEOUT);
+        ports_open = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSO));
+        ports_closed = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSC));
         cnt_open = (ports_open == null) ? 0 : ports_open.size();
         cnt_closed = (ports_closed == null) ? 0 : ports_closed.size();
 
@@ -130,11 +133,11 @@ final public class PortScanActivity extends TabActivity {
         list_closed.setAdapter(adapter_closed);
         list_closed.setItemsCanFocus(true);
 
-        openPortsConnect = new ArrayList<Long>(4);
-        openPortsConnect.add((long) 22);
-        openPortsConnect.add((long) 23);
-        openPortsConnect.add((long) 80);
-        openPortsConnect.add((long) 443);
+        openPortsConnect = new ArrayList<Integer>(4);
+        openPortsConnect.add((int) 22);
+        openPortsConnect.add((int) 23);
+        openPortsConnect.add((int) 80);
+        openPortsConnect.add((int) 443);
 
         // Start scan if ports empty
         if (ports_open == null && ports_closed == null) {
@@ -193,7 +196,7 @@ final public class PortScanActivity extends TabActivity {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            final long port = (type == "open") ? ports_open.get(position) : ports_closed
+            final int port = (type == "open") ? ports_open.get(position) : ports_closed
                     .get(position);
 
             ViewHolder holder;
@@ -230,7 +233,8 @@ final public class PortScanActivity extends TabActivity {
         private int progress_current = 0;
 
         ScanPortTask(String host) {
-            super(host);
+            super(host, timeout);
+            Log.v("ScanPortTask", "timeout=" + timeout);
         }
 
         @Override
@@ -250,10 +254,10 @@ final public class PortScanActivity extends TabActivity {
         }
 
         @Override
-        protected void onProgressUpdate(Long... values) {
+        protected void onProgressUpdate(Integer... values) {
             if (!isCancelled()) {
                 if (values.length > 0) {
-                    if (!values[0].equals(new Long(0))) {
+                    if (!values[0].equals(new Integer(0))) {
                         if (values[1] == 1) {
                             addPort(ports_open, adapter_open, values[0]);
                             cnt_open++;
@@ -266,7 +270,6 @@ final public class PortScanActivity extends TabActivity {
                             mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                     cnt_closed));
                         } else if (values[1] == -1) {
-                            // If host is unknown
                             makeToast(R.string.scan_host_unreachable);
                         }
                     }
@@ -296,11 +299,11 @@ final public class PortScanActivity extends TabActivity {
             stopScan();
         }
 
-        private void addPort(ArrayList<Long> ports, PortsAdapter adapter, Long value) {
+        private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, Integer value) {
             ports.add(value);
             adapter.add("placeholder");
-            //Collections.sort(ports); // FIXME: cause GC to collect
-            //adapter.insert("placeholder", ports.indexOf(value));
+            // Collections.sort(ports); // FIXME: cause GC to collect
+            // adapter.insert("placeholder", ports.indexOf(value));
         }
     }
 
@@ -312,8 +315,8 @@ final public class PortScanActivity extends TabActivity {
         adapter_closed.clear();
         cnt_open = 0;
         cnt_closed = 0;
-        ports_open = new ArrayList<Long>();
-        ports_closed = new ArrayList<Long>();
+        ports_open = new ArrayList<Integer>();
+        ports_closed = new ArrayList<Integer>();
         scanPortTask = new ScanPortTask(host);
         scanPortTask.execute();
         btn_scan.setText(R.string.btn_discover_cancel);
@@ -329,8 +332,8 @@ final public class PortScanActivity extends TabActivity {
         // Set result
         Intent intent = new Intent();
         intent.putExtra(HostBean.EXTRA_POSITION, position);
-        intent.putExtra(HostBean.EXTRA_PORTSO, portsToLongArray(ports_open));
-        intent.putExtra(HostBean.EXTRA_PORTSC, portsToLongArray(ports_closed));
+        intent.putExtra(HostBean.EXTRA_PORTSO, portsToIntArray(ports_open));
+        intent.putExtra(HostBean.EXTRA_PORTSC, portsToIntArray(ports_closed));
         setResult(RESULT_OK, intent);
         // Reset scan
         setProgressBarVisibility(false);
@@ -345,40 +348,40 @@ final public class PortScanActivity extends TabActivity {
         });
     }
 
-    private List<String> preparePort(ArrayList<Long> ports, String state) {
+    private List<String> preparePort(ArrayList<Integer> ports, String state) {
         List<String> portsChar = new ArrayList<String>();
         if (ports != null) {
-            for (Long port : ports) {
+            for (Integer port : ports) {
                 portsChar.add(String.valueOf(port) + "/tcp " + state);
             }
         }
         return portsChar;
     }
 
-    private long[] portsToLongArray(ArrayList<Long> ports) {
-        long[] portsArray = new long[ports.size()];
+    private int[] portsToIntArray(ArrayList<Integer> ports) {
+        int[] portsArray = new int[ports.size()];
         for (int i = 0; i < ports.size(); i++) {
             portsArray[i] = ports.get(i);
         }
         return portsArray;
     }
 
-    private ArrayList<Long> portsToArrayList(long[] longArray) {
-        ArrayList<Long> ports = new ArrayList<Long>();
-        if (longArray != null) {
-            for (int i = 0; i < longArray.length; i++) {
-                ports.add(longArray[i]);
+    private ArrayList<Integer> portsToArrayList(int[] intArray) {
+        ArrayList<Integer> ports = new ArrayList<Integer>();
+        if (intArray != null) {
+            for (int i = 0; i < intArray.length; i++) {
+                ports.add(intArray[i]);
             }
             return ports;
         }
         return null;
     }
 
-    private void openPortService(Long port) {
+    private void openPortService(Integer port) {
         String pk = "";
         String action = "";
         Intent intent = null;
-        int portInt = (int) ((long) port);
+        int portInt = (int) ((int) port);
         switch (portInt) {
             case 22:
                 pk = "org.connectbot";
