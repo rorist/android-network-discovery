@@ -19,7 +19,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -234,7 +233,6 @@ final public class PortScanActivity extends TabActivity {
 
         ScanPortTask(String host) {
             super(host, timeout);
-            Log.v("ScanPortTask", "timeout=" + timeout);
         }
 
         @Override

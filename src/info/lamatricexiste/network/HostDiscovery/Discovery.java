@@ -18,50 +18,33 @@ import android.os.AsyncTask;
 import android.os.Vibrator;
 import android.util.Log;
 
-public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
+public class Discovery extends AbstractDiscovery {
 
-    private final String TAG = "DiscoveryUnicast";
+    private final String TAG = "Discovery";
     private final int TIMEOUT_REACH = 1000;
-    private int hosts_done = 0;
-    private int pt_move = 2; // 1=backward 2=forward
+    private final int mRateMult = 50; // Number of hosts between Rate Checks
     private int mRateCnt = 0;
-    // TODO: Adaptiv value or changeable by Prefs
-    private final int mRateMult = 50;
-    private long ip;
-    private long start;
-    private long end;
-    private long size = 0;
-    private WeakReference<DiscoverActivity> mDiscover;
+    private int pt_move = 2; // 1=backward 2=forward
     private Reachable mReachable;
     private ExecutorService mPool;
-    private SharedPreferences prefsMgr;
+    private SharedPreferences mPrefsMgr;
 
-    protected RateControl mRateControl;
-
-    public DiscoveryUnicast(DiscoverActivity discover) {
-        mDiscover = new WeakReference<DiscoverActivity>(discover);
-        mRateControl = new RateControl();
+    public Discovery(DiscoverActivity discover) {
+        super(discover);
         mReachable = new Reachable();
+        mPrefsMgr = discover.prefs;
     }
 
-    @Override
-    protected void onPreExecute() {
-        final DiscoverActivity discover = mDiscover.get();
-        prefsMgr = discover.prefs;
-        NetInfo net = new NetInfo(discover);
-        ip = NetInfo.getUnsignedLongFromIp(net.getIp());
-        int shift = (32 - net.getNetCidr());
-        start = (ip >> shift << shift) + 1;
-        end = (start | ((1 << shift) - 1)) - 1;
-        size = (int) (end - start + 1);
-        discover.setProgress(0);
+    protected void publish(String str) {
+        publishProgress(str);
+        mRateCnt++;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
         Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start + "), end="
                 + NetInfo.getIpFromLongUnsigned(end) + " (" + end + "), length=" + size);
-        mPool = Executors.newFixedThreadPool(Integer.parseInt(prefsMgr.getString(
+        mPool = Executors.newFixedThreadPool(Integer.parseInt(mPrefsMgr.getString(
                 Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
 
         try {
@@ -99,13 +82,14 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
         return null;
     }
 
-    private void launch(long i) {
-        mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
+    @Override
+    protected void onCancelled() {
+        mPool.shutdownNow();
+        super.onCancelled();
     }
 
-    private void publish(String str) {
-        publishProgress(str);
-        mRateCnt++;
+    private void launch(long i) {
+        mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
     }
 
     private class CheckRunnable implements Runnable {
@@ -153,36 +137,5 @@ public class DiscoveryUnicast extends AsyncTask<Void, String, Void> {
             } catch (InterruptedException e) {
             }
         }
-    }
-
-    @Override
-    protected void onProgressUpdate(String... item) {
-        final DiscoverActivity discover = mDiscover.get();
-        if (!isCancelled()) {
-            if (item[0] != null) {
-                discover.addHost(item[0], mRateControl.getRate());
-            }
-            hosts_done++;
-            discover.setProgress((int) (hosts_done * 10000 / size));
-        }
-    }
-
-    @Override
-    protected void onPostExecute(Void unused) {
-        final DiscoverActivity discover = mDiscover.get();
-        if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
-            Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(DiscoverActivity.VIBRATE);
-        }
-        discover.makeToast(R.string.discover_finished);
-        discover.stopDiscovering();
-    }
-
-    @Override
-    protected void onCancelled() {
-        mPool.shutdownNow();
-        final DiscoverActivity discover = mDiscover.get();
-        discover.makeToast(R.string.discover_canceled);
-        discover.stopDiscovering();
     }
 }

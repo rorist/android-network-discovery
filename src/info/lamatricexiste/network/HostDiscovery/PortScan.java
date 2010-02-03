@@ -22,7 +22,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.util.SparseArray;
 
-public class PortScan extends AsyncTask<Void, Integer, Void> {
+public class PortScan extends AbstractPortScan {
 
     private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 100;
@@ -30,61 +30,33 @@ public class PortScan extends AsyncTask<Void, Integer, Void> {
     private int TIMEOUT_SOCKET = 1000;
     private int step;
     private int cnt_selected;
-    private long time;
     private Selector selector = null;
 
-    protected int port_start;
-    protected int port_end;
-    protected int nb_port;
-    protected String host;
-
     protected PortScan(String host) {
-        this.host = host;
+        super(host);
     }
 
     protected PortScan(String host, final int timeout) {
-        this.host = host;
+        super(host);
         TIMEOUT_SOCKET = timeout;
     }
 
-    protected Void doInBackground(Void... params) {
-        try {
-            step = 127;
-            InetAddress ina = InetAddress.getByName(host);
-            if (nb_port > step) {
-                for (int i = port_start; i <= port_end - step; i += step + 1) {
-                    time = System.currentTimeMillis();
-                    scanPorts(ina, i, i + ((i + step <= port_end - step) ? step : port_end - i));
-                }
-            } else {
-                time = System.currentTimeMillis();
-                scanPorts(ina, port_start, port_end);
-            }
-        } catch (UnknownHostException e) {
-            publishProgress((int) -1, (int) -1);
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
-        } catch (InterruptedException e) {
-            Log.e(TAG, e.getMessage());
-        } finally {
-            stopSelecting();
-        }
-        return null;
-    }
-
     protected void onCancelled() {
-        stopSelecting();
+        stop();
     }
-
-    // Borrowed here:
-    // http://72.5.124.102/thread.jspa?threadID=679818&messageID=3973992
-    private void cancelTimeouts() throws IOException {
-        if ((System.currentTimeMillis() - time) > TIMEOUT_SOCKET) {
-            stopSelecting();
+    
+    protected void scanPorts(InetAddress ina, final int PORT_START, final int PORT_END)
+            throws InterruptedException, IOException {
+        cnt_selected = 0;
+        selector = Selector.open();
+        for (int i = PORT_START; i <= PORT_END; i++) {
+            connectSocket(ina, i);
+            Thread.sleep(SCAN_RATE);
         }
+        doSelect(PORT_END - PORT_START);
     }
 
-    private void stopSelecting() {
+    protected void stop() {
         // Log.d(TAG, "stopSelecting");
         if (selector != null) {
             synchronized (selector) {
@@ -116,17 +88,6 @@ public class PortScan extends AsyncTask<Void, Integer, Void> {
                 cnt_selected++;
             }
         }
-    }
-
-    private void scanPorts(InetAddress ina, final int PORT_START, final int PORT_END)
-            throws InterruptedException, IOException {
-        cnt_selected = 0;
-        selector = Selector.open();
-        for (int i = PORT_START; i <= PORT_END; i++) {
-            connectSocket(ina, i);
-            Thread.sleep(SCAN_RATE);
-        }
-        doSelect(PORT_END - PORT_START);
     }
 
     private void connectSocket(InetAddress ina, int port) throws IOException {
@@ -161,13 +122,13 @@ public class PortScan extends AsyncTask<Void, Integer, Void> {
                 }
                 cancelTimeouts(); // Filtered or Unresponsive
                 if (cnt_selected >= STEP) {
-                    stopSelecting();
+                    stop();
                 }
             }
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            stopSelecting();
+            stop();
         }
     }
 
