@@ -12,13 +12,11 @@ package info.lamatricexiste.network.HostDiscovery;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
-import android.os.AsyncTask;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -26,9 +24,7 @@ public class PortScan extends AbstractPortScan {
 
     private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 100;
-    private final int SCAN_RATE = 0;
-    private int TIMEOUT_SOCKET = 1000;
-    private int step;
+    // private final int SCAN_RATE = 0;
     private int cnt_selected;
     private Selector selector = null;
 
@@ -41,23 +37,18 @@ public class PortScan extends AbstractPortScan {
         TIMEOUT_SOCKET = timeout;
     }
 
-    protected void onCancelled() {
-        stop();
-    }
-    
-    protected void scanPorts(InetAddress ina, final int PORT_START, final int PORT_END)
+    protected void start(InetAddress ina, final int PORT_START, final int PORT_END)
             throws InterruptedException, IOException {
         cnt_selected = 0;
         selector = Selector.open();
         for (int i = PORT_START; i <= PORT_END; i++) {
             connectSocket(ina, i);
-            Thread.sleep(SCAN_RATE);
+            // Thread.sleep(SCAN_RATE);
         }
         doSelect(PORT_END - PORT_START);
     }
 
     protected void stop() {
-        // Log.d(TAG, "stopSelecting");
         if (selector != null) {
             synchronized (selector) {
                 if (selector.isOpen()) {
@@ -73,19 +64,6 @@ public class PortScan extends AbstractPortScan {
                     } catch (IOException e) {
                     }
                 }
-            }
-        }
-    }
-
-    private void finishKey(SelectionKey key) {
-        synchronized (key) {
-            try {
-                ((SocketChannel) key.channel()).close();
-            } catch (IOException e) {
-                Log.e(TAG, e.getMessage());
-            } finally {
-                key.cancel();
-                cnt_selected++;
             }
         }
     }
@@ -150,6 +128,19 @@ public class PortScan extends AbstractPortScan {
         } catch (IOException e) { // Closed
             publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 0);
             finishKey(key);
+        }
+    }
+
+    private void finishKey(SelectionKey key) {
+        synchronized (key) {
+            try {
+                ((SocketChannel) key.channel()).close();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } finally {
+                key.cancel();
+                cnt_selected++;
+            }
         }
     }
 

@@ -20,41 +20,47 @@ import android.util.Log;
 public class RootDaemon {
     private final String TAG = "RootDaemon";
     private final String DAEMON = "scand";
+    private final String rootBin = "/system/bin/su";
     private WeakReference<DiscoverActivity> mDiscover;
+    private boolean hasRoot;
 
     public RootDaemon(DiscoverActivity discover) {
         mDiscover = new WeakReference<DiscoverActivity>(discover);
+        checkRoot();
     }
 
     public void start() {
-        String dir = getDir();
-        Log.d(TAG, "dir=" + dir); // FIXME: Remove me after debug
-        if ((new File(dir + DAEMON)).exists() == false) {
-            installDaemon(dir);
-            restart();
-            return;
+        if (hasRoot) {
+            String dir = getDir();
+            if ((new File(dir + DAEMON)).exists() == false) {
+                installDaemon(dir);
+                // restart();
+                // return;
+            }
+            startDaemon(dir);
         }
-        startDaemon(dir);
     }
 
     public void killDaemon() {
-        execute("su -c 'killall -9 " + DAEMON + "'");
+        if (hasRoot) {
+            execute(rootBin + " -c 'killall -9 " + DAEMON + "'");
+        }
     }
 
     private void installDaemon(String dir) {
         createDir(dir);
         copyFile(dir + DAEMON, R.raw.scand);
-        execute("su -c 'chmod 755 " + dir + DAEMON + "; chown root " + dir + DAEMON + "'");
+        execute(rootBin + " -c 'chmod 755 " + dir + DAEMON + "; chown root " + dir + DAEMON + "'");
     }
 
     private void startDaemon(String dir) {
-        execute("su -c " + dir + DAEMON);
+        execute(rootBin + " -c " + dir + DAEMON);
     }
 
     private void restart() {
         final DiscoverActivity d = mDiscover.get();
         d.startActivity(d.getIntent());
-        // d.finish();
+        d.finish();
     }
 
     private String getDir() {
@@ -86,6 +92,22 @@ public class RootDaemon {
         int ret = Command.runCommand(cmd);
         Log.i(TAG, "cmd=" + cmd + ", ret=" + ret);
     }
+
+    private void checkRoot() {
+        hasRoot = true;
+        try {
+            File su = new File(rootBin);
+            if (su.exists() == false) {
+                hasRoot = false;
+                Log.d(TAG, "not rooted");
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Can't obtain root: " + e.getMessage());
+            hasRoot = false;
+            Log.d(TAG, "not rooted");
+        }
+    }
+
     // private void execute(final String[] cmds) {
     // new Thread(new Runnable() {
     // public void run() {

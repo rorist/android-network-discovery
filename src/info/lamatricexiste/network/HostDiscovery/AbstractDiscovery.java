@@ -5,22 +5,15 @@ import info.lamatricexiste.network.R;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.InetAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Vibrator;
-import android.util.Log;
 
 public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
-    private final String TAG = "AbstractDiscovery";
+    // private final String TAG = "AbstractDiscovery";
     private int hosts_done = 0;
     private WeakReference<DiscoverActivity> mDiscover;
     protected RateControl mRateControl;
@@ -35,8 +28,10 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
         mDiscover = new WeakReference<DiscoverActivity>(discover);
         mRateControl = new RateControl();
     }
-    
+
     abstract protected Void doInBackground(Void... params);
+
+    abstract protected void publish(String str);
 
     @Override
     protected void onPreExecute() {
@@ -80,4 +75,3 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
         discover.stopDiscovering();
     }
 }
-

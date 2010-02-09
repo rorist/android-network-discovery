@@ -2,6 +2,7 @@ package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.HostDiscovery.Discovery;
 import info.lamatricexiste.network.HostDiscovery.HostBean;
+import info.lamatricexiste.network.HostDiscovery.RootDaemon;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
@@ -61,12 +62,10 @@ final public class DiscoverActivity extends Activity {
     private Button btn_discover;
     private Button btn_export;
     public SharedPreferences prefs = null;
-    // private boolean rooted = false;
     private ConnectivityManager connMgr;
     private Discovery mDiscoveryTask = null;
+    private RootDaemon mRootDaemon;
     private Context ctxt;
-
-    // private RootDaemon mRootDaemon;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -158,19 +157,19 @@ final public class DiscoverActivity extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-        // mRootDaemon = new RootDaemon(this);
+        mRootDaemon = new RootDaemon(this);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        // mRootDaemon.start();
+        mRootDaemon.start();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // mRootDaemon.killDaemon();
+        mRootDaemon.killDaemon();
     }
 
     @Override
@@ -485,19 +484,6 @@ final public class DiscoverActivity extends Activity {
         infoDialog.setNegativeButton(R.string.btn_close, null);
         infoDialog.show();
     }
-
-    // private void checkRoot() {
-    // // Borrowed here: http://bit.ly/754iGA
-    // try {
-    // File su = new File("/system/bin/su");
-    // if (su.exists() == false) {
-    // rooted = false;
-    // }
-    // } catch (Exception e) {
-    // Log.d(TAG, "Can't obtain root: " + e.getMessage());
-    // rooted = false;
-    // }
-    // }
 
     // private void sendPacket(){
     // CheckBox cb = (CheckBox) findViewById(R.id.repeat);

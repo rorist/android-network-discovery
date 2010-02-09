@@ -375,12 +375,11 @@ final public class PortScanActivity extends TabActivity {
         return null;
     }
 
-    private void openPortService(Integer port) {
+    private void openPortService(int port) {
         String pk = "";
         String action = "";
         Intent intent = null;
-        int portInt = (int) ((int) port);
-        switch (portInt) {
+        switch (port) {
             case 22:
                 pk = "org.connectbot";
                 action = Intent.ACTION_VIEW;
