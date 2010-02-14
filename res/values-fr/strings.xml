@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Network Discovery</string>
+    <string name="app_loading">Chargement</string>
     <string name="btn_yes">Oui</string>
     <string name="btn_no">Non</string>
     <string name="btn_discover">Rechercher</string>
@@ -27,6 +28,9 @@
     <string name="discover_canceled">Recherche annulée !</string>
     <string name="discover_proxy_title">Erreur proxy</string>
     <string name="discover_proxy_msg">La recherche est annulée car une adresse mac est apparue plusieurs fois, vous êtes probablement derrière un proxy.\n\nAccédez à la passerelle depuis votre navigateur: http://%s</string>
+    <string name="discover_root_title">Installation: Root</string>
+    <string name="discover_root_install">Voulez-vous installer le service de scan en root ?</string>
+    <string name="discover_root_restart">Redémarrage de l\'application ...</string>
         
     <string name="scan_single_title">Scanner une IP</string>
     <string name="scan_single_summary">Entrez une adresse IP ou un nom d\'hôte sur lequel effectuer un scan de ports, p.ex. scanme.nmap.org</string>
@@ -80,5 +84,5 @@
     <string name="preferences_resetdb_ok">Base de donnée mise à jour ! %S nouveaux éléments ...</string>
     <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
     <string name="preferences_error2">Erreur: Le nombre de Threads doit être entre 1 et 256 !</string>
-    <string name="preferences_error3">Erreur: Le fichier n\'a pas été téléchargé correctement !</string>
+    <string name="preferences_error3">Erreur: Le téléchargement du fichier a été interrompu !</string>
 </resources>

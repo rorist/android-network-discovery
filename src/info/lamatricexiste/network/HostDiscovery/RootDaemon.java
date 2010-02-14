@@ -1,10 +1,9 @@
 package info.lamatricexiste.network.HostDiscovery;
 
-import info.lamatricexiste.network.DiscoverActivity;
 import info.lamatricexiste.network.R;
-import info.lamatricexiste.network.Utils.Command;
 import info.lamatricexiste.network.Utils.DownloadFile;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,56 +14,60 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 
-public class RootDaemon {
+public class RootDaemon extends AbstractRoot {
     private final String TAG = "RootDaemon";
     private final String DAEMON = "scand";
-    private final String rootBin = "/system/bin/su";
-    private WeakReference<DiscoverActivity> mDiscover;
-    private boolean hasRoot;
+    private WeakReference<Activity> mActivity;
+    private String dir;
+    public boolean hasRoot;
 
-    public RootDaemon(DiscoverActivity discover) {
-        mDiscover = new WeakReference<DiscoverActivity>(discover);
-        checkRoot();
+    public RootDaemon(Activity activity) {
+        mActivity = new WeakReference<Activity>(activity);
+        hasRoot = checkRoot();
+        dir = getDir();
     }
 
     public void start() {
         if (hasRoot) {
-            String dir = getDir();
-            if ((new File(dir + DAEMON)).exists() == false) {
-                installDaemon(dir);
-                // restart();
-                // return;
-            }
-            startDaemon(dir);
+            execute(new String[] { "killall -9 " + DAEMON, dir + DAEMON });
         }
     }
 
-    public void killDaemon() {
+    public void kill() {
         if (hasRoot) {
-            execute(rootBin + " -c 'killall -9 " + DAEMON + "'");
+            execute(new String[] { "killall -9 " + DAEMON });
         }
     }
 
-    private void installDaemon(String dir) {
-        createDir(dir);
-        copyFile(dir + DAEMON, R.raw.scand);
-        execute(rootBin + " -c 'chmod 755 " + dir + DAEMON + "; chown root " + dir + DAEMON + "'");
+    public void install() {
+        if (hasRoot) {
+            if ((new File(dir + DAEMON)).exists() == false) {
+                createDir(dir);
+                copyFile(dir + DAEMON, R.raw.scand);
+            }
+        }
     }
 
-    private void startDaemon(String dir) {
-        execute(rootBin + " -c " + dir + DAEMON);
+    public void permission() {
+        if (hasRoot) {
+            execute(new String[] { "chmod 755 " + dir + DAEMON, "chown root " + dir + DAEMON });
+        }
     }
 
-    private void restart() {
-        final DiscoverActivity d = mDiscover.get();
-        d.startActivity(d.getIntent());
+    public void restartActivity() {
+        final Activity d = mActivity.get();
+        Intent intent = new Intent();
+        intent.setClass(d, d.getClass());
+        d.startActivity(intent);
         d.finish();
     }
 
     private String getDir() {
-        final DiscoverActivity d = mDiscover.get();
+        final Activity d = mActivity.get();
         return d.getFilesDir().getParent() + "/bin/";
     }
 
@@ -76,9 +79,9 @@ public class RootDaemon {
     }
 
     private void copyFile(String file, int resource) {
-        final DiscoverActivity discover = mDiscover.get();
+        final Activity activity = mActivity.get();
         try {
-            InputStream in = discover.getResources().openRawResource(resource);
+            InputStream in = activity.getResources().openRawResource(resource);
             OutputStream out = new FileOutputStream(file);
             final ReadableByteChannel inputChannel = Channels.newChannel(in);
             final WritableByteChannel outputChannel = Channels.newChannel(out);
@@ -88,46 +91,31 @@ public class RootDaemon {
         }
     }
 
-    private void execute(final String cmd) {
-        int ret = Command.runCommand(cmd);
-        Log.i(TAG, "cmd=" + cmd + ", ret=" + ret);
-    }
+    // private void execute(final String cmd) {
+    // int ret = Command.runCommand(cmd);
+    // Log.i(TAG, "cmd=" + cmd + ", ret=" + ret);
+    // }
 
-    private void checkRoot() {
-        hasRoot = true;
-        try {
-            File su = new File(rootBin);
-            if (su.exists() == false) {
-                hasRoot = false;
-                Log.d(TAG, "not rooted");
+    private void execute(final String[] cmds) {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Process process = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(process.getOutputStream());
+                    for (String cmd : cmds) {
+                        Log.v(TAG, "run=" + cmd);
+                        os.writeBytes(cmd + "\n");
+                    }
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    os.close();
+                    process.waitFor();
+                } catch (IOException e) {
+                    Log.e(TAG + ":execute", e.getMessage());
+                } catch (InterruptedException e) {
+                    Log.e(TAG + ":execute", e.getMessage());
+                }
             }
-        } catch (Exception e) {
-            Log.d(TAG, "Can't obtain root: " + e.getMessage());
-            hasRoot = false;
-            Log.d(TAG, "not rooted");
-        }
+        }).start();
     }
-
-    // private void execute(final String[] cmds) {
-    // new Thread(new Runnable() {
-    // public void run() {
-    // try {
-    // Process process = Runtime.getRuntime().exec("su");
-    // DataOutputStream os = new DataOutputStream(process.getOutputStream());
-    // for (String cmd : cmds) {
-    // Log.v(TAG, "run=" + cmd);
-    // os.writeBytes(cmd + "\n");
-    // }
-    // os.writeBytes("exit\n");
-    // os.flush();
-    // os.close();
-    // process.waitFor();
-    // } catch (IOException e) {
-    // Log.e(TAG + ":execute", e.getMessage());
-    // } catch (InterruptedException e) {
-    // Log.e(TAG + ":execute", e.getMessage());
-    // }
-    // }
-    // }).start();
-    // }
 }

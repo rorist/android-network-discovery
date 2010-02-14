@@ -39,6 +39,9 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_RESETDB = "resetdb";
     public static final int DEFAULT_RESETDB = 1;
 
+    public static final String KEY_ROOT = "root";
+    public static final int DEFAULT_ROOT = 0;
+
     private Context ctxt;
     private PreferenceScreen preferenceScreen = null;
     private String before_port_start;

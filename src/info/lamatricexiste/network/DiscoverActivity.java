@@ -8,7 +8,6 @@ import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
-import info.lamatricexiste.network.Utils.UpdateNicDb;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -23,8 +22,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -47,7 +44,7 @@ import android.widget.Toast;
 
 final public class DiscoverActivity extends Activity {
 
-    private final String TAG = "info.lamatricexiste.network";
+    // private final String TAG = "info.lamatricexiste.network";
     // private final int DEFAULT_DISCOVER = 1;
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
@@ -72,23 +69,10 @@ final public class DiscoverActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_PROGRESS);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.main);
+        setContentView(R.layout.discovery);
         ctxt = getApplicationContext();
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         mInflater = LayoutInflater.from(ctxt);
-
-        // Check NIC db
-        try {
-            if (prefs.getInt(Prefs.KEY_RESETDB, Prefs.DEFAULT_RESETDB) != getPackageManager()
-                    .getPackageInfo(TAG, 0).versionCode) {
-                new UpdateNicDb(DiscoverActivity.this, prefs);
-            }
-        } catch (NameNotFoundException e) {
-        } catch (ClassCastException e) {
-            Editor edit = prefs.edit();
-            edit.putInt(Prefs.KEY_RESETDB, 1);
-            edit.commit();
-        }
 
         // Discover
         btn_discover = (Button) findViewById(R.id.btn_discover);
@@ -153,23 +137,10 @@ final public class DiscoverActivity extends Activity {
         list.setItemsCanFocus(true);
 
         connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        // checkRoot();
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-        mRootDaemon = new RootDaemon(this);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mRootDaemon.start();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mRootDaemon.killDaemon();
+        mRootDaemon = new RootDaemon(DiscoverActivity.this);
     }
 
     @Override
@@ -186,6 +157,18 @@ final public class DiscoverActivity extends Activity {
     public void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mRootDaemon.start();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mRootDaemon.kill();
     }
 
     @Override

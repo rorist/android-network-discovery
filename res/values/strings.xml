@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Network Discovery</string>
+    <string name="app_loading">Loading</string>
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
     <string name="btn_discover">Discover</string>
@@ -27,6 +28,9 @@
     <string name="discover_canceled">Discovery canceled !</string>
     <string name="discover_proxy_title">Proxy Error</string>
     <string name="discover_proxy_msg">Discovery is canceled, because a mac address appeared multiple times, you probably are behind a proxy.\n\nGo to your Gateway from the browser : http://%s</string>
+    <string name="discover_root_title">Installation: Root</string>
+    <string name="discover_root_install">Do you want to install the scan daemon for root ?</string>
+    <string name="discover_root_restart">Restarting application ...</string>
         
     <string name="scan_single_title">Scan IP</string>
     <string name="scan_single_summary">Enter an IP address or FQDN to scan, i.e. scanme.nmap.org</string>
@@ -80,5 +84,5 @@
     <string name="preferences_resetdb_ok">Database updated ! %s new entries ...</string>
     <string name="preferences_error1">Error: First port is bigger than Last port !</string>
     <string name="preferences_error2">Error: Number of Threads must be between 1 and 256 !</string>
-    <string name="preferences_error3">Error: File transfer failed, please try again !</string>
+    <string name="preferences_error3">Error: File transfer interrupted !</string>
 </resources>

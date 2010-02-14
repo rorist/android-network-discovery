@@ -63,6 +63,7 @@ final public class PortScanActivity extends TabActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         mInflater = LayoutInflater.from(ctxt);
 
+        // Get Intent information
         Bundle extra = getIntent().getExtras();
         host = extra.getString(HostBean.EXTRA_HOST);
         position = extra.getInt(HostBean.EXTRA_POSITION);

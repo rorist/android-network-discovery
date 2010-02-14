@@ -4,29 +4,40 @@
     package="info.lamatricexiste.network"
     android:versionCode="20"
     android:versionName="0.2.7.1">
+    
     <application
         android:icon="@drawable/icon"
         android:label="@string/app_name">
+        
         <activity
-            android:name=".DiscoverActivity"
-            android:label="@string/app_name"
-            android:configChanges="keyboard|keyboardHidden|orientation">
+            android:name=".MainActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name=".DiscoverActivity"
+            android:label="@string/app_name"
+            android:configChanges="keyboard|keyboardHidden|orientation" />
+            
         <activity
             android:name=".PortScanActivity"
             android:label="@string/app_name"
             android:configChanges="keyboard|keyboardHidden|orientation" />
+            
         <activity
             android:name=".Utils.Prefs"
             android:label="@string/app_name" />
+            
         <activity
             android:name=".Utils.Help"
             android:label="@string/app_name" />
+            
     </application>
+    
     <supports-screens />
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
     <uses-permission android:name="android.permission.INTERNET" />

@@ -36,14 +36,18 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
         // TODO: Use weak Reference
         this.ctxt = ctxt;
         this.prefs = prefs;
-        AlertDialog.Builder dialog = new AlertDialog.Builder(ctxt);
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(ctxt);
         dialog.setTitle(R.string.preferences_resetdb_action);
         dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 execute();
             }
         });
-        dialog.setNegativeButton(R.string.btn_no, null);
+        dialog.setNegativeButton(R.string.btn_no, new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                cancel(true);
+            }
+        });
         dialog.show();
     }
 
