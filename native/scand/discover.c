@@ -1,15 +1,9 @@
-#include "libscan.h"
-
-char debug(char* str){
-    char errbuf [50];
-    sprintf(errbuf, "%s: %s", str, strerror(errno));
-    __android_log_write(ANDROID_LOG_ERROR,"SocketTest", errbuf);
-}
+#include "discover.h"
 
 int CreateRawSocket(int protocol) {
     int rawsock;
     if((rawsock = socket(PF_PACKET, SOCK_RAW, htons(protocol)))==-1) {
-        debug("Error creating raw socket");
+        LOGE("Error creating raw socket");
         exit(-1);
     }
     return rawsock;
@@ -32,7 +26,7 @@ int BindRawSocketToInterface(char *device, int rawsock, int protocol) {
     
     strncpy((char *)ifr.ifr_name, device, IFNAMSIZ);
     if((ioctl(rawsock, SIOCGIFINDEX, &ifr)) == -1) {
-        debug("Error getting Interface index");
+        LOGE("Error getting Interface index");
         exit(-1);
     }
 
@@ -41,13 +35,13 @@ int BindRawSocketToInterface(char *device, int rawsock, int protocol) {
     sll.sll_protocol = htons(protocol); 
 
     if((bind(rawsock, (struct sockaddr *)&sll, sizeof(sll)))== -1) {
-        debug("Error binding raw socket to interface");
+        LOGE("Error binding raw socket to interface");
         exit(-1);
     }
     return 1;
 }
 
-int scan() 
+int test()
 {
     int raw;
     unsigned char packet[PACKET_LENGTH];
@@ -61,7 +55,7 @@ int scan()
     
     while((num_of_pkts--)>0){
         if(!SendRawPacket(raw, packet, PACKET_LENGTH)) {
-            debug("Error sending packet");
+            LOGE("Error sending packet");
         }
     }
     

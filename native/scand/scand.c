@@ -1,16 +1,16 @@
-//TODO: http://www-theorie.physik.unizh.ch/~dpotter/howto/daemonize
-
+// TODO: http://www-theorie.physik.unizh.ch/~dpotter/howto/daemonize
 // from AOSP, frameworks/base/cmds/installd/installd.*
 
-#include "libscan.h"
+#include "scand.h"
+#include "discover.h"
 
-#define BUFFER_MAX    1024  /* input buffer for commands */
-#define TOKEN_MAX     8     /* max number of arguments in buffer */
-#define REPLY_MAX     256   /* largest reply allowed */
-#define SOCKET_PATH   "/dev/socket/scand"
+static int do_discover(char **arg, char reply[REPLY_MAX])
+{
+    test();
+    return 0;
+}
 
-
-static int do_ping(char **arg, char reply[REPLY_MAX])
+static int do_portscan(char **arg, char reply[REPLY_MAX])
 {
     return 0;
 }
@@ -22,7 +22,8 @@ struct cmdinfo {
 };
 
 struct cmdinfo cmds[] = {
-    { "ping",                 0, do_ping },
+    { "discover", 0, do_discover},
+    { "portscan", 1, do_portscan },
 };
 
 static int readx(int s, void *_buf, int count)
@@ -125,17 +126,23 @@ done:
     return 0;
 }
 
-int main(const int argc, const char *argv[]) {
-    // Daemonize: Now handled by the daemonize command
-    LOGI("Start process");
+static void daemonize(void){
     pid_t i;
     i = fork();
     if (i<0) exit(1); /* fork error */
     if (i>0) exit(0); /* parent exits */
     setsid();
-    
-    LOGI("Start child");
-    
+    /* Change the current working directory.  This prevents the current
+       directory from being locked; hence not being able to remove it. */
+    if ((chdir("/")) < 0) {
+        exit(1);
+    }
+}
+
+int main(const int argc, const char *argv[]) {
+    LOGI("SCAND: Starting");
+    daemonize();
+
     //main    
     char buf[BUFFER_MAX];
     struct sockaddr addr;
@@ -144,8 +151,6 @@ int main(const int argc, const char *argv[]) {
 
     struct sockaddr_un local, remote;
     char str[100];
-    
-    LOGI("Start program");
 
     if ((lsocket = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         LOGE("create socket");
@@ -157,7 +162,7 @@ int main(const int argc, const char *argv[]) {
     unlink(local.sun_path);
     len = strlen(local.sun_path) + sizeof(local.sun_family);
     if (bind(lsocket, (struct sockaddr *)&local, len) == -1) {
-        LOGE("bind socket");
+        LOGE("bind socket failed");
         exit(1);
     }
     
@@ -176,7 +181,6 @@ int main(const int argc, const char *argv[]) {
         }
         fcntl(s, F_SETFD, FD_CLOEXEC);
 
-        LOGI("new connection\n");
         for (;;) {
             unsigned short count;
             if (readx(s, &count, sizeof(count))) {
@@ -194,9 +198,9 @@ int main(const int argc, const char *argv[]) {
             buf[count] = 0;
             if (execute(s, buf)) break;
         }
-        LOGI("closing connection\n");
         close(s);
     }
+    LOGI("SCAND: Stopping");
 
     return 0;
 }
