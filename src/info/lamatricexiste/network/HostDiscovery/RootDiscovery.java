@@ -1,4 +1,5 @@
 // Inspired from AOSP in frameworks/base/services/java/com/android/server/Installer.java
+// Nmap for ARM: http://rmccurdy.com/nmap.sh
 
 package info.lamatricexiste.network.HostDiscovery;
 
@@ -29,16 +30,14 @@ public class RootDiscovery extends AbstractDiscovery {
     @Override
     protected Void doInBackground(Void... params) {
         /*
-         * Wireless Interfaces:
-         * HTC Magic has tiwlan0
-         * Nexus One has eth0
+         * Wireless Interfaces: HTC Magic has tiwlan0 Nexus One has eth0
          */
-        
+
         if (!connect()) {
             Log.e(TAG, "connection failed");
             return null;
         }
-        if (!writeCommand("discover eth0")) {
+        if (!writeCommand("discover eth0 " + start + " " + end)) {
             Log.e(TAG, "write command failed!");
             return null;
         }

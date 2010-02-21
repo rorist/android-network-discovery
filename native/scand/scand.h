@@ -28,13 +28,16 @@
 #define LOG_TAG       "scand"
 #define BUFFER_MAX    1024  /* input buffer for commands */
 #define TOKEN_MAX     8     /* max number of arguments in buffer */
-#define REPLY_MAX     256   /* largest reply allowed */
 #define SOCKET_PATH   "/dev/socket/scand"
 
-static int do_discover(char **arg, char reply[REPLY_MAX]);
-static int do_portscan(char **arg, char reply[REPLY_MAX]);
 static int readx(int s, void *_buf, int count);
 static int writex(int s, const void *_buf, int count);
 static int execute(int s, char cmd[BUFFER_MAX]);
 static void daemonize(void);
 int main(const int argc, const char *argv[]);
+
+struct cmdinfo {
+    const char *name;
+    unsigned numargs;
+    int (*func)(char **arg, char reply[REPLY_MAX]);
+};

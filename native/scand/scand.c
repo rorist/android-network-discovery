@@ -4,26 +4,9 @@
 #include "discover.h"
 #include "scand.h"
 
-static int do_discover(char **arg, char reply[REPLY_MAX])
-{
-    discover(arg[0]);
-    return 0;
-}
-
-static int do_portscan(char **arg, char reply[REPLY_MAX])
-{
-    return 0;
-}
-
-struct cmdinfo {
-    const char *name;
-    unsigned numargs;
-    int (*func)(char **arg, char reply[REPLY_MAX]);
-};
-
 struct cmdinfo cmds[] = {
-    { "discover", 1, do_discover},
-    { "portscan", 1, do_portscan },
+    { "discover", 3, do_discover},
+    //{ "portscan", 1, do_portscan },
 };
 
 static int readx(int s, void *_buf, int count)
@@ -140,7 +123,7 @@ static void daemonize(void){
 }
 
 int main(const int argc, const char *argv[]) {
-    LOGI("SCAND: Starting");
+    LOGI("Starting ...");
     daemonize();
 
     //main    
@@ -200,7 +183,7 @@ int main(const int argc, const char *argv[]) {
         }
         close(s);
     }
-    LOGI("SCAND: Stopping");
+    LOGI("Stopping ...");
 
     return 0;
 }
