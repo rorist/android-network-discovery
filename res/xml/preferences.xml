@@ -7,7 +7,7 @@
             android:key="vibrate_finish"
             android:title="@string/preferences_vibrate_title"
             android:summary="@string/preferences_vibrate_summary"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

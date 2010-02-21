@@ -13,6 +13,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Window;
 
 final public class MainActivity extends Activity {
 
@@ -23,6 +24,7 @@ final public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
         setTitle(R.string.app_loading);
         ctxt = getApplicationContext();
@@ -73,7 +75,13 @@ final public class MainActivity extends Activity {
                 super(ctxt, prefs);
             }
 
+            protected void onPreExecute() {
+                super.onPreExecute();
+                // TODO: Start loading dialog!
+            }
+
             protected void onPostExecute(Void unused) {
+                // TODO: Stop loading dialog
                 startDiscoverActivity();
                 super.onPostExecute(unused);
             }

@@ -21,7 +21,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public final static boolean DEFAULT_RESOLVE_NAME = false;
 
     public final static String KEY_VIBRATE_FINISH = "vibrate_finish";
-    public final static boolean DEFAULT_VIBRATE_FINISH = true;
+    public final static boolean DEFAULT_VIBRATE_FINISH = false;
 
     public final static String KEY_PORT_START = "port_start";
     public final static String DEFAULT_PORT_START = "1";

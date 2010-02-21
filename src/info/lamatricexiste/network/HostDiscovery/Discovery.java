@@ -45,7 +45,6 @@ public class Discovery extends AbstractDiscovery {
         try {
             // gateway
             launch(start);
-
             // hosts
             long pt_backward = ip - 1;
             long pt_forward = ip + 1;

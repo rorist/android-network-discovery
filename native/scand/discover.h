@@ -13,10 +13,10 @@
 #include <linux/if.h>
 #include <linux/if_packet.h>
 
-#define LOG_TAG       "discover"
+#define LOG_TAG       "scand"
 #define PACKET_LENGTH 1024
 
-int test();
+int discover(char *interface);
 int CreateRawSocket(int protocol);
 int SendRawPacket(int rawsock, unsigned char *pkt, int pkt_len);
 int BindRawSocketToInterface(char *device, int rawsock, int protocol);

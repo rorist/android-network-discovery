@@ -11,13 +11,13 @@ public class HostBean {
     private int[] portsOpen = null;
     private int[] portsClosed = null;
     private String os = "Unknown";
-    
-    public static final String EXTRA_POSITION = "position";
-    public static final String EXTRA_HOST = "host";
-    public static final String EXTRA_TIMEOUT = "timeout";
-    public static final String EXTRA_HOSTNAME = "hostname";
-    public static final String EXTRA_PORTSO = "ports_o";
-    public static final String EXTRA_PORTSC = "ports_c";
+
+    public static final String EXTRA_POSITION = "info.lamatricexiste.network.extra_position";
+    public static final String EXTRA_HOST = "info.lamatricexiste.network.extra_host";
+    public static final String EXTRA_TIMEOUT = "info.lamatricexiste.network.extra_timeout";
+    public static final String EXTRA_HOSTNAME = "info.lamatricexiste.network.extra_hostname";
+    public static final String EXTRA_PORTSO = "info.lamatricexiste.network.extra_ports_o";
+    public static final String EXTRA_PORTSC = "info.lamatricexiste.network.extra_ports_c";
 
     public String getHardwareAddress() {
         return hardwareAddress;

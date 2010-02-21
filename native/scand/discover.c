@@ -41,7 +41,7 @@ int BindRawSocketToInterface(char *device, int rawsock, int protocol) {
     return 1;
 }
 
-int test()
+int discover(char *interface)
 {
     int raw;
     unsigned char packet[PACKET_LENGTH];
@@ -51,7 +51,11 @@ int test()
     
     raw = CreateRawSocket(ETH_P_ALL);
     
-    BindRawSocketToInterface("tiwlan0", raw, ETH_P_ALL);
+    // Interfaces:
+    // HTC Magic: tiwlan0
+    // Nexus One: eth0
+    
+    BindRawSocketToInterface(interface, raw, ETH_P_ALL);
     
     while((num_of_pkts--)>0){
         if(!SendRawPacket(raw, packet, PACKET_LENGTH)) {

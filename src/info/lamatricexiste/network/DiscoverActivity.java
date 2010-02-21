@@ -1,8 +1,9 @@
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.HostDiscovery.Discovery;
+import info.lamatricexiste.network.HostDiscovery.AbstractDiscovery;
 import info.lamatricexiste.network.HostDiscovery.HostBean;
 import info.lamatricexiste.network.HostDiscovery.RootDaemon;
+import info.lamatricexiste.network.HostDiscovery.RootDiscovery;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
@@ -60,7 +61,7 @@ final public class DiscoverActivity extends Activity {
     private Button btn_export;
     public SharedPreferences prefs = null;
     private ConnectivityManager connMgr;
-    private Discovery mDiscoveryTask = null;
+    private AbstractDiscovery mDiscoveryTask = null;
     private RootDaemon mRootDaemon;
     private Context ctxt;
 
@@ -370,7 +371,8 @@ final public class DiscoverActivity extends Activity {
      * Discover hosts
      */
     private void startDiscovering() {
-        mDiscoveryTask = new Discovery(DiscoverActivity.this);
+        // mDiscoveryTask = new Discovery(DiscoverActivity.this);
+        mDiscoveryTask = new RootDiscovery(DiscoverActivity.this);
         mHardwareAddress = new HardwareAddress();
         makeToast(R.string.discover_start);
         setProgressBarVisibility(true);

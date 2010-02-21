@@ -1,12 +1,12 @@
 // TODO: http://www-theorie.physik.unizh.ch/~dpotter/howto/daemonize
 // from AOSP, frameworks/base/cmds/installd/installd.*
 
-#include "scand.h"
 #include "discover.h"
+#include "scand.h"
 
 static int do_discover(char **arg, char reply[REPLY_MAX])
 {
-    test();
+    discover(arg[0]);
     return 0;
 }
 
@@ -22,7 +22,7 @@ struct cmdinfo {
 };
 
 struct cmdinfo cmds[] = {
-    { "discover", 0, do_discover},
+    { "discover", 1, do_discover},
     { "portscan", 1, do_portscan },
 };
 

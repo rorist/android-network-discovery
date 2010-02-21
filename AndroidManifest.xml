@@ -26,11 +26,29 @@
         <activity
             android:name=".PortScanActivity"
             android:label="@string/app_name"
-            android:configChanges="keyboard|keyboardHidden|orientation" />
+            android:configChanges="keyboard|keyboardHidden|orientation">
+            <intent-filter>
+                <action android:name=".SCAN_HOST" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <!--
+                  Extras:
+                    HostBean.EXTRA_HOST         Host to scan: i.e. scanme.nmap.org or an IP
+                    HostBean.EXTRA_POSITION     Integer that will be put to the result intent
+                    HostBean.EXTRA_TIMEOUT      Maximum time a port can be reached, AKA scan rate
+                    HostBean.EXTRA_PORTSO       Integer array of already know open ports for this host
+                    HostBean.EXTRA_PORTSC       Integer array of already know closed ports for this host
+                 -->
+            </intent-filter>
+        </activity>
             
         <activity
             android:name=".Utils.Prefs"
-            android:label="@string/app_name" />
+            android:label="@string/app_name">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
+        </activity>
             
         <activity
             android:name=".Utils.Help"
