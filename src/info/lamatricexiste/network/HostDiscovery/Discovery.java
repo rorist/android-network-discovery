@@ -96,7 +96,7 @@ public class Discovery extends AbstractDiscovery {
         public void run() {
             try {
                 Thread.sleep((int) mRateControl.getRate());
-                InetAddress h = InetAddress.getByName(host);
+                InetAddress h = InetAddress.getByName(host); //FIXME: is that producing logs?
                 // Rate control check
                 if (mRateControl.isIndicatorDiscovered() && mRateCnt % mRateMult == 0) {
                     mRateControl.adaptRate();
