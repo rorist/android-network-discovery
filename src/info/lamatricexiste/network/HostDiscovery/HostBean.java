@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ * Licensed under GNU's GPL 2, see README
+ */
+
 // Inspired by http://connectbot.googlecode.com/svn/trunk/connectbot/src/org/connectbot/bean/HostBean.java
 package info.lamatricexiste.network.HostDiscovery;
 

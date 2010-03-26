@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ * Licensed under GNU's GPL 2, see README
+ */
+
 // Inspired from AOSP in frameworks/base/services/java/com/android/server/Installer.java
 // Nmap for ARM: http://rmccurdy.com/nmap.sh
 

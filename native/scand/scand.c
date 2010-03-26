@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ * Licensed under GNU's GPL 2, see README
+ */
+
 // TODO: http://www-theorie.physik.unizh.ch/~dpotter/howto/daemonize
 // from AOSP, frameworks/base/cmds/installd/installd.*
 

@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ * Licensed under GNU's GPL 2, see README
+ */
+
 //am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
 package info.lamatricexiste.network.Utils;
 

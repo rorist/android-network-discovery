@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ * Licensed under GNU's GPL 2, see README
+ */
+
 // http://standards.ieee.org/regauth/oui/oui.txt
 
 package info.lamatricexiste.network.Utils;
