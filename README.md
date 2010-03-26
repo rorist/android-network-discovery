@@ -2,7 +2,7 @@
 Network Discovery
 =================
 
-    Machines discovery/mapping (over Wifi) and port scan (over 3G/Wifi) utility for Android devices.
+Machines discovery/mapping (over Wifi) and port scan (over 3G/Wifi) utility for Android devices.
 
 Features
 --------
@@ -13,6 +13,7 @@ Features
  *  Export results to your sdcard in XML
  *  Fast access to Wifi Settings
  *  Adaptive scanning rate (slow start, then adaptive to network latency)
+ *  Open Source, available at http://github.com/rorist/android-network-discovery
 
 Build
 -----

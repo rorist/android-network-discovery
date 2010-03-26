@@ -3,7 +3,7 @@
  Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
  Licensed under GNU's GPL 2, see README
 -->
-<project name="SmbExploit" default="help">
+<project name="NetworkDiscovery" default="help">
 
     <!-- The local.properties file is created and updated by the 'android' tool.
          It contain the path to the SDK. It should *NOT* be checked in in Version

@@ -4,9 +4,8 @@
 # Licensed under GNU's GPL 2, see README
 #
 
-BASE=$(dirname `cd ${0%/*} && echo $PWD/${0##*/}`)
-PATH_TO_APP='/home/rorist/workspace/SmbExploit'
-PATH_TO_NATIVE="$PATH_TO_APP/native"
+BASE=$(dirname `cd ${0%/*} && echo $PWD}`)
+PATH_TO_NATIVE="$BASE/native"
 PATH_TO_SRC='/opt/android-src'
 SCAND_PATH='external/scand'
 #LIBCOMMAND_PATH='external/libcommand'
@@ -30,7 +29,7 @@ cp $PATH_TO_NATIVE/scand/* $SCAND_PATH/.
 # Build
 make scand && {
   echo "\nBuild Successfull!"
-  mkdir -p $PATH_TO_APP/libs/armeabi
-  cp out/target/product/generic/system/bin/scand $PATH_TO_APP/res/raw/scand
-  #cp out/target/product/generic/system/lib/libcommand.so $PATH_TO_APP/libs/armeabi/libcommand.so
+  mkdir -p $BASE/libs/armeabi
+  cp out/target/product/generic/system/bin/scand $BASE/res/raw/scand
+  #cp out/target/product/generic/system/lib/libcommand.so $BASE/libs/armeabi/libcommand.so
 }
