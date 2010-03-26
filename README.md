@@ -21,6 +21,20 @@ Build
  *  APK: build.xml is provided for ant, simply type this command:
     ant debug
 
+Todo
+----
+
+ * Network interface choice in preferences
+ * Uses-intents in manifest
+ * Save all scan in DB, open previous scan, export previous scan, etc
+ * Discovery: restrict range or change cidr
+ * Settings: prevent phone from sleeping, discovery method (root/non-root)
+ * RateControl: better rate by host ?
+ * NMAP build script (ARM and other arch (using AOSP?))
+ * Refactor host info (inflater + dynamic layouts), and add new info such as Hops (using MTR?)
+ * Nat Traversal
+ * Support of other protocol: UDP, SCTP
+
 License
 -------
 
