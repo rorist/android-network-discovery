@@ -13,10 +13,9 @@ import java.net.Socket;
 public class Reachable {
 
     final int[] ports = { 445, 22, 80, 111 };
-    final int timeout = 800; // FIXME: Point of failure, MUST use NIO
     final int len = ports.length;
 
-    public int isReachable(InetAddress host) {
+    public int isReachable(InetAddress host, int timeout) {
         for (int i = 0; i < len; i++) {
             try {
                 Socket s = new Socket();

@@ -10,6 +10,7 @@ import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -76,22 +77,26 @@ final public class MainActivity extends Activity {
     private void phase2() {
 
         class UpdateNicDbMain extends UpdateNicDb {
+            private ProgressDialog progress;
+
             public UpdateNicDbMain(Context ctxt, SharedPreferences prefs) {
                 super(ctxt, prefs);
             }
 
             protected void onPreExecute() {
+                progress = ProgressDialog.show(ctxt, "", "Downloading DB ...");
                 super.onPreExecute();
-                // TODO: Start loading dialog!
+
             }
 
             protected void onPostExecute(Void unused) {
-                // TODO: Stop loading dialog
+                progress.dismiss();
                 startDiscoverActivity();
                 super.onPostExecute(unused);
             }
 
             protected void onCancelled() {
+                progress.dismiss();
                 startDiscoverActivity();
                 super.onCancelled();
             }

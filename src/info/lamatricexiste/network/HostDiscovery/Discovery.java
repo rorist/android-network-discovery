@@ -117,7 +117,7 @@ public class Discovery extends AbstractDiscovery {
                 }
                 // Custom check
                 int port = -1;
-                if ((port = mReachable.isReachable(h)) > -1) {
+                if ((port = mReachable.isReachable(h, (int) mRateControl.getRate())) > -1) {
                     Log.v(TAG, "used Reachable object, port=" + port);
                     publish(host);
                     // if (!mRateControl.isIndicatorDiscovered()) {
