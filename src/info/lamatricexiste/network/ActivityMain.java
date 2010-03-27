@@ -5,7 +5,6 @@
 
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.HostDiscovery.RootDaemon;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 import android.app.Activity;
@@ -21,7 +20,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Window;
 
-final public class MainActivity extends Activity {
+final public class ActivityMain extends Activity {
 
     private final String TAG = "info.lamatricexiste.network";
     public SharedPreferences prefs = null;
@@ -106,7 +105,7 @@ final public class MainActivity extends Activity {
         try {
             if (prefs.getInt(Prefs.KEY_RESETDB, Prefs.DEFAULT_RESETDB) != getPackageManager()
                     .getPackageInfo(TAG, 0).versionCode) {
-                new UpdateNicDbMain(MainActivity.this, prefs);
+                new UpdateNicDbMain(ActivityMain.this, prefs);
             } else {
                 // There is a NIC Db installed
                 startDiscoverActivity();
@@ -122,7 +121,7 @@ final public class MainActivity extends Activity {
     }
 
     private void startDiscoverActivity() {
-        startActivity(new Intent(ctxt, DiscoverActivity.class));
+        startActivity(new Intent(ctxt, ActivityDiscover.class));
         finish();
     }
 }

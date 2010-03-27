@@ -6,6 +6,7 @@
 package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.R;
+import info.lamatricexiste.network.Network.DownloadFile;
 
 import java.io.IOException;
 

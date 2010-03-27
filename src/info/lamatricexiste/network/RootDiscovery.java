@@ -6,9 +6,7 @@
 // Inspired from AOSP in frameworks/base/services/java/com/android/server/Installer.java
 // Nmap for ARM: http://rmccurdy.com/nmap.sh
 
-package info.lamatricexiste.network.HostDiscovery;
-
-import info.lamatricexiste.network.DiscoverActivity;
+package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +26,7 @@ public class RootDiscovery extends AbstractDiscovery {
 
     // private int buflen = 0;
 
-    public RootDiscovery(DiscoverActivity discover) {
+    public RootDiscovery(ActivityDiscover discover) {
         super(discover);
     }
 

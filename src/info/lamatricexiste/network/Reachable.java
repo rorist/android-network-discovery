@@ -3,7 +3,7 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package info.lamatricexiste.network.HostDiscovery;
+package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.net.InetAddress;

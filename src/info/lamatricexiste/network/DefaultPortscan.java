@@ -12,7 +12,7 @@
  * http://weblogs.java.net/blog/2006/09/21/tricks-and-tips-nio-part-v-ssl-and-nio-friend-or-foe
  */
 
-package info.lamatricexiste.network.HostDiscovery;
+package info.lamatricexiste.network;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -25,7 +25,7 @@ import java.util.Iterator;
 import android.util.Log;
 import android.util.SparseArray;
 
-public class PortScan extends AbstractPortScan {
+public class DefaultPortscan extends AbstractPortScan {
 
     private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 100;
@@ -33,11 +33,11 @@ public class PortScan extends AbstractPortScan {
     private int cnt_selected;
     private Selector selector = null;
 
-    protected PortScan(String host) {
+    protected DefaultPortscan(String host) {
         super(host);
     }
 
-    protected PortScan(String host, final int timeout) {
+    protected DefaultPortscan(String host, final int timeout) {
         super(host);
         TIMEOUT_SOCKET = timeout;
     }

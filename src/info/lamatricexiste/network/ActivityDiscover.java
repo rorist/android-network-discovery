@@ -5,14 +5,10 @@
 
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.HostDiscovery.AbstractDiscovery;
-import info.lamatricexiste.network.HostDiscovery.HostBean;
-import info.lamatricexiste.network.HostDiscovery.RootDaemon;
-import info.lamatricexiste.network.HostDiscovery.RootDiscovery;
+import info.lamatricexiste.network.Network.HardwareAddress;
+import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Export;
-import info.lamatricexiste.network.Utils.HardwareAddress;
 import info.lamatricexiste.network.Utils.Help;
-import info.lamatricexiste.network.Utils.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.net.InetAddress;
@@ -48,7 +44,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-final public class DiscoverActivity extends Activity {
+final public class ActivityDiscover extends Activity {
 
     // private final String TAG = "info.lamatricexiste.network";
     // private final int DEFAULT_DISCOVER = 1;
@@ -146,7 +142,7 @@ final public class DiscoverActivity extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-        mRootDaemon = new RootDaemon(DiscoverActivity.this);
+        mRootDaemon = new RootDaemon(ActivityDiscover.this);
     }
 
     @Override
@@ -179,11 +175,11 @@ final public class DiscoverActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+        menu.add(0, ActivityDiscover.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
-        menu.add(0, DiscoverActivity.MENU_OPTIONS, 0, "Options").setIcon(
+        menu.add(0, ActivityDiscover.MENU_OPTIONS, 0, "Options").setIcon(
                 android.R.drawable.ic_menu_preferences);
-        menu.add(0, DiscoverActivity.MENU_HELP, 0, R.string.preferences_help).setIcon(
+        menu.add(0, ActivityDiscover.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
         return true;
     }
@@ -191,13 +187,13 @@ final public class DiscoverActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case DiscoverActivity.MENU_SCAN_SINGLE:
+            case ActivityDiscover.MENU_SCAN_SINGLE:
                 scanSingle(this, null);
                 return true;
-            case DiscoverActivity.MENU_OPTIONS:
+            case ActivityDiscover.MENU_OPTIONS:
                 startActivity(new Intent(ctxt, Prefs.class));
                 return true;
-            case DiscoverActivity.MENU_HELP:
+            case ActivityDiscover.MENU_HELP:
                 startActivity(new Intent(ctxt, Help.class));
                 return true;
         }
@@ -258,7 +254,7 @@ final public class DiscoverActivity extends Activity {
             }
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    Intent intent = new Intent(ctxt, PortScanActivity.class);
+                    Intent intent = new Intent(ctxt, ActivityPortscan.class);
                     if (wifiConnected() == false) {
                         intent.putExtra("wifiDisabled", true);
                     }
@@ -377,7 +373,7 @@ final public class DiscoverActivity extends Activity {
      */
     private void startDiscovering() {
         // mDiscoveryTask = new Discovery(DiscoverActivity.this);
-        mDiscoveryTask = new RootDiscovery(DiscoverActivity.this);
+        mDiscoveryTask = new RootDiscovery(ActivityDiscover.this);
         mHardwareAddress = new HardwareAddress();
         makeToast(R.string.discover_start);
         setProgressBarVisibility(true);
@@ -465,7 +461,7 @@ final public class DiscoverActivity extends Activity {
     private void showHostInfo(HostBean host) {
         View v = mInflater.inflate(R.layout.info, null);
         // Build info dialog
-        AlertDialog.Builder infoDialog = new AlertDialog.Builder(DiscoverActivity.this);
+        AlertDialog.Builder infoDialog = new AlertDialog.Builder(ActivityDiscover.this);
         infoDialog.setTitle(host.getIpAddress());
         ((TextView) v.findViewById(R.id.info_mac)).setText(host.getHardwareAddress());
         ((TextView) v.findViewById(R.id.info_nic)).setText(host.getNicVendor());
@@ -511,7 +507,7 @@ final public class DiscoverActivity extends Activity {
         dialogIp.setPositiveButton(R.string.btn_scan, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dlg, int sumthin) {
                 // start scanportactivity
-                Intent intent = new Intent(ctxt, PortScanActivity.class);
+                Intent intent = new Intent(ctxt, ActivityPortscan.class);
                 intent.putExtra(HostBean.EXTRA_HOST, txt.getText().toString());
                 try {
                     intent.putExtra(HostBean.EXTRA_HOSTNAME, (InetAddress.getByName(txt.getText()
@@ -541,7 +537,7 @@ final public class DiscoverActivity extends Activity {
             public void onClick(DialogInterface dlg, int sumthin) {
                 final String fileEdit = txt.getText().toString();
                 if (e.fileExists(fileEdit)) {
-                    AlertDialog.Builder fileExists = new AlertDialog.Builder(DiscoverActivity.this);
+                    AlertDialog.Builder fileExists = new AlertDialog.Builder(ActivityDiscover.this);
                     fileExists.setTitle(R.string.export_exists_title);
                     fileExists.setMessage(R.string.export_exists_msg);
                     fileExists.setPositiveButton(R.string.btn_yes,

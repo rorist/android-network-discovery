@@ -5,7 +5,7 @@
 
 // http://standards.ieee.org/regauth/oui/oui.txt
 
-package info.lamatricexiste.network.Utils;
+package info.lamatricexiste.network.Network;
 
 import info.lamatricexiste.network.R;
 

@@ -3,10 +3,9 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package info.lamatricexiste.network.HostDiscovery;
+package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.DiscoverActivity;
-import info.lamatricexiste.network.Utils.NetInfo;
+import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.IOException;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-public class Discovery extends AbstractDiscovery {
+public class DefaultDiscovery extends AbstractDiscovery {
 
     private final String TAG = "Discovery";
     private final int TIMEOUT_REACH = 1000;
@@ -29,7 +28,7 @@ public class Discovery extends AbstractDiscovery {
     private ExecutorService mPool;
     private SharedPreferences mPrefsMgr;
 
-    public Discovery(DiscoverActivity discover) {
+    public DefaultDiscovery(ActivityDiscover discover) {
         super(discover);
         mReachable = new Reachable();
         mPrefsMgr = discover.prefs;

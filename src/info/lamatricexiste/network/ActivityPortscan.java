@@ -6,8 +6,6 @@
 // TODO: Detect wifi status
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.HostDiscovery.HostBean;
-import info.lamatricexiste.network.HostDiscovery.PortScan;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
 
@@ -37,7 +35,7 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-final public class PortScanActivity extends TabActivity {
+final public class ActivityPortscan extends TabActivity {
 
     // private final String TAG = "PortScanActivity";
     private SharedPreferences prefs;
@@ -160,11 +158,11 @@ final public class PortScanActivity extends TabActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, DiscoverActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+        menu.add(0, ActivityDiscover.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
-        menu.add(0, DiscoverActivity.MENU_OPTIONS, 0, "Options").setIcon(
+        menu.add(0, ActivityDiscover.MENU_OPTIONS, 0, "Options").setIcon(
                 android.R.drawable.ic_menu_preferences);
-        menu.add(0, DiscoverActivity.MENU_HELP, 0, R.string.preferences_help).setIcon(
+        menu.add(0, ActivityDiscover.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
         return true;
     }
@@ -172,13 +170,13 @@ final public class PortScanActivity extends TabActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case DiscoverActivity.MENU_SCAN_SINGLE:
-                DiscoverActivity.scanSingle(this, host);
+            case ActivityDiscover.MENU_SCAN_SINGLE:
+                ActivityDiscover.scanSingle(this, host);
                 return true;
-            case DiscoverActivity.MENU_OPTIONS:
+            case ActivityDiscover.MENU_OPTIONS:
                 startActivity(new Intent(ctxt, Prefs.class));
                 return true;
-            case DiscoverActivity.MENU_HELP:
+            case ActivityDiscover.MENU_HELP:
                 startActivity(new Intent(ctxt, Help.class));
                 return true;
         }
@@ -234,7 +232,7 @@ final public class PortScanActivity extends TabActivity {
         }
     }
 
-    private class ScanPortTask extends PortScan {
+    private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
 
         ScanPortTask(String host) {
@@ -287,7 +285,7 @@ final public class PortScanActivity extends TabActivity {
         protected void onPostExecute(Void unused) {
             if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(DiscoverActivity.VIBRATE);
+                v.vibrate(ActivityDiscover.VIBRATE);
             }
             if (ports_open.size() == 0) {
                 makeToast(R.string.scan_noport);

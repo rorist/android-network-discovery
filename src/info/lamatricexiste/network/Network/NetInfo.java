@@ -4,7 +4,7 @@
  */
 
 //am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
-package info.lamatricexiste.network.Utils;
+package info.lamatricexiste.network.Network;
 
 import android.content.Context;
 import android.net.DhcpInfo;

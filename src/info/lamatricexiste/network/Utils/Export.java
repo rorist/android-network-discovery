@@ -5,7 +5,8 @@
 
 package info.lamatricexiste.network.Utils;
 
-import info.lamatricexiste.network.HostDiscovery.HostBean;
+import info.lamatricexiste.network.HostBean;
+import info.lamatricexiste.network.Network.NetInfo;
 
 import java.io.File;
 import java.io.FileWriter;

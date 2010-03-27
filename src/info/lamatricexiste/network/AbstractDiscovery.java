@@ -3,11 +3,9 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package info.lamatricexiste.network.HostDiscovery;
+package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.DiscoverActivity;
-import info.lamatricexiste.network.R;
-import info.lamatricexiste.network.Utils.NetInfo;
+import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.lang.ref.WeakReference;
@@ -20,7 +18,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     // private final String TAG = "AbstractDiscovery";
     private int hosts_done = 0;
-    private WeakReference<DiscoverActivity> mDiscover;
+    private WeakReference<ActivityDiscover> mDiscover;
     protected RateControl mRateControl;
 
     // TODO: Adaptiv value or changeable by Prefs
@@ -29,8 +27,8 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
     protected long end;
     protected long size = 0;
 
-    public AbstractDiscovery(DiscoverActivity discover) {
-        mDiscover = new WeakReference<DiscoverActivity>(discover);
+    public AbstractDiscovery(ActivityDiscover discover) {
+        mDiscover = new WeakReference<ActivityDiscover>(discover);
         mRateControl = new RateControl();
     }
 
@@ -40,7 +38,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPreExecute() {
-        final DiscoverActivity discover = mDiscover.get();
+        final ActivityDiscover discover = mDiscover.get();
         NetInfo net = new NetInfo(discover);
         ip = NetInfo.getUnsignedLongFromIp(net.getIp());
         int shift = (32 - net.getNetCidr());
@@ -52,7 +50,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onProgressUpdate(String... item) {
-        final DiscoverActivity discover = mDiscover.get();
+        final ActivityDiscover discover = mDiscover.get();
         if (!isCancelled()) {
             if (item[0] != null) {
                 discover.addHost(item[0], mRateControl.getRate());
@@ -64,10 +62,10 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPostExecute(Void unused) {
-        final DiscoverActivity discover = mDiscover.get();
+        final ActivityDiscover discover = mDiscover.get();
         if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
             Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(DiscoverActivity.VIBRATE);
+            v.vibrate(ActivityDiscover.VIBRATE);
         }
         discover.makeToast(R.string.discover_finished);
         discover.stopDiscovering();
@@ -75,7 +73,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onCancelled() {
-        final DiscoverActivity discover = mDiscover.get();
+        final ActivityDiscover discover = mDiscover.get();
         discover.makeToast(R.string.discover_canceled);
         discover.stopDiscovering();
     }

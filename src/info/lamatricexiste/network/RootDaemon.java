@@ -3,10 +3,10 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package info.lamatricexiste.network.HostDiscovery;
+package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.R;
-import info.lamatricexiste.network.Utils.DownloadFile;
+import info.lamatricexiste.network.Network.DownloadFile;
 
 import java.io.DataOutputStream;
 import java.io.File;

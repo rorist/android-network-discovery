@@ -11,7 +11,7 @@
  http://g-laurent.blogspot.com/2009/09/windows-vista7-smb20-negotiate-protocol.html
  */
 
-package info.lamatricexiste.network.Utils;
+package info.lamatricexiste.network.Network;
 
 import java.io.IOException;
 import java.io.OutputStream;
