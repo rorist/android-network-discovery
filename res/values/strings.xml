@@ -68,16 +68,25 @@
     
     <string name="preferences_help">Help</string>
     <string name="preferences_notifications">Notifications settings</string>
-    <string name="preferences_port_scan">Port Scan settings</string>
+    <string name="preferences_discover">Discover settings</string>
+    <string name="preferences_portscan">Port Scan settings</string>
     <string name="preferences_advanced">Advanced Settings</string>
     <string name="preferences_resolve_name_title">Resolve Hostname</string>
     <string name="preferences_resolve_name_summary">Produce more traffic on the network</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Vibrate when Scan is completed</string>
+    <string name="preferences_ratecontrol_enable_title">Rate control</string>
+    <string name="preferences_ratecontrol_enable_summary">Enable automatic rate detection</string>
+    <string name="preferences_timeout_discover_title">Custom rate</string>
+    <string name="preferences_timeout_discover_summary">Rate of discovery in millisecondes</string>
     <string name="preferences_port_start_title">First Port</string>
     <string name="preferences_port_start_summary">First TCP Port to scan. 1-65535</string>
     <string name="preferences_port_end_title">Last Port</string>
     <string name="preferences_port_end_summary">Last TCP Port to scan. 1-65535</string>
+    <string name="preferences_timeout_force_title">Custom timeout</string>
+    <string name="preferences_timeout_force_summary">Manually set connect timeout</string>
+    <string name="preferences_timeout_title">Connect timeout</string>
+    <string name="preferences_timeout_summary">Timeout of a port connection in millisecondes</string>
     <string name="preferences_ssh_user_title">SSH User</string>
     <string name="preferences_ssh_user_summary">Username for the SSH connection</string>
     <string name="preferences_threads_title">Discovery Threads</string>

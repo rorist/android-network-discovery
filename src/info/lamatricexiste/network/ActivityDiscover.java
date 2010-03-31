@@ -6,6 +6,7 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.HardwareAddress;
+import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.Help;
@@ -31,6 +32,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,8 +48,7 @@ import android.widget.Toast;
 
 final public class ActivityDiscover extends Activity {
 
-    // private final String TAG = "info.lamatricexiste.network";
-    // private final int DEFAULT_DISCOVER = 1;
+    private final String TAG = "ActivityDiscover";
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
     public static final int MENU_SCAN_SINGLE = 0;
@@ -57,13 +58,12 @@ final public class ActivityDiscover extends Activity {
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     private HardwareAddress mHardwareAddress;
-    // private Button btn;
     private Button btn_discover;
     private Button btn_export;
     public SharedPreferences prefs = null;
     private ConnectivityManager connMgr;
     private AbstractDiscovery mDiscoveryTask = null;
-    private RootDaemon mRootDaemon;
+    private RootDaemon mRootDaemon = null;
     private Context ctxt;
 
     @Override
@@ -108,30 +108,6 @@ final public class ActivityDiscover extends Activity {
             }
         });
 
-        // Send Request
-        // btn = (Button) findViewById(R.id.btn);
-        // btn.setOnClickListener(new View.OnClickListener() {
-        // public void onClick(View v) {
-        // sendPacket();
-        // }
-        // });
-
-        // All
-        // Button btn3 = (Button) findViewById(R.id.btn3);
-        // btn3.setOnClickListener(new View.OnClickListener() {
-        // public void onClick(View v) {
-        // setSelectedHosts(true);
-        // }
-        // });
-
-        // None
-        // Button btn4 = (Button) findViewById(R.id.btn4);
-        // btn4.setOnClickListener(new View.OnClickListener() {
-        // public void onClick(View v) {
-        // setSelectedHosts(false);
-        // }
-        // });
-
         // Hosts list
         adapter = new HostsAdapter(ctxt);
         ListView list = (ListView) findViewById(R.id.output);
@@ -142,7 +118,6 @@ final public class ActivityDiscover extends Activity {
 
         // Fake hosts
         // adapter.add("10.0.10.1");
-        mRootDaemon = new RootDaemon(ActivityDiscover.this);
     }
 
     @Override
@@ -164,13 +139,20 @@ final public class ActivityDiscover extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        mRootDaemon.start();
+        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+            mRootDaemon = new RootDaemon(ActivityDiscover.this);
+            mRootDaemon.start();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mRootDaemon.kill();
+        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+            if (mRootDaemon != null) {
+                mRootDaemon.kill();
+            }
+        }
     }
 
     @Override
@@ -334,7 +316,6 @@ final public class ActivityDiscover extends Activity {
                 } else if (sstate == SupplicantState.COMPLETED) {
                     info_nt.setText(String.format(getString(R.string.wifi_dhcp), net.getSSID()));
                 }
-
             }
         }
 
@@ -372,8 +353,13 @@ final public class ActivityDiscover extends Activity {
      * Discover hosts
      */
     private void startDiscovering() {
-        // mDiscoveryTask = new Discovery(DiscoverActivity.this);
-        mDiscoveryTask = new RootDiscovery(ActivityDiscover.this);
+        Log.v(TAG, "METHOD="
+                + prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER));
+        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
+            mDiscoveryTask = new DefaultDiscovery(ActivityDiscover.this);
+        } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+            mDiscoveryTask = new RootDiscovery(ActivityDiscover.this);
+        }
         mHardwareAddress = new HardwareAddress();
         makeToast(R.string.discover_start);
         setProgressBarVisibility(true);

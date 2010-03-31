@@ -3,7 +3,7 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.Network;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -14,7 +14,7 @@ public class Reachable {
 
     final int[] ports = { 445, 22, 80, 111 };
     final int len = ports.length;
-
+    
     public int isReachable(InetAddress host, int timeout) {
         for (int i = 0; i < len; i++) {
             try {

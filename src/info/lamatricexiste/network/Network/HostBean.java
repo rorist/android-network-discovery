@@ -4,7 +4,7 @@
  */
 
 // Inspired by http://connectbot.googlecode.com/svn/trunk/connectbot/src/org/connectbot/bean/HostBean.java
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.Network;
 
 public class HostBean {
     private String ipAddress = null;

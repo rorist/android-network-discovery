@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -20,6 +21,8 @@ import android.view.Window;
 import android.widget.Toast;
 
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+
+    // TODO: Show value in summary
     // private final String TAG = "Prefs";
 
     public final static String KEY_RESOLVE_NAME = "resolve_name";
@@ -44,11 +47,29 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_RESETDB = "resetdb";
     public static final int DEFAULT_RESETDB = 1;
 
-    public static final String KEY_ROOT = "root";
-    public static final int DEFAULT_ROOT = 0;
+    public static final String KEY_ROOT_INSTALLED = "root_installed";
+    public static final int DEFAULT_ROOT_INSTALLED = 0;
+
+    public static final String KEY_METHOD_DISCOVER = "method_discovery";
+    public static final String DEFAULT_METHOD_DISCOVER = "0";
+
+    public static final String KEY_METHOD_PORTSCAN = "method_portscan";
+    public static final String DEFAULT_METHOD_PORTSCAN = "0";
+
+    public final static String KEY_TIMEOUT_FORCE = "timeout_force";
+    public final static boolean DEFAULT_TIMEOUT_FORCE = false;
+
+    public final static String KEY_TIMEOUT = "timeout";
+    public final static String DEFAULT_TIMEOUT = "500";
+
+    public static final String KEY_RATECTRL_ENABLE = "ratecontrol_enable";
+    public static final boolean DEFAULT_RATECTRL_ENABLE = true;
+
+    public final static String KEY_TIMEOUT_DISCOVER = "timeout_discover";
+    public final static String DEFAULT_TIMEOUT_DISCOVER = "500";
 
     private Context ctxt;
-    private PreferenceScreen preferenceScreen = null;
+    private PreferenceScreen ps = null;
     private String before_port_start;
     private String before_port_end;
 
@@ -59,11 +80,15 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         addPreferencesFromResource(R.xml.preferences);
         ctxt = getApplicationContext();
 
-        preferenceScreen = getPreferenceScreen();
-        preferenceScreen.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        ps = getPreferenceScreen();
+        ps.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        
+        // Default state of checkboxes        
+        checkTimeout(KEY_TIMEOUT, KEY_TIMEOUT_FORCE, true);
+        checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
 
         // Reset DB click listener
-        Preference resetdb = (Preference) preferenceScreen.findPreference(KEY_RESETDB);
+        Preference resetdb = (Preference) ps.findPreference(KEY_RESETDB);
         resetdb.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 new UpdateNicDb(Prefs.this, PreferenceManager.getDefaultSharedPreferences(ctxt));
@@ -81,16 +106,28 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         if (key.equals(KEY_PORT_START) || key.equals(KEY_PORT_END)) {
             checkPortRange();
         } else if (key.equals(KEY_NTHREADS)) {
-            checkMaxThreads(key);
+            checkMaxThreads();
+        } else if (key.equals(KEY_TIMEOUT_FORCE)) {
+            checkTimeout(KEY_TIMEOUT, KEY_TIMEOUT_FORCE, true);
+        } else if (key.equals(KEY_RATECTRL_ENABLE)) {
+            checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
+        }
+    }
+
+    private void checkTimeout(String key_pref, String key_cb, boolean value) {
+        EditTextPreference timeout = (EditTextPreference) ps.findPreference(key_pref);
+        CheckBoxPreference cb = (CheckBoxPreference) ps.findPreference(key_cb);
+        if (cb.isChecked()) {
+            timeout.setEnabled(value);
+        } else {
+            timeout.setEnabled(!value);
         }
     }
 
     private void checkPortRange() {
         // Check if port start is bigger or equal than port end
-        EditTextPreference portStartEdit = (EditTextPreference) preferenceScreen
-                .findPreference(KEY_PORT_START);
-        EditTextPreference portEndEdit = (EditTextPreference) preferenceScreen
-                .findPreference(KEY_PORT_END);
+        EditTextPreference portStartEdit = (EditTextPreference) ps.findPreference(KEY_PORT_START);
+        EditTextPreference portEndEdit = (EditTextPreference) ps.findPreference(KEY_PORT_END);
         try {
             int portStart = Integer.parseInt(portStartEdit.getText());
             int portEnd = Integer.parseInt(portEndEdit.getText());
@@ -106,9 +143,9 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         }
     }
 
-    private void checkMaxThreads(String key) {
+    private void checkMaxThreads() {
         // Check if nthreads is numeric and between 1-256
-        EditTextPreference threads = (EditTextPreference) preferenceScreen.findPreference(key);
+        EditTextPreference threads = (EditTextPreference) ps.findPreference(KEY_NTHREADS);
         int nthreads = 0;
         try {
             nthreads = Integer.parseInt(threads.getText());

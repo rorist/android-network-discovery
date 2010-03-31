@@ -6,17 +6,15 @@
 <resources>
 
     <string-array
-        name="discover_method_name">
-        <item>Incrémental (defaut)</item>
-        <item>Broadcast</item>
-        <item>Idle scan</item>
+        name="method_discover_name">
+        <item>Ping (défaut)</item>
+        <item>Root</item>
     </string-array>
 
     <string-array
-        name="discover_method_value">
+        name="method_discover_value">
+        <item>0</item>
         <item>1</item>
-        <item>2</item>
-        <item>3</item>
     </string-array>
 
 </resources>

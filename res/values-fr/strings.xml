@@ -68,16 +68,25 @@
     
     <string name="preferences_help">Aide</string>
     <string name="preferences_notifications">Options de Notifications</string>
-    <string name="preferences_port_scan">Options du Scan de Ports</string>
+    <string name="preferences_discover">Options de Découverte de Machines</string>
+    <string name="preferences_portscan">Options du Scan de Ports</string>
     <string name="preferences_advanced">Options Avancés</string>
     <string name="preferences_resolve_name_title">Résoudre les noms d\'hôtes</string>
     <string name="preferences_resolve_name_summary">Augmente le nombre de requêtes effectuées sur le réseaux</string>
     <string name="preferences_vibrate_title">Vibration</string>
     <string name="preferences_vibrate_summary">Vibre lorsque le Scan est terminé</string>
+    <string name="preferences_ratecontrol_enable_title">Contrôle fréquence de scan</string>
+    <string name="preferences_ratecontrol_enable_summary">Activer le contôle automatique de la vitesse de scan</string>
+    <string name="preferences_timeout_discover_title">Délai de connection</string>
+    <string name="preferences_timeout_discover_summary">Délai maximum d\'une connection à une machine, en millisecondes</string>
     <string name="preferences_port_start_title">Premier port</string>
     <string name="preferences_port_start_summary">Le premier port TCP à scanner. 1-65535</string>
     <string name="preferences_port_end_title">Dernier port</string>
     <string name="preferences_port_end_summary">Le dernier port TCP à scanner. 1-65535</string>
+    <string name="preferences_timeout_force_title">Délai de connection personnalisé</string>
+    <string name="preferences_timeout_force_summary">Régler manuellement le délai de connection</string>
+    <string name="preferences_timeout_title">Délai de connection</string>
+    <string name="preferences_timeout_summary">Délai maximum d\'une connection à un port, en millisecondes</string>
     <string name="preferences_ssh_user_title">Nom d\'utilisateur SSH</string>
     <string name="preferences_ssh_user_summary">Utilisateur à utiliser pour se connecter en SSH</string>
     <string name="preferences_threads_title">Discovery Threads</string>

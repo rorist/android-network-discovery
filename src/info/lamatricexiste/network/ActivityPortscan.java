@@ -6,6 +6,7 @@
 // TODO: Detect wifi status
 package info.lamatricexiste.network;
 
+import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
 
@@ -37,7 +38,7 @@ import android.widget.Toast;
 
 final public class ActivityPortscan extends TabActivity {
 
-    // private final String TAG = "PortScanActivity";
+    // private final String TAG = "ActivityPortscan";
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
     private String host;
@@ -70,18 +71,11 @@ final public class ActivityPortscan extends TabActivity {
         Bundle extra = getIntent().getExtras();
         host = extra.getString(HostBean.EXTRA_HOST);
         position = extra.getInt(HostBean.EXTRA_POSITION);
-        timeout = extra.getInt(HostBean.EXTRA_TIMEOUT);
         ports_open = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSO));
         ports_closed = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSC));
         cnt_open = (ports_open == null) ? 0 : ports_open.size();
         cnt_closed = (ports_closed == null) ? 0 : ports_closed.size();
-
-        // Adapt title size
-        // DisplayMetrics metrics = new DisplayMetrics();
-        // getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        // ((TextView) findViewById(R.id.host))
-        // .setWidth((int) (metrics.widthPixels - (2 * 104 * (metrics.density /
-        // 160))));
+        timeout = extra.getInt(HostBean.EXTRA_TIMEOUT, Integer.parseInt(Prefs.DEFAULT_TIMEOUT));
 
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
@@ -235,7 +229,7 @@ final public class ActivityPortscan extends TabActivity {
     private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
 
-        ScanPortTask(String host) {
+        ScanPortTask(String host, int timeout) {
             super(host, timeout);
         }
 
@@ -319,7 +313,7 @@ final public class ActivityPortscan extends TabActivity {
         cnt_closed = 0;
         ports_open = new ArrayList<Integer>();
         ports_closed = new ArrayList<Integer>();
-        scanPortTask = new ScanPortTask(host);
+        scanPortTask = new ScanPortTask(host, getTimeout());
         scanPortTask.execute();
         btn_scan.setText(R.string.btn_discover_cancel);
         btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cancel, 0, 0);
@@ -348,6 +342,13 @@ final public class ActivityPortscan extends TabActivity {
                 startScan();
             }
         });
+    }
+
+    private int getTimeout() {
+        if (prefs.getBoolean(Prefs.KEY_TIMEOUT_FORCE, Prefs.DEFAULT_TIMEOUT_FORCE)) {
+            return Integer.parseInt(prefs.getString(Prefs.KEY_TIMEOUT, Prefs.DEFAULT_TIMEOUT));
+        }
+        return timeout;
     }
 
     private List<String> preparePort(ArrayList<Integer> ports, String state) {
@@ -379,6 +380,7 @@ final public class ActivityPortscan extends TabActivity {
         return null;
     }
 
+    // TODO: Service discovery
     private void openPortService(int port) {
         String pk = "";
         String action = "";

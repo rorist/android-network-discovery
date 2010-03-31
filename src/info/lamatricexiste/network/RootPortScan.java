@@ -12,13 +12,8 @@ public class RootPortScan extends AbstractPortScan {
 
     // private final String TAG = "RootPortScan";
 
-    protected RootPortScan(String host) {
-        super(host);
-    }
-
     protected RootPortScan(String host, final int timeout) {
-        super(host);
-        TIMEOUT_SOCKET = timeout;
+        super(host, timeout);
     }
 
     protected void start(InetAddress ina, final int PORT_START, final int PORT_END)

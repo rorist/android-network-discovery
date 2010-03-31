@@ -3,44 +3,23 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package info.lamatricexiste.network;
+package info.lamatricexiste.network.Network;
 
-import java.io.InputStreamReader;
-import android.util.Log;
-import java.util.regex.Matcher;
 import java.io.BufferedReader;
 import java.io.File;
-import java.lang.Process;
+import java.io.InputStreamReader;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import android.util.Log;
 
 public class RateControl {
 
     // TODO: Calculate a rounded up value from experiments in different networks
     private final String TAG = "RateControl";
-    private final long RATE_BASE = 1000;
-    private long rate = RATE_BASE; // Slow start
-    private String[] indicator;
-    private boolean indicator_discovered = false;
-
-    public long getRate() {
-        return rate;
-    }
-
-    public void setRate(long rate) {
-        this.rate = rate;
-    }
-
-    public void setIndicator(String... indicator) {
-        this.indicator = indicator;
-    }
-
-    public String[] getIndicator() {
-        return indicator;
-    }
-
-    public boolean isIndicatorDiscovered() {
-        return indicator_discovered;
-    }
+    public String[] indicator;
+    public long rate = 800; // Slow start
+    public boolean is_indicator_discovered = false;
 
     public void adaptRate() {
         long response_time = 0;
@@ -48,11 +27,11 @@ public class RateControl {
         // if (indicator.length > 1) {
         // Log.v(TAG, "use a socket here, port=" + getIndicator()[1]);
         // } else {
-        indicator_discovered = true;
-        if ((response_time = getAvgResponseTime(getIndicator()[0], 3)) > 0) {
+        is_indicator_discovered = true;
+        if ((response_time = getAvgResponseTime(indicator[0], 3)) > 0) {
             // Add 30% to the response time
-            setRate(response_time + (response_time * 3 / 10));
-            Log.v(TAG, "rate=" + getRate());
+            rate = response_time + (response_time * 3 / 10);
+            Log.v(TAG, "rate=" + rate);
         }
         // }
     }

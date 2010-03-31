@@ -5,8 +5,8 @@
 
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.R;
 import info.lamatricexiste.network.Network.DownloadFile;
+import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -21,6 +21,8 @@ import java.nio.channels.WritableByteChannel;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class RootDaemon extends AbstractRoot {
@@ -34,6 +36,13 @@ public class RootDaemon extends AbstractRoot {
         mActivity = new WeakReference<Activity>(activity);
         hasRoot = checkRoot();
         dir = getDir();
+        // Check if daemon is installed, if not run MainActivity again
+        final Activity d = mActivity.get();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
+                .getApplicationContext());
+        if (hasRoot && prefs.getInt(Prefs.KEY_ROOT_INSTALLED, Prefs.DEFAULT_ROOT_INSTALLED) == 0) {
+            d.startActivity(new Intent(d.getApplicationContext(), ActivityMain.class));
+        }
     }
 
     public void start() {

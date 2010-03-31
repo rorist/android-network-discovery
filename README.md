@@ -36,7 +36,7 @@ Todo
  * Nat Traversal
  * Support of other protocol: UDP, SCTP
 
-License
+GPLv2 License
 -------
 
 Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)

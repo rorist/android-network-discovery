@@ -22,21 +22,18 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
     protected int port_end;
     protected int nb_port;
     protected String host;
-    protected int TIMEOUT_SOCKET = 1000;
+    protected int timeout;
 
-    protected AbstractPortScan(String host) {
+    protected AbstractPortScan(String host, final int timeout) {
         this.host = host;
-    }
-    
-    protected AbstractPortScan(String host, int timeout) {
-        this.host = host;
-        this.TIMEOUT_SOCKET = timeout;
+        this.timeout = timeout;
     }
     
     abstract protected void stop();
     abstract protected void start(InetAddress ina, final int PORT_START, final int PORT_END) throws InterruptedException, IOException;
 
     protected Void doInBackground(Void... params) {
+        Log.v(TAG, "timeout=" + timeout);
         try {
             step = 127;
             InetAddress ina = InetAddress.getByName(host);
@@ -62,7 +59,7 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
     }
 
     protected void cancelTimeouts() throws IOException {
-        if ((System.currentTimeMillis() - time) > TIMEOUT_SOCKET) {
+        if ((System.currentTimeMillis() - time) > timeout) {
             stop();
         }
     }

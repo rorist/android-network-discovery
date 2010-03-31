@@ -4,7 +4,7 @@
  */
 
 /**
- * Un peu de doc:
+ * Java NIO Documentation:
  * http://weblogs.java.net/blog/2006/05/30/tricks-and-tips-nio-part-i-why-you-must-handle-opwrite
  * http://www.java.net/blog/2006/06/06/tricks-and-tips-nio-part-ii-why-selectionkeyattach-evil
  * http://weblogs.java.net/blog/2006/07/07/tricks-and-tips-nio-part-iii-thread-or-not-thread
@@ -17,9 +17,11 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import android.util.Log;
@@ -28,18 +30,12 @@ import android.util.SparseArray;
 public class DefaultPortscan extends AbstractPortScan {
 
     private final String TAG = "PortScan";
-    private final int TIMEOUT_SELECT = 100;
-    // private final int SCAN_RATE = 0;
+    private final int TIMEOUT_SELECT = 300;
     private int cnt_selected;
     private Selector selector = null;
 
-    protected DefaultPortscan(String host) {
-        super(host);
-    }
-
     protected DefaultPortscan(String host, final int timeout) {
-        super(host);
-        TIMEOUT_SOCKET = timeout;
+        super(host, timeout);
     }
 
     protected void start(InetAddress ina, final int PORT_START, final int PORT_END)
@@ -48,7 +44,7 @@ public class DefaultPortscan extends AbstractPortScan {
         selector = Selector.open();
         for (int i = PORT_START; i <= PORT_END; i++) {
             connectSocket(ina, i);
-            // Thread.sleep(SCAN_RATE);
+            // Thread.sleep(timeout);
         }
         doSelect(PORT_END - PORT_START);
     }
@@ -57,16 +53,21 @@ public class DefaultPortscan extends AbstractPortScan {
         if (selector != null) {
             synchronized (selector) {
                 if (selector.isOpen()) {
-                    // Force invalidate keys
-                    Iterator<SelectionKey> iterator = selector.keys().iterator();
-                    while (iterator.hasNext()) {
-                        publishProgress(0, -2);
-                        finishKey((SelectionKey) iterator.next());
-                    }
-                    // Close the selector
                     try {
+                        // Force invalidate keys
+                        Iterator<SelectionKey> iterator = selector.keys().iterator();
+                        while (iterator.hasNext()) {
+                            publishProgress(0, -2);
+                            synchronized (iterator) {
+                                finishKey((SelectionKey) iterator.next());
+                            }
+                        }
+                        // Close the selector
                         selector.close();
+                    } catch (ClosedSelectorException e) {
+                        Log.e(TAG, "ClosedSelectorException");
                     } catch (IOException e) {
+                        Log.e(TAG, e.getMessage());
                     }
                 }
             }
@@ -141,6 +142,8 @@ public class DefaultPortscan extends AbstractPortScan {
             try {
                 ((SocketChannel) key.channel()).close();
             } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } catch (ConcurrentModificationException e) {
                 Log.e(TAG, e.getMessage());
             } finally {
                 key.cancel();

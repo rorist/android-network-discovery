@@ -6,6 +6,7 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.NetInfo;
+import info.lamatricexiste.network.Network.RateControl;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.lang.ref.WeakReference;
@@ -53,7 +54,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
         final ActivityDiscover discover = mDiscover.get();
         if (!isCancelled()) {
             if (item[0] != null) {
-                discover.addHost(item[0], mRateControl.getRate());
+                discover.addHost(item[0], mRateControl.rate);
             }
             hosts_done++;
             discover.setProgress((int) (hosts_done * 10000 / size));

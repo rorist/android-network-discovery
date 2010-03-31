@@ -6,6 +6,7 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.NetInfo;
+import info.lamatricexiste.network.Network.Reachable;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.IOException;
@@ -20,18 +21,17 @@ import android.util.Log;
 public class DefaultDiscovery extends AbstractDiscovery {
 
     private final String TAG = "Discovery";
-    private final int TIMEOUT_REACH = 1000;
     private final int mRateMult = 50; // Number of hosts between Rate Checks
     private int mRateCnt = 0;
     private int pt_move = 2; // 1=backward 2=forward
     private Reachable mReachable;
     private ExecutorService mPool;
-    private SharedPreferences mPrefsMgr;
+    private SharedPreferences mPrefs;
 
     public DefaultDiscovery(ActivityDiscover discover) {
         super(discover);
         mReachable = new Reachable();
-        mPrefsMgr = discover.prefs;
+        mPrefs = discover.prefs;
     }
 
     protected void publish(String str) {
@@ -43,8 +43,8 @@ public class DefaultDiscovery extends AbstractDiscovery {
     protected Void doInBackground(Void... params) {
         Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start + "), end="
                 + NetInfo.getIpFromLongUnsigned(end) + " (" + end + "), length=" + size);
-        mPool = Executors.newFixedThreadPool(Integer.parseInt(mPrefsMgr.getString(
-                Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
+        mPool = Executors.newFixedThreadPool(Integer.parseInt(mPrefs.getString(Prefs.KEY_NTHREADS,
+                Prefs.DEFAULT_NTHREADS)));
 
         try {
             // gateway
@@ -99,24 +99,25 @@ public class DefaultDiscovery extends AbstractDiscovery {
 
         public void run() {
             try {
-                Thread.sleep((int) mRateControl.getRate());
-                InetAddress h = InetAddress.getByName(host); //FIXME: is that producing logs?
+                Thread.sleep(getRate());
+                InetAddress h = InetAddress.getByName(host); // FIXME: is that
+                // producing logs?
                 // Rate control check
-                if (mRateControl.isIndicatorDiscovered() && mRateCnt % mRateMult == 0) {
+                if (mRateControl.is_indicator_discovered && mRateCnt % mRateMult == 0) {
                     mRateControl.adaptRate();
                 }
                 // Native InetAddress check
-                if (h.isReachable(TIMEOUT_REACH)) {
+                if (h.isReachable(getRate())) {
                     publish(host);
-                    if (!mRateControl.isIndicatorDiscovered()) {
-                        mRateControl.setIndicator(host);
+                    if (!mRateControl.is_indicator_discovered) {
+                        mRateControl.indicator = new String[]{host};
                         mRateControl.adaptRate();
                     }
                     return;
                 }
                 // Custom check
                 int port = -1;
-                if ((port = mReachable.isReachable(h, (int) mRateControl.getRate())) > -1) {
+                if ((port = mReachable.isReachable(h, getRate())) > -1) {
                     Log.v(TAG, "used Reachable object, port=" + port);
                     publish(host);
                     // if (!mRateControl.isIndicatorDiscovered()) {
@@ -134,6 +135,14 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 Log.e(TAG, e.getMessage());
             } catch (InterruptedException e) {
             }
+        }
+
+        private int getRate() {
+            if (mPrefs.getBoolean(Prefs.KEY_RATECTRL_ENABLE, Prefs.DEFAULT_RATECTRL_ENABLE)) {
+                return (int) mRateControl.rate;
+            }
+            return Integer.parseInt(mPrefs.getString(Prefs.KEY_TIMEOUT_DISCOVER,
+                    Prefs.DEFAULT_TIMEOUT_DISCOVER));
         }
     }
 }

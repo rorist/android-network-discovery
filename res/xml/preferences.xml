@@ -15,7 +15,40 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/preferences_port_scan">
+        android:title="@string/preferences_discover">
+        <ListPreference
+            android:key="method_discover"
+            android:title="Discovery Method"
+            android:summary="Select a different discovery method"
+            android:entries="@array/method_discover_name"
+            android:entryValues="@array/method_discover_value"
+            android:dialogTitle="Choose the method"/>
+        <CheckBoxPreference
+            android:key="ratecontrol_enable"
+            android:title="@string/preferences_ratecontrol_enable_title"
+            android:summary="@string/preferences_ratecontrol_enable_summary"
+            android:defaultValue="true" />
+        <EditTextPreference
+            android:key="timeout_discover"
+            android:title="@string/preferences_timeout_discover_title"
+            android:summary="@string/preferences_timeout_discover_summary"
+            android:defaultValue="500"
+            android:inputType="number" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/preferences_portscan">
+        <CheckBoxPreference
+            android:key="timeout_force"
+            android:title="@string/preferences_timeout_force_title"
+            android:summary="@string/preferences_timeout_force_summary"
+            android:defaultValue="false" />
+        <EditTextPreference
+            android:key="timeout"
+            android:title="@string/preferences_timeout_title"
+            android:summary="@string/preferences_timeout_summary"
+            android:defaultValue="500"
+            android:inputType="number" />
         <EditTextPreference
             android:key="ssh_user"
             android:title="@string/preferences_ssh_user_title"

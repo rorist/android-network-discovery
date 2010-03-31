@@ -34,14 +34,20 @@ final public class ActivityMain extends Activity {
         setTitle(R.string.app_loading);
         ctxt = getApplicationContext();
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
-        phase1();
+
+        // Determine the needed installation phases
+        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+            phase1();
+        } else {
+            phase2();
+        }
     }
 
     private void phase1() {
         // Check Root and Install Daemon
         final RootDaemon rootDaemon = new RootDaemon(this);
         if (rootDaemon.hasRoot) {
-            if (prefs.getInt(Prefs.KEY_ROOT, Prefs.DEFAULT_ROOT) == 0) {
+            if (prefs.getInt(Prefs.KEY_ROOT_INSTALLED, Prefs.DEFAULT_ROOT_INSTALLED) == 0) {
                 // Install
                 AlertDialog.Builder d = new AlertDialog.Builder(this);
                 d.setTitle(R.string.discover_root_title);
@@ -51,7 +57,7 @@ final public class ActivityMain extends Activity {
                         rootDaemon.install();
                         rootDaemon.permission();
                         Editor edit = prefs.edit();
-                        edit.putInt(Prefs.KEY_ROOT, 1);
+                        edit.putInt(Prefs.KEY_ROOT_INSTALLED, 1);
                         edit.commit();
                         // rootDaemon.restartActivity();
                         phase2();
@@ -77,13 +83,17 @@ final public class ActivityMain extends Activity {
 
         class UpdateNicDbMain extends UpdateNicDb {
             private ProgressDialog progress;
+            private Context ctxt;
 
             public UpdateNicDbMain(Context ctxt, SharedPreferences prefs) {
-                super(ctxt, prefs);
+                super(ctxt, prefs); // FIXME: memory leak (make soft ref)
+                this.ctxt = ctxt;
             }
 
             protected void onPreExecute() {
-                progress = ProgressDialog.show(ctxt, "", "Downloading DB ...");
+                progress = ProgressDialog.show(this.ctxt, "", "Downloading DB ..."); // FIXME:
+                // memory
+                // leak
                 super.onPreExecute();
 
             }
@@ -95,7 +105,9 @@ final public class ActivityMain extends Activity {
             }
 
             protected void onCancelled() {
-                progress.dismiss();
+                if (progress != null) {
+                    progress.dismiss();
+                }
                 startDiscoverActivity();
                 super.onCancelled();
             }
