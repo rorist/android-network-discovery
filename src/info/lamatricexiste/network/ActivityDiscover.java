@@ -268,11 +268,11 @@ final public class ActivityDiscover extends Activity {
     private void networkStateChanged(Intent intent) {
         // Use NetworkInfo
         TextView info_ip = (TextView) findViewById(R.id.info_ip);
-        TextView info_nt = (TextView) findViewById(R.id.info_nt);
-        TextView info_id = (TextView) findViewById(R.id.info_id);
+        TextView info_in = (TextView) findViewById(R.id.info_in);
+        TextView info_mo = (TextView) findViewById(R.id.info_mo);
 
         info_ip.setText("");
-        info_id.setText("");
+        info_mo.setText("");
         setButtonOff(btn_discover);
         setButtonOff(btn_export);
 
@@ -286,19 +286,19 @@ final public class ActivityDiscover extends Activity {
                 // Log.d(TAG, "WifiState=" + WifiState);
                 switch (WifiState) {
                     case WifiManager.WIFI_STATE_ENABLING:
-                        info_nt.setText(R.string.wifi_enabling);
+                        info_in.setText(R.string.wifi_enabling);
                         break;
                     case WifiManager.WIFI_STATE_ENABLED:
-                        info_nt.setText(R.string.wifi_enabled);
+                        info_in.setText(R.string.wifi_enabled);
                         break;
                     case WifiManager.WIFI_STATE_DISABLING:
-                        info_nt.setText(R.string.wifi_disabling);
+                        info_in.setText(R.string.wifi_disabling);
                         break;
                     case WifiManager.WIFI_STATE_DISABLED:
-                        info_nt.setText(R.string.wifi_disabled);
+                        info_in.setText(R.string.wifi_disabled);
                         break;
                     default:
-                        info_nt.setText(R.string.wifi_unknown);
+                        info_in.setText(R.string.wifi_unknown);
                 }
             }
 
@@ -306,33 +306,41 @@ final public class ActivityDiscover extends Activity {
                 SupplicantState sstate = net.getSupplicantState();
                 // Log.d(TAG, "SupplicantState=" + sstate);
                 if (sstate == SupplicantState.SCANNING) {
-                    info_nt.setText(R.string.wifi_scanning);
+                    info_in.setText(R.string.wifi_scanning);
                 } else if (sstate == SupplicantState.ASSOCIATING) {
-                    String bssid = net.getBSSID();
                     String ssid = net.getSSID();
+                    String bssid = net.getBSSID();
                     String mac = net.getMacAddress();
-                    String id = ssid != null ? ssid : (bssid != null ? bssid : mac);
-                    info_nt.setText(String.format(getString(R.string.wifi_associating), id));
+                    info_in.setText(String.format(getString(R.string.wifi_associating), (ssid != null ? ssid : (bssid != null ? bssid : mac))));
                 } else if (sstate == SupplicantState.COMPLETED) {
-                    info_nt.setText(String.format(getString(R.string.wifi_dhcp), net.getSSID()));
+                    info_in.setText(String.format(getString(R.string.wifi_dhcp), net.getSSID()));
                 }
             }
         }
 
         // 3G(connected) -> Wifi(connected)
         // TODO: Support Ethernet, with ConnectivityManager.TYPE_ETHER=3
-        final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (network_info != null) {
-            NetworkInfo.State state = network_info.getState();
-            // Log.d(TAG, "netinfo=" + state + " with " +
-            // network_info.getType());
-            // Connection check
-            if (net.getSSID() != null && state == NetworkInfo.State.CONNECTED) {
-                info_ip.setText("IP: " + net.getIp());
-                info_nt.setText("NT: " + net.getNetIp() + "/" + net.getNetCidr());
-                info_id.setText("SSID: " + net.getSSID());
-                setButtonOn(btn_discover, R.drawable.discover);
-                setButtonOn(btn_export, R.drawable.export);
+        //final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final NetworkInfo ni = connMgr.getActiveNetworkInfo();
+        if (ni != null) {
+            if(ni.getState() == NetworkInfo.State.CONNECTED){
+                int type = ni.getType();
+                if (type == ConnectivityManager.TYPE_WIFI && net.getSSID() != null) { //WIFI
+                    info_mo.setText("MODE: WiFi");
+                    info_ip.setText("IP: " + net.getIp() + "/" + net.getNetCidr());
+                    info_in.setText("SSID: " + net.getSSID());
+                    setButtonOn(btn_discover, R.drawable.discover);
+                    setButtonOn(btn_export, R.drawable.export);
+                } else if (type == ConnectivityManager.TYPE_MOBILE ) { //3G
+                    info_mo.setText("MODE: Mobile");
+                    info_ip.setText("IP: " + net.getIp() + "/" + net.getNetCidr());
+                    info_in.setText("");
+                    setButtonOn(btn_discover, R.drawable.discover); //FIXME: This is a test
+                    setButtonOn(btn_export, R.drawable.export);
+                } else if (type == 3 ) { //ETH
+                    Log.i(TAG, "Ethernet connectivity detected!");
+                    info_mo.setText("MODE: Ethernet");
+                }
             } else if (mDiscoveryTask != null) {
                 cancelTasks();
             }

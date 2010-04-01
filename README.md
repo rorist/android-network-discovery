@@ -19,8 +19,9 @@ Build
 -----
 
  *  Native Code: Follow instructions in native/README
- *  APK: build.xml is provided for ant, simply type this command:
-    ant debug
+ *  APK: 
+  * build.xml is provided for ant
+  * simply type this command: ant debug
 
 Todo
 ----
@@ -33,8 +34,8 @@ Todo
  * RateControl: better rate by host ?
  * NMAP build script (ARM and other arch (using AOSP?))
  * Refactor host info (inflater + dynamic layouts), and add new info such as Hops (using MTR?)
- * Nat Traversal
  * Support of other protocol: UDP, SCTP
+ * Nat Traversal
 
 GPLv2 License
 -------

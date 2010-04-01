@@ -84,14 +84,14 @@
                 android:textSize="10dip"
                 android:typeface="monospace" />
             <TextView
-                android:id="@+id/info_nt"
+                android:id="@+id/info_in"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
                 android:typeface="monospace"
                 android:text="@string/wifi_unknown" />
             <TextView
-                android:id="@+id/info_id"
+                android:id="@+id/info_mo"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10dip"
