@@ -26,7 +26,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
     protected long ip;
     protected long start;
     protected long end;
-    protected long size = 0;
+    protected long size;
 
     public AbstractDiscovery(ActivityDiscover discover) {
         mDiscover = new WeakReference<ActivityDiscover>(discover);
@@ -41,8 +41,8 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
     protected void onPreExecute() {
         final ActivityDiscover discover = mDiscover.get();
         NetInfo net = new NetInfo(discover);
-        ip = NetInfo.getUnsignedLongFromIp(net.getIp());
-        int shift = (32 - net.getNetCidr());
+        ip = NetInfo.getUnsignedLongFromIp(net.ip);
+        int shift = (32 - net.cidr);
         start = (ip >> shift << shift) + 1;
         end = (start | ((1 << shift) - 1)) - 1;
         size = (int) (end - start + 1);

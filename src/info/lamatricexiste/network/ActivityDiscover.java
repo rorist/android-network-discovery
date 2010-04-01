@@ -237,7 +237,7 @@ final public class ActivityDiscover extends Activity {
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(ctxt, ActivityPortscan.class);
-                    if (wifiConnected() == false) {
+                    if (NetInfo.isConnected(ctxt) == false) {
                         intent.putExtra("wifiDisabled", true);
                     }
                     intent.putExtra(HostBean.EXTRA_TIMEOUT, (int) host.getResponseTime());
@@ -302,42 +302,46 @@ final public class ActivityDiscover extends Activity {
                 }
             }
 
-            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) && net.getWifiInfo()) {
                 SupplicantState sstate = net.getSupplicantState();
                 // Log.d(TAG, "SupplicantState=" + sstate);
                 if (sstate == SupplicantState.SCANNING) {
                     info_in.setText(R.string.wifi_scanning);
                 } else if (sstate == SupplicantState.ASSOCIATING) {
-                    String ssid = net.getSSID();
-                    String bssid = net.getBSSID();
-                    String mac = net.getMacAddress();
-                    info_in.setText(String.format(getString(R.string.wifi_associating), (ssid != null ? ssid : (bssid != null ? bssid : mac))));
+                    info_in.setText(String.format(getString(R.string.wifi_associating),
+                            (net.ssid != null ? net.ssid : (net.bssid != null ? net.bssid
+                                    : net.macAddress))));
                 } else if (sstate == SupplicantState.COMPLETED) {
-                    info_in.setText(String.format(getString(R.string.wifi_dhcp), net.getSSID()));
+                    info_in.setText(String.format(getString(R.string.wifi_dhcp), net.ssid));
                 }
             }
         }
 
         // 3G(connected) -> Wifi(connected)
-        // TODO: Support Ethernet, with ConnectivityManager.TYPE_ETHER=3
-        //final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        // Support Ethernet, with ConnectivityManager.TYPE_ETHER=3
         final NetworkInfo ni = connMgr.getActiveNetworkInfo();
         if (ni != null) {
-            if(ni.getState() == NetworkInfo.State.CONNECTED){
+            if (ni.getState() == NetworkInfo.State.CONNECTED) {
                 int type = ni.getType();
-                if (type == ConnectivityManager.TYPE_WIFI && net.getSSID() != null) { //WIFI
-                    info_mo.setText("MODE: WiFi");
-                    info_ip.setText("IP: " + net.getIp() + "/" + net.getNetCidr());
-                    info_in.setText("SSID: " + net.getSSID());
-                    setButtonOn(btn_discover, R.drawable.discover);
-                    setButtonOn(btn_export, R.drawable.export);
-                } else if (type == ConnectivityManager.TYPE_MOBILE ) { //3G
-                    info_mo.setText("MODE: Mobile");
-                    info_ip.setText("IP: " + net.getIp() + "/" + net.getNetCidr());
-                    info_in.setText("");
-                    setButtonOn(btn_discover, R.drawable.discover); //FIXME: This is a test
-                    setButtonOn(btn_export, R.drawable.export);
-                } else if (type == 3 ) { //ETH
+                if (type == ConnectivityManager.TYPE_WIFI) { // WIFI
+                    net.getWifiInfo();
+                    if (net.ssid != null) {
+                        info_mo.setText("MODE: WiFi");
+                        info_ip.setText("IP: " + net.ip + "/" + net.cidr);
+                        info_in.setText("SSID: " + net.ssid);
+                        setButtonOn(btn_discover, R.drawable.discover);
+                        setButtonOn(btn_export, R.drawable.export);
+                    }
+                } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
+                    net.getMobileInfo();
+                    if (net.carrier != null) {
+                        info_mo.setText("MODE: Mobile");
+                        info_ip.setText("IP: " + net.ip + "/" + net.cidr);
+                        info_in.setText("CARRIER: " + net.carrier);
+                        setButtonOn(btn_discover, R.drawable.discover);
+                        setButtonOn(btn_export, R.drawable.export);
+                    }
+                } else if (type == 3) { // ETH
                     Log.i(TAG, "Ethernet connectivity detected!");
                     info_mo.setText("MODE: Ethernet");
                 }
@@ -347,14 +351,6 @@ final public class ActivityDiscover extends Activity {
         } else if (mDiscoveryTask != null) {
             cancelTasks();
         }
-    }
-
-    private boolean wifiConnected() {
-        final NetworkInfo network_info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (network_info.getState() == NetworkInfo.State.CONNECTED) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -435,8 +431,8 @@ final public class ActivityDiscover extends Activity {
             NetInfo net = new NetInfo(ctxt);
             AlertDialog.Builder infoDialog = new AlertDialog.Builder(this);
             infoDialog.setTitle(R.string.discover_proxy_title);
-            infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg), net
-                    .getGatewayIp()));
+            infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg),
+                    net.gatewayIp));
             infoDialog.setNegativeButton(R.string.btn_close, null);
             infoDialog.show();
         }

@@ -5,6 +5,7 @@
 
 package info.lamatricexiste.network.Utils;
 
+import info.lamatricexiste.network.AbstractRoot;
 import info.lamatricexiste.network.R;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,6 +13,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -82,8 +84,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
         ps = getPreferenceScreen();
         ps.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-        
-        // Default state of checkboxes        
+
+        // Default state of checkboxes
         checkTimeout(KEY_TIMEOUT, KEY_TIMEOUT_FORCE, true);
         checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
 
@@ -100,6 +102,14 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         before_port_start = prefs.getString(KEY_PORT_START, DEFAULT_PORT_START);
         before_port_end = prefs.getString(KEY_PORT_END, DEFAULT_PORT_END);
+
+        // Root check
+        if (!AbstractRoot.checkRoot()) {
+            ListPreference md = (ListPreference) ps.findPreference(KEY_METHOD_DISCOVER);
+            if (md != null) {
+                md.setEnabled(false);
+            }
+        }
     }
 
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {

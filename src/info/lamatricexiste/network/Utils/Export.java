@@ -28,6 +28,7 @@ public class Export {
     public Export(Context ctxt, List<HostBean> hosts) {
         this.hosts = hosts;
         net = new NetInfo(ctxt);
+        net.getWifiInfo();
     }
 
     public boolean writeToSd(String file) {
@@ -62,9 +63,9 @@ public class Export {
                 + "\t\t<date>"
                 + (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")).format(new Date())
                 + "</date>\r\n" // RFC 2822
-                + "\t\t<network>" + net.getNetIp() + "/" + net.getNetCidr() + "</network>\r\n"
-                + "\t\t<ssid>" + net.getSSID() + "</ssid>\r\n" + "\t\t<bssid>" + net.getBSSID()
-                + "</bssid>\r\n" + "\t\t<ip>" + net.getIp() + "</ip>\r\n" + "\t</info>\r\n";
+                + "\t\t<network>" + net.getNetIp() + "/" + net.cidr + "</network>\r\n"
+                + "\t\t<ssid>" + net.ssid + "</ssid>\r\n" + "\t\t<bssid>" + net.bssid
+                + "</bssid>\r\n" + "\t\t<ip>" + net.ip + "</ip>\r\n" + "\t</info>\r\n";
 
         // Hosts
         if (hosts != null) {
@@ -73,8 +74,8 @@ public class Export {
                 // Host info
                 HostBean host = hosts.get(i);
                 xml += "\t\t<host ip=\"" + host.getIpAddress() + "\" mac=\""
-                        + host.getHardwareAddress() + "\" vendor=\""
-                        + host.getNicVendor() + "\">\r\n";
+                        + host.getHardwareAddress() + "\" vendor=\"" + host.getNicVendor()
+                        + "\">\r\n";
                 // Open Ports //TODO: rething the XML structure to include close
                 // and filtered ports
                 int[] ports = host.getPortsOpen();

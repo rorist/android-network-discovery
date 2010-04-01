@@ -7,6 +7,7 @@ package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.R;
 import info.lamatricexiste.network.Network.DownloadFile;
+import info.lamatricexiste.network.Network.NetInfo;
 
 import java.io.IOException;
 
@@ -21,8 +22,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -75,7 +74,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     private void remoteCopy(Context ctxt) throws IOException {
         Log.v(TAG, "Copying oui.db remotly");
-        if (isConnected(ctxt)) {
+        if (NetInfo.isConnected(ctxt)) {
             new DownloadFile(DB_REMOTE, DB_PATH + DB_NAME);
         }
     }
@@ -96,16 +95,6 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
             return nb;
         }
         return nb;
-    }
-
-    private boolean isConnected(Context ctxt) {
-        // TODO: Move to NetInfo and factorize with DiscoveryActivity
-        NetworkInfo nfo = ((ConnectivityManager) ctxt
-                .getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-        if (nfo != null) {
-            return nfo.isConnected();
-        }
-        return false;
     }
 
     @Override
