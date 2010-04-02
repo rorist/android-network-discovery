@@ -19,7 +19,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     // private final String TAG = "AbstractDiscovery";
     private int hosts_done = 0;
-    private WeakReference<ActivityDiscover> mDiscover;
+    private WeakReference<ActivityDiscovery> mDiscover;
     protected RateControl mRateControl;
 
     // TODO: Adaptiv value or changeable by Prefs
@@ -28,8 +28,8 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
     protected long end;
     protected long size;
 
-    public AbstractDiscovery(ActivityDiscover discover) {
-        mDiscover = new WeakReference<ActivityDiscover>(discover);
+    public AbstractDiscovery(ActivityDiscovery discover) {
+        mDiscover = new WeakReference<ActivityDiscovery>(discover);
         mRateControl = new RateControl();
     }
 
@@ -39,7 +39,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPreExecute() {
-        final ActivityDiscover discover = mDiscover.get();
+        final ActivityDiscovery discover = mDiscover.get();
         NetInfo net = new NetInfo(discover);
         ip = NetInfo.getUnsignedLongFromIp(net.ip);
         int shift = (32 - net.cidr);
@@ -51,7 +51,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onProgressUpdate(String... item) {
-        final ActivityDiscover discover = mDiscover.get();
+        final ActivityDiscovery discover = mDiscover.get();
         if (!isCancelled()) {
             if (item[0] != null) {
                 discover.addHost(item[0], mRateControl.rate);
@@ -63,10 +63,10 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPostExecute(Void unused) {
-        final ActivityDiscover discover = mDiscover.get();
+        final ActivityDiscovery discover = mDiscover.get();
         if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
             Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(ActivityDiscover.VIBRATE);
+            v.vibrate(ActivityDiscovery.VIBRATE);
         }
         discover.makeToast(R.string.discover_finished);
         discover.stopDiscovering();
@@ -74,7 +74,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onCancelled() {
-        final ActivityDiscover discover = mDiscover.get();
+        final ActivityDiscovery discover = mDiscover.get();
         discover.makeToast(R.string.discover_canceled);
         discover.stopDiscovering();
     }

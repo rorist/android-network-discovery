@@ -28,7 +28,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
     private ExecutorService mPool;
     private SharedPreferences mPrefs;
 
-    public DefaultDiscovery(ActivityDiscover discover) {
+    public DefaultDiscovery(ActivityDiscovery discover) {
         super(discover);
         mReachable = new Reachable();
         mPrefs = discover.prefs;

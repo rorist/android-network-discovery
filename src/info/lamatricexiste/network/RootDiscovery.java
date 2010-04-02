@@ -26,7 +26,7 @@ public class RootDiscovery extends AbstractDiscovery {
 
     // private int buflen = 0;
 
-    public RootDiscovery(ActivityDiscover discover) {
+    public RootDiscovery(ActivityDiscovery discover) {
         super(discover);
     }
 

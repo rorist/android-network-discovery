@@ -43,23 +43,23 @@ public class NetInfo {
 
     public NetInfo(Context ctxt) {
         this.ctxt = ctxt;
-        getFirstInterface();
-        getCurrentIp();
+        getIp();
+        getCidr();
         getWifiInfo();
     }
 
-    private void getFirstInterface() {
+    private void getIp() {
         // Iterate throught interfaces
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
                     .hasMoreElements();) {
                 NetworkInterface ni = en.nextElement();
                 intf = ni.getName();
-                for (Enumeration<InetAddress> enumIp = ni.getInetAddresses(); enumIp
-                        .hasMoreElements();) {
-                    InetAddress ia = enumIp.nextElement();
+                for (Enumeration<InetAddress> nis = ni.getInetAddresses(); nis.hasMoreElements();) {
+                    InetAddress ia = nis.nextElement();
                     if (!ia.isLoopbackAddress()) {
                         ip = ia.getHostAddress();
+                        return;
                     }
                 }
             }
@@ -68,32 +68,42 @@ public class NetInfo {
         }
     }
 
-    private void getCurrentIp() {
-        // Running ip tool
+    private void getCidr() {
+        // Running ip tools
+        if (!runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
+                "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) {
+            Log.e(TAG, "command ip failed");
+        } else if (!runCommand(new File("/system/bin/ifconfig"), "ifconfig " + intf, "^" + intf
+                + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags")) {
+            Log.e(TAG, "command ifconfig failed");
+        }
+    }
+
+    private boolean runCommand(File file, String cmd, String ptrn) {
         try {
-            if ((new File("/system/xbin/ip")).exists() == true) {
+            if (file.exists() == true) {
                 String line;
                 Matcher matcher;
-                Process p = Runtime.getRuntime().exec("ip -f inet addr show " + intf);
+                Process p = Runtime.getRuntime().exec(cmd);
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
                 while ((line = r.readLine()) != null) {
                     Log.v(TAG, "IF: " + line);
-                    matcher = Pattern.compile(
-                            "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf
-                                    + "$").matcher(line);
+                    matcher = Pattern.compile(ptrn).matcher(line);
                     if (matcher.matches()) {
                         cidr = Integer.parseInt(matcher.group(1));
+                        return true;
                     }
                 }
             }
         } catch (Exception e) {
             Log.e(TAG, "Can't use native command: " + e.getMessage());
         }
+        return false;
     }
 
     public boolean getMobileInfo() {
         TelephonyManager tm = (TelephonyManager) ctxt.getSystemService(Context.TELEPHONY_SERVICE);
-        if(tm != null){
+        if (tm != null) {
             carrier = tm.getNetworkOperatorName();
         }
         return false;

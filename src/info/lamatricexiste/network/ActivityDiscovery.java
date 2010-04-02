@@ -46,7 +46,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-final public class ActivityDiscover extends Activity {
+final public class ActivityDiscovery extends Activity {
 
     private final String TAG = "ActivityDiscover";
     public final static long VIBRATE = (long) 250;
@@ -140,7 +140,7 @@ final public class ActivityDiscover extends Activity {
     public void onStart() {
         super.onStart();
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-            mRootDaemon = new RootDaemon(ActivityDiscover.this);
+            mRootDaemon = new RootDaemon(ActivityDiscovery.this);
             mRootDaemon.start();
         }
     }
@@ -157,11 +157,11 @@ final public class ActivityDiscover extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, ActivityDiscover.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+        menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
-        menu.add(0, ActivityDiscover.MENU_OPTIONS, 0, "Options").setIcon(
+        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, "Options").setIcon(
                 android.R.drawable.ic_menu_preferences);
-        menu.add(0, ActivityDiscover.MENU_HELP, 0, R.string.preferences_help).setIcon(
+        menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
         return true;
     }
@@ -169,13 +169,13 @@ final public class ActivityDiscover extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case ActivityDiscover.MENU_SCAN_SINGLE:
+            case ActivityDiscovery.MENU_SCAN_SINGLE:
                 scanSingle(this, null);
                 return true;
-            case ActivityDiscover.MENU_OPTIONS:
+            case ActivityDiscovery.MENU_OPTIONS:
                 startActivity(new Intent(ctxt, Prefs.class));
                 return true;
-            case ActivityDiscover.MENU_HELP:
+            case ActivityDiscovery.MENU_HELP:
                 startActivity(new Intent(ctxt, Help.class));
                 return true;
         }
@@ -360,9 +360,9 @@ final public class ActivityDiscover extends Activity {
         Log.v(TAG, "METHOD="
                 + prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER));
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
-            mDiscoveryTask = new DefaultDiscovery(ActivityDiscover.this);
+            mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-            mDiscoveryTask = new RootDiscovery(ActivityDiscover.this);
+            mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress();
         makeToast(R.string.discover_start);
@@ -451,7 +451,7 @@ final public class ActivityDiscover extends Activity {
     private void showHostInfo(HostBean host) {
         View v = mInflater.inflate(R.layout.info, null);
         // Build info dialog
-        AlertDialog.Builder infoDialog = new AlertDialog.Builder(ActivityDiscover.this);
+        AlertDialog.Builder infoDialog = new AlertDialog.Builder(ActivityDiscovery.this);
         infoDialog.setTitle(host.getIpAddress());
         ((TextView) v.findViewById(R.id.info_mac)).setText(host.getHardwareAddress());
         ((TextView) v.findViewById(R.id.info_nic)).setText(host.getNicVendor());
@@ -527,7 +527,7 @@ final public class ActivityDiscover extends Activity {
             public void onClick(DialogInterface dlg, int sumthin) {
                 final String fileEdit = txt.getText().toString();
                 if (e.fileExists(fileEdit)) {
-                    AlertDialog.Builder fileExists = new AlertDialog.Builder(ActivityDiscover.this);
+                    AlertDialog.Builder fileExists = new AlertDialog.Builder(ActivityDiscovery.this);
                     fileExists.setTitle(R.string.export_exists_title);
                     fileExists.setMessage(R.string.export_exists_msg);
                     fileExists.setPositiveButton(R.string.btn_yes,

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.TabActivity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,7 +40,7 @@ import android.widget.Toast;
 
 final public class ActivityPortscan extends TabActivity {
 
-    // private final String TAG = "ActivityPortscan";
+    private final String TAG = "ActivityPortscan";
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
     private String host;
@@ -152,11 +154,11 @@ final public class ActivityPortscan extends TabActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, ActivityDiscover.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+        menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
-        menu.add(0, ActivityDiscover.MENU_OPTIONS, 0, "Options").setIcon(
+        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, "Options").setIcon(
                 android.R.drawable.ic_menu_preferences);
-        menu.add(0, ActivityDiscover.MENU_HELP, 0, R.string.preferences_help).setIcon(
+        menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
         return true;
     }
@@ -164,13 +166,13 @@ final public class ActivityPortscan extends TabActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case ActivityDiscover.MENU_SCAN_SINGLE:
-                ActivityDiscover.scanSingle(this, host);
+            case ActivityDiscovery.MENU_SCAN_SINGLE:
+                ActivityDiscovery.scanSingle(this, host);
                 return true;
-            case ActivityDiscover.MENU_OPTIONS:
+            case ActivityDiscovery.MENU_OPTIONS:
                 startActivity(new Intent(ctxt, Prefs.class));
                 return true;
-            case ActivityDiscover.MENU_HELP:
+            case ActivityDiscovery.MENU_HELP:
                 startActivity(new Intent(ctxt, Help.class));
                 return true;
         }
@@ -279,7 +281,7 @@ final public class ActivityPortscan extends TabActivity {
         protected void onPostExecute(Void unused) {
             if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(ActivityDiscover.VIBRATE);
+                v.vibrate(ActivityDiscovery.VIBRATE);
             }
             if (ports_open.size() == 0) {
                 makeToast(R.string.scan_noport);
@@ -426,7 +428,11 @@ final public class ActivityPortscan extends TabActivity {
                 // message of service
         }
         if (intent != null) {
-            startActivity(intent);
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
 

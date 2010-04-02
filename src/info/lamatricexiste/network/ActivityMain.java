@@ -133,7 +133,7 @@ final public class ActivityMain extends Activity {
     }
 
     private void startDiscoverActivity() {
-        startActivity(new Intent(ctxt, ActivityDiscover.class));
+        startActivity(new Intent(ctxt, ActivityDiscovery.class));
         finish();
     }
 }
