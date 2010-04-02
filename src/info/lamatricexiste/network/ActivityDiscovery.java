@@ -229,7 +229,8 @@ final public class ActivityDiscovery extends Activity {
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
-            if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
+            if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
+                    && host.hostname != null) {
                 holder.host.setText(host.hostname);
             } else {
                 holder.host.setText(host.ipAddress);
