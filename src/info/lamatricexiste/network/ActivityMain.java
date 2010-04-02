@@ -9,7 +9,6 @@ import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -82,32 +81,17 @@ final public class ActivityMain extends Activity {
     private void phase2() {
 
         class UpdateNicDbMain extends UpdateNicDb {
-            private ProgressDialog progress;
-            private Context ctxt;
 
-            public UpdateNicDbMain(Context ctxt, SharedPreferences prefs) {
-                super(ctxt, prefs); // FIXME: memory leak (make soft ref)
-                this.ctxt = ctxt;
-            }
-
-            protected void onPreExecute() {
-                progress = ProgressDialog.show(this.ctxt, "", "Downloading DB ..."); // FIXME:
-                // memory
-                // leak
-                super.onPreExecute();
-
+            public UpdateNicDbMain(Activity activity) {
+                super(activity);
             }
 
             protected void onPostExecute(Void unused) {
-                progress.dismiss();
                 startDiscoverActivity();
                 super.onPostExecute(unused);
             }
 
             protected void onCancelled() {
-                if (progress != null) {
-                    progress.dismiss();
-                }
                 startDiscoverActivity();
                 super.onCancelled();
             }
@@ -117,7 +101,7 @@ final public class ActivityMain extends Activity {
         try {
             if (prefs.getInt(Prefs.KEY_RESETDB, Prefs.DEFAULT_RESETDB) != getPackageManager()
                     .getPackageInfo(TAG, 0).versionCode) {
-                new UpdateNicDbMain(ActivityMain.this, prefs);
+                new UpdateNicDbMain(ActivityMain.this);
             } else {
                 // There is a NIC Db installed
                 startDiscoverActivity();

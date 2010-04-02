@@ -35,6 +35,7 @@ Todo
  * NMAP build script (ARM and other arch (using AOSP?))
  * Refactor host info (inflater + dynamic layouts), and add new info such as Hops (using MTR?)
  * Support of other protocol: UDP, SCTP
+ * Send custom packets (shell codes, exploits, ...)
  * Nat Traversal
 
 GPLv2 License

@@ -93,7 +93,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         Preference resetdb = (Preference) ps.findPreference(KEY_RESETDB);
         resetdb.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                new UpdateNicDb(Prefs.this, PreferenceManager.getDefaultSharedPreferences(ctxt));
+                new UpdateNicDb(Prefs.this);
                 return false;
             }
         });

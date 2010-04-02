@@ -10,9 +10,11 @@ import info.lamatricexiste.network.Network.DownloadFile;
 import info.lamatricexiste.network.Network.NetInfo;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -23,6 +25,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -32,16 +35,14 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
     private final static String DB_REMOTE = "http://download.lamatricexiste.info/oui.db";
     private final static String DB_PATH = "/data/data/info.lamatricexiste.network/";
     private final static String DB_NAME = "oui.db";
-
-    private Context ctxt;
-    private SharedPreferences prefs;
     private int nb;
+    private ProgressDialog progress;
+    protected WeakReference<Activity> mActivity;
 
-    public UpdateNicDb(final Context ctxt, final SharedPreferences prefs) {
-        // TODO: Use weak Reference
-        this.ctxt = ctxt;
-        this.prefs = prefs;
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(ctxt);
+    public UpdateNicDb(Activity activity) {
+        mActivity = new WeakReference<Activity>(activity);
+        final Activity d = mActivity.get();
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(d);
         dialog.setTitle(R.string.preferences_resetdb_action);
         dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -58,14 +59,16 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPreExecute() {
-        ((Activity) ctxt).setProgressBarIndeterminateVisibility(true);
+        final Activity d = mActivity.get();
+        d.setProgressBarIndeterminateVisibility(true);
+        progress = ProgressDialog.show(d, "", "Downloading DB ...");
     }
 
     @Override
     protected Void doInBackground(Void... params) {
         try {
             nb = countEntries();
-            remoteCopy(ctxt);
+            remoteCopy(mActivity.get());
         } catch (IOException e) {
             cancel(true);
         }
@@ -99,14 +102,16 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPostExecute(Void unused) {
-        ((Activity) ctxt).setProgressBarIndeterminateVisibility(false);
-        Toast.makeText(
-                ctxt,
-                String.format(ctxt.getString(R.string.preferences_resetdb_ok),
-                        (countEntries() - nb)), Toast.LENGTH_LONG).show();
+        final Activity d = mActivity.get();
+        progress.dismiss();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d.getApplication());
+        d.setProgressBarIndeterminateVisibility(false);
+        Toast.makeText(d.getApplicationContext(),
+                String.format(d.getString(R.string.preferences_resetdb_ok), (countEntries() - nb)),
+                Toast.LENGTH_LONG).show();
         try {
             Editor edit = prefs.edit();
-            edit.putInt(Prefs.KEY_RESETDB, ctxt.getPackageManager().getPackageInfo(
+            edit.putInt(Prefs.KEY_RESETDB, d.getPackageManager().getPackageInfo(
                     "info.lamatricexiste.network", 0).versionCode);
             edit.commit();
         } catch (NameNotFoundException e) {
@@ -116,6 +121,11 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onCancelled() {
-        Toast.makeText(ctxt, R.string.preferences_error3, Toast.LENGTH_SHORT).show();
+        final Activity d = mActivity.get();
+        if (progress != null) {
+            progress.dismiss();
+        }
+        Toast.makeText(d.getApplicationContext(), R.string.preferences_error3, Toast.LENGTH_SHORT)
+                .show();
     }
 }
