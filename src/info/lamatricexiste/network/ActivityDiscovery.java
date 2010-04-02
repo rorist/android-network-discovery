@@ -193,8 +193,8 @@ final public class ActivityDiscovery extends Activity {
                     Bundle extra = data.getExtras();
                     int position = extra.getInt(HostBean.EXTRA_POSITION);
                     HostBean host = hosts.get(position);
-                    host.setPortsOpen(extra.getIntArray(HostBean.EXTRA_PORTSO));
-                    host.setPortsClosed(extra.getIntArray(HostBean.EXTRA_PORTSC));
+                    host.portsOpen = extra.getIntArray(HostBean.EXTRA_PORTSO);
+                    host.portsClosed = extra.getIntArray(HostBean.EXTRA_PORTSC);
                     // OS Fingerprint check
                     // host.setOs(OsFingerprint.finger(extra.getLongArray(HostBean.EXTRA_)));
                 }
@@ -230,9 +230,9 @@ final public class ActivityDiscovery extends Activity {
             }
             final HostBean host = hosts.get(position);
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
-                holder.host.setText(host.getHostname());
+                holder.host.setText(host.hostname);
             } else {
-                holder.host.setText(host.getIpAddress());
+                holder.host.setText(host.ipAddress);
             }
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -240,12 +240,12 @@ final public class ActivityDiscovery extends Activity {
                     if (NetInfo.isConnected(ctxt) == false) {
                         intent.putExtra("wifiDisabled", true);
                     }
-                    intent.putExtra(HostBean.EXTRA_TIMEOUT, (int) host.getResponseTime());
+                    intent.putExtra(HostBean.EXTRA_TIMEOUT, (int) host.responseTime);
                     intent.putExtra(HostBean.EXTRA_POSITION, position);
-                    intent.putExtra(HostBean.EXTRA_HOST, host.getIpAddress());
-                    intent.putExtra(HostBean.EXTRA_HOSTNAME, host.getHostname());
-                    intent.putExtra(HostBean.EXTRA_PORTSO, host.getPortsOpen());
-                    intent.putExtra(HostBean.EXTRA_PORTSC, host.getPortsClosed());
+                    intent.putExtra(HostBean.EXTRA_HOST, host.ipAddress);
+                    intent.putExtra(HostBean.EXTRA_HOSTNAME, host.hostname);
+                    intent.putExtra(HostBean.EXTRA_PORTSO, host.portsOpen);
+                    intent.putExtra(HostBean.EXTRA_PORTSC, host.portsClosed);
                     startActivityForResult(intent, SCAN_PORT_RESULT);
                 }
             });
@@ -410,14 +410,14 @@ final public class ActivityDiscovery extends Activity {
         String haddr = mHardwareAddress.getHardwareAddress(addr);
         if (!hardwareAddressAlreadyExists(haddr)) {
             HostBean host = new HostBean();
-            host.setHardwareAddress(haddr);
-            host.setNicVendor(mHardwareAddress.getNicVendor(ctxt, haddr));
-            host.setIpAddress(addr);
-            host.setPosition(hosts.size());
-            host.setResponseTime(timeout);
+            host.hardwareAddress = haddr;
+            host.nicVendor = mHardwareAddress.getNicVendor(ctxt, haddr);
+            host.ipAddress = addr;
+            host.position = hosts.size();
+            host.responseTime = timeout;
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
                 try {
-                    host.setHostname((InetAddress.getByName(addr)).getCanonicalHostName());
+                    host.hostname = (InetAddress.getByName(addr)).getCanonicalHostName();
                 } catch (UnknownHostException e) {
                     return;
                 }
@@ -441,7 +441,7 @@ final public class ActivityDiscovery extends Activity {
     private boolean hardwareAddressAlreadyExists(String addr) {
         // TODO: Find a more performant method
         for (HostBean host : hosts) {
-            if (host.getHardwareAddress() == addr) {
+            if (host.hardwareAddress == addr) {
                 return true;
             }
         }
@@ -452,9 +452,9 @@ final public class ActivityDiscovery extends Activity {
         View v = mInflater.inflate(R.layout.info, null);
         // Build info dialog
         AlertDialog.Builder infoDialog = new AlertDialog.Builder(ActivityDiscovery.this);
-        infoDialog.setTitle(host.getIpAddress());
-        ((TextView) v.findViewById(R.id.info_mac)).setText(host.getHardwareAddress());
-        ((TextView) v.findViewById(R.id.info_nic)).setText(host.getNicVendor());
+        infoDialog.setTitle(host.ipAddress);
+        ((TextView) v.findViewById(R.id.info_mac)).setText(host.hardwareAddress);
+        ((TextView) v.findViewById(R.id.info_nic)).setText(host.nicVendor);
         // Show dialog
         infoDialog.setView(v);
         infoDialog.setNegativeButton(R.string.btn_close, null);
