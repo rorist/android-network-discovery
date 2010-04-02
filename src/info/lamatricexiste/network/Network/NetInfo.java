@@ -70,12 +70,12 @@ public class NetInfo {
 
     private void getCidr() {
         // Running ip tools
-        if (!runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
+        if (runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
                 "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) {
-            Log.e(TAG, "command ip failed");
-        } else if (!runCommand(new File("/system/bin/ifconfig"), "ifconfig " + intf, "^" + intf
+            return;
+        } else if (runCommand(new File("/system/bin/ifconfig"), "ifconfig " + intf, "^" + intf
                 + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags")) {
-            Log.e(TAG, "command ifconfig failed");
+            return;
         }
     }
 
@@ -86,10 +86,12 @@ public class NetInfo {
                 Matcher matcher;
                 Process p = Runtime.getRuntime().exec(cmd);
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
+                // Log.i(TAG, "CMD=" + cmd);
                 while ((line = r.readLine()) != null) {
-                    Log.v(TAG, "IF: " + line);
+                    // Log.v(TAG, line);
                     matcher = Pattern.compile(ptrn).matcher(line);
                     if (matcher.matches()) {
+                        // Log.i(TAG, "MATCH=" + matcher.group(1));
                         cidr = Integer.parseInt(matcher.group(1));
                         return true;
                     }

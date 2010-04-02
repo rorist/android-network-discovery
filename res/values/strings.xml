@@ -51,6 +51,8 @@
     <string name="info_time">Response time:</string>
     <string name="info_mac">MAC Address:</string>
     <string name="info_nic">NIC vendor:</string>
+    <string name="info_ports_open">Open ports:</string>
+    <string name="info_ports_closed">Closed ports:</string>
     <string name="info_unknown">Unknown</string>
     
     <string name="export_finished">File saved !</string>
