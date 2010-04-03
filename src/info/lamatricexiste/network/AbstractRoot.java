@@ -10,7 +10,7 @@ import java.io.File;
 import android.util.Log;
 
 public abstract class AbstractRoot {
-    
+
     private final static String TAG = "AbstractRoot";
     private final static String BIN = "/system/bin/su";
 

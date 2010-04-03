@@ -68,4 +68,3 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
         stop();
     }
 }
-

@@ -6,8 +6,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="info.lamatricexiste.network"
-    android:versionCode="20"
-    android:versionName="0.2.7.1">
+    android:versionCode="21"
+    android:versionName="0.3beta">
     
     <application
         android:icon="@drawable/icon"

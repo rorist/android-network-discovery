@@ -37,6 +37,7 @@ Todo
  * Support of other protocol: UDP, SCTP
  * Send custom packets (shell codes, exploits, ...)
  * Nat Traversal
+ * Proxy (auto)support
 
 GPLv2 License
 -------

@@ -24,13 +24,11 @@ public class DefaultDiscovery extends AbstractDiscovery {
     private final int mRateMult = 50; // Number of hosts between Rate Checks
     private int mRateCnt = 0;
     private int pt_move = 2; // 1=backward 2=forward
-    private Reachable mReachable;
     private ExecutorService mPool;
     private SharedPreferences mPrefs;
 
     public DefaultDiscovery(ActivityDiscovery discover) {
         super(discover);
-        mReachable = new Reachable();
         mPrefs = discover.prefs;
     }
 
@@ -100,8 +98,8 @@ public class DefaultDiscovery extends AbstractDiscovery {
         public void run() {
             try {
                 Thread.sleep(getRate());
-                InetAddress h = InetAddress.getByName(host); // FIXME: is that
-                // producing logs?
+                // FIXME: is that producing logs?
+                InetAddress h = InetAddress.getByName(host);
                 // Rate control check
                 if (mRateControl.is_indicator_discovered && mRateCnt % mRateMult == 0) {
                     mRateControl.adaptRate();
@@ -110,15 +108,15 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 if (h.isReachable(getRate())) {
                     publish(host);
                     if (!mRateControl.is_indicator_discovered) {
-                        mRateControl.indicator = new String[]{host};
+                        mRateControl.indicator = new String[] { host };
                         mRateControl.adaptRate();
                     }
                     return;
                 }
                 // Custom check
-                int port = -1;
-                if ((port = mReachable.isReachable(h, getRate())) > -1) {
-                    Log.v(TAG, "used Reachable object, port=" + port);
+                int port;
+                if ((port = Reachable.isReachable(h, getRate())) > -1) {
+                    Log.v(TAG, "used Network.Reachable object, port=" + port);
                     publish(host);
                     // if (!mRateControl.isIndicatorDiscovered()) {
                     // mRateControl.setIndicator(host,
@@ -134,6 +132,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 publish((String) null);
                 Log.e(TAG, e.getMessage());
             } catch (InterruptedException e) {
+                Log.i(TAG, e.getMessage());
             }
         }
 

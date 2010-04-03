@@ -14,7 +14,6 @@ public class HostBean {
     public static final String EXTRA_HOSTNAME = PKG + ".extra_hostname";
     public static final String EXTRA_PORTSO = PKG + ".extra_ports_o";
     public static final String EXTRA_PORTSC = PKG + ".extra_ports_c";
-
     public String ipAddress = null;
     public String hostname = null;
     public String hardwareAddress = "00:00:00:00:00:00";
