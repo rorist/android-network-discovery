@@ -43,4 +43,15 @@
         <item name="android:textSize">10sp</item>
         <item name="android:typeface">monospace</item>
     </style>
+    <style name="ListPortScanText">
+        <item name="android:typeface">monospace</item>
+    </style>
+    <style name="ListPortScanTextTitle" parent="ListPortScanText">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="ListPortScanTextSummary" parent="ListPortScanText">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
 </resources>

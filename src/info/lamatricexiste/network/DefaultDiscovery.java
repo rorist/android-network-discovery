@@ -132,7 +132,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 publish((String) null);
                 Log.e(TAG, e.getMessage());
             } catch (InterruptedException e) {
-                Log.i(TAG, e.getMessage());
+                Log.i(TAG, "InterruptedException");
             }
         }
 

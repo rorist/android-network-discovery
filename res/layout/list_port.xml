@@ -7,23 +7,35 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_ports"
     android:layout_width="fill_parent"
-    android:layout_height="45dip"
+    android:layout_height="wrap_content"
     android:padding="3dip"
-    android:focusable="false">
-    <TextView
-        android:id="@+id/list"
+    android:focusable="false"
+    android:orientation="horizontal">
+
+    <LinearLayout
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_gravity="center_vertical"
-        android:paddingLeft="12dip"
-        android:textSize="12dip"
-        android:typeface="monospace"
-        android:text="List"
-        android:focusable="false"
-        android:focusableInTouchMode="false" />
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <TextView android:id="@+id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="0.0.0.0"
+            style="@style/ListPortScanTextTitle" />
+
+        <TextView android:id="@+id/banner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Banner"
+            style="@style/ListPortScanTextSummary" />
+
+    </LinearLayout>
+        
     <Button
         android:id="@+id/list_connect"
         android:layout_gravity="center_vertical"
         style="@style/ButtonConnect" />
+
 </LinearLayout>

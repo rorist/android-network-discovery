@@ -17,22 +17,29 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import android.util.Log;
 import android.util.SparseArray;
 
 public class DefaultPortscan extends AbstractPortScan {
 
+    private final int MAX_READ = 75;
     private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 300;
+    private final int TIMEOUT_READ = 5000;
     private int cnt_selected;
     private Selector selector = null;
+    private Selector readSelector = null;
+    protected String[] mBanners = null;
 
     protected DefaultPortscan(String host, final int timeout) {
         super(host, timeout);
@@ -57,9 +64,9 @@ public class DefaultPortscan extends AbstractPortScan {
                         // Force invalidate keys
                         Iterator<SelectionKey> iterator = selector.keys().iterator();
                         while (iterator.hasNext()) {
-                            publishProgress(0, -2);
                             synchronized (iterator) {
-                                finishKey((SelectionKey) iterator.next());
+                                publishProgress(0, -2);
+                                finishKey(iterator.next());
                             }
                         }
                         // Close the selector
@@ -77,8 +84,7 @@ public class DefaultPortscan extends AbstractPortScan {
     private void connectSocket(InetAddress ina, int port) throws IOException {
         // Create the socket
         InetSocketAddress addr = new InetSocketAddress(ina, port);
-        SocketChannel socket;
-        socket = SocketChannel.open();
+        SocketChannel socket = SocketChannel.open();
         socket.configureBlocking(false);
         socket.connect(addr);
         // Register the Channel with port as attachement
@@ -87,7 +93,7 @@ public class DefaultPortscan extends AbstractPortScan {
         socket.register(selector, SelectionKey.OP_CONNECT, data);
     }
 
-    private void doSelect(int STEP) {
+    private void doSelect(final int NB) {
         try {
             while (selector.isOpen()) {
                 selector.select(TIMEOUT_SELECT);
@@ -95,17 +101,12 @@ public class DefaultPortscan extends AbstractPortScan {
                 while (iterator.hasNext()) {
                     SelectionKey key = (SelectionKey) iterator.next();
                     iterator.remove();
-                    if (key.isValid()) {
-                        if (key.isConnectable()) {
-                            handleConnect(key);
-                        }
-                        // else if (key.isReadable()) {
-                        // handleRead(key);
-                        // }
+                    if (key.isValid() && key.isConnectable()) {
+                        handleConnect(key);
                     }
                 }
                 cancelTimeouts(); // Filtered or Unresponsive
-                if (cnt_selected >= STEP) {
+                if (cnt_selected >= NB) {
                     stop();
                 }
             }
@@ -116,25 +117,55 @@ public class DefaultPortscan extends AbstractPortScan {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void handleConnect(SelectionKey key) {
         try {
             if (((SocketChannel) key.channel()).finishConnect()) { // Open
+                boolean prout = true; // FIXME: get from preferences
+                if (prout) {
+                    // Create a new selector and register for reading
+                    readSelector = Selector.open();
+                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
+                            SelectionKey.OP_READ, key.attachment());
+                    tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
+                    int code = readSelector.select(TIMEOUT_READ);
+                    tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
+                    if (code != 0) {
+                        handleRead(tmpKey);
+                        return;
+                    }
+                    finishKey(tmpKey);
+                }
                 publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 1);
                 finishKey(key);
-                // Register for reading
-                // SparseArray<Long> data = (SparseArray<Long>)
-                // key.attachment();
-                // data.setValueAt(1, System.currentTimeMillis());
-                // ((SocketChannel) key.channel()).register(selector,
-                // SelectionKey.OP_READ, data);
-                // key.interestOps(SelectionKey.OP_READ);
-                // Log.v(TAG, "port=" + data.get(0));
             }
         } catch (IOException e) { // Closed
             publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 0);
             finishKey(key);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void handleRead(SelectionKey key) {
+        // new Banner(host, ((SparseArray<Integer>) key.attachment()).get(0),
+        // 8000).execute();
+
+        ByteBuffer bbuf = ByteBuffer.allocate(MAX_READ);
+        int numRead = 0;
+        try {
+            // while (numRead > 0) {
+            numRead = ((SocketChannel) key.channel()).read(bbuf);
+            // }
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        int port = ((SparseArray<Integer>) key.attachment()).get(0);
+        if (numRead != -1) {
+            mBanners[port] = new String(bbuf.array()).substring(0, numRead).trim();
+            Log.v(TAG, mBanners[port]);
+        }
+        publishProgress(port, (int) 1);
+        finishKey(key);
+        cnt_selected--; // Hack for finishKey();
     }
 
     private void finishKey(SelectionKey key) {
@@ -151,28 +182,4 @@ public class DefaultPortscan extends AbstractPortScan {
             }
         }
     }
-
-    // @SuppressWarnings("unchecked")
-    // private void handleRead(SelectionKey key) {
-    // publishProgress(((SparseArray<Long>) key.attachment()).get(0));
-    // finishKey(key);
-    //
-    // ByteBuffer buf = ByteBuffer.allocateDirect(2);
-    // buf.clear();
-    // int numRead = 0;
-    // try {
-    // numRead = ((SocketChannel) key.channel()).read(buf);
-    // } catch (IOException e) {
-    // Log.e(TAG, e.getMessage());
-    // } finally {
-    // if (numRead > 0) {
-    // try {
-    // Log.v(TAG, "read=" + new String(buf.array()));
-    // } catch (UnsupportedOperationException e) {
-    // Log.e(TAG, "UnsupportedOperationException");
-    // }
-    // }
-    // finishKey(key);
-    // }
-    // }
 }

@@ -12,6 +12,7 @@ public class HostBean {
     public static final String EXTRA_HOST = PKG + ".extra_host";
     public static final String EXTRA_TIMEOUT = PKG + ".network.extra_timeout";
     public static final String EXTRA_HOSTNAME = PKG + ".extra_hostname";
+    public static final String EXTRA_BANNERS = PKG + ".extra_banners";
     public static final String EXTRA_PORTSO = PKG + ".extra_ports_o";
     public static final String EXTRA_PORTSC = PKG + ".extra_ports_c";
     public String ipAddress = null;
@@ -21,6 +22,7 @@ public class HostBean {
     public String os = "Unknown";
     public float responseTime = 0;
     public int position = 0;
+    public String[] banners = null;
     public int[] portsOpen = null;
     public int[] portsClosed = null;
 }

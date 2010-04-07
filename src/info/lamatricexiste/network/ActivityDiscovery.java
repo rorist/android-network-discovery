@@ -194,6 +194,7 @@ final public class ActivityDiscovery extends Activity {
                     Bundle extra = data.getExtras();
                     int position = extra.getInt(HostBean.EXTRA_POSITION);
                     HostBean host = hosts.get(position);
+                    host.banners = extra.getStringArray(HostBean.EXTRA_BANNERS);
                     host.portsOpen = extra.getIntArray(HostBean.EXTRA_PORTSO);
                     host.portsClosed = extra.getIntArray(HostBean.EXTRA_PORTSC);
                     // OS Fingerprint check
@@ -449,6 +450,7 @@ final public class ActivityDiscovery extends Activity {
         intent.putExtra(HostBean.EXTRA_POSITION, position);
         intent.putExtra(HostBean.EXTRA_HOST, host.ipAddress);
         intent.putExtra(HostBean.EXTRA_HOSTNAME, host.hostname);
+        intent.putExtra(HostBean.EXTRA_BANNERS, host.banners);
         intent.putExtra(HostBean.EXTRA_PORTSO, host.portsOpen);
         intent.putExtra(HostBean.EXTRA_PORTSC, host.portsClosed);
         startActivityForResult(intent, SCAN_PORT_RESULT);

@@ -11,7 +11,9 @@ import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.lang.System;
 
 import android.app.TabActivity;
 import android.content.ActivityNotFoundException;
@@ -48,6 +50,7 @@ final public class ActivityPortscan extends TabActivity {
     private int timeout;
     private PortsAdapter adapter_open;
     private PortsAdapter adapter_closed;
+    private String[] banners = null;
     private ArrayList<Integer> ports_open = null;
     private ArrayList<Integer> ports_closed = null;
     private int cnt_open;
@@ -73,6 +76,7 @@ final public class ActivityPortscan extends TabActivity {
         Bundle extra = getIntent().getExtras();
         host = extra.getString(HostBean.EXTRA_HOST);
         position = extra.getInt(HostBean.EXTRA_POSITION);
+        banners = extra.getStringArray(HostBean.EXTRA_BANNERS);
         ports_open = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSO));
         ports_closed = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSC));
         cnt_open = (ports_open == null) ? 0 : ports_open.size();
@@ -132,6 +136,7 @@ final public class ActivityPortscan extends TabActivity {
         list_closed.setAdapter(adapter_closed);
         list_closed.setItemsCanFocus(true);
 
+        // FIXME: get from prefs/banners
         openPortsConnect = new ArrayList<Integer>(4);
         openPortsConnect.add((int) 22);
         openPortsConnect.add((int) 23);
@@ -181,7 +186,8 @@ final public class ActivityPortscan extends TabActivity {
 
     static class ViewHolder {
         TextView port;
-        Button btn_connect;
+        TextView banner;
+        Button btn_c;
     }
 
     // Custom ArrayAdapter
@@ -203,26 +209,31 @@ final public class ActivityPortscan extends TabActivity {
                 convertView = mInflater.inflate(R.layout.list_port, null);
                 holder = new ViewHolder();
                 holder.port = (TextView) convertView.findViewById(R.id.list);
-                holder.btn_connect = (Button) convertView.findViewById(R.id.list_connect);
+                holder.banner = (TextView) convertView.findViewById(R.id.banner);
+                holder.btn_c = (Button) convertView.findViewById(R.id.list_connect);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
             holder.port.setText(port + "/tcp " + type);
+            if(banners != null && banners[port] != null) {
+                holder.banner.setText(banners[port]);
+            }
+            // Port's service is known 
             if (openPortsConnect.contains(port)) {
-                // That is an awful hack
-                holder.btn_connect.setText(R.string.scan_connect);
-                holder.btn_connect.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connect, 0,
+                holder.btn_c.setText(R.string.scan_connect);
+                holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connect, 0,
                         0, 0);
-                holder.btn_connect.setOnClickListener(new View.OnClickListener() {
+                holder.btn_c.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         openPortService(port);
                     }
                 });
+            // No action for this service
             } else {
-                holder.btn_connect.setText(null);
-                holder.btn_connect.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                holder.btn_connect.setOnClickListener(null);
+                holder.btn_c.setText(null);
+                holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                holder.btn_c.setOnClickListener(null);
             }
             return convertView;
         }
@@ -248,6 +259,8 @@ final public class ActivityPortscan extends TabActivity {
                 port_end = Integer.parseInt(Prefs.DEFAULT_PORT_END);
             }
             nb_port = port_end - port_start + 1;
+            mBanners = new String[nb_port+1];
+            banners = new String[nb_port+1];
             setProgress(0);
         }
 
@@ -259,9 +272,12 @@ final public class ActivityPortscan extends TabActivity {
                         if (values[1] == 1) {
                             addPort(ports_open, adapter_open, values[0]);
                             cnt_open++;
-                            mTabOpen
-                                    .setText(String.format(getString(R.string.scan_open), cnt_open));
-
+                            mTabOpen.setText(String.format(getString(R.string.scan_open), cnt_open));
+                            // Save banners
+                            if(mBanners != null) {
+                                banners[values[0]] = mBanners[values[0]];
+                                //System.arraycopy(mBanners, 0, banners, 0, mBanners.length);
+                            }
                         } else if (values[1] == 0) {
                             addPort(ports_closed, adapter_closed, values[0]);
                             cnt_closed++;
@@ -279,6 +295,7 @@ final public class ActivityPortscan extends TabActivity {
 
         @Override
         protected void onPostExecute(Void unused) {
+            // Finishing
             if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(ActivityDiscovery.VIBRATE);
@@ -297,11 +314,10 @@ final public class ActivityPortscan extends TabActivity {
             stopScan();
         }
 
-        private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, Integer value) {
-            ports.add(value);
+        private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, Integer port) {
+            ports.add(port);
             adapter.add("placeholder");
-            // Collections.sort(ports); // FIXME: cause GC to collect
-            // adapter.insert("placeholder", ports.indexOf(value));
+            Collections.sort(ports); // FIXME: cause GC to collect
         }
     }
 
@@ -330,8 +346,9 @@ final public class ActivityPortscan extends TabActivity {
         // Set result
         Intent intent = new Intent();
         intent.putExtra(HostBean.EXTRA_POSITION, position);
-        intent.putExtra(HostBean.EXTRA_PORTSO, portsToIntArray(ports_open));
+        intent.putExtra(HostBean.EXTRA_PORTSO, portsToIntArray(ports_open)); // TODO: Use int[]
         intent.putExtra(HostBean.EXTRA_PORTSC, portsToIntArray(ports_closed));
+        intent.putExtra(HostBean.EXTRA_BANNERS, banners);
         setResult(RESULT_OK, intent);
         // Reset scan
         setProgressBarVisibility(false);
@@ -369,6 +386,17 @@ final public class ActivityPortscan extends TabActivity {
             portsArray[i] = ports.get(i);
         }
         return portsArray;
+    }
+
+    private ArrayList<String> bannersToArrayList(String[] strArray) {
+        ArrayList<String> bannersArray = new ArrayList<String>();
+        if (strArray != null) {
+            for (int i = 0; i < strArray.length; i++) {
+                bannersArray.add(strArray[i]);
+            }
+            return bannersArray;
+        }
+        return null;
     }
 
     private ArrayList<Integer> portsToArrayList(int[] intArray) {
