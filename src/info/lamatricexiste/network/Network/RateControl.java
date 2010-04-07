@@ -38,10 +38,11 @@ public class RateControl {
 
     private long getAvgResponseTime(String host, int count) {
         try {
-            if ((new File("/system/bin/ping")).exists() == true) {
+            String cmd = "/system/bin/ping";
+            if ((new File(cmd)).exists() == true) {
                 String line;
                 Matcher matcher;
-                Process p = Runtime.getRuntime().exec("ping -q -n -W 2 -c " + count + " " + host);
+                Process p = Runtime.getRuntime().exec(cmd + " -q -n -W 2 -c " + count + " " + host);
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
                 while ((line = r.readLine()) != null) {
                     matcher = Pattern
