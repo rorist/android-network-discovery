@@ -35,11 +35,11 @@ public class NetInfo {
     public String ip = "0.0.0.0";
     public int cidr = 24;
 
-    public String ssid;
-    public String bssid;
-    public String carrier;
-    public String macAddress;
-    public Object gatewayIp;
+    public String ssid = null;
+    public String bssid = null;
+    public String carrier = null;
+    public String macAddress = "00:00:00:00:00:00";
+    public Object gatewayIp = "0.0.0.0";
 
     public NetInfo(Context ctxt) {
         this.ctxt = ctxt;

@@ -16,7 +16,7 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
 
     private final String TAG = "AbstractPortScan";
     private int step;
-    private long time;
+    protected long time;
 
     protected int port_start;
     protected int port_end;

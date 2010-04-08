@@ -38,7 +38,6 @@ public class DefaultPortscan extends AbstractPortScan {
     private final int TIMEOUT_READ = 5000;
     private int cnt_selected;
     private Selector selector = null;
-    private Selector readSelector = null;
     protected String[] mBanners = null;
 
     protected DefaultPortscan(String host, final int timeout) {
@@ -123,16 +122,18 @@ public class DefaultPortscan extends AbstractPortScan {
                 boolean prout = true; // FIXME: get from preferences
                 if (prout) {
                     // Create a new selector and register for reading
-                    readSelector = Selector.open();
-                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
-                            SelectionKey.OP_READ, key.attachment());
+                    Selector readSelector = Selector.open();
+                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector, SelectionKey.OP_READ);
                     tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
                     int code = readSelector.select(TIMEOUT_READ);
                     tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
                     if (code != 0) {
-                        handleRead(tmpKey);
+                        handleRead(tmpKey, ((SparseArray<Integer>) key.attachment()).get(0));
+                        time = System.currentTimeMillis(); // Reset selector timeout
+                        finishKey(key);
                         return;
                     }
+                    time = System.currentTimeMillis(); // Reset the selector timeout
                     finishKey(tmpKey);
                 }
                 publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 1);
@@ -144,8 +145,7 @@ public class DefaultPortscan extends AbstractPortScan {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void handleRead(SelectionKey key) {
+    private void handleRead(SelectionKey key, int port) {
         // new Banner(host, ((SparseArray<Integer>) key.attachment()).get(0),
         // 8000).execute();
 
@@ -158,10 +158,8 @@ public class DefaultPortscan extends AbstractPortScan {
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }
-        int port = ((SparseArray<Integer>) key.attachment()).get(0);
         if (numRead != -1) {
             mBanners[port] = new String(bbuf.array()).substring(0, numRead).trim();
-            Log.v(TAG, mBanners[port]);
         }
         publishProgress(port, (int) 1);
         finishKey(key);

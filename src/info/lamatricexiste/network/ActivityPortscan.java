@@ -218,6 +218,8 @@ final public class ActivityPortscan extends TabActivity {
             holder.port.setText(port + "/tcp " + type);
             if(banners != null && banners[port] != null) {
                 holder.banner.setText(banners[port]);
+            } else {
+                holder.banner.setText("");
             }
             // Port's service is known 
             if (openPortsConnect.contains(port)) {
