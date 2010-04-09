@@ -13,8 +13,8 @@ import info.lamatricexiste.network.Utils.Prefs;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.lang.System;
 
+import android.app.Activity;
 import android.app.TabActivity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -244,8 +244,8 @@ final public class ActivityPortscan extends TabActivity {
     private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
 
-        ScanPortTask(String host, int timeout) {
-            super(host, timeout);
+        ScanPortTask(Activity activity, String host, int timeout) {
+            super(activity, host, timeout);
         }
 
         @Override
@@ -333,7 +333,7 @@ final public class ActivityPortscan extends TabActivity {
         cnt_closed = 0;
         ports_open = new ArrayList<Integer>();
         ports_closed = new ArrayList<Integer>();
-        scanPortTask = new ScanPortTask(host, getTimeout());
+        scanPortTask = new ScanPortTask(this, host, getTimeout());
         scanPortTask.execute();
         btn_scan.setText(R.string.btn_discover_cancel);
         btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cancel, 0, 0);
@@ -388,17 +388,6 @@ final public class ActivityPortscan extends TabActivity {
             portsArray[i] = ports.get(i);
         }
         return portsArray;
-    }
-
-    private ArrayList<String> bannersToArrayList(String[] strArray) {
-        ArrayList<String> bannersArray = new ArrayList<String>();
-        if (strArray != null) {
-            for (int i = 0; i < strArray.length; i++) {
-                bannersArray.add(strArray[i]);
-            }
-            return bannersArray;
-        }
-        return null;
     }
 
     private ArrayList<Integer> portsToArrayList(int[] intArray) {

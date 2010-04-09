@@ -70,6 +70,9 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public final static String KEY_TIMEOUT_DISCOVER = "timeout_discover";
     public final static String DEFAULT_TIMEOUT_DISCOVER = "500";
 
+    public static final String KEY_BANNER = "banner";
+    public static final boolean DEFAULT_BANNER = false;
+
     private Context ctxt;
     private PreferenceScreen ps = null;
     private String before_port_start;

@@ -13,8 +13,10 @@
  */
 
 package info.lamatricexiste.network;
+import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -23,10 +25,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -37,11 +40,13 @@ public class DefaultPortscan extends AbstractPortScan {
     private final int TIMEOUT_SELECT = 300;
     private final int TIMEOUT_READ = 5000;
     private int cnt_selected;
+    private WeakReference<Activity> mActivity;
     private Selector selector = null;
     protected String[] mBanners = null;
 
-    protected DefaultPortscan(String host, final int timeout) {
+    protected DefaultPortscan(Activity activity, String host, final int timeout) {
         super(host, timeout);
+        mActivity = new WeakReference<Activity>(activity);
     }
 
     protected void start(InetAddress ina, final int PORT_START, final int PORT_END)
@@ -116,11 +121,13 @@ public class DefaultPortscan extends AbstractPortScan {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void handleConnect(SelectionKey key) {
         try {
             if (((SocketChannel) key.channel()).finishConnect()) { // Open
-                boolean prout = true; // FIXME: get from preferences
-                if (prout) {
+                final Activity d = mActivity.get();
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d.getApplicationContext());
+                if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
                     // Create a new selector and register for reading
                     Selector readSelector = Selector.open();
                     SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector, SelectionKey.OP_READ);

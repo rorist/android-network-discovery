@@ -66,6 +66,11 @@
             android:summary="@string/preferences_port_end_summary"
             android:defaultValue="1024"
             android:inputType="number" />
+        <CheckBoxPreference
+            android:key="banner"
+            android:title="@string/preferences_banner_title"
+            android:summary="@string/preferences_banner_summary"
+            android:defaultValue="false" />
     </PreferenceCategory>
     
     <PreferenceCategory
