@@ -39,11 +39,11 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
             InetAddress ina = InetAddress.getByName(host);
             if (nb_port > step) {
                 for (int i = port_start; i <= port_end - step; i += step + 1) {
-                    time = System.currentTimeMillis();
+                    time = System.nanoTime();
                     start(ina, i, i + ((i + step <= port_end - step) ? step : port_end - i));
                 }
             } else {
-                time = System.currentTimeMillis();
+                time = System.nanoTime();
                 start(ina, port_start, port_end);
             }
         } catch (UnknownHostException e) {
@@ -59,7 +59,7 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
     }
 
     protected void cancelTimeouts() throws IOException {
-        if ((System.currentTimeMillis() - time) > timeout) {
+        if ((System.nanoTime() - time) > timeout) {
             stop();
         }
     }

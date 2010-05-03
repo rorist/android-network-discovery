@@ -136,11 +136,11 @@ public class DefaultPortscan extends AbstractPortScan {
                     tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
                     if (code != 0) {
                         handleRead(tmpKey, ((SparseArray<Integer>) key.attachment()).get(0));
-                        time = System.currentTimeMillis(); // Reset selector timeout
+                        time = System.nanoTime(); // Reset selector timeout
                         finishKey(key);
                         return;
                     }
-                    time = System.currentTimeMillis(); // Reset the selector timeout
+                    time = System.nanoTime(); // Reset the selector timeout
                     finishKey(tmpKey);
                 }
                 publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 1);
