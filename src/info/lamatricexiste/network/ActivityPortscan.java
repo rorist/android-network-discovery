@@ -367,7 +367,7 @@ final public class ActivityPortscan extends TabActivity {
 
     private long getTimeout() {
         if (prefs.getBoolean(Prefs.KEY_TIMEOUT_FORCE, Prefs.DEFAULT_TIMEOUT_FORCE)) {
-            return Long.parseLong(prefs.getString(Prefs.KEY_TIMEOUT, Prefs.DEFAULT_TIMEOUT));
+            return (long) Integer.parseInt(prefs.getString(Prefs.KEY_TIMEOUT, Prefs.DEFAULT_TIMEOUT)) * 1000000;
         }
         return timeout;
     }
