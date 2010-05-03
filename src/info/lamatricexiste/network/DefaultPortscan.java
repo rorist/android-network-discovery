@@ -37,14 +37,14 @@ public class DefaultPortscan extends AbstractPortScan {
 
     private final int MAX_READ = 75;
     private final String TAG = "PortScan";
-    private final int TIMEOUT_SELECT = 300;
-    private final int TIMEOUT_READ = 5000;
+    private final int TIMEOUT_SELECT = 300; // milliseconds
+    private final long TIMEOUT_READ = 5000;
     private int cnt_selected;
     private WeakReference<Activity> mActivity;
     private Selector selector = null;
     protected String[] mBanners = null;
 
-    protected DefaultPortscan(Activity activity, String host, final int timeout) {
+    protected DefaultPortscan(Activity activity, String host, final long timeout) {
         super(host, timeout);
         mActivity = new WeakReference<Activity>(activity);
     }

@@ -12,7 +12,7 @@ public class RootPortScan extends AbstractPortScan {
 
     // private final String TAG = "RootPortScan";
 
-    protected RootPortScan(String host, final int timeout) {
+    protected RootPortScan(String host, final long timeout) {
         super(host, timeout);
     }
 

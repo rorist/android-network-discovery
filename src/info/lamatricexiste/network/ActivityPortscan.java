@@ -244,7 +244,7 @@ final public class ActivityPortscan extends TabActivity {
     private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
 
-        ScanPortTask(Activity activity, String host, int timeout) {
+        ScanPortTask(Activity activity, String host, long timeout) {
             super(activity, host, timeout);
         }
 
@@ -365,9 +365,9 @@ final public class ActivityPortscan extends TabActivity {
         });
     }
 
-    private int getTimeout() {
+    private long getTimeout() {
         if (prefs.getBoolean(Prefs.KEY_TIMEOUT_FORCE, Prefs.DEFAULT_TIMEOUT_FORCE)) {
-            return Integer.parseInt(prefs.getString(Prefs.KEY_TIMEOUT, Prefs.DEFAULT_TIMEOUT));
+            return Long.parseLong(prefs.getString(Prefs.KEY_TIMEOUT, Prefs.DEFAULT_TIMEOUT));
         }
         return timeout;
     }

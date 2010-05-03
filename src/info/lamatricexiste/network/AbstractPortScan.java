@@ -17,14 +17,14 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
     private final String TAG = "AbstractPortScan";
     private int step;
     protected long time;
+    protected long timeout;
 
     protected int port_start;
     protected int port_end;
     protected int nb_port;
     protected String host;
-    protected int timeout;
 
-    protected AbstractPortScan(String host, final int timeout) {
+    protected AbstractPortScan(String host, final long timeout) {
         this.host = host;
         this.timeout = timeout;
     }

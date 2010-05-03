@@ -62,7 +62,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public final static boolean DEFAULT_TIMEOUT_FORCE = false;
 
     public final static String KEY_TIMEOUT = "timeout";
-    public final static String DEFAULT_TIMEOUT = "500";
+    public final static String DEFAULT_TIMEOUT = "500000000"; // nanoseconds = 500 * 1000000
 
     public static final String KEY_RATECTRL_ENABLE = "ratecontrol_enable";
     public static final boolean DEFAULT_RATECTRL_ENABLE = true;
