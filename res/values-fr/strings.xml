@@ -16,6 +16,9 @@
     <string name="btn_options">Options</string>
     <string name="btn_back">Retour</string>
     
+    <string name="task_nic">Téléchargement de la base des adresses MAC ...</string>
+    <string name="main_services">Création de la base de données des Services ...</string>
+    
     <string name="package_missing">%s doit être installée depuis le Market !</string>
     
     <string name="wifi_enabled">Wifi activé</string>

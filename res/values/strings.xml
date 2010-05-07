@@ -15,6 +15,9 @@
     <string name="btn_scan">Scan</string>
     <string name="btn_options">Options</string>
     <string name="btn_back">Back</string>
+    
+    <string name="task_nic">Downloading NIC databse ...</string>
+    <string name="task_services">Creating Services database ...</string>
  
     <string name="package_missing">%s must be installed from the market !</string>
     

@@ -128,7 +128,17 @@ final public class ActivityMain extends Activity {
 
     private void phase3(final Context ctxt) {
         // Install Services DB
-        new CreateServicesDb(ActivityMain.this).execute();
+
+        try {
+            if (prefs.getInt(Prefs.KEY_RESETDB, Prefs.DEFAULT_RESETDB) != getPackageManager()
+                    .getPackageInfo(TAG, 0).versionCode) {
+                new CreateServicesDb(ActivityMain.this).execute();
+            } else {
+                startDiscoverActivity(ctxt);
+            }
+        } catch (NameNotFoundException e) {
+            startDiscoverActivity(ctxt);
+        }
     }
 
     private void startDiscoverActivity(final Context ctxt) {
@@ -149,7 +159,7 @@ final public class ActivityMain extends Activity {
         protected void onPreExecute() {
             final Activity d = mActivity.get();
             d.setProgressBarIndeterminateVisibility(true);
-            progress = ProgressDialog.show(d, "", "Creating Services DB ...");
+            progress = ProgressDialog.show(d, "", d.getString(R.string.main_services));
         }
 
         @Override

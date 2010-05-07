@@ -61,7 +61,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
     protected void onPreExecute() {
         final Activity d = mActivity.get();
         d.setProgressBarIndeterminateVisibility(true);
-        progress = ProgressDialog.show(d, "", "Downloading DB ...");
+        progress = ProgressDialog.show(d, "", d.getString(R.string.task_nic));
     }
 
     @Override
