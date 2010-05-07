@@ -16,13 +16,13 @@
 
     <PreferenceCategory
         android:title="@string/preferences_discover">
-        <ListPreference
-            android:key="method_discover"
-            android:title="Discovery Method"
-            android:summary="Select a different discovery method"
-            android:entries="@array/method_discover_name"
-            android:entryValues="@array/method_discover_value"
-            android:dialogTitle="Choose the method"/>
+<!--        <ListPreference-->
+<!--            android:key="method_discover"-->
+<!--            android:title="Discovery Method"-->
+<!--            android:summary="Select a different discovery method"-->
+<!--            android:entries="@array/method_discover_name"-->
+<!--            android:entryValues="@array/method_discover_value"-->
+<!--            android:dialogTitle="Choose the method"/>-->
         <CheckBoxPreference
             android:key="ratecontrol_enable"
             android:title="@string/preferences_ratecontrol_enable_title"

@@ -28,12 +28,14 @@ public abstract class AbstractPortScan extends AsyncTask<Void, Integer, Void> {
         this.host = host;
         this.timeout = timeout;
     }
-    
+
     abstract protected void stop();
-    abstract protected void start(InetAddress ina, final int PORT_START, final int PORT_END) throws InterruptedException, IOException;
+
+    abstract protected void start(InetAddress ina, final int PORT_START, final int PORT_END)
+            throws InterruptedException, IOException;
 
     protected Void doInBackground(Void... params) {
-        Log.v(TAG, "timeout=" + timeout);
+        Log.v(TAG, "timeout=" + timeout / 1000 + "ms");
         try {
             step = 127;
             InetAddress ina = InetAddress.getByName(host);

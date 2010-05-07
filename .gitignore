@@ -3,3 +3,4 @@ bin
 .settings
 libs
 network.kpf
+res/raw/services.sql

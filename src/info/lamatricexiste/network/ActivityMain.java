@@ -6,15 +6,20 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Utils.Prefs;
+import info.lamatricexiste.network.Utils.ServicesDb;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
+
+import java.lang.ref.WeakReference;
+
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Window;
@@ -23,7 +28,6 @@ final public class ActivityMain extends Activity {
 
     private final String TAG = "info.lamatricexiste.network";
     public SharedPreferences prefs = null;
-    private Context ctxt;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,54 +35,58 @@ final public class ActivityMain extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
         setTitle(R.string.app_loading);
-        ctxt = getApplicationContext();
+        final Context ctxt = this;
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
 
         // Determine the needed installation phases
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-            phase1();
+            phase1(ctxt);
         } else {
-            phase2();
+            phase2(ctxt);
         }
     }
 
-    private void phase1() {
+    private void phase1(final Context ctxt) {
+        phase2(ctxt);
         // Check Root and Install Daemon
-        final RootDaemon rootDaemon = new RootDaemon(this);
-        if (rootDaemon.hasRoot) {
-            if (prefs.getInt(Prefs.KEY_ROOT_INSTALLED, Prefs.DEFAULT_ROOT_INSTALLED) == 0) {
-                // Install
-                AlertDialog.Builder d = new AlertDialog.Builder(this);
-                d.setTitle(R.string.discover_root_title);
-                d.setMessage(R.string.discover_root_install);
-                d.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dlg, int sumthin) {
-                        rootDaemon.install();
-                        rootDaemon.permission();
-                        Editor edit = prefs.edit();
-                        edit.putInt(Prefs.KEY_ROOT_INSTALLED, 1);
-                        edit.commit();
-                        // rootDaemon.restartActivity();
-                        phase2();
-                    }
-                });
-                d.setNegativeButton(R.string.btn_no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dlg, int sumthin) {
-                        phase2();
-                    }
-                });
-                d.show();
-            } else {
-                // Root daemon already installed
-                phase2();
-            }
-        } else {
-            // Don't have root
-            phase2();
-        }
+        // final RootDaemon rootDaemon = new RootDaemon(this);
+        // if (rootDaemon.hasRoot) {
+        // if (prefs.getInt(Prefs.KEY_ROOT_INSTALLED,
+        // Prefs.DEFAULT_ROOT_INSTALLED) == 0) {
+        // // Install
+        // AlertDialog.Builder d = new AlertDialog.Builder(this);
+        // d.setTitle(R.string.discover_root_title);
+        // d.setMessage(R.string.discover_root_install);
+        // d.setPositiveButton(R.string.btn_yes, new
+        // DialogInterface.OnClickListener() {
+        // public void onClick(DialogInterface dlg, int sumthin) {
+        // rootDaemon.install();
+        // rootDaemon.permission();
+        // Editor edit = prefs.edit();
+        // edit.putInt(Prefs.KEY_ROOT_INSTALLED, 1);
+        // edit.commit();
+        // // rootDaemon.restartActivity();
+        // phase2(ctxt);
+        // }
+        // });
+        // d.setNegativeButton(R.string.btn_no, new
+        // DialogInterface.OnClickListener() {
+        // public void onClick(DialogInterface dlg, int sumthin) {
+        // phase2(ctxt);
+        // }
+        // });
+        // d.show();
+        // } else {
+        // // Root daemon already installed
+        // phase2(ctxt);
+        // }
+        // } else {
+        // // Don't have root
+        // phase2(ctxt);
+        // }
     }
 
-    private void phase2() {
+    private void phase2(final Context ctxt) {
 
         class UpdateNicDbMain extends UpdateNicDb {
 
@@ -87,13 +95,15 @@ final public class ActivityMain extends Activity {
             }
 
             protected void onPostExecute(Void unused) {
-                startDiscoverActivity();
                 super.onPostExecute(unused);
+                final Activity d = mActivity.get();
+                phase3(d);
             }
 
             protected void onCancelled() {
-                startDiscoverActivity();
                 super.onCancelled();
+                final Activity d = mActivity.get();
+                phase3(d);
             }
         }
 
@@ -104,20 +114,59 @@ final public class ActivityMain extends Activity {
                 new UpdateNicDbMain(ActivityMain.this);
             } else {
                 // There is a NIC Db installed
-                startDiscoverActivity();
+                phase3(ctxt);
             }
         } catch (NameNotFoundException e) {
-            startDiscoverActivity();
+            phase3(ctxt);
         } catch (ClassCastException e) {
             Editor edit = prefs.edit();
             edit.putInt(Prefs.KEY_RESETDB, 1);
             edit.commit();
-            startDiscoverActivity();
+            phase3(ctxt);
         }
     }
 
-    private void startDiscoverActivity() {
+    private void phase3(final Context ctxt) {
+        // Install Services DB
+        new CreateServicesDb(ActivityMain.this).execute();
+    }
+
+    private void startDiscoverActivity(final Context ctxt) {
         startActivity(new Intent(ctxt, ActivityDiscovery.class));
         finish();
+    }
+
+    class CreateServicesDb extends AsyncTask<Void, String, Void> {
+        private WeakReference<Activity> mActivity;
+        private ProgressDialog progress;
+        private SQLiteDatabase db;
+
+        public CreateServicesDb(Activity activity) {
+            mActivity = new WeakReference<Activity>(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            final Activity d = mActivity.get();
+            d.setProgressBarIndeterminateVisibility(true);
+            progress = ProgressDialog.show(d, "", "Creating Services DB ...");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            final Activity d = mActivity.get();
+            db = (new ServicesDb(d)).getWritableDatabase();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            db.close();
+            final Activity d = mActivity.get();
+            d.setProgressBarIndeterminateVisibility(true);
+            progress.dismiss();
+
+            startDiscoverActivity(d);
+        }
     }
 }

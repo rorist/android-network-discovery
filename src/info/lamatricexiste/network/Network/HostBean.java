@@ -15,6 +15,8 @@ public class HostBean {
     public static final String EXTRA_BANNERS = PKG + ".extra_banners";
     public static final String EXTRA_PORTSO = PKG + ".extra_ports_o";
     public static final String EXTRA_PORTSC = PKG + ".extra_ports_c";
+    public static final String EXTRA_SERVICESO = PKG + ".extra_services_o";
+    public static final String EXTRA_SERVICESC = PKG + ".extra_services_c";
     public String ipAddress = null;
     public String hostname = null;
     public String hardwareAddress = "00:00:00:00:00:00";
@@ -25,4 +27,6 @@ public class HostBean {
     public String[] banners = null;
     public int[] portsOpen = null;
     public int[] portsClosed = null;
+    public String[] services_open = null;
+    public String[] services_closed = null;
 }
