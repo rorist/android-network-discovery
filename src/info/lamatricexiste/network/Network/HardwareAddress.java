@@ -8,6 +8,7 @@
 package info.lamatricexiste.network.Network;
 
 import info.lamatricexiste.network.R;
+import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,9 +17,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class HardwareAddress {
@@ -72,12 +75,19 @@ public class HardwareAddress {
         if (db != null) {
             String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
             // Db request
-            Cursor c = db.rawQuery("select vendor from oui where mac='" + macid + "'", null);
-            if (c.getCount() > 0) {
-                c.moveToFirst();
-                ni = c.getString(c.getColumnIndex("vendor"));
+            try {
+                Cursor c = db.rawQuery("select vendor from oui where mac='" + macid + "'", null);
+                if (c.getCount() > 0) {
+                    c.moveToFirst();
+                    ni = c.getString(c.getColumnIndex("vendor"));
+                }
+                c.close();
+            } catch (SQLiteException e) {
+                Log.e(TAG, e.getMessage());
+                Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+                edit.putInt(Prefs.KEY_RESETDB, 1);
+                edit.commit();
             }
-            c.close();
         }
         return ni;
     }

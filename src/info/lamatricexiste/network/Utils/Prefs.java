@@ -91,7 +91,6 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         // Default state of checkboxes
         checkTimeout(KEY_TIMEOUT, KEY_TIMEOUT_FORCE, true);
         checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
-        ((CheckBoxPreference) ps.findPreference(KEY_BANNER)).setChecked(DEFAULT_BANNER);
 
         // Reset DB click listener
         Preference resetdb = (Preference) ps.findPreference(KEY_RESETDB);

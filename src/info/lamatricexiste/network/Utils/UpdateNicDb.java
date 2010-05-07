@@ -43,7 +43,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
         mActivity = new WeakReference<Activity>(activity);
         final Activity d = mActivity.get();
         final AlertDialog.Builder dialog = new AlertDialog.Builder(d);
-        dialog.setTitle(R.string.preferences_resetdb_action);
+        dialog.setMessage(R.string.preferences_resetdb_action);
         dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 execute();
