@@ -10,14 +10,13 @@
     <string name="btn_no">No</string>
     <string name="btn_discover">Discover</string>
     <string name="btn_discover_cancel">Cancel</string>
-    <string name="btn_export">Export</string>
     <string name="btn_close">Close</string>
     <string name="btn_scan">Scan</string>
     <string name="btn_options">Options</string>
     <string name="btn_back">Back</string>
     
-    <string name="task_nic">Downloading NIC databse ...</string>
-    <string name="task_services">Creating Services database ...</string>
+    <string name="task_nic">Downloading and installing NIC database ...</string>
+    <string name="task_services">Creating Services database ... Please wait.</string>
  
     <string name="package_missing">%s must be installed from the market !</string>
     
@@ -72,6 +71,7 @@
     <string name="help_links_content">- TCP connect scan: http://nmap.org/book/man-port-scanning-techniques.html#id421401\n\n- Host discovery: http://nmap.org/book/man-host-discovery.html</string>
     
     <string name="preferences_help">Help</string>
+    <string name="preferences_export">Export</string>
     <string name="preferences_notifications">Notifications settings</string>
     <string name="preferences_discover">Discover settings</string>
     <string name="preferences_portscan">Port Scan settings</string>

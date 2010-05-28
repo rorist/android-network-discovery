@@ -46,8 +46,11 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_NTHREADS = "nthreads";
     public static final String DEFAULT_NTHREADS = "32";
 
-    public static final String KEY_RESETDB = "resetdb";
-    public static final int DEFAULT_RESETDB = 1;
+    public static final String KEY_RESET_NICDB = "resetdb";
+    public static final int DEFAULT_RESET_NICDB = 1;
+
+    public static final String KEY_RESET_SERVICESDB = "resetservicesdb";
+    public static final int DEFAULT_RESET_SERVICESDB = 1;
 
     public static final String KEY_ROOT_INSTALLED = "root_installed";
     public static final int DEFAULT_ROOT_INSTALLED = 0;
@@ -92,8 +95,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         checkTimeout(KEY_TIMEOUT, KEY_TIMEOUT_FORCE, true);
         checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
 
-        // Reset DB click listener
-        Preference resetdb = (Preference) ps.findPreference(KEY_RESETDB);
+        // Reset Nic DB click listener
+        Preference resetdb = (Preference) ps.findPreference(KEY_RESET_NICDB);
         resetdb.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 new UpdateNicDb(Prefs.this);

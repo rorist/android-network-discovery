@@ -15,7 +15,7 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 #include <linux/if_ether.h>
-#include <linux/if.h>
+//#include <linux/if.h>
 #include <linux/if_packet.h>
 
 #define LOG_TAG       "scand"
@@ -34,11 +34,11 @@ int BindRawSocketToInterface(char *device, int rawsock, int protocol);
 #define SRC_IP	"10.0.10.4"
 #define DST_IP	"10.0.10.2"
 
-#include<arpa/inet.h>
-#include <net/if.h>
+//#include<arpa/inet.h>
+//#include <net/if.h>
 //#include <net/if_ether.h>
 //#include<net/if_packet.h>
-#include <netinet/in.h>
+//#include <netinet/in.h>
 #include<linux/ip.h>
 
 void inject_ip_packet();

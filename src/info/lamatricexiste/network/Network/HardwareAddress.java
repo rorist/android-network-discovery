@@ -85,7 +85,7 @@ public class HardwareAddress {
             } catch (SQLiteException e) {
                 Log.e(TAG, e.getMessage());
                 Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-                edit.putInt(Prefs.KEY_RESETDB, 1);
+                edit.putInt(Prefs.KEY_RESET_NICDB, 1);
                 edit.commit();
             }
         }

@@ -109,7 +109,7 @@ final public class ActivityMain extends Activity {
 
         // CheckNicDb
         try {
-            if (prefs.getInt(Prefs.KEY_RESETDB, Prefs.DEFAULT_RESETDB) != getPackageManager()
+            if (prefs.getInt(Prefs.KEY_RESET_NICDB, Prefs.DEFAULT_RESET_NICDB) != getPackageManager()
                     .getPackageInfo(TAG, 0).versionCode) {
                 new UpdateNicDbMain(ActivityMain.this);
             } else {
@@ -120,7 +120,7 @@ final public class ActivityMain extends Activity {
             phase3(ctxt);
         } catch (ClassCastException e) {
             Editor edit = prefs.edit();
-            edit.putInt(Prefs.KEY_RESETDB, 1);
+            edit.putInt(Prefs.KEY_RESET_NICDB, 1);
             edit.commit();
             phase3(ctxt);
         }
@@ -130,7 +130,7 @@ final public class ActivityMain extends Activity {
         // Install Services DB
 
         try {
-            if (prefs.getInt(Prefs.KEY_RESETDB, Prefs.DEFAULT_RESETDB) != getPackageManager()
+            if (prefs.getInt(Prefs.KEY_RESET_SERVICESDB, Prefs.DEFAULT_RESET_SERVICESDB) != getPackageManager()
                     .getPackageInfo(TAG, 0).versionCode) {
                 new CreateServicesDb(ActivityMain.this).execute();
             } else {
@@ -159,7 +159,7 @@ final public class ActivityMain extends Activity {
         protected void onPreExecute() {
             final Activity d = mActivity.get();
             d.setProgressBarIndeterminateVisibility(true);
-            progress = ProgressDialog.show(d, "", d.getString(R.string.main_services));
+            progress = ProgressDialog.show(d, "", d.getString(R.string.task_services));
         }
 
         @Override

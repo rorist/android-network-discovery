@@ -23,13 +23,13 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="0/tcp (service)"
-            style="@style/ListPortScanTextTitle" />
+            style="@style/ListTextTitle" />
 
         <TextView android:id="@+id/banner"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Banner"
-            style="@style/ListPortScanTextSummary" />
+            style="@style/ListTextSummary" />
 
     </LinearLayout>
         

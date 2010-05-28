@@ -14,19 +14,14 @@
         <item name="android:padding">5dip</item>
     </style>
     <style name="ButtonTop" parent="@style/Button">
-        <item name="android:layout_width">104dip</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/btn_top</item>
+        <item name="android:layout_width">0dip</item>
+        <item name="android:layout_height">48dip</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">20sp</item>
     </style>
     <style name="ButtonBottom" parent="@style/Button">
         <item name="android:layout_width">60dip</item>
-        <item name="android:layout_marginRight">5dip</item>
-    </style>
-    <style name="ButtonList" parent="@style/Button">
-        <item name="android:textSize">12sp</item>
-        <item name="android:layout_width">0dip</item>
-        <item name="android:layout_height">38dip</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_gravity">center_vertical</item>
     </style>
     <style name="ButtonConnect" parent="@style/Button">
         <item name="android:textSize">12sp</item>
@@ -43,14 +38,14 @@
         <item name="android:textSize">10sp</item>
         <item name="android:typeface">monospace</item>
     </style>
-    <style name="ListPortScanText">
+    <style name="ListText">
         <item name="android:typeface">monospace</item>
     </style>
-    <style name="ListPortScanTextTitle" parent="ListPortScanText">
+    <style name="ListTextTitle" parent="ListText">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
     </style>
-    <style name="ListPortScanTextSummary" parent="ListPortScanText">
+    <style name="ListTextSummary" parent="ListText">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">12sp</item>
     </style>

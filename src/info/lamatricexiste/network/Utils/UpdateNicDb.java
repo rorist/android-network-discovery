@@ -111,7 +111,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
                 Toast.LENGTH_LONG).show();
         try {
             Editor edit = prefs.edit();
-            edit.putInt(Prefs.KEY_RESETDB, d.getPackageManager().getPackageInfo(
+            edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
                     "info.lamatricexiste.network", 0).versionCode);
             edit.commit();
         } catch (NameNotFoundException e) {

@@ -10,14 +10,13 @@
     <string name="btn_no">Non</string>
     <string name="btn_discover">Rechercher</string>
     <string name="btn_discover_cancel">Annuler</string>
-    <string name="btn_export">Exporter</string>
     <string name="btn_close">Fermer</string>
     <string name="btn_scan">Scanner</string>
     <string name="btn_options">Options</string>
     <string name="btn_back">Retour</string>
     
     <string name="task_nic">Téléchargement de la base des adresses MAC ...</string>
-    <string name="main_services">Création de la base de données des Services ...</string>
+    <string name="task_services">Création de la base de données des Services ... Veuillez patienter.</string>
     
     <string name="package_missing">%s doit être installée depuis le Market !</string>
     
@@ -72,6 +71,7 @@
     <string name="help_links_content">- Méthodes de scan de ports de Nmap: http://nmap.org/man/fr/man-port-scanning-techniques.html\n\n- Découverte de machines dans nmap: http://nmap.org/man/fr/man-host-discovery.html</string>
     
     <string name="preferences_help">Aide</string>
+    <string name="preferences_export">Exporter</string>
     <string name="preferences_notifications">Options de Notifications</string>
     <string name="preferences_discover">Options de Découverte de Machines</string>
     <string name="preferences_portscan">Options du Scan de Ports</string>

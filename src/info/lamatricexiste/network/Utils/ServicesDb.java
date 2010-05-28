@@ -13,10 +13,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class ServicesDb extends SQLiteOpenHelper {
@@ -68,10 +71,17 @@ public class ServicesDb extends SQLiteOpenHelper {
                         db.execSQL(str);
                     }
                 }
+                // Set Nic DB as installed
+                Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+                edit.putInt(Prefs.KEY_RESET_SERVICESDB, ctxt.getPackageManager().getPackageInfo(
+                        "info.lamatricexiste.network", 0).versionCode);
+                edit.commit();
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SQLiteException e) {
+            e.printStackTrace();
+        } catch (NameNotFoundException e) {
             e.printStackTrace();
         } finally {
             c.close();

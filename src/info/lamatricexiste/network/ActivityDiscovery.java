@@ -42,7 +42,7 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,12 +55,12 @@ final public class ActivityDiscovery extends Activity {
     public static final int MENU_SCAN_SINGLE = 0;
     public static final int MENU_OPTIONS = 1;
     public static final int MENU_HELP = 2;
+    private static final int MENU_EXPORT = 3;
     private static LayoutInflater mInflater;
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     private HardwareAddress mHardwareAddress;
     private Button btn_discover;
-    private Button btn_export;
     public SharedPreferences prefs = null;
     private ConnectivityManager connMgr;
     private AbstractDiscovery mDiscoveryTask = null;
@@ -85,14 +85,6 @@ final public class ActivityDiscovery extends Activity {
             }
         });
 
-        // Export
-        btn_export = (Button) findViewById(R.id.btn_export);
-        btn_export.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                export();
-            }
-        });
-
         // Options
         Button btn_options = (Button) findViewById(R.id.btn_options);
         btn_options.setOnClickListener(new View.OnClickListener() {
@@ -102,7 +94,7 @@ final public class ActivityDiscovery extends Activity {
         });
 
         // Wifi Settings
-        Button btn_wifi = (Button) findViewById(R.id.btn_wifi);
+        ImageButton btn_wifi = (ImageButton) findViewById(R.id.btn_wifi);
         btn_wifi.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
@@ -116,9 +108,6 @@ final public class ActivityDiscovery extends Activity {
         list.setItemsCanFocus(true);
 
         connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        // Fake hosts
-        // adapter.add("10.0.10.1");
     }
 
     @Override
@@ -160,6 +149,8 @@ final public class ActivityDiscovery extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
+        menu.add(0, ActivityDiscovery.MENU_EXPORT, 0, R.string.preferences_export).setIcon(
+                android.R.drawable.ic_menu_save);
         menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, "Options").setIcon(
                 android.R.drawable.ic_menu_preferences);
         menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
@@ -178,6 +169,9 @@ final public class ActivityDiscovery extends Activity {
                 return true;
             case ActivityDiscovery.MENU_HELP:
                 startActivity(new Intent(ctxt, Help.class));
+                return true;
+            case ActivityDiscovery.MENU_EXPORT:
+                export();
                 return true;
         }
         return false;
@@ -207,8 +201,9 @@ final public class ActivityDiscovery extends Activity {
 
     static class ViewHolder {
         TextView host;
-        Button btn_ports;
-        Button btn_info;
+        TextView mac;
+        TextView vendor;
+        ImageButton btn_ports;
     }
 
     // Custom ArrayAdapter
@@ -224,8 +219,9 @@ final public class ActivityDiscovery extends Activity {
                 convertView = mInflater.inflate(R.layout.list_host, null);
                 holder = new ViewHolder();
                 holder.host = (TextView) convertView.findViewById(R.id.list);
-                holder.btn_ports = (Button) convertView.findViewById(R.id.list_port);
-                holder.btn_info = (Button) convertView.findViewById(R.id.list_info);
+                holder.mac = (TextView) convertView.findViewById(R.id.mac);
+                holder.vendor = (TextView) convertView.findViewById(R.id.vendor);
+                holder.btn_ports = (ImageButton) convertView.findViewById(R.id.list_port);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -237,14 +233,11 @@ final public class ActivityDiscovery extends Activity {
             } else {
                 holder.host.setText(host.ipAddress);
             }
+            holder.mac.setText(host.hardwareAddress);
+            holder.vendor.setText(host.nicVendor);
             holder.btn_ports.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     startPortscan(host, position);
-                }
-            });
-            holder.btn_info.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    showHostInfo(host);
                 }
             });
             return convertView;
@@ -266,8 +259,7 @@ final public class ActivityDiscovery extends Activity {
 
         info_ip.setText("");
         info_mo.setText("");
-        setButtonOff(btn_discover);
-        setButtonOff(btn_export);
+        setButtonOff(btn_discover, R.drawable.disabled);
 
         NetInfo net = new NetInfo(ctxt);
 
@@ -323,7 +315,6 @@ final public class ActivityDiscovery extends Activity {
                         info_ip.setText("IP: " + net.ip + "/" + net.cidr);
                         info_in.setText("SSID: " + net.ssid);
                         setButtonOn(btn_discover, R.drawable.discover);
-                        setButtonOn(btn_export, R.drawable.export);
                     }
                 } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
                     net.getMobileInfo();
@@ -332,7 +323,6 @@ final public class ActivityDiscovery extends Activity {
                         info_ip.setText("IP: " + net.ip + "/" + net.cidr);
                         info_in.setText("CARRIER: " + net.carrier);
                         setButtonOn(btn_discover, R.drawable.discover);
-                        setButtonOn(btn_export, R.drawable.export);
                     }
                 } else if (type == 3) { // ETH
                     Log.i(TAG, "Ethernet connectivity detected!");
@@ -364,7 +354,7 @@ final public class ActivityDiscovery extends Activity {
         initList();
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
-        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cancel, 0, 0);
+        setButtonOff(btn_discover, R.drawable.cancel, false);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 cancelTasks();
@@ -378,7 +368,7 @@ final public class ActivityDiscovery extends Activity {
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
         btn_discover.setText(R.string.btn_discover);
-        btn_discover.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.discover, 0, 0);
+        setButtonOn(btn_discover, R.drawable.discover);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startDiscovering();
@@ -456,35 +446,38 @@ final public class ActivityDiscovery extends Activity {
         startActivityForResult(intent, SCAN_PORT_RESULT);
     }
 
-    private void showHostInfo(HostBean host) {
-        View v = mInflater.inflate(R.layout.info, null);
-        // Build info dialog
-        AlertDialog.Builder infoDialog = new AlertDialog.Builder(ActivityDiscovery.this);
-        infoDialog.setTitle(host.ipAddress);
-        // Add all available infos
-        LinearLayout root = (LinearLayout) v.findViewById(R.id.info);
-        root.addView(createHostInfoLine(R.string.info_mac, host.hardwareAddress));
-        root.addView(createHostInfoLine(R.string.info_nic, host.nicVendor));
-        if (host.portsOpen != null) {
-            root.addView(createHostInfoLine(R.string.info_ports_open, String
-                    .valueOf(host.portsOpen.length)));
-        }
-        if (host.portsClosed != null) {
-            root.addView(createHostInfoLine(R.string.info_ports_closed, String
-                    .valueOf(host.portsClosed.length)));
-        }
-        // Show dialog
-        infoDialog.setView(v);
-        infoDialog.setNegativeButton(R.string.btn_close, null);
-        infoDialog.show();
-    }
+    // private void showHostInfo(HostBean host) {
+    // View v = mInflater.inflate(R.layout.info, null);
+    // // Build info dialog
+    // AlertDialog.Builder infoDialog = new
+    // AlertDialog.Builder(ActivityDiscovery.this);
+    // infoDialog.setTitle(host.ipAddress);
+    // // Add all available infos
+    // LinearLayout root = (LinearLayout) v.findViewById(R.id.info);
+    // root.addView(createHostInfoLine(R.string.info_mac,
+    // host.hardwareAddress));
+    // root.addView(createHostInfoLine(R.string.info_nic, host.nicVendor));
+    // if (host.portsOpen != null) {
+    // root.addView(createHostInfoLine(R.string.info_ports_open, String
+    // .valueOf(host.portsOpen.length)));
+    // }
+    // if (host.portsClosed != null) {
+    // root.addView(createHostInfoLine(R.string.info_ports_closed, String
+    // .valueOf(host.portsClosed.length)));
+    // }
+    // // Show dialog
+    // infoDialog.setView(v);
+    // infoDialog.setNegativeButton(R.string.btn_close, null);
+    // infoDialog.show();
+    // }
 
-    private LinearLayout createHostInfoLine(int title, String value) {
-        LinearLayout line = (LinearLayout) mInflater.inflate(R.layout.info_line, null);
-        ((TextView) line.findViewById(R.id.info_title)).setText(title);
-        ((TextView) line.findViewById(R.id.info_value)).setText(value);
-        return line;
-    }
+    // private LinearLayout createHostInfoLine(int title, String value) {
+    // LinearLayout line = (LinearLayout) mInflater.inflate(R.layout.info_line,
+    // null);
+    // ((TextView) line.findViewById(R.id.info_title)).setText(title);
+    // ((TextView) line.findViewById(R.id.info_value)).setText(value);
+    // return line;
+    // }
 
     // private void sendPacket(){
     // CheckBox cb = (CheckBox) findViewById(R.id.repeat);
@@ -613,15 +606,23 @@ final public class ActivityDiscovery extends Activity {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void setButtonOff(Button b) {
+    private void setButtonOff(Button b, int drawable, boolean disable) {
+        if (disable) {
+            setButtonOff(b, drawable);
+        } else {
+            b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
+        }
+    }
+
+    private void setButtonOff(Button b, int drawable) {
         b.setClickable(false);
         b.setEnabled(false);
-        b.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.disabled, 0, 0);
+        b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
     }
 
     private void setButtonOn(Button b, int drawable) {
         b.setClickable(true);
         b.setEnabled(true);
-        b.setCompoundDrawablesWithIntrinsicBounds(0, drawable, 0, 0);
+        b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
     }
 }

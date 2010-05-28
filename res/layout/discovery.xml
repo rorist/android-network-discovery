@@ -11,72 +11,38 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="5dip"
-        android:paddingLeft="2dip">
+        android:layout_height="wrap_content">
         <Button
             android:id="@+id/btn_discover"
-            android:drawableTop="@drawable/discover"
+            android:drawableLeft="@drawable/discover"
             android:text="@string/btn_discover"
             style="@style/ButtonTop" />
         <Button
-            android:id="@+id/btn_export"
-            android:drawableTop="@drawable/export"
-            android:text="@string/btn_export"
-            style="@style/ButtonTop" />
-        <Button
             android:id="@+id/btn_options"
-            android:drawableTop="@drawable/settings"
+            android:drawableLeft="@drawable/settings"
             android:text="@string/btn_options"
             style="@style/ButtonTop" />
-        <!--
-            <Button android:id="@+id/btn" android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Send"/> <CheckBox android:id="@+id/repeat"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" android:paddingLeft="42dip"
-            android:textSize="10dip" android:typeface="monospace"
-            android:text="Send every minute"/>
-        -->
     </LinearLayout>
-    <!--
-        <LinearLayout android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip"> <Button
-        android:id="@+id/btn3" android:layout_width="75dip"
-        android:layout_height="35dip" android:textSize="12dip"
-        android:text="All"/> <Button android:id="@+id/btn4"
-        android:layout_width="75dip" android:layout_height="35dip"
-        android:textSize="12dip" android:text="None"/> </LinearLayout>
-    -->
     <ListView
         android:id="@+id/output"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:layout_marginTop="10dip"
-        android:layout_marginBottom="10dip" />
+        android:dividerHeight="0dip" />
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingRight="5dip"
-        android:paddingLeft="2dip">
-        <Button
+        android:layout_height="48dip"
+        android:background="@drawable/info_bg">
+        <ImageButton
             android:id="@+id/btn_wifi"
-            android:drawableTop="@drawable/wifi"
-            android:text="Wifi"
+            android:src="@drawable/wifi"
             style="@style/ButtonBottom" />
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="2dip">
+            android:layout_weight="1">
             <TextView
                 android:id="@+id/info_ip"
                 android:layout_width="fill_parent"
