@@ -13,7 +13,6 @@ import info.lamatricexiste.network.Utils.ServicesDb;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
@@ -342,21 +341,23 @@ final public class ActivityPortscan extends TabActivity {
 
         private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, String[] services,
                 Integer port) {
-            ports.add(findLocation(ports, port), port); //TODO: Is it more performant thant Collections.sort(ports);
+            ports.add(findLocation(ports, port), port); // TODO: Is it more
+                                                        // performant thant
+                                                        // Collections.sort(ports);
             adapter.add(PLACEHOLDER);
-            //Collections.sort(ports); // FIXME: cause GC to collect
+            // Collections.sort(ports); // FIXME: cause GC to collect
             services[port] = getPortService(port);
         }
 
-        private int findLocation(ArrayList<Integer> array, int value){
+        private int findLocation(ArrayList<Integer> array, int value) {
             int index;
             int current;
             int size = array.size();
-            for(index=0; index<size; index++){
+            for (index = 0; index < size; index++) {
                 current = array.get(index);
-                if(value>current){
+                if (value > current) {
                     continue;
-                } else if(value<current){
+                } else if (value < current) {
                     break;
                 }
             }

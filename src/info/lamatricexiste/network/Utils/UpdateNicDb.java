@@ -103,7 +103,9 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
     @Override
     protected void onPostExecute(Void unused) {
         final Activity d = mActivity.get();
-        progress.dismiss();
+        if (progress.isShowing()) {
+            progress.dismiss();
+        }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d.getApplication());
         d.setProgressBarIndeterminateVisibility(false);
         Toast.makeText(d.getApplicationContext(),
@@ -122,7 +124,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
     @Override
     protected void onCancelled() {
         final Activity d = mActivity.get();
-        if (progress != null) {
+        if (progress != null && progress.isShowing()) {
             progress.dismiss();
         }
         Toast.makeText(d.getApplicationContext(), R.string.preferences_error3, Toast.LENGTH_SHORT)

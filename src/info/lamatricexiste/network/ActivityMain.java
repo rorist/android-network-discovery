@@ -174,7 +174,9 @@ final public class ActivityMain extends Activity {
             db.close();
             final Activity d = mActivity.get();
             d.setProgressBarIndeterminateVisibility(true);
-            progress.dismiss();
+            if (progress.isShowing()) {
+                progress.dismiss();
+            }
 
             startDiscoverActivity(d);
         }
