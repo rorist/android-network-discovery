@@ -21,6 +21,7 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -70,7 +71,7 @@ public class HardwareAddress {
         return hw;
     }
 
-    public String getNicVendor(Context ctxt, String hw) {
+    public String getNicVendor(Context ctxt, String hw) throws SQLiteDatabaseCorruptException {
         String ni = ctxt.getString(R.string.info_unknown);
         if (db != null) {
             String macid = hw.replace(":", "").substring(0, 6).toUpperCase();

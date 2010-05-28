@@ -52,12 +52,14 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
     @Override
     protected void onProgressUpdate(String... item) {
         final ActivityDiscovery discover = mDiscover.get();
-        if (!isCancelled()) {
-            if (item[0] != null) {
-                discover.addHost(item[0], mRateControl.rate);
+        if(discover != null){
+            if (!isCancelled()) {
+                if (item[0] != null) {
+                    discover.addHost(item[0], mRateControl.rate);
+                }
+                hosts_done++;
+                discover.setProgress((int) (hosts_done * 10000 / size));
             }
-            hosts_done++;
-            discover.setProgress((int) (hosts_done * 10000 / size));
         }
     }
 

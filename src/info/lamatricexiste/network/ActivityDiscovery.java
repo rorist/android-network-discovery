@@ -25,6 +25,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -394,7 +396,14 @@ final public class ActivityDiscovery extends Activity {
         if (!hardwareAddressAlreadyExists(haddr)) {
             HostBean host = new HostBean();
             host.hardwareAddress = haddr;
-            host.nicVendor = mHardwareAddress.getNicVendor(ctxt, haddr);
+            try {
+                host.nicVendor = mHardwareAddress.getNicVendor(ctxt, haddr);
+            } catch(SQLiteDatabaseCorruptException e) {
+                Log.e(TAG, e.getMessage());
+                Editor edit = prefs.edit();
+                edit.putInt(Prefs.KEY_RESET_NICDB, Prefs.DEFAULT_RESET_NICDB);
+                edit.commit();
+            }
             host.ipAddress = addr;
             host.position = hosts.size();
             host.responseTime = timeout;

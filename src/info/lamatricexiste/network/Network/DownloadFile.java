@@ -81,7 +81,7 @@ public class DownloadFile {
 
     public static void fastChannelCopy(final ReadableByteChannel src, final WritableByteChannel dest)
             throws IOException, NullPointerException {
-        if (src != null) {
+        if (src != null && dest != null) {
             final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
             while (src.read(buffer) != -1) {
                 // prepare the buffer to be drained
