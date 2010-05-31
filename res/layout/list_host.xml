@@ -10,7 +10,7 @@
     android:background="@drawable/row_item"
     android:orientation="horizontal"
     android:padding="2dip">
-            
+
     <ImageView
         android:id="@+id/logo"
         android:src="@drawable/computer"
@@ -52,15 +52,5 @@
             android:text="NIC Vendor" />
             
     </LinearLayout>
-    
-    <ImageButton
-        android:id="@+id/list_port"
-        android:src="@drawable/portscan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:paddingLeft="10dip"
-        android:paddingRight="5dip"
-        style="@style/Button" />
     
 </LinearLayout>

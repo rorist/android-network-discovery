@@ -16,7 +16,7 @@
     <string name="btn_back">Back</string>
     
     <string name="task_nic">Downloading and installing NIC database ...</string>
-    <string name="task_services">Creating Services database ... Please wait.</string>
+    <string name="task_services">Creating Services database ...\nThis may take a while ...</string>
  
     <string name="package_missing">%s must be installed from the market !</string>
     

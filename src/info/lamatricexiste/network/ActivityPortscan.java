@@ -223,8 +223,14 @@ final public class ActivityPortscan extends TabActivity {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+            if (type == "open" && services_open != null) {
+                service = services_open[port];
+            } else if (type == "closed" && services_closed != null) {
+                service = services_closed[port];
+            } else {
+                service = getString(R.string.info_unknown);
+            }
             // FIXME: Use a string template
-            service = (type == "open") ? services_open[port] : services_closed[port];
             holder.port.setText(port + "/tcp " + "(" + service + ")");
             if (banners != null && banners[port] != null) {
                 holder.banner.setText(banners[port]);
@@ -342,8 +348,8 @@ final public class ActivityPortscan extends TabActivity {
         private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, String[] services,
                 Integer port) {
             ports.add(findLocation(ports, port), port); // TODO: Is it more
-                                                        // performant thant
-                                                        // Collections.sort(ports);
+            // performant thant
+            // Collections.sort(ports);
             adapter.add(PLACEHOLDER);
             // Collections.sort(ports); // FIXME: cause GC to collect
             services[port] = getPortService(port);
@@ -403,8 +409,7 @@ final public class ActivityPortscan extends TabActivity {
         Intent intent = new Intent();
         intent.putExtra(HostBean.EXTRA_POSITION, position);
         intent.putExtra(HostBean.EXTRA_PORTSO, portsToIntArray(ports_open)); // TODO:
-        // Use
-        // int[]
+        // Use int[]
         intent.putExtra(HostBean.EXTRA_PORTSC, portsToIntArray(ports_closed));
         intent.putExtra(HostBean.EXTRA_BANNERS, banners);
         setResult(RESULT_OK, intent);

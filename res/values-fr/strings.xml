@@ -16,7 +16,7 @@
     <string name="btn_back">Retour</string>
     
     <string name="task_nic">Téléchargement de la base des adresses MAC ...</string>
-    <string name="task_services">Création de la base de données des Services ... Veuillez patienter.</string>
+    <string name="task_services">Création de la base de données des Services ... Veuillez patienter ...</string>
     
     <string name="package_missing">%s doit être installée depuis le Market !</string>
     

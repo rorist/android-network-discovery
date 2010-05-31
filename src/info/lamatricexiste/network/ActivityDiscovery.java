@@ -41,6 +41,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,8 +49,9 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
-final public class ActivityDiscovery extends Activity {
+final public class ActivityDiscovery extends Activity implements OnItemClickListener {
 
     private final String TAG = "ActivityDiscover";
     public final static long VIBRATE = (long) 250;
@@ -107,7 +109,8 @@ final public class ActivityDiscovery extends Activity {
         adapter = new HostsAdapter(ctxt);
         ListView list = (ListView) findViewById(R.id.output);
         list.setAdapter(adapter);
-        list.setItemsCanFocus(true);
+        list.setItemsCanFocus(false);
+        list.setOnItemClickListener(this);
 
         connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
@@ -201,11 +204,14 @@ final public class ActivityDiscovery extends Activity {
         }
     }
 
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        startPortscan(hosts.get(position), position);
+    }
+
     static class ViewHolder {
         TextView host;
         TextView mac;
         TextView vendor;
-        ImageButton btn_ports;
     }
 
     // Custom ArrayAdapter
@@ -223,7 +229,6 @@ final public class ActivityDiscovery extends Activity {
                 holder.host = (TextView) convertView.findViewById(R.id.list);
                 holder.mac = (TextView) convertView.findViewById(R.id.mac);
                 holder.vendor = (TextView) convertView.findViewById(R.id.vendor);
-                holder.btn_ports = (ImageButton) convertView.findViewById(R.id.list_port);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -237,11 +242,6 @@ final public class ActivityDiscovery extends Activity {
             }
             holder.mac.setText(host.hardwareAddress);
             holder.vendor.setText(host.nicVendor);
-            holder.btn_ports.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    startPortscan(host, position);
-                }
-            });
             return convertView;
         }
     }
@@ -398,7 +398,7 @@ final public class ActivityDiscovery extends Activity {
             host.hardwareAddress = haddr;
             try {
                 host.nicVendor = mHardwareAddress.getNicVendor(ctxt, haddr);
-            } catch(SQLiteDatabaseCorruptException e) {
+            } catch (SQLiteDatabaseCorruptException e) {
                 Log.e(TAG, e.getMessage());
                 Editor edit = prefs.edit();
                 edit.putInt(Prefs.KEY_RESET_NICDB, Prefs.DEFAULT_RESET_NICDB);
