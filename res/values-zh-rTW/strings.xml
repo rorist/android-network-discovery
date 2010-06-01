@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ Licensed under GNU's GPL 2, see README
+-->
+<resources>
+    <string name="app_name">Network Discovery</string>
+    <string name="app_loading">載入中</string>
+    <string name="btn_yes">是</string>
+    <string name="btn_no">否</string>
+    <string name="btn_discover">發掘</string>
+    <string name="btn_discover_cancel">取消</string>
+    <string name="btn_export">匯出</string>
+    <string name="btn_close">關閉</string>
+    <string name="btn_scan">掃瞄</string>
+    <string name="btn_options">選項</string>
+    <string name="btn_back">返回</string>
+    <string name="btn_info">信息</string>
+    <string name="btn_ports">港口</string>
+         
+    <string name="package_missing">必須從市場上安裝 %s ！</string>
+    
+    <string name="wifi_enabled">Wifi 已開啟</string>
+    <string name="wifi_enabling">Wifi 啟用中</string>
+    <string name="wifi_disabling">Wifi 關閉中</string>
+    <string name="wifi_disabled">Wifi 已關閉</string>
+    <string name="wifi_scanning">Wifi 掃瞄中</string>
+    <string name="wifi_associating">Wifi是用 %s 聯入的</string>
+    <string name="wifi_dhcp">正在從 %s 獲取IP位址</string>
+    <string name="wifi_unknown">Wifi 狀態未知</string>
+    
+    <string name="discover_start">開始發掘 ...</string>
+    <string name="discover_finished">發掘完成！</string>
+    <string name="discover_canceled">已取消發掘！</string>
+    <string name="discover_proxy_title">代理錯誤</string>
+    <string name="discover_proxy_msg">發掘已被取消，由於一個MAC位址出現了多次，您可能是在一個代理環境下。\n\n從瀏覽器轉到您的網關：http://%s</string>
+    <string name="discover_root_title">安裝： Root</string>
+    <string name="discover_root_install">是否需要以ROOT權限安裝後台掃瞄程式？</string>
+    <string name="discover_root_restart">程式重啟中 ...</string>
+        
+    <string name="scan_single_title">掃瞄 IP</string>
+    <string name="scan_single_summary">輸入一個IP位址或者域名以供掃瞄，例如 scanme.nmap.org</string>
+    <string name="scan_noport">未發現開啟的通訊埠！</string>
+    <string name="scan_noaction">無相關操作！</string>
+    <string name="scan_connect">連接</string>
+    <string name="scan_start">開始掃瞄 ...</string>
+    <string name="scan_finished">掃瞄完成！</string>
+    <string name="scan_canceled">已取消掃瞄！</string>
+    <string name="scan_open">已開啟 (%s)</string>
+    <string name="scan_closed">已關閉 (%s)</string>
+    <string name="scan_host_unreachable">主機未響應！</string>
+    
+    <string name="info_time">響應時間：</string>
+    <string name="info_mac">MAC 位址:</string>
+    <string name="info_nic">網卡廠商：</string>
+    <string name="info_ports_open">開啟的通訊埠：</string>
+    <string name="info_ports_closed">關閉的通訊埠：</string>
+    <string name="info_unknown">未知</string>
+    
+    <string name="export_finished">檔案已儲存！</string>
+    <string name="export_choose">選取目標檔案</string>
+    <string name="export_save">儲存</string>
+    <string name="export_exists_title">檔案已存在</string>
+    <string name="export_exists_msg">是否需要覆寫檔案？</string>
+    
+    <string name="help_discovery_title">主機發掘</string>
+    <string name="help_discovery_content">正在使用的方法，並不需要有root權限。在將來的版本將會有更先進的技術，非root權限下的功能將更加完美。\n\n這兒說明軟體是怎樣工作的: \n1. 計算子網路範圍\n2. 重複連接 IP 並驗證之\n3. 首選它將傳送一個ICMP包Ping主機，或者回顯在TCP/7 (使用 InetAddress.isReachable())\n4. 如果不起作用，則嘗試利用一些常用通訊埠進行連接，如: 135, 139, 22, 111, 80\n5. 如果以上方式都沒有成功，則是未發掘到主機</string>
+    <string name="help_portscan_title">通訊埠掃瞄</string>
+    <string name="help_portscan_content">通訊埠掃瞄是事件驅動，使用JAVA選取器和Socket通道。\n在以毫秒為單位的時間註冊Socket建立時會產生一個假逾時，會定期檢查它。\n通訊埠掃瞄方式，如發掘，使用完全的TCP連接掃瞄。(將來結合root功能將有更多的粒度連接。)\n\n同一時間最多能有127個Sockets通信進程，所以這並不總是精確的，但是很快。同樣的，將來會有一個新功能以適應要求發出以及主機響應之間的時間時間(網路擁擠控制類別軟體)\n\n當TCP連接是成功的，則認為通訊埠是開放的；而當監聽結束時仍未發現任何服務或者過濾器逾時則認為通訊埠是關閉的。</string>
+    <string name="help_links_title">連結</string>
+    <string name="help_links_content">- 掃瞄 TCP 連接：http://nmap.org/book/man-port-scanning-techniques.html#id421401\n\n- 主機發掘：http://nmap.org/book/man-host-discovery.html\n\n- 安智網中文化 (http://goapk.com)</string>
+    
+    <string name="preferences_help">說明</string>
+    <string name="preferences_notifications">通知設定</string>
+    <string name="preferences_discover">發掘設定</string>
+    <string name="preferences_portscan">通訊埠掃瞄設定</string>
+    <string name="preferences_advanced">進階設定</string>
+    <string name="preferences_resolve_name_title">剖析主機名</string>
+    <string name="preferences_resolve_name_summary">在網路上將消耗更多的資料流量</string>
+    <string name="preferences_vibrate_title">震動</string>
+    <string name="preferences_vibrate_summary">當掃瞄完成後震動</string>
+    <string name="preferences_ratecontrol_enable_title">速率控制</string>
+    <string name="preferences_ratecontrol_enable_summary">啟用速率自動偵測</string>
+    <string name="preferences_timeout_discover_title">自訂速率</string>
+    <string name="preferences_timeout_discover_summary">主機發掘的毫秒數</string>
+    <string name="preferences_port_start_title">開始通訊埠</string>
+    <string name="preferences_port_start_summary">掃瞄時的開始 TCP 通訊埠。 1-65535</string>
+    <string name="preferences_port_end_title">終止通訊埠</string>
+    <string name="preferences_port_end_summary">掃瞄時的終止 TCP 通訊埠。1-65535</string>
+    <string name="preferences_banner_title">服務廣告</string>
+    <string name="preferences_banner_summary">連接到TCP通訊埠並列印出利用監聽服務獲取的訊息(將產生一定的資料流量)</string>
+    <string name="preferences_timeout_force_title">自訂逾時</string>
+    <string name="preferences_timeout_force_summary">手動設定連接逾時</string>
+    <string name="preferences_timeout_title">連接逾時</string>
+    <string name="preferences_timeout_summary">通訊埠連接逾時的毫秒數</string>
+    <string name="preferences_ssh_user_title">SSH 使用者</string>
+    <string name="preferences_ssh_user_summary">SSH 連接的使用者名</string>
+    <string name="preferences_threads_title">發掘執行緒</string>
+    <string name="preferences_threads_summary">發掘主機的最大執行緒數(1-256)</string>
+    <string name="preferences_resetdb_title">重裝網卡資料庫</string>
+    <string name="preferences_resetdb_summary">獲取並更新MAC位址資料庫</string>
+    <string name="preferences_resetdb_action">是否需要下載網卡資料庫？ (~500k)</string>
+    <string name="preferences_resetdb_ok">已升級資料庫！更新 %s 個新項目 ...</string>
+    <string name="preferences_error1">錯誤：開始通訊埠大於終止通訊埠！</string>
+    <string name="preferences_error2">錯誤：執行緒數必須介於1和256！</string>
+    <string name="preferences_error3">錯誤：檔案傳輸中斷！</string>
+</resources>
