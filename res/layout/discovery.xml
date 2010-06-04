@@ -28,7 +28,8 @@
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:dividerHeight="0dip" />
+        android:dividerHeight="0dip"
+        android:cacheColorHint="#000000" />
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
