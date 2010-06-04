@@ -30,11 +30,14 @@ import android.util.Log;
 public class DownloadFile {
 
     private static String TAG = "DownloadFile";
+    private final String USERAGENT = "Android/" + android.os.Build.DISPLAY + " ("
+            + android.os.Build.MODEL + ") NetworkDiscovery/0.2.8";
     private HttpClient httpclient;
 
     public DownloadFile(String url, String dst) throws IOException {
         Log.i(TAG, "Downloading " + url + " to " + dst);
         httpclient = new DefaultHttpClient();
+        httpclient.getParams().setParameter("http.useragent", USERAGENT);
         InputStream in = openURL(url);
         OutputStream out = new FileOutputStream(dst);
         final ReadableByteChannel inputChannel = Channels.newChannel(in);
