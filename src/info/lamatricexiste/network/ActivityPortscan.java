@@ -7,9 +7,9 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.HostBean;
+import info.lamatricexiste.network.Utils.DbServices;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
-import info.lamatricexiste.network.Utils.ServicesDb;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ final public class ActivityPortscan extends TabActivity {
     private Context ctxt;
     private TextView mTabOpen;
     private TextView mTabClosed;
-    private List<Integer> openPortsConnect;
+    private List<String> knownServices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,11 +145,12 @@ final public class ActivityPortscan extends TabActivity {
         list_closed.setItemsCanFocus(true);
 
         // FIXME: get from prefs/banners
-        openPortsConnect = new ArrayList<Integer>(4);
-        openPortsConnect.add((int) 22);
-        openPortsConnect.add((int) 23);
-        openPortsConnect.add((int) 80);
-        openPortsConnect.add((int) 443);
+        knownServices = new ArrayList<String>();
+        // knownServices.add("ftp");
+        knownServices.add("ssh");
+        knownServices.add("telnet");
+        knownServices.add("http");
+        knownServices.add("https");
 
         // Start scan if ports empty
         if (ports_open == null && ports_closed == null) {
@@ -223,22 +224,12 @@ final public class ActivityPortscan extends TabActivity {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            if (type == "open" && services_open != null) {
-                service = services_open[port];
-            } else if (type == "closed" && services_closed != null) {
-                service = services_closed[port];
-            } else {
-                service = getString(R.string.info_unknown);
-            }
-            // FIXME: Use a string template
-            holder.port.setText(port + "/tcp " + "(" + service + ")");
-            if (banners != null && banners[port] != null) {
-                holder.banner.setText(banners[port]);
-            } else {
-                holder.banner.setText("");
-            }
-            // Port's service is known
-            if (openPortsConnect.contains(port)) {
+            // FIXME: Use a Port List and don't compute this data at every
+            // getView() calls !!!
+            // Service
+            service = getService(port, type);
+            if (knownServices.contains(service)) {
+                // Port's service is known
                 holder.btn_c.setText(R.string.scan_connect);
                 holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connect, 0, 0, 0);
                 holder.btn_c.setOnClickListener(new View.OnClickListener() {
@@ -246,11 +237,18 @@ final public class ActivityPortscan extends TabActivity {
                         openPortService(port);
                     }
                 });
-                // No action for this service
             } else {
+                // No action for this service
                 holder.btn_c.setText(null);
                 holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                 holder.btn_c.setOnClickListener(null);
+            }
+            // Set line text
+            holder.port.setText(port + "/tcp " + "(" + service + ")");
+            if (banners != null && banners[port] != null) {
+                holder.banner.setText(banners[port]);
+            } else {
+                holder.banner.setText("");
             }
             return convertView;
         }
@@ -266,7 +264,7 @@ final public class ActivityPortscan extends TabActivity {
             super(activity, host, timeout);
             WeakReference<Activity> a = new WeakReference<Activity>(activity);
             final Activity d = a.get();
-            db = (new ServicesDb(d)).getWritableDatabase();
+            db = (new DbServices(d)).getWritableDatabase();
         }
 
         @Override
@@ -464,8 +462,44 @@ final public class ActivityPortscan extends TabActivity {
         return null;
     }
 
-    // TODO: Service discovery
+    private String getService(int port, String type) {
+        String service = null;
+
+        // Determinate service with banners
+        // if (banners != null && banners[port] != null) {
+        // Pattern pattern;
+        // Matcher matcher;
+        // SQLiteDatabase db = (new ServicesDb(getApplicationContext(),
+        // ServicesDb.DB_PROBES))
+        // .getWritableDatabase();
+        // Cursor c = db.rawQuery("select service,regex from services", null);
+        // c.moveToFirst();
+        // if (c.getCount() > 0) {
+        // pattern = Pattern.compile(c.getString(2));
+        // matcher = pattern.matcher(banners[port]);
+        // if (matcher.matches()) {
+        // service = c.getString(1);
+        // }
+        // }
+        // c.close();
+        // db.close();
+        // }
+
+        // Get the service from port number
+        if (service == null) {
+            if (type == "open" && services_open != null) {
+                service = services_open[port];
+            } else if (type == "closed" && services_closed != null) {
+                service = services_closed[port];
+            } else {
+                service = getString(R.string.info_unknown);
+            }
+        }
+        return service;
+    }
+
     private void openPortService(int port) {
+        // Action for the service
         String pk = "";
         String action = "";
         Intent intent = null;

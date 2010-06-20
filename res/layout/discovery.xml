@@ -33,7 +33,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="48dip"
+        android:layout_height="54dip"
         android:background="@drawable/info_bg">
         <ImageButton
             android:id="@+id/btn_wifi"

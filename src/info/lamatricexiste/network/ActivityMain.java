@@ -5,8 +5,9 @@
 
 package info.lamatricexiste.network;
 
+import info.lamatricexiste.network.Utils.DbProbes;
+import info.lamatricexiste.network.Utils.DbServices;
 import info.lamatricexiste.network.Utils.Prefs;
-import info.lamatricexiste.network.Utils.ServicesDb;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 
 import java.lang.ref.WeakReference;
@@ -18,16 +19,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Window;
 
 final public class ActivityMain extends Activity {
 
-    private final String TAG = "info.lamatricexiste.network";
-    public SharedPreferences prefs = null;
+    private final static String TAG = "info.lamatricexiste.network";
+    public static SharedPreferences prefs = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,7 +90,6 @@ final public class ActivityMain extends Activity {
     private void phase2(final Context ctxt) {
 
         class UpdateNicDbMain extends UpdateNicDb {
-
             public UpdateNicDbMain(Activity activity) {
                 super(activity);
             }
@@ -146,10 +146,9 @@ final public class ActivityMain extends Activity {
         finish();
     }
 
-    class CreateServicesDb extends AsyncTask<Void, String, Void> {
+    static class CreateServicesDb extends AsyncTask<Void, String, Void> {
         private WeakReference<Activity> mActivity;
         private ProgressDialog progress;
-        private SQLiteDatabase db;
 
         public CreateServicesDb(Activity activity) {
             mActivity = new WeakReference<Activity>(activity);
@@ -165,20 +164,34 @@ final public class ActivityMain extends Activity {
         @Override
         protected Void doInBackground(Void... params) {
             final Activity d = mActivity.get();
-            db = (new ServicesDb(d)).getWritableDatabase();
+            DbServices services = new DbServices(d);
+            services.createTable(services.getReadableDatabase(), DbServices.DB_TABLE,
+                    DbServices.DB_TABLE_RES);
+            services.close();
+            DbProbes probes = new DbProbes(d);
+            probes.createTable(probes.getReadableDatabase(), DbProbes.DB_TABLE,
+                    DbProbes.DB_TABLE_RES);
+            probes.close();
             return null;
         }
 
         @Override
         protected void onPostExecute(Void unused) {
-            db.close();
-            final Activity d = mActivity.get();
+            final ActivityMain d = (ActivityMain) mActivity.get();
             d.setProgressBarIndeterminateVisibility(true);
             if (progress.isShowing()) {
                 progress.dismiss();
             }
-
-            startDiscoverActivity(d);
+            try {
+                Editor edit = prefs.edit();
+                edit.putInt(Prefs.KEY_RESET_SERVICESDB, d.getPackageManager().getPackageInfo(
+                        "info.lamatricexiste.network", 0).versionCode);
+                edit.commit();
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, e.getMessage());
+            } finally {
+                d.startDiscoverActivity(d);
+            }
         }
     }
 }

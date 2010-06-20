@@ -13,6 +13,7 @@
  */
 
 package info.lamatricexiste.network;
+
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.IOException;
@@ -61,25 +62,23 @@ public class DefaultPortscan extends AbstractPortScan {
     }
 
     protected void stop() {
-        if (selector != null) {
-            synchronized (selector) {
-                if (selector.isOpen()) {
-                    try {
-                        // Force invalidate keys
-                        Iterator<SelectionKey> iterator = selector.keys().iterator();
+        synchronized (selector) {
+            if (selector != null && selector.isOpen()) {
+                try {
+                    // Force invalidate keys
+                    Iterator<SelectionKey> iterator = selector.keys().iterator();
+                    synchronized (iterator) {
                         while (iterator.hasNext()) {
-                            synchronized (iterator) {
-                                publishProgress(0, -2);
-                                finishKey(iterator.next());
-                            }
+                            publishProgress(0, -2);
+                            finishKey(iterator.next());
                         }
-                        // Close the selector
-                        selector.close();
-                    } catch (ClosedSelectorException e) {
-                        Log.e(TAG, "ClosedSelectorException");
-                    } catch (IOException e) {
-                        Log.e(TAG, e.getMessage());
                     }
+                    // Close the selector
+                    selector.close();
+                } catch (ClosedSelectorException e) {
+                    Log.e(TAG, "ClosedSelectorException");
+                } catch (IOException e) {
+                    Log.e(TAG, e.getMessage());
                 }
             }
         }
@@ -87,10 +86,9 @@ public class DefaultPortscan extends AbstractPortScan {
 
     private void connectSocket(InetAddress ina, int port) throws IOException {
         // Create the socket
-        InetSocketAddress addr = new InetSocketAddress(ina, port);
         SocketChannel socket = SocketChannel.open();
         socket.configureBlocking(false);
-        socket.connect(addr);
+        socket.connect(new InetSocketAddress(ina, port));
         // Register the Channel with port as attachement
         SparseArray<Integer> data = new SparseArray<Integer>(1);
         data.append(0, port);
@@ -126,11 +124,13 @@ public class DefaultPortscan extends AbstractPortScan {
         try {
             if (((SocketChannel) key.channel()).finishConnect()) { // Open
                 final Activity d = mActivity.get();
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d.getApplicationContext());
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
+                        .getApplicationContext());
                 if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
                     // Create a new selector and register for reading
                     Selector readSelector = Selector.open();
-                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector, SelectionKey.OP_READ);
+                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
+                            SelectionKey.OP_READ);
                     tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
                     int code = readSelector.select(TIMEOUT_READ);
                     tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
