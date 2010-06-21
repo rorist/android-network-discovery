@@ -46,6 +46,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,6 +71,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
     private AbstractDiscovery mDiscoveryTask = null;
     private RootDaemon mRootDaemon = null;
     private Context ctxt;
+    private NetInfo net = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,6 +82,8 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         ctxt = getApplicationContext();
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         mInflater = LayoutInflater.from(ctxt);
+        net = new NetInfo(ctxt);
+        net.getWifiInfo();
 
         // Discover
         btn_discover = (Button) findViewById(R.id.btn_discover);
@@ -182,10 +186,8 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         return false;
     }
 
-    // Sub Activity result
-    // Listen for results.
+    // Listen for Activity results
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Log.v(TAG, "result=" + resultCode + "(" + RESULT_OK + ")");
         switch (requestCode) {
             case SCAN_PORT_RESULT:
                 if (resultCode == RESULT_OK) {
@@ -194,10 +196,9 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                     int position = extra.getInt(HostBean.EXTRA_POSITION);
                     HostBean host = hosts.get(position);
                     host.banners = extra.getStringArray(HostBean.EXTRA_BANNERS);
+                    host.services = extra.getStringArray(HostBean.EXTRA_SERVICES);
                     host.portsOpen = extra.getIntArray(HostBean.EXTRA_PORTSO);
                     host.portsClosed = extra.getIntArray(HostBean.EXTRA_PORTSC);
-                    // OS Fingerprint check
-                    // host.setOs(OsFingerprint.finger(extra.getLongArray(HostBean.EXTRA_)));
                 }
             default:
                 break;
@@ -212,6 +213,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         TextView host;
         TextView mac;
         TextView vendor;
+        ImageView logo;
     }
 
     // Custom ArrayAdapter
@@ -229,11 +231,17 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                 holder.host = (TextView) convertView.findViewById(R.id.list);
                 holder.mac = (TextView) convertView.findViewById(R.id.mac);
                 holder.vendor = (TextView) convertView.findViewById(R.id.vendor);
+                holder.logo = (ImageView) convertView.findViewById(R.id.logo);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
+            if (host.isGateway) {
+                holder.logo.setImageResource(R.drawable.router);
+            } else {
+                holder.logo.setImageResource(R.drawable.computer);
+            }
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
                     && host.hostname != null) {
                 holder.host.setText(host.hostname);
@@ -262,8 +270,6 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         info_ip.setText("");
         info_mo.setText("");
         setButtonOff(btn_discover, R.drawable.disabled);
-
-        NetInfo net = new NetInfo(ctxt);
 
         // Wifi state
         String action = intent.getAction();
@@ -395,7 +401,10 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         String haddr = mHardwareAddress.getHardwareAddress(addr);
         if (!hardwareAddressAlreadyExists(haddr)) {
             HostBean host = new HostBean();
+            host.position = hosts.size();
             host.hardwareAddress = haddr;
+            host.ipAddress = addr;
+            host.responseTime = timeout;
             try {
                 host.nicVendor = mHardwareAddress.getNicVendor(ctxt, haddr);
             } catch (SQLiteDatabaseCorruptException e) {
@@ -404,9 +413,13 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                 edit.putInt(Prefs.KEY_RESET_NICDB, Prefs.DEFAULT_RESET_NICDB);
                 edit.commit();
             }
-            host.ipAddress = addr;
-            host.position = hosts.size();
-            host.responseTime = timeout;
+
+            // Is gateway ?
+            if (net.gatewayIp.equals(host.ipAddress)) {
+                host.isGateway = true;
+            }
+
+            // FQDN
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
                 try {
                     host.hostname = (InetAddress.getByName(addr)).getCanonicalHostName();
@@ -414,13 +427,13 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                     return;
                 }
             }
+
             hosts.add(host);
             adapter.add(null);
         } else {
             if (mDiscoveryTask != null) {
                 cancelTasks();
             }
-            NetInfo net = new NetInfo(ctxt);
             AlertDialog.Builder infoDialog = new AlertDialog.Builder(this);
             infoDialog.setTitle(R.string.discover_proxy_title);
             infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg),
@@ -450,6 +463,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         intent.putExtra(HostBean.EXTRA_HOST, host.ipAddress);
         intent.putExtra(HostBean.EXTRA_HOSTNAME, host.hostname);
         intent.putExtra(HostBean.EXTRA_BANNERS, host.banners);
+        intent.putExtra(HostBean.EXTRA_SERVICES, host.services);
         intent.putExtra(HostBean.EXTRA_PORTSO, host.portsOpen);
         intent.putExtra(HostBean.EXTRA_PORTSC, host.portsClosed);
         startActivityForResult(intent, SCAN_PORT_RESULT);

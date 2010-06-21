@@ -30,7 +30,7 @@ import android.util.Log;
 public class DownloadFile {
 
     private static String TAG = "DownloadFile";
-    private final String USERAGENT = "Android/" + android.os.Build.DISPLAY + " ("
+    private final String USERAGENT = "Android/" + android.os.Build.VERSION.RELEASE + " ("
             + android.os.Build.MODEL + ") NetworkDiscovery/0.2.8";
     private HttpClient httpclient;
 

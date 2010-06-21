@@ -39,12 +39,12 @@ public class Db extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.v(TAG, "onCreate");
+        // Log.v(TAG, "onCreate");
         // createTable(db, DB_TABLE, DB_TABLE_RES);
     }
 
     public void onOpen(SQLiteDatabase db) {
-        Log.v(TAG, "onOpen");
+        // Log.v(TAG, "onOpen");
     }
 
     @Override

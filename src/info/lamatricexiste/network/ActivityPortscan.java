@@ -7,6 +7,7 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.HostBean;
+import info.lamatricexiste.network.Utils.DbProbes;
 import info.lamatricexiste.network.Utils.DbServices;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
@@ -14,6 +15,9 @@ import info.lamatricexiste.network.Utils.Prefs;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import android.app.Activity;
 import android.app.TabActivity;
@@ -55,8 +59,7 @@ final public class ActivityPortscan extends TabActivity {
     private PortsAdapter adapter_open;
     private PortsAdapter adapter_closed;
     private String[] banners = null;
-    private String[] services_open = null;
-    private String[] services_closed = null;
+    private String[] services = null;
     private ArrayList<Integer> ports_open = null;
     private ArrayList<Integer> ports_closed = null;
     private int cnt_open;
@@ -83,8 +86,7 @@ final public class ActivityPortscan extends TabActivity {
         host = extra.getString(HostBean.EXTRA_HOST);
         position = extra.getInt(HostBean.EXTRA_POSITION);
         banners = extra.getStringArray(HostBean.EXTRA_BANNERS);
-        services_open = extra.getStringArray(HostBean.EXTRA_SERVICESO);
-        services_closed = extra.getStringArray(HostBean.EXTRA_SERVICESC);
+        services = extra.getStringArray(HostBean.EXTRA_SERVICES);
         ports_open = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSO));
         ports_closed = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSC));
         cnt_open = (ports_open == null) ? 0 : ports_open.size();
@@ -202,7 +204,6 @@ final public class ActivityPortscan extends TabActivity {
     // Custom ArrayAdapter
     private class PortsAdapter extends ArrayAdapter<String> {
         private String type;
-        private String service;
 
         public PortsAdapter(Context context, List<String> objects, String type) {
             super(context, R.layout.list_port, R.id.list, objects);
@@ -211,8 +212,7 @@ final public class ActivityPortscan extends TabActivity {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            final int port = (type == "open") ? ports_open.get(position) : ports_closed
-                    .get(position);
+            // Views
             ViewHolder holder;
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.list_port, null);
@@ -224,27 +224,33 @@ final public class ActivityPortscan extends TabActivity {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            // FIXME: Use a Port List and don't compute this data at every
-            // getView() calls !!!
-            // Service
-            service = getService(port, type);
-            if (knownServices.contains(service)) {
-                // Port's service is known
-                holder.btn_c.setText(R.string.scan_connect);
-                holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connect, 0, 0, 0);
-                holder.btn_c.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        openPortService(port);
-                    }
-                });
+            // Port & Service
+            final int port = (type == "open") ? ports_open.get(position) : ports_closed
+                    .get(position);
+            if (services != null) {
+                final String service = services[port];
+                holder.port.setText(port + "/tcp " + "(" + service + ")");
+
+                // Service is known
+                if (knownServices.contains(service)) {
+                    holder.btn_c.setText(R.string.scan_connect);
+                    holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connect, 0, 0,
+                            0);
+                    holder.btn_c.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            openPortService(service);
+                        }
+                    });
+                } else {
+                    // No action for this service
+                    holder.btn_c.setText(null);
+                    holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    holder.btn_c.setOnClickListener(null);
+                }
             } else {
-                // No action for this service
-                holder.btn_c.setText(null);
-                holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                holder.btn_c.setOnClickListener(null);
+                holder.port.setText(port + "/tcp ");
             }
-            // Set line text
-            holder.port.setText(port + "/tcp " + "(" + service + ")");
+            // Banner
             if (banners != null && banners[port] != null) {
                 holder.banner.setText(banners[port]);
             } else {
@@ -256,15 +262,17 @@ final public class ActivityPortscan extends TabActivity {
 
     private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
-        private SQLiteDatabase db;
-        private Cursor c;
+        private SQLiteDatabase dbServices;
+        private SQLiteDatabase dbProbes;
         private String service;
+        private Cursor c;
 
         ScanPortTask(Activity activity, String host, long timeout) {
             super(activity, host, timeout);
             WeakReference<Activity> a = new WeakReference<Activity>(activity);
             final Activity d = a.get();
-            db = (new DbServices(d)).getWritableDatabase();
+            dbServices = (new DbServices(d)).getReadableDatabase();
+            dbProbes = (new DbProbes(d)).getReadableDatabase();
         }
 
         @Override
@@ -282,10 +290,9 @@ final public class ActivityPortscan extends TabActivity {
             nb_port = port_end - port_start + 2;
             mBanners = new String[nb_port];
             banners = new String[nb_port];
-            services_open = new String[nb_port];
-            services_closed = new String[nb_port];
+            services = new String[nb_port];
             mTabOpen.setText(String.format(getString(R.string.scan_open), 0));
-            mTabClosed.setText(String.format(getString(R.string.scan_open), 0));
+            mTabClosed.setText(String.format(getString(R.string.scan_closed), 0));
             setProgress(0);
         }
 
@@ -295,18 +302,16 @@ final public class ActivityPortscan extends TabActivity {
                 if (values.length > 0) {
                     if (!values[0].equals(new Integer(0))) {
                         if (values[1] == 1) {
-                            addPort(ports_open, adapter_open, services_open, values[0]);
-                            cnt_open++;
-                            mTabOpen
-                                    .setText(String.format(getString(R.string.scan_open), cnt_open));
                             // Save banners
                             if (mBanners != null) {
                                 banners[values[0]] = mBanners[values[0]];
-                                // System.arraycopy(mBanners, 0, banners, 0,
-                                // mBanners.length);
                             }
+                            addPort(ports_open, adapter_open, values[0]);
+                            cnt_open++;
+                            mTabOpen
+                                    .setText(String.format(getString(R.string.scan_open), cnt_open));
                         } else if (values[1] == 0) {
-                            addPort(ports_closed, adapter_closed, services_closed, values[0]);
+                            addPort(ports_closed, adapter_closed, values[0]);
                             cnt_closed++;
                             mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                     cnt_closed));
@@ -330,7 +335,8 @@ final public class ActivityPortscan extends TabActivity {
             if (ports_open.size() == 0) {
                 makeToast(R.string.scan_noport);
             }
-            db.close();
+            dbServices.close();
+            dbProbes.close();
             stopScan();
             makeToast(R.string.scan_finished);
         }
@@ -339,18 +345,64 @@ final public class ActivityPortscan extends TabActivity {
         protected void onCancelled() {
             super.onCancelled();
             makeToast(R.string.scan_canceled);
-            db.close();
+            dbServices.close();
+            dbProbes.close();
             stopScan();
         }
 
-        private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, String[] services,
-                Integer port) {
-            ports.add(findLocation(ports, port), port); // TODO: Is it more
-            // performant thant
-            // Collections.sort(ports);
+        private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, Integer port) {
+            ports.add(findLocation(ports, port), port);
             adapter.add(PLACEHOLDER);
             // Collections.sort(ports); // FIXME: cause GC to collect
             services[port] = getPortService(port);
+        }
+
+        private String getPortService(int port) {
+            service = null;
+
+            // Determinate service with banners
+            if (banners != null && banners[port] != null) {
+
+                Log.v(TAG, "banner=" + banners[port]);
+                Pattern pattern;
+                Matcher matcher;
+                Cursor c = dbProbes.rawQuery("select service, regex from services_probes", null);
+                Log.v(TAG, "count=" + c.getCount());
+                if (c.getCount() > 0) {
+                    c.moveToFirst();
+                    do {
+                        try {
+                            pattern = Pattern.compile(c.getString(1), Pattern.DOTALL
+                                    | Pattern.CASE_INSENSITIVE);
+                            matcher = pattern.matcher(banners[port]);
+                            if (matcher.matches()) {
+                                service = c.getString(0);
+                                Log.v(TAG, "MATCHED=" + service);
+                                break;
+                            }
+                        } catch (PatternSyntaxException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                    } while (c.moveToNext());
+                }
+                c.close();
+            }
+
+            // Get the service from port number
+            if (service == null) {
+                c = dbServices.rawQuery("SELECT service FROM services WHERE port=" + port
+                        + " LIMIT 1", null);
+                if (c.getCount() > 0) {
+                    c.moveToFirst();
+                    service = c.getString(0);
+                    c.close();
+                } else {
+                    service = getString(R.string.info_unknown);
+                }
+                c.close();
+            }
+
+            return service;
         }
 
         private int findLocation(ArrayList<Integer> array, int value) {
@@ -367,18 +419,6 @@ final public class ActivityPortscan extends TabActivity {
             }
             return index;
         }
-
-        private String getPortService(int port) {
-            c = db.rawQuery("SELECT service FROM services WHERE port=" + port + " LIMIT 1", null);
-            if (c.getCount() > 0) {
-                c.moveToFirst();
-                service = c.getString(0);
-                c.close();
-                return service;
-            }
-            c.close();
-            return "unknown";
-        }
     }
 
     private void startScan() {
@@ -391,6 +431,8 @@ final public class ActivityPortscan extends TabActivity {
         cnt_closed = 0;
         ports_open = new ArrayList<Integer>();
         ports_closed = new ArrayList<Integer>();
+        banners = new String[] {};
+        services = new String[] {};
         scanPortTask = new ScanPortTask(this, host, getTimeout());
         scanPortTask.execute();
         btn_scan.setText(R.string.btn_discover_cancel);
@@ -406,10 +448,11 @@ final public class ActivityPortscan extends TabActivity {
         // Set result
         Intent intent = new Intent();
         intent.putExtra(HostBean.EXTRA_POSITION, position);
-        intent.putExtra(HostBean.EXTRA_PORTSO, portsToIntArray(ports_open)); // TODO:
-        // Use int[]
-        intent.putExtra(HostBean.EXTRA_PORTSC, portsToIntArray(ports_closed));
+        intent.putExtra(HostBean.EXTRA_SERVICES, services);
         intent.putExtra(HostBean.EXTRA_BANNERS, banners);
+        // TODO: Use int[]
+        intent.putExtra(HostBean.EXTRA_PORTSO, portsToIntArray(ports_open));
+        intent.putExtra(HostBean.EXTRA_PORTSC, portsToIntArray(ports_closed));
         setResult(RESULT_OK, intent);
         // Reset scan
         setProgressBarVisibility(false);
@@ -462,87 +505,47 @@ final public class ActivityPortscan extends TabActivity {
         return null;
     }
 
-    private String getService(int port, String type) {
-        String service = null;
-
-        // Determinate service with banners
-        // if (banners != null && banners[port] != null) {
-        // Pattern pattern;
-        // Matcher matcher;
-        // SQLiteDatabase db = (new ServicesDb(getApplicationContext(),
-        // ServicesDb.DB_PROBES))
-        // .getWritableDatabase();
-        // Cursor c = db.rawQuery("select service,regex from services", null);
-        // c.moveToFirst();
-        // if (c.getCount() > 0) {
-        // pattern = Pattern.compile(c.getString(2));
-        // matcher = pattern.matcher(banners[port]);
-        // if (matcher.matches()) {
-        // service = c.getString(1);
-        // }
-        // }
-        // c.close();
-        // db.close();
-        // }
-
-        // Get the service from port number
-        if (service == null) {
-            if (type == "open" && services_open != null) {
-                service = services_open[port];
-            } else if (type == "closed" && services_closed != null) {
-                service = services_closed[port];
-            } else {
-                service = getString(R.string.info_unknown);
-            }
-        }
-        return service;
-    }
-
-    private void openPortService(int port) {
+    private void openPortService(String service) {
         // Action for the service
         String pk = "";
         String action = "";
         Intent intent = null;
-        switch (port) {
-            case 22:
-                pk = "org.connectbot";
-                action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(ctxt, pk)) {
-                    String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
-                    intent = new Intent(action);
-                    intent.setData(Uri.parse("ssh://" + user + "@" + host + ":22/#" + user + "@"
-                            + host + ":22"));
-                } else {
-                    makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
-                    intent = new Intent(Intent.ACTION_VIEW).setData(Uri
-                            .parse("market://search?q=pname:" + pk));
-                }
-                break;
-            case 23:
-                pk = "org.connectbot";
-                action = Intent.ACTION_VIEW;
-                if (isPackageInstalled(ctxt, pk)) {
-                    intent = new Intent(action);
-                    intent.setData(Uri.parse("telnet://" + host + ":23"));
-                } else {
-                    makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
-                    intent = new Intent(Intent.ACTION_VIEW).setData(Uri
-                            .parse("market://search?q=pname:" + pk));
-                }
-                break;
-            case 80:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("http://" + host));
-                break;
-            case 443:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://" + host));
-                break;
-            default:
-                makeToast(R.string.scan_noaction);
-                // TODO: Use something like netcat to fetch identification
-                // message of service
+        if (service.equals("ssh")) {
+            pk = "org.connectbot";
+            action = Intent.ACTION_VIEW;
+            if (isPackageInstalled(ctxt, pk)) {
+                String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
+                intent = new Intent(action);
+                intent.setData(Uri.parse("ssh://" + user + "@" + host + ":22/#" + user + "@" + host
+                        + ":22"));
+            } else {
+                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
+                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
+                        .parse("market://search?q=pname:" + pk));
+            }
+        } else if (service.equals("telnet")) {
+            pk = "org.connectbot";
+            action = Intent.ACTION_VIEW;
+            if (isPackageInstalled(ctxt, pk)) {
+                intent = new Intent(action);
+                intent.setData(Uri.parse("telnet://" + host + ":23"));
+            } else {
+                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
+                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
+                        .parse("market://search?q=pname:" + pk));
+            }
+        } else if (service.equals("http")) {
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("http://" + host));
+        } else if (service.equals("https")) {
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://" + host));
+        } else {
+            makeToast(R.string.scan_noaction);
+            // TODO: Use something like netcat to fetch identification
+            // message of service
         }
+
         if (intent != null) {
             try {
                 startActivity(intent);

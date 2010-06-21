@@ -27,7 +27,7 @@ ptn2 = re.compile("^softmatch ([a-zA-Z0-9\-]+) m\/(.*?)\/[si]? ?[pvihod]?/?(.*?)
 
 for line in open("nmap-service-probes"):
   if "match " in line:
-    line = line.replace("'", "''")
+    line = line.replace("'", "''") #.replace("\\0", "\\x")
     # First pass
     fnd = re.match(ptn1, line)
     if fnd:

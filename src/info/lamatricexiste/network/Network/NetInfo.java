@@ -28,7 +28,6 @@ import android.util.Log;
 public class NetInfo {
     private final String TAG = "NetInfo";
     private Context ctxt;
-    // private DhcpInfo dhcp;
     private WifiInfo info;
 
     public String intf = "eth0";
@@ -88,10 +87,8 @@ public class NetInfo {
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
                 // Log.i(TAG, "CMD=" + cmd);
                 while ((line = r.readLine()) != null) {
-                    // Log.v(TAG, line);
                     matcher = Pattern.compile(ptrn).matcher(line);
                     if (matcher.matches()) {
-                        // Log.i(TAG, "MATCH=" + matcher.group(1));
                         cidr = Integer.parseInt(matcher.group(1));
                         return true;
                     }
@@ -114,13 +111,13 @@ public class NetInfo {
     public boolean getWifiInfo() {
         WifiManager wifi = (WifiManager) ctxt.getSystemService(Context.WIFI_SERVICE);
         if (wifi != null) {
-            // dhcp = wifi.getDhcpInfo();
             info = wifi.getConnectionInfo();
             // Set wifi variables
             ssid = info.getSSID();
             bssid = info.getBSSID();
             macAddress = info.getMacAddress();
-            // gatewayIp = getIpFromIntSigned(dhcp.gateway);
+            gatewayIp = getIpFromIntSigned(wifi.getDhcpInfo().gateway);
+            Log.v(TAG, "gatewayIP=" + gatewayIp);
             // broadcastIp = getIpFromIntSigned((dhcp.ipAddress & dhcp.netmask)
             // | ~dhcp.netmask);
             // netmaskIp = getIpFromIntSigned(dhcp.netmask);
