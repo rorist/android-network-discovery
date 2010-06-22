@@ -271,8 +271,10 @@ final public class ActivityPortscan extends TabActivity {
             super(activity, host, timeout);
             WeakReference<Activity> a = new WeakReference<Activity>(activity);
             final Activity d = a.get();
-            dbServices = (new DbServices(d)).getReadableDatabase();
-            dbProbes = (new DbProbes(d)).getReadableDatabase();
+            if(d!=null){
+                dbServices = (new DbServices(d)).getReadableDatabase();
+                dbProbes = (new DbProbes(d)).getReadableDatabase();
+            }
         }
 
         @Override

@@ -40,19 +40,21 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
     @Override
     protected void onPreExecute() {
         final ActivityDiscovery discover = mDiscover.get();
-        NetInfo net = new NetInfo(discover);
-        ip = NetInfo.getUnsignedLongFromIp(net.ip);
-        int shift = (32 - net.cidr);
-        start = (ip >> shift << shift) + 1;
-        end = (start | ((1 << shift) - 1)) - 1;
-        size = (int) (end - start + 1);
-        discover.setProgress(0);
+        if (discover != null) {
+            NetInfo net = new NetInfo(discover);
+            ip = NetInfo.getUnsignedLongFromIp(net.ip);
+            int shift = (32 - net.cidr);
+            start = (ip >> shift << shift) + 1;
+            end = (start | ((1 << shift) - 1)) - 1;
+            size = (int) (end - start + 1);
+            discover.setProgress(0);
+        }
     }
 
     @Override
     protected void onProgressUpdate(String... item) {
         final ActivityDiscovery discover = mDiscover.get();
-        if(discover != null){
+        if (discover != null) {
             if (!isCancelled()) {
                 if (item[0] != null) {
                     discover.addHost(item[0], mRateControl.rate);
@@ -66,18 +68,22 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, String, Void> {
     @Override
     protected void onPostExecute(Void unused) {
         final ActivityDiscovery discover = mDiscover.get();
-        if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
-            Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(ActivityDiscovery.VIBRATE);
+        if (discover != null) {
+            if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
+                Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(ActivityDiscovery.VIBRATE);
+            }
+            discover.makeToast(R.string.discover_finished);
+            discover.stopDiscovering();
         }
-        discover.makeToast(R.string.discover_finished);
-        discover.stopDiscovering();
     }
 
     @Override
     protected void onCancelled() {
         final ActivityDiscovery discover = mDiscover.get();
-        discover.makeToast(R.string.discover_canceled);
-        discover.stopDiscovering();
+        if (discover != null) {
+            discover.makeToast(R.string.discover_canceled);
+            discover.stopDiscovering();
+        }
     }
 }

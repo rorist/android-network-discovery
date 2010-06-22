@@ -124,24 +124,26 @@ public class DefaultPortscan extends AbstractPortScan {
         try {
             if (((SocketChannel) key.channel()).finishConnect()) { // Open
                 final Activity d = mActivity.get();
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
-                        .getApplicationContext());
-                if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
-                    // Create a new selector and register for reading
-                    Selector readSelector = Selector.open();
-                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
-                            SelectionKey.OP_READ);
-                    tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
-                    int code = readSelector.select(TIMEOUT_READ);
-                    tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
-                    if (code != 0) {
-                        handleRead(tmpKey, ((SparseArray<Integer>) key.attachment()).get(0));
-                        time = System.nanoTime(); // Reset selector timeout
-                        finishKey(key);
-                        return;
+                if (d != null) {
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
+                            .getApplicationContext());
+                    if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
+                        // Create a new selector and register for reading
+                        Selector readSelector = Selector.open();
+                        SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
+                                SelectionKey.OP_READ);
+                        tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
+                        int code = readSelector.select(TIMEOUT_READ);
+                        tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
+                        if (code != 0) {
+                            handleRead(tmpKey, ((SparseArray<Integer>) key.attachment()).get(0));
+                            time = System.nanoTime(); // Reset selector timeout
+                            finishKey(key);
+                            return;
+                        }
+                        time = System.nanoTime(); // Reset the selector timeout
+                        finishKey(tmpKey);
                     }
-                    time = System.nanoTime(); // Reset the selector timeout
-                    finishKey(tmpKey);
                 }
                 publishProgress(((SparseArray<Integer>) key.attachment()).get(0), (int) 1);
                 finishKey(key);
