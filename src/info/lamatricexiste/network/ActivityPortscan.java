@@ -3,10 +3,10 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-// TODO: Detect wifi status
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.HostBean;
+import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.DbProbes;
 import info.lamatricexiste.network.Utils.DbServices;
 import info.lamatricexiste.network.Utils.Help;
@@ -54,6 +54,7 @@ final public class ActivityPortscan extends TabActivity {
     private SharedPreferences prefs;
     private ScanPortTask scanPortTask;
     private String host;
+    private String hostname;
     private int position;
     private int timeout;
     private PortsAdapter adapter_open;
@@ -82,8 +83,10 @@ final public class ActivityPortscan extends TabActivity {
         mInflater = LayoutInflater.from(ctxt);
 
         // Get Intent information
+        // TODO: send HostBean object instead of multiple types?
         Bundle extra = getIntent().getExtras();
         host = extra.getString(HostBean.EXTRA_HOST);
+        hostname = extra.getString(HostBean.EXTRA_HOSTNAME);
         position = extra.getInt(HostBean.EXTRA_POSITION);
         banners = extra.getStringArray(HostBean.EXTRA_BANNERS);
         services = extra.getStringArray(HostBean.EXTRA_SERVICES);
@@ -95,7 +98,7 @@ final public class ActivityPortscan extends TabActivity {
 
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
-            ((TextView) findViewById(R.id.host)).setText(extra.getString(HostBean.EXTRA_HOSTNAME));
+            ((TextView) findViewById(R.id.host)).setText(hostname);
         } else {
             ((TextView) findViewById(R.id.host)).setText(host);
         }
@@ -420,6 +423,9 @@ final public class ActivityPortscan extends TabActivity {
     }
 
     private void startScan() {
+        if(!NetInfo.isConnected(ctxt)){
+            return;
+        }
         makeToast(R.string.scan_start);
         setProgressBarVisibility(true);
         setProgressBarIndeterminateVisibility(true);
@@ -534,10 +540,10 @@ final public class ActivityPortscan extends TabActivity {
             }
         } else if (service.equals("http")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://" + host));
+            intent.setData(Uri.parse("http://" + hostname));
         } else if (service.equals("https")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://" + host));
+            intent.setData(Uri.parse("https://" + hostname));
         } else {
             makeToast(R.string.scan_noaction);
             // TODO: Use something like netcat to fetch identification
