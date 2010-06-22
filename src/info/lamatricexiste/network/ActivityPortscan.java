@@ -361,23 +361,21 @@ final public class ActivityPortscan extends TabActivity {
             service = null;
 
             // Determinate service with banners
+            // TODO: Grab banner/headers of HTTP services with GET/POST/HEAD
             if (banners != null && banners[port] != null) {
-
-                Log.v(TAG, "banner=" + banners[port]);
                 Pattern pattern;
                 Matcher matcher;
                 Cursor c = dbProbes.rawQuery("select service, regex from services_probes", null);
-                Log.v(TAG, "count=" + c.getCount());
                 if (c.getCount() > 0) {
                     c.moveToFirst();
                     do {
                         try {
-                            pattern = Pattern.compile(c.getString(1), Pattern.DOTALL
-                                    | Pattern.CASE_INSENSITIVE);
+                            Log.v(TAG, c.getString(1));
+                            pattern = Pattern.compile(c.getString(1));
                             matcher = pattern.matcher(banners[port]);
-                            if (matcher.matches()) {
+                            if (matcher.find()) {
                                 service = c.getString(0);
-                                Log.v(TAG, "MATCHED=" + service);
+                                //Log.v(TAG, "FOUND=" + service);
                                 break;
                             }
                         } catch (PatternSyntaxException e) {

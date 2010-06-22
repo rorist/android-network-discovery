@@ -117,7 +117,6 @@ public class NetInfo {
             bssid = info.getBSSID();
             macAddress = info.getMacAddress();
             gatewayIp = getIpFromIntSigned(wifi.getDhcpInfo().gateway);
-            Log.v(TAG, "gatewayIP=" + gatewayIp);
             // broadcastIp = getIpFromIntSigned((dhcp.ipAddress & dhcp.netmask)
             // | ~dhcp.netmask);
             // netmaskIp = getIpFromIntSigned(dhcp.netmask);
