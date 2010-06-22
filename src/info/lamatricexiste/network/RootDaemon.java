@@ -5,19 +5,12 @@
 
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.Network.DownloadFile;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -92,18 +85,18 @@ public class RootDaemon extends AbstractRoot {
         }
     }
 
-    private void copyFile(String file, int resource) {
-        final Activity activity = mActivity.get();
-        try {
-            InputStream in = activity.getResources().openRawResource(resource);
-            OutputStream out = new FileOutputStream(file);
-            final ReadableByteChannel inputChannel = Channels.newChannel(in);
-            final WritableByteChannel outputChannel = Channels.newChannel(out);
-            DownloadFile.fastChannelCopy(inputChannel, outputChannel);
-        } catch (IOException e) {
-            Log.e(TAG + ":copyFile", e.getMessage());
-        }
-    }
+    // private void copyFile(String file, int resource) {
+    // final Activity activity = mActivity.get();
+    // try {
+    // InputStream in = activity.getResources().openRawResource(resource);
+    // OutputStream out = new FileOutputStream(file);
+    // final ReadableByteChannel inputChannel = Channels.newChannel(in);
+    // final WritableByteChannel outputChannel = Channels.newChannel(out);
+    // DownloadFile.fastChannelCopy(inputChannel, outputChannel);
+    // } catch (IOException e) {
+    // Log.e(TAG + ":copyFile", e.getMessage());
+    // }
+    // }
 
     // private void execute(final String cmd) {
     // int ret = Command.runCommand(cmd);

@@ -240,7 +240,7 @@ final public class ActivityPortscan extends TabActivity {
                             0);
                     holder.btn_c.setOnClickListener(new View.OnClickListener() {
                         public void onClick(View v) {
-                            openPortService(service);
+                            openPortService(service, port);
                         }
                     });
                 } else {
@@ -273,7 +273,7 @@ final public class ActivityPortscan extends TabActivity {
             super(activity, host, timeout);
             WeakReference<Activity> a = new WeakReference<Activity>(activity);
             final Activity d = a.get();
-            if(d!=null){
+            if (d != null) {
                 dbServices = (new DbServices(d)).getReadableDatabase();
                 dbProbes = (new DbProbes(d)).getReadableDatabase();
             }
@@ -378,7 +378,7 @@ final public class ActivityPortscan extends TabActivity {
                             matcher = pattern.matcher(banners[port]);
                             if (matcher.find()) {
                                 service = c.getString(0);
-                                //Log.v(TAG, "FOUND=" + service);
+                                // Log.v(TAG, "FOUND=" + service);
                                 break;
                             }
                         } catch (PatternSyntaxException e) {
@@ -423,7 +423,7 @@ final public class ActivityPortscan extends TabActivity {
     }
 
     private void startScan() {
-        if(!NetInfo.isConnected(ctxt)){
+        if (!NetInfo.isConnected(ctxt)) {
             return;
         }
         makeToast(R.string.scan_start);
@@ -509,7 +509,7 @@ final public class ActivityPortscan extends TabActivity {
         return null;
     }
 
-    private void openPortService(String service) {
+    private void openPortService(String service, int port) {
         // Action for the service
         String pk = "";
         String action = "";
@@ -520,8 +520,8 @@ final public class ActivityPortscan extends TabActivity {
             if (isPackageInstalled(ctxt, pk)) {
                 String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
                 intent = new Intent(action);
-                intent.setData(Uri.parse("ssh://" + user + "@" + host + ":22/#" + user + "@" + host
-                        + ":22"));
+                intent.setData(Uri.parse("ssh://" + user + "@" + host + ":" + port + "/#" + user
+                        + "@" + host + ":" + port));
             } else {
                 makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
                 intent = new Intent(Intent.ACTION_VIEW).setData(Uri
@@ -532,7 +532,7 @@ final public class ActivityPortscan extends TabActivity {
             action = Intent.ACTION_VIEW;
             if (isPackageInstalled(ctxt, pk)) {
                 intent = new Intent(action);
-                intent.setData(Uri.parse("telnet://" + host + ":23"));
+                intent.setData(Uri.parse("telnet://" + host + ":" + port));
             } else {
                 makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
                 intent = new Intent(Intent.ACTION_VIEW).setData(Uri
@@ -540,14 +540,12 @@ final public class ActivityPortscan extends TabActivity {
             }
         } else if (service.equals("http")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://" + hostname));
+            intent.setData(Uri.parse("http://" + hostname + ":" + port));
         } else if (service.equals("https")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://" + hostname));
+            intent.setData(Uri.parse("https://" + hostname + ":" + port));
         } else {
             makeToast(R.string.scan_noaction);
-            // TODO: Use something like netcat to fetch identification
-            // message of service
         }
 
         if (intent != null) {
