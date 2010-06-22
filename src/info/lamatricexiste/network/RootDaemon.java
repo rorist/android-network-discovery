@@ -61,7 +61,7 @@ public class RootDaemon extends AbstractRoot {
         if (hasRoot) {
             if ((new File(dir + DAEMON)).exists() == false) {
                 createDir(dir);
-                copyFile(dir + DAEMON, 0); //FIXME: To finish //R.raw.scand);
+                //copyFile(dir + DAEMON, R.raw.scand);
             }
         }
     }

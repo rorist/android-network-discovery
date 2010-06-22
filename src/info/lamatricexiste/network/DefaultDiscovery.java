@@ -98,7 +98,6 @@ public class DefaultDiscovery extends AbstractDiscovery {
         public void run() {
             try {
                 Thread.sleep(getRate());
-                // FIXME: is that producing logs?
                 InetAddress h = InetAddress.getByName(host);
                 // Rate control check
                 if (mRateControl.is_indicator_discovered && mRateCnt % mRateMult == 0) {

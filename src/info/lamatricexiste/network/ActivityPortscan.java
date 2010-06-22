@@ -146,9 +146,8 @@ final public class ActivityPortscan extends TabActivity {
         list_closed.setAdapter(adapter_closed);
         list_closed.setItemsCanFocus(true);
 
-        // FIXME: get from prefs/banners
+        // TODO: Get from resource array ?
         knownServices = new ArrayList<String>();
-        // knownServices.add("ftp");
         knownServices.add("ssh");
         knownServices.add("telnet");
         knownServices.add("http");
@@ -355,7 +354,6 @@ final public class ActivityPortscan extends TabActivity {
         private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, Integer port) {
             ports.add(findLocation(ports, port), port);
             adapter.add(PLACEHOLDER);
-            // Collections.sort(ports); // FIXME: cause GC to collect
             services[port] = getPortService(port);
         }
 
