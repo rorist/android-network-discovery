@@ -11,7 +11,8 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_margin="5dip">
         <Button
             android:id="@+id/btn_discover"
             android:drawableLeft="@drawable/discover"
@@ -33,8 +34,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="54dip"
-        android:background="@drawable/info_bg">
+        android:layout_height="54dip">
         <ImageButton
             android:id="@+id/btn_wifi"
             android:src="@drawable/wifi"

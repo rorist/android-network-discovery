@@ -18,10 +18,10 @@
             android:paddingTop="5dip"
             android:paddingLeft="2dip">
             <Button
-                android:id="@+id/btn_scan"
-                android:drawableTop="@drawable/discover"
-                android:text="@string/btn_scan"
+                android:id="@+id/btn_discover"
+                android:drawableLeft="@drawable/discover"
                 android:layout_alignParentLeft="true"
+                android:text="@string/btn_scan"
                 style="@style/ButtonTop" />
             <TextView
                 android:id="@+id/host"
@@ -33,10 +33,10 @@
                 android:typeface="monospace"
                 android:text="0.0.0.0" />
             <Button
-                android:id="@+id/btn_back"
-                android:drawableTop="@drawable/back"
-                android:text="@string/btn_back"
+                android:id="@+id/btn_discover"
+                android:drawableLeft="@drawable/back"
                 android:layout_alignParentRight="true"
+                android:text="@string/btn_back"
                 style="@style/ButtonTop" />
         </RelativeLayout>
         <TabWidget

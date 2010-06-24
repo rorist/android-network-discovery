@@ -62,8 +62,8 @@ public class DefaultPortscan extends AbstractPortScan {
     }
 
     protected void stop() {
-        synchronized (selector) {
-            if (selector != null && selector.isOpen()) {
+        if (selector != null && selector.isOpen()) {
+            synchronized (selector) {
                 try {
                     // Force invalidate keys
                     Iterator<SelectionKey> iterator = selector.keys().iterator();
@@ -129,6 +129,7 @@ public class DefaultPortscan extends AbstractPortScan {
                             .getApplicationContext());
                     if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
                         // Create a new selector and register for reading
+                        // FIXME: Read selector should be created once (at start)
                         Selector readSelector = Selector.open();
                         SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
                                 SelectionKey.OP_READ);
@@ -136,6 +137,7 @@ public class DefaultPortscan extends AbstractPortScan {
                         int code = readSelector.select(TIMEOUT_READ);
                         tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
                         if (code != 0) {
+                            // TODO: Send a Probe before reading ! Something like \n\r\n\r
                             handleRead(tmpKey, ((SparseArray<Integer>) key.attachment()).get(0));
                             time = System.nanoTime(); // Reset selector timeout
                             finishKey(key);
@@ -161,6 +163,7 @@ public class DefaultPortscan extends AbstractPortScan {
         ByteBuffer bbuf = ByteBuffer.allocate(MAX_READ);
         int numRead = 0;
         try {
+            // TODO: Get banner until there is no more data to read
             // while (numRead > 0) {
             numRead = ((SocketChannel) key.channel()).read(bbuf);
             // }

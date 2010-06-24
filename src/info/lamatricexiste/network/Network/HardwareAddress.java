@@ -30,14 +30,14 @@ public class HardwareAddress {
     private final String TAG = "HardwareAddress";
     private final String DB_PATH = "/data/data/info.lamatricexiste.network/";
     private final String DB_NAME = "oui.db";
-    private SQLiteDatabase db;
+    private SQLiteDatabase db = null;
 
     public HardwareAddress() {
         try {
             db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         } catch (SQLiteException e) {
-            db = null;
+            Log.e(TAG, e.getMessage());
         }
     }
 

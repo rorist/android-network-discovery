@@ -5,9 +5,7 @@
  Licensed under GNU's GPL 2, see README
 '''
 
-import sqlite3
-import os
-import urllib
+import sqlite3, os, urllib
 
 db = '/var/www/lamatricexiste.info/htdocs/oui.db'
 url = 'http://standards.ieee.org/regauth/oui/oui.txt'

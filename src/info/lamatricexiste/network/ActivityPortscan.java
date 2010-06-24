@@ -7,8 +7,7 @@ package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
-import info.lamatricexiste.network.Utils.DbProbes;
-import info.lamatricexiste.network.Utils.DbServices;
+import info.lamatricexiste.network.Utils.Db;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
 
@@ -151,6 +150,9 @@ final public class ActivityPortscan extends TabActivity {
 
         // TODO: Get from resource array ?
         knownServices = new ArrayList<String>();
+        knownServices.add("sftp");
+        knownServices.add("ftps");
+        knownServices.add("ftp");
         knownServices.add("ssh");
         knownServices.add("telnet");
         knownServices.add("http");
@@ -262,6 +264,68 @@ final public class ActivityPortscan extends TabActivity {
         }
     }
 
+    private void openPortService(String service, int port) {
+        // Action for the service
+        String pk = "";
+        String action = "";
+        Intent intent = null;
+        if (service.equals("ftp") || service.equals("ftps")) {
+            action = Intent.ACTION_VIEW;
+            intent = new Intent(action);
+            intent.setData(service.equals("ftp") ? Uri.parse("ftp://" + host) : Uri.parse("sftp://"
+                    + host));
+            intent.putExtra("ftp_pasv", "true");
+            // intent.setDataAndType(ftpUri,
+            // "vnd.android.cursor.dir/lysesoft.andftp.uri");
+            // intent.putExtra("ftp_username", "anonymous");
+            // intent.putExtra("ftp_password", "anonymous");
+            // intent.putExtra("ftp_keyfile", "/sdcard/dsakey.txt");
+            // intent.putExtra("ftp_keypass", "");
+            // intent.putExtra("ftp_resume", "true");
+            // intent.putExtra("ftp_encoding", "UTF8");
+        } else if (service.equals("ssh")) {
+            pk = "org.connectbot";
+            action = Intent.ACTION_VIEW;
+            if (isPackageInstalled(ctxt, pk)) {
+                String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
+                intent = new Intent(action);
+                intent.setData(Uri.parse("ssh://" + user + "@" + host + ":" + port + "/#" + user
+                        + "@" + host + ":" + port));
+            } else {
+                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
+                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
+                        .parse("market://search?q=pname:" + pk));
+            }
+        } else if (service.equals("telnet")) {
+            pk = "org.connectbot";
+            action = Intent.ACTION_VIEW;
+            if (isPackageInstalled(ctxt, pk)) {
+                intent = new Intent(action);
+                intent.setData(Uri.parse("telnet://" + host + ":" + port));
+            } else {
+                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
+                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
+                        .parse("market://search?q=pname:" + pk));
+            }
+        } else if (service.equals("http")) {
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("http://" + hostname + ":" + port));
+        } else if (service.equals("https")) {
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://" + hostname + ":" + port));
+        } else {
+            makeToast(R.string.scan_noaction);
+        }
+
+        if (intent != null) {
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+    }
+
     private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
         private SQLiteDatabase dbServices;
@@ -274,8 +338,9 @@ final public class ActivityPortscan extends TabActivity {
             WeakReference<Activity> a = new WeakReference<Activity>(activity);
             final Activity d = a.get();
             if (d != null) {
-                dbServices = (new DbServices(d)).getReadableDatabase();
-                dbProbes = (new DbProbes(d)).getReadableDatabase();
+                Db db = new Db(d.getApplicationContext());
+                dbServices = db.openDb(Db.DB_SERVICES);
+                dbProbes = db.openDb(Db.DB_PROBES);
             }
         }
 
@@ -368,7 +433,7 @@ final public class ActivityPortscan extends TabActivity {
             if (banners != null && banners[port] != null) {
                 Pattern pattern;
                 Matcher matcher;
-                Cursor c = dbProbes.rawQuery("select service, regex from services_probes", null);
+                Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
                 if (c.getCount() > 0) {
                     c.moveToFirst();
                     do {
@@ -388,6 +453,7 @@ final public class ActivityPortscan extends TabActivity {
                 }
                 c.close();
             }
+            // TODO: Do a HTTP/GET request and re parse banner if any
 
             // Get the service from port number
             if (service == null) {
@@ -507,54 +573,6 @@ final public class ActivityPortscan extends TabActivity {
             return ports;
         }
         return null;
-    }
-
-    private void openPortService(String service, int port) {
-        // Action for the service
-        String pk = "";
-        String action = "";
-        Intent intent = null;
-        if (service.equals("ssh")) {
-            pk = "org.connectbot";
-            action = Intent.ACTION_VIEW;
-            if (isPackageInstalled(ctxt, pk)) {
-                String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
-                intent = new Intent(action);
-                intent.setData(Uri.parse("ssh://" + user + "@" + host + ":" + port + "/#" + user
-                        + "@" + host + ":" + port));
-            } else {
-                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
-                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
-                        .parse("market://search?q=pname:" + pk));
-            }
-        } else if (service.equals("telnet")) {
-            pk = "org.connectbot";
-            action = Intent.ACTION_VIEW;
-            if (isPackageInstalled(ctxt, pk)) {
-                intent = new Intent(action);
-                intent.setData(Uri.parse("telnet://" + host + ":" + port));
-            } else {
-                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
-                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
-                        .parse("market://search?q=pname:" + pk));
-            }
-        } else if (service.equals("http")) {
-            intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://" + hostname + ":" + port));
-        } else if (service.equals("https")) {
-            intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://" + hostname + ":" + port));
-        } else {
-            makeToast(R.string.scan_noaction);
-        }
-
-        if (intent != null) {
-            try {
-                startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG, e.getMessage());
-            }
-        }
     }
 
     private boolean isPackageInstalled(Context context, String p) {

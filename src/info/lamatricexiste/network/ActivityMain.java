@@ -5,11 +5,11 @@
 
 package info.lamatricexiste.network;
 
-import info.lamatricexiste.network.Utils.DbProbes;
-import info.lamatricexiste.network.Utils.DbServices;
+import info.lamatricexiste.network.Utils.Db;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.UpdateNicDb;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import android.app.Activity;
@@ -164,14 +164,17 @@ final public class ActivityMain extends Activity {
         @Override
         protected Void doInBackground(Void... params) {
             final Activity d = mActivity.get();
-            DbServices services = new DbServices(d);
-            services.createTable(services.getReadableDatabase(), DbServices.DB_TABLE,
-                    DbServices.DB_TABLE_RES);
-            services.close();
-            DbProbes probes = new DbProbes(d);
-            probes.createTable(probes.getReadableDatabase(), DbProbes.DB_TABLE,
-                    DbProbes.DB_TABLE_RES);
-            probes.close();
+            if (d != null) {
+                Db db = new Db(d.getApplicationContext());
+                try {
+                    db.copyDbToDevice(R.raw.services, Db.DB_SERVICES);
+                    db.copyDbToDevice(R.raw.probes, Db.DB_PROBES);
+                } catch (NullPointerException e) {
+                    Log.e(TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
             return null;
         }
 

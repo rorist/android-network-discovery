@@ -244,7 +244,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             }
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
                     && host.hostname != null) {
-                holder.host.setText(host.hostname);
+                holder.host.setText(host.hostname + " (" + host.ipAddress + ")");
             } else {
                 holder.host.setText(host.ipAddress);
             }

@@ -5,9 +5,9 @@
  Licensed under GNU's GPL 2, see README
 '''
 
-import os, re, urllib
+import sqlite3, os, urllib, re
 
-file = open("../res/raw/services.sql", "w")
+db = '../res/raw/services.db'
 url = 'http://nmap.org/svn/nmap-services'
 
 #Download the file
@@ -17,16 +17,28 @@ localFile.write(webFile.read())
 webFile.close()
 localFile.close()
 
-#Create the file
-file.write("BEGIN TRANSACTION;\nCREATE TABLE services (_id INTEGER PRIMARY KEY, service TEXT, port INTEGER);\nCREATE INDEX portIndex ON services (port);\n")
+#Create the DB
+try:
+  os.remove(db)
+except OSError, err:
+  print err
+conn = sqlite3.connect(db)
+
+c = conn.cursor()
+c.execute("CREATE TABLE services (_id INTEGER PRIMARY KEY, service TEXT, port INTEGER);")
+c.execute("CREATE INDEX portIndex ON services (port);")
+
 ptn = re.compile("([a-zA-Z0-9\-]+)[\s\t]+([0-9]+)\/tcp")
 for line in open("nmap-services"):
   if "/tcp" in line and "unknown" not in line:
     fnd = re.match(ptn, line)
     if fnd:
-      file.write("INSERT INTO services ('port', 'service') VALUES (%s, '%s');\n" % (fnd.group(2), fnd.group(1)))
+      try:
+        c.execute("INSERT INTO services ('port', 'service') VALUES (%s, '%s');" % (fnd.group(2), fnd.group(1)))
+      except sqlite3.OperationalError, err:
+        print err 
 
-file.write("COMMIT;\n")    
-file.close()
+conn.commit()
+c.close()
 os.remove("nmap-services")
 

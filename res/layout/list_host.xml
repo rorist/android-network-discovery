@@ -14,8 +14,8 @@
     <ImageView
         android:id="@+id/logo"
         android:src="@drawable/computer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dip"
+        android:layout_height="48dip"
         android:layout_gravity="center_vertical"
         android:paddingRight="10dip"
         android:paddingLeft="5dip" />
@@ -32,6 +32,7 @@
             android:id="@+id/list"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:ellipsize="marquee"
             style="@style/ListTextTitle"
             android:text="List" />
             
