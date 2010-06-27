@@ -54,4 +54,5 @@ for line in open("nmap-service-probes"):
 
 conn.commit()
 c.close()
+os.remove("nmap-service-probes")
 

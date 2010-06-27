@@ -77,9 +77,8 @@ public class Export {
                         + "\" vendor=\"" + host.nicVendor + "\">\r\n";
                 // Open Ports //TODO: rething the XML structure to include close
                 // and filtered ports
-                int[] ports = host.portsOpen;
-                if (ports != null) {
-                    for (int port : ports) {
+                if (host.portsOpen != null) {
+                    for (int port : host.portsOpen) {
                         xml += "\t\t\t<port>" + port + "/tcp open</port>\r\n";
                     }
                 }

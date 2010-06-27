@@ -50,26 +50,19 @@ final public class ActivityPortscan extends TabActivity {
 
     private final String TAG = "ActivityPortscan";
     private final String PLACEHOLDER = "placeholder";
+    private Context ctxt;
     private SharedPreferences prefs;
+    private LayoutInflater mInflater;
     private ScanPortTask scanPortTask;
-    private String host;
-    private String hostname;
-    private int position;
-    private int timeout;
+    private HostBean host;
     private PortsAdapter adapter_open;
     private PortsAdapter adapter_closed;
-    private String[] banners = null;
-    private String[] services = null;
-    private ArrayList<Integer> ports_open = null;
-    private ArrayList<Integer> ports_closed = null;
     private int cnt_open;
     private int cnt_closed;
-    private Button btn_scan;
-    private LayoutInflater mInflater;
-    private Context ctxt;
+    private List<String> knownServices;
     private TextView mTabOpen;
     private TextView mTabClosed;
-    private List<String> knownServices;
+    private Button btn_scan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,29 +75,39 @@ final public class ActivityPortscan extends TabActivity {
         mInflater = LayoutInflater.from(ctxt);
 
         // Get Intent information
-        // TODO: send HostBean object instead of multiple types?
-        Bundle extra = getIntent().getExtras();
-        host = extra.getString(HostBean.EXTRA_HOST);
-        hostname = extra.getString(HostBean.EXTRA_HOSTNAME);
-        position = extra.getInt(HostBean.EXTRA_POSITION);
-        banners = extra.getStringArray(HostBean.EXTRA_BANNERS);
-        services = extra.getStringArray(HostBean.EXTRA_SERVICES);
-        ports_open = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSO));
-        ports_closed = portsToArrayList(extra.getIntArray(HostBean.EXTRA_PORTSC));
-        cnt_open = (ports_open == null) ? 0 : ports_open.size();
-        cnt_closed = (ports_closed == null) ? 0 : ports_closed.size();
-        timeout = extra.getInt(HostBean.EXTRA_TIMEOUT, Integer.parseInt(Prefs.DEFAULT_TIMEOUT));
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            if (intent.hasExtra(HostBean.EXTRA)) {
+                host = intent.getParcelableExtra(HostBean.EXTRA);
+                Log.v(TAG, "Parcalable used ..."); // FIXME: todo
+            } else {
+                host = new HostBean();
+                host.ipAddress = extras.getString(HostBean.EXTRA_HOST);
+                host.hostname = extras.getString(HostBean.EXTRA_HOSTNAME);
+                host.position = extras.getInt(HostBean.EXTRA_POSITION);
+                host.banners = extras.getStringArray(HostBean.EXTRA_BANNERS);
+                host.services = extras.getStringArray(HostBean.EXTRA_SERVICES);
+                host.portsOpen = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSO));
+                host.portsClosed = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSC));
+                host.responseTime = extras.getInt(HostBean.EXTRA_TIMEOUT, Integer
+                        .parseInt(Prefs.DEFAULT_TIMEOUT));
+            }
+        }
+        // TODO: Include this in the HostBean class
+        cnt_open = (host.portsOpen == null) ? 0 : host.portsOpen.size();
+        cnt_closed = (host.portsClosed == null) ? 0 : host.portsClosed.size();
 
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
-            ((TextView) findViewById(R.id.host)).setText(hostname);
+            ((TextView) findViewById(R.id.host)).setText(host.hostname);
         } else {
-            ((TextView) findViewById(R.id.host)).setText(host);
+            ((TextView) findViewById(R.id.host)).setText(host.ipAddress);
         }
 
         // Scan
         btn_scan = (Button) findViewById(R.id.btn_scan);
-        if (extra.getBoolean("wifiDisabled") == true) {
+        if (extras.getBoolean("wifiDisabled") == true) {
             btn_scan.setClickable(false);
             btn_scan.setEnabled(false);
             btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.disabled, 0, 0);
@@ -138,12 +141,12 @@ final public class ActivityPortscan extends TabActivity {
                 android.R.id.title);
 
         // Lists
-        adapter_open = new PortsAdapter(ctxt, preparePort(ports_open), "open");
+        adapter_open = new PortsAdapter(ctxt, preparePort(host.portsOpen), "open");
         ListView list_open = (ListView) findViewById(R.id.list_open);
         list_open.setAdapter(adapter_open);
         list_open.setItemsCanFocus(true);
 
-        adapter_closed = new PortsAdapter(ctxt, preparePort(ports_closed), "closed");
+        adapter_closed = new PortsAdapter(ctxt, preparePort(host.portsClosed), "closed");
         ListView list_closed = (ListView) findViewById(R.id.list_closed);
         list_closed.setAdapter(adapter_closed);
         list_closed.setItemsCanFocus(true);
@@ -159,7 +162,7 @@ final public class ActivityPortscan extends TabActivity {
         knownServices.add("https");
 
         // Start scan if ports empty
-        if (ports_open == null && ports_closed == null) {
+        if (host.portsOpen == null && host.portsClosed == null) {
             startScan();
         }
     }
@@ -187,7 +190,7 @@ final public class ActivityPortscan extends TabActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case ActivityDiscovery.MENU_SCAN_SINGLE:
-                ActivityDiscovery.scanSingle(this, host);
+                ActivityDiscovery.scanSingle(this, host.ipAddress);
                 return true;
             case ActivityDiscovery.MENU_OPTIONS:
                 startActivity(new Intent(ctxt, Prefs.class));
@@ -229,10 +232,10 @@ final public class ActivityPortscan extends TabActivity {
                 holder = (ViewHolder) convertView.getTag();
             }
             // Port & Service
-            final int port = (type == "open") ? ports_open.get(position) : ports_closed
+            final int port = (type == "open") ? host.portsOpen.get(position) : host.portsClosed
                     .get(position);
-            if (services != null) {
-                final String service = services[port];
+            if (host.services != null) {
+                final String service = host.services[port];
                 holder.port.setText(port + "/tcp " + "(" + service + ")");
 
                 // Service is known
@@ -255,8 +258,8 @@ final public class ActivityPortscan extends TabActivity {
                 holder.port.setText(port + "/tcp ");
             }
             // Banner
-            if (banners != null && banners[port] != null) {
-                holder.banner.setText(banners[port]);
+            if (host.banners != null && host.banners[port] != null) {
+                holder.banner.setText(host.banners[port]);
             } else {
                 holder.banner.setText("");
             }
@@ -269,11 +272,11 @@ final public class ActivityPortscan extends TabActivity {
         String pk = "";
         String action = "";
         Intent intent = null;
-        if (service.equals("ftp") || service.equals("ftps")) {
+        if (service.equals("ftp") || service.equals("ftps") || service.equals("sftp")) {
             action = Intent.ACTION_VIEW;
             intent = new Intent(action);
-            intent.setData(service.equals("ftp") ? Uri.parse("ftp://" + host) : Uri.parse("sftp://"
-                    + host));
+            intent.setData(service.equals("ftp") ? Uri.parse("ftp://" + host.ipAddress) : Uri
+                    .parse("sftp://" + host.ipAddress));
             intent.putExtra("ftp_pasv", "true");
             // intent.setDataAndType(ftpUri,
             // "vnd.android.cursor.dir/lysesoft.andftp.uri");
@@ -289,8 +292,8 @@ final public class ActivityPortscan extends TabActivity {
             if (isPackageInstalled(ctxt, pk)) {
                 String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
                 intent = new Intent(action);
-                intent.setData(Uri.parse("ssh://" + user + "@" + host + ":" + port + "/#" + user
-                        + "@" + host + ":" + port));
+                intent.setData(Uri.parse("ssh://" + user + "@" + host.ipAddress + ":" + port + "/#"
+                        + user + "@" + host.ipAddress + ":" + port));
             } else {
                 makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
                 intent = new Intent(Intent.ACTION_VIEW).setData(Uri
@@ -301,7 +304,7 @@ final public class ActivityPortscan extends TabActivity {
             action = Intent.ACTION_VIEW;
             if (isPackageInstalled(ctxt, pk)) {
                 intent = new Intent(action);
-                intent.setData(Uri.parse("telnet://" + host + ":" + port));
+                intent.setData(Uri.parse("telnet://" + host.ipAddress + ":" + port));
             } else {
                 makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
                 intent = new Intent(Intent.ACTION_VIEW).setData(Uri
@@ -309,10 +312,10 @@ final public class ActivityPortscan extends TabActivity {
             }
         } else if (service.equals("http")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://" + hostname + ":" + port));
+            intent.setData(Uri.parse("http://" + host.hostname + ":" + port));
         } else if (service.equals("https")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://" + hostname + ":" + port));
+            intent.setData(Uri.parse("https://" + host.hostname + ":" + port));
         } else {
             makeToast(R.string.scan_noaction);
         }
@@ -333,8 +336,8 @@ final public class ActivityPortscan extends TabActivity {
         private String service;
         private Cursor c;
 
-        ScanPortTask(Activity activity, String host, long timeout) {
-            super(activity, host, timeout);
+        ScanPortTask(Activity activity, String ip, long timeout) {
+            super(activity, ip, timeout);
             WeakReference<Activity> a = new WeakReference<Activity>(activity);
             final Activity d = a.get();
             if (d != null) {
@@ -357,9 +360,13 @@ final public class ActivityPortscan extends TabActivity {
                 port_end = Integer.parseInt(Prefs.DEFAULT_PORT_END);
             }
             nb_port = port_end - port_start + 2;
-            mBanners = new String[nb_port];
-            banners = new String[nb_port];
-            services = new String[nb_port];
+            // Initialize arrays and views
+            int len = port_end + 1; // TODO: Not really efficient?
+            host.portsOpen = new ArrayList<Integer>();
+            host.portsClosed = new ArrayList<Integer>();
+            mBanners = new String[len];
+            host.banners = new String[len];
+            host.services = new String[len];
             mTabOpen.setText(String.format(getString(R.string.scan_open), 0));
             mTabClosed.setText(String.format(getString(R.string.scan_closed), 0));
             setProgress(0);
@@ -368,23 +375,30 @@ final public class ActivityPortscan extends TabActivity {
         @Override
         protected void onProgressUpdate(Integer... values) {
             if (!isCancelled()) {
-                if (values.length > 0) {
-                    if (!values[0].equals(new Integer(0))) {
-                        if (values[1] == 1) {
-                            // Save banners
+                if (values.length > 1) {
+                    Integer port = values[0];
+                    int type = values[1];
+                    if (!port.equals(new Integer(0))) {
+                        if (type == 1) {
+                            // Open
                             if (mBanners != null) {
-                                banners[values[0]] = mBanners[values[0]];
+                                host.banners[port] = mBanners[port];
                             }
-                            addPort(ports_open, adapter_open, values[0]);
+                            host.portsOpen.add(findLocation(host.portsOpen, port), port);
+                            adapter_open.add(PLACEHOLDER);
+                            host.services[port] = getPortService(port);
                             cnt_open++;
                             mTabOpen
                                     .setText(String.format(getString(R.string.scan_open), cnt_open));
-                        } else if (values[1] == 0) {
-                            addPort(ports_closed, adapter_closed, values[0]);
+                        } else if (type == 0) {
+                            // Closed
+                            host.portsClosed.add(findLocation(host.portsClosed, port), port);
+                            adapter_closed.add(PLACEHOLDER);
+                            host.services[port] = getPortService(port);
                             cnt_closed++;
                             mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                     cnt_closed));
-                        } else if (values[1] == -1) {
+                        } else if (type == -1) {
                             makeToast(R.string.scan_host_unreachable);
                         }
                     }
@@ -401,7 +415,7 @@ final public class ActivityPortscan extends TabActivity {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(ActivityDiscovery.VIBRATE);
             }
-            if (ports_open.size() == 0) {
+            if (host.portsOpen.size() == 0) {
                 makeToast(R.string.scan_noport);
             }
             dbServices.close();
@@ -419,18 +433,12 @@ final public class ActivityPortscan extends TabActivity {
             stopScan();
         }
 
-        private void addPort(ArrayList<Integer> ports, PortsAdapter adapter, Integer port) {
-            ports.add(findLocation(ports, port), port);
-            adapter.add(PLACEHOLDER);
-            services[port] = getPortService(port);
-        }
-
         private String getPortService(int port) {
             service = null;
 
             // Determinate service with banners
             // TODO: Grab banner/headers of HTTP services with GET/POST/HEAD
-            if (banners != null && banners[port] != null) {
+            if (host.banners != null && host.banners[port] != null) {
                 Pattern pattern;
                 Matcher matcher;
                 Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
@@ -440,7 +448,7 @@ final public class ActivityPortscan extends TabActivity {
                         try {
                             Log.v(TAG, c.getString(1));
                             pattern = Pattern.compile(c.getString(1));
-                            matcher = pattern.matcher(banners[port]);
+                            matcher = pattern.matcher(host.banners[port]);
                             if (matcher.find()) {
                                 service = c.getString(0);
                                 // Log.v(TAG, "FOUND=" + service);
@@ -453,7 +461,6 @@ final public class ActivityPortscan extends TabActivity {
                 }
                 c.close();
             }
-            // TODO: Do a HTTP/GET request and re parse banner if any
 
             // Get the service from port number
             if (service == null) {
@@ -471,21 +478,21 @@ final public class ActivityPortscan extends TabActivity {
 
             return service;
         }
+    }
 
-        private int findLocation(ArrayList<Integer> array, int value) {
-            int index;
-            int current;
-            int size = array.size();
-            for (index = 0; index < size; index++) {
-                current = array.get(index);
-                if (value > current) {
-                    continue;
-                } else if (value < current) {
-                    break;
-                }
+    private int findLocation(ArrayList<Integer> array, int value) {
+        int index;
+        int current;
+        int size = array.size();
+        for (index = 0; index < size; index++) {
+            current = array.get(index);
+            if (value > current) {
+                continue;
+            } else if (value < current) {
+                break;
             }
-            return index;
         }
+        return index;
     }
 
     private void startScan() {
@@ -499,11 +506,7 @@ final public class ActivityPortscan extends TabActivity {
         adapter_closed.clear();
         cnt_open = 0;
         cnt_closed = 0;
-        ports_open = new ArrayList<Integer>();
-        ports_closed = new ArrayList<Integer>();
-        banners = new String[] {};
-        services = new String[] {};
-        scanPortTask = new ScanPortTask(this, host, getTimeout());
+        scanPortTask = new ScanPortTask(this, host.ipAddress, getTimeout());
         scanPortTask.execute();
         btn_scan.setText(R.string.btn_discover_cancel);
         btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cancel, 0, 0);
@@ -517,12 +520,7 @@ final public class ActivityPortscan extends TabActivity {
     private void stopScan() {
         // Set result
         Intent intent = new Intent();
-        intent.putExtra(HostBean.EXTRA_POSITION, position);
-        intent.putExtra(HostBean.EXTRA_SERVICES, services);
-        intent.putExtra(HostBean.EXTRA_BANNERS, banners);
-        // TODO: Use int[]
-        intent.putExtra(HostBean.EXTRA_PORTSO, portsToIntArray(ports_open));
-        intent.putExtra(HostBean.EXTRA_PORTSC, portsToIntArray(ports_closed));
+        intent.putExtra(HostBean.EXTRA, host);
         setResult(RESULT_OK, intent);
         // Reset scan
         setProgressBarVisibility(false);
@@ -542,7 +540,7 @@ final public class ActivityPortscan extends TabActivity {
             return (long) Integer.parseInt(prefs
                     .getString(Prefs.KEY_TIMEOUT, Prefs.DEFAULT_TIMEOUT)) * 1000000;
         }
-        return timeout;
+        return (long) host.responseTime;
     }
 
     private List<String> preparePort(ArrayList<Integer> ports) {
@@ -556,15 +554,7 @@ final public class ActivityPortscan extends TabActivity {
         return portsChar;
     }
 
-    private int[] portsToIntArray(ArrayList<Integer> ports) {
-        int[] portsArray = new int[ports.size()];
-        for (int i = 0; i < ports.size(); i++) {
-            portsArray[i] = ports.get(i);
-        }
-        return portsArray;
-    }
-
-    private ArrayList<Integer> portsToArrayList(int[] intArray) {
+    private ArrayList<Integer> intArrayToArrayList(int[] intArray) {
         ArrayList<Integer> ports = new ArrayList<Integer>();
         if (intArray != null) {
             for (int i = 0; i < intArray.length; i++) {

@@ -8,12 +8,22 @@ package info.lamatricexiste.network;
 import java.io.IOException;
 import java.net.InetAddress;
 
-public class RootPortScan extends AbstractPortScan {
+import android.os.AsyncTask;
+
+public class RootPortScan extends AsyncTask<Void, Integer, Void> {
 
     // private final String TAG = "RootPortScan";
+    protected long timeout;
+    protected String ipAddr = null;
 
     protected RootPortScan(String host, final long timeout) {
-        super(host, timeout);
+        this.ipAddr = host;
+        this.timeout = timeout;
+    }
+
+    @Override
+    protected Void doInBackground(Void... params) {
+        return null;
     }
 
     protected void start(InetAddress ina, final int PORT_START, final int PORT_END)

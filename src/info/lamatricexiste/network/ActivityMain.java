@@ -172,7 +172,9 @@ final public class ActivityMain extends Activity {
                 } catch (NullPointerException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (IOException e) {
-                    Log.e(TAG, e.getMessage());
+                    if (e != null) {
+                        Log.e(TAG, e.getMessage());
+                    }
                 }
             }
             return null;

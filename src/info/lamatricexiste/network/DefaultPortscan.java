@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
@@ -30,30 +31,77 @@ import java.util.Iterator;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 
-public class DefaultPortscan extends AbstractPortScan {
+public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
 
     private final int MAX_READ = 75;
     private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 300; // milliseconds
     private final long TIMEOUT_READ = 5000;
     private int cnt_selected;
-    private Selector selector = null;
+    private long time;
+    private Selector connSelector = null;
+    private Selector readSelector = null;
     protected WeakReference<Activity> mActivity;
     protected String[] mBanners = null;
 
+    protected String ipAddr = null;
+    protected long timeout = 0;
+    protected int port_start = 0;
+    protected int port_end = 0;
+    protected int nb_port = 0;
+
     protected DefaultPortscan(Activity activity, String host, final long timeout) {
-        super(host, timeout);
         mActivity = new WeakReference<Activity>(activity);
+        this.ipAddr = host;
+        this.timeout = timeout;
+    }
+
+    protected Void doInBackground(Void... params) {
+        Log.v(TAG, "timeout=" + timeout / 1000 + "ms");
+        try {
+            int step = 127;
+            InetAddress ina = InetAddress.getByName(ipAddr);
+            if (nb_port > step) {
+                for (int i = port_start; i <= port_end - step; i += step + 1) {
+                    time = System.nanoTime();
+                    start(ina, i, i + ((i + step <= port_end - step) ? step : port_end - i));
+                }
+            } else {
+                time = System.nanoTime();
+                start(ina, port_start, port_end);
+            }
+        } catch (UnknownHostException e) {
+            publishProgress((int) -1, (int) -1);
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        } finally {
+            stop();
+        }
+        return null;
+    }
+
+    protected void cancelTimeouts() throws IOException {
+        if ((System.nanoTime() - time) > timeout) {
+            stop();
+        }
+    }
+
+    protected void onCancelled() {
+        stop();
     }
 
     protected void start(InetAddress ina, final int PORT_START, final int PORT_END)
             throws InterruptedException, IOException {
         cnt_selected = 0;
-        selector = Selector.open();
+        connSelector = Selector.open();
+        readSelector = Selector.open();
         for (int i = PORT_START; i <= PORT_END; i++) {
             connectSocket(ina, i);
             // Thread.sleep(timeout);
@@ -62,6 +110,11 @@ public class DefaultPortscan extends AbstractPortScan {
     }
 
     protected void stop() {
+        stopSelector(connSelector);
+        stopSelector(readSelector);
+    }
+
+    private void stopSelector(Selector selector) {
         if (selector != null && selector.isOpen()) {
             synchronized (selector) {
                 try {
@@ -69,14 +122,15 @@ public class DefaultPortscan extends AbstractPortScan {
                     Iterator<SelectionKey> iterator = selector.keys().iterator();
                     synchronized (iterator) {
                         while (iterator.hasNext()) {
-                            publishProgress(0, -2);
+                            publishProgress(0, -2); // FIXME: Filter read
+                            // channel ? Probably not
                             finishKey(iterator.next());
                         }
                     }
                     // Close the selector
                     selector.close();
                 } catch (ClosedSelectorException e) {
-                    Log.e(TAG, "ClosedSelectorException");
+                    Log.e(TAG, "ClosedSelectorException: " + selector.toString());
                 } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -92,14 +146,14 @@ public class DefaultPortscan extends AbstractPortScan {
         // Register the Channel with port as attachement
         SparseArray<Integer> data = new SparseArray<Integer>(1);
         data.append(0, port);
-        socket.register(selector, SelectionKey.OP_CONNECT, data);
+        socket.register(connSelector, SelectionKey.OP_CONNECT, data);
     }
 
     private void doSelect(final int NB) {
         try {
-            while (selector.isOpen()) {
-                selector.select(TIMEOUT_SELECT);
-                Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
+            while (connSelector.isOpen()) {
+                connSelector.select(TIMEOUT_SELECT);
+                Iterator<SelectionKey> iterator = connSelector.selectedKeys().iterator();
                 while (iterator.hasNext()) {
                     SelectionKey key = (SelectionKey) iterator.next();
                     iterator.remove();
@@ -129,15 +183,16 @@ public class DefaultPortscan extends AbstractPortScan {
                             .getApplicationContext());
                     if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
                         // Create a new selector and register for reading
-                        // FIXME: Read selector should be created once (at start)
-                        Selector readSelector = Selector.open();
-                        SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
-                                SelectionKey.OP_READ);
+                        // FIXME: Read selector should be created once (at
+                        // start)
+                        SelectionKey tmpKey = ((SocketChannel) key.channel()).register(
+                                readSelector, SelectionKey.OP_READ);
                         tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
                         int code = readSelector.select(TIMEOUT_READ);
                         tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
                         if (code != 0) {
-                            // TODO: Send a Probe before reading ! Something like \n\r\n\r
+                            // TODO: Send a Probe before reading ! Something
+                            // like \n\r\n\r
                             handleRead(tmpKey, ((SparseArray<Integer>) key.attachment()).get(0));
                             time = System.nanoTime(); // Reset selector timeout
                             finishKey(key);
@@ -163,7 +218,8 @@ public class DefaultPortscan extends AbstractPortScan {
         ByteBuffer bbuf = ByteBuffer.allocate(MAX_READ);
         int numRead = 0;
         try {
-            // TODO: Get banner until there is no more data to read
+            // TODO: Get banner until there is no more data to read or the
+            // buffer is filled
             // while (numRead > 0) {
             numRead = ((SocketChannel) key.channel()).read(bbuf);
             // }

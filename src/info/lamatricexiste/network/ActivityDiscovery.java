@@ -31,6 +31,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -68,7 +69,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
     private Button btn_discover;
     public SharedPreferences prefs = null;
     private ConnectivityManager connMgr;
-    private AbstractDiscovery mDiscoveryTask = null;
+    private AsyncTask<Void, String, Void> mDiscoveryTask = null;
     private RootDaemon mRootDaemon = null;
     private Context ctxt;
     private NetInfo net = null;
@@ -192,13 +193,10 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             case SCAN_PORT_RESULT:
                 if (resultCode == RESULT_OK) {
                     // Get scanned ports
-                    Bundle extra = data.getExtras();
-                    int position = extra.getInt(HostBean.EXTRA_POSITION);
-                    HostBean host = hosts.get(position);
-                    host.banners = extra.getStringArray(HostBean.EXTRA_BANNERS);
-                    host.services = extra.getStringArray(HostBean.EXTRA_SERVICES);
-                    host.portsOpen = extra.getIntArray(HostBean.EXTRA_PORTSO);
-                    host.portsClosed = extra.getIntArray(HostBean.EXTRA_PORTSC);
+                    if (data.hasExtra(HostBean.EXTRA)) {
+                        HostBean host = data.getParcelableExtra(HostBean.EXTRA);
+                        hosts.set(host.position, host);
+                    }
                 }
             default:
                 break;
@@ -237,8 +235,8 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
-            if (host.isGateway) {
-                holder.logo.setImageResource(R.drawable.router);
+            if (host.isGateway == 1) {
+                holder.logo.setImageResource(R.drawable.router1);
             } else {
                 holder.logo.setImageResource(R.drawable.computer);
             }
@@ -416,7 +414,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
 
             // Is gateway ?
             if (net.gatewayIp.equals(host.ipAddress)) {
-                host.isGateway = true;
+                host.isGateway = 1;
             }
 
             // FQDN
@@ -458,14 +456,15 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         if (NetInfo.isConnected(ctxt) == false) {
             intent.putExtra("wifiDisabled", true);
         }
-        intent.putExtra(HostBean.EXTRA_TIMEOUT, (int) host.responseTime);
-        intent.putExtra(HostBean.EXTRA_POSITION, position);
-        intent.putExtra(HostBean.EXTRA_HOST, host.ipAddress);
-        intent.putExtra(HostBean.EXTRA_HOSTNAME, host.hostname);
-        intent.putExtra(HostBean.EXTRA_BANNERS, host.banners);
-        intent.putExtra(HostBean.EXTRA_SERVICES, host.services);
-        intent.putExtra(HostBean.EXTRA_PORTSO, host.portsOpen);
-        intent.putExtra(HostBean.EXTRA_PORTSC, host.portsClosed);
+        intent.putExtra(HostBean.EXTRA, host);
+        // intent.putExtra(HostBean.EXTRA_TIMEOUT, (int) host.responseTime);
+        // intent.putExtra(HostBean.EXTRA_POSITION, position);
+        // intent.putExtra(HostBean.EXTRA_HOST, host.ipAddress);
+        // intent.putExtra(HostBean.EXTRA_HOSTNAME, host.hostname);
+        // intent.putExtra(HostBean.EXTRA_BANNERS, host.banners);
+        // intent.putExtra(HostBean.EXTRA_SERVICES, host.services);
+        // intent.putExtra(HostBean.EXTRA_PORTSO, host.portsOpen);
+        // intent.putExtra(HostBean.EXTRA_PORTSC, host.portsClosed);
         startActivityForResult(intent, SCAN_PORT_RESULT);
     }
 

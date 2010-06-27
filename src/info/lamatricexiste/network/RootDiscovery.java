@@ -14,20 +14,24 @@ import java.io.OutputStream;
 
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.os.AsyncTask;
 import android.util.Log;
 
-public class RootDiscovery extends AbstractDiscovery {
+public class RootDiscovery extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "RootDiscovery";
+    // private WeakReference<ActivityDiscovery> mDiscover;
     private LocalSocket mSocket;
     private InputStream mIn;
     private OutputStream mOut;
     private byte buf[] = new byte[1024];
+    protected long start;
+    protected long end;
 
     // private int buflen = 0;
 
     public RootDiscovery(ActivityDiscovery discover) {
-        super(discover);
+        // mDiscover = new WeakReference<ActivityDiscovery>(discover);
     }
 
     @Override

@@ -6,19 +6,24 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.NetInfo;
+import info.lamatricexiste.network.Network.RateControl;
 import info.lamatricexiste.network.Network.Reachable;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Vibrator;
 import android.util.Log;
 
-public class DefaultDiscovery extends AbstractDiscovery {
+public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "Discovery";
     private final int mRateMult = 50; // Number of hosts between Rate Checks
@@ -26,15 +31,39 @@ public class DefaultDiscovery extends AbstractDiscovery {
     private int pt_move = 2; // 1=backward 2=forward
     private ExecutorService mPool;
     private SharedPreferences mPrefs;
+    private int hosts_done = 0;
+    private WeakReference<ActivityDiscovery> mDiscover;
+    protected RateControl mRateControl;
+
+    // TODO: Adaptiv value or changeable by Prefs
+    protected long ip;
+    protected long start;
+    protected long end;
+    protected long size;
 
     public DefaultDiscovery(ActivityDiscovery discover) {
-        super(discover);
+        mDiscover = new WeakReference<ActivityDiscovery>(discover);
+        mRateControl = new RateControl();
         mPrefs = discover.prefs;
     }
 
     protected void publish(String str) {
         publishProgress(str);
         mRateCnt++;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        final ActivityDiscovery discover = mDiscover.get();
+        if (discover != null) {
+            NetInfo net = new NetInfo(discover);
+            ip = NetInfo.getUnsignedLongFromIp(net.ip);
+            int shift = (32 - net.cidr);
+            start = (ip >> shift << shift) + 1;
+            end = (start | ((1 << shift) - 1)) - 1;
+            size = (int) (end - start + 1);
+            discover.setProgress(0);
+        }
     }
 
     @Override
@@ -79,7 +108,39 @@ public class DefaultDiscovery extends AbstractDiscovery {
     }
 
     @Override
+    protected void onProgressUpdate(String... item) {
+        final ActivityDiscovery discover = mDiscover.get();
+        if (discover != null) {
+            if (!isCancelled()) {
+                if (item[0] != null) {
+                    discover.addHost(item[0], mRateControl.rate);
+                }
+                hosts_done++;
+                discover.setProgress((int) (hosts_done * 10000 / size));
+            }
+        }
+    }
+
+    @Override
+    protected void onPostExecute(Void unused) {
+        final ActivityDiscovery discover = mDiscover.get();
+        if (discover != null) {
+            if (discover.prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
+                Vibrator v = (Vibrator) discover.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(ActivityDiscovery.VIBRATE);
+            }
+            discover.makeToast(R.string.discover_finished);
+            discover.stopDiscovering();
+        }
+    }
+
+    @Override
     protected void onCancelled() {
+        final ActivityDiscovery discover = mDiscover.get();
+        if (discover != null) {
+            discover.makeToast(R.string.discover_canceled);
+            discover.stopDiscovering();
+        }
         mPool.shutdownNow();
         super.onCancelled();
     }
