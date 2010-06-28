@@ -82,12 +82,13 @@ final public class ActivityPortscan extends TabActivity {
                 host = intent.getParcelableExtra(HostBean.EXTRA);
                 Log.v(TAG, "Parcalable used ..."); // FIXME: todo
             } else {
+                // Intents for 3rd party usage
                 host = new HostBean();
                 host.ipAddress = extras.getString(HostBean.EXTRA_HOST);
                 host.hostname = extras.getString(HostBean.EXTRA_HOSTNAME);
                 host.position = extras.getInt(HostBean.EXTRA_POSITION);
-                host.banners = extras.getStringArray(HostBean.EXTRA_BANNERS);
-                host.services = extras.getStringArray(HostBean.EXTRA_SERVICES);
+                host.banners = strArrayToArrayList(extras.getStringArray(HostBean.EXTRA_BANNERS));
+                host.services = strArrayToArrayList(extras.getStringArray(HostBean.EXTRA_SERVICES));
                 host.portsOpen = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSO));
                 host.portsClosed = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSC));
                 host.responseTime = extras.getInt(HostBean.EXTRA_TIMEOUT, Integer
@@ -235,7 +236,7 @@ final public class ActivityPortscan extends TabActivity {
             final int port = (type == "open") ? host.portsOpen.get(position) : host.portsClosed
                     .get(position);
             if (host.services != null) {
-                final String service = host.services[port];
+                final String service = host.services.get(position);
                 holder.port.setText(port + "/tcp " + "(" + service + ")");
 
                 // Service is known
@@ -258,8 +259,8 @@ final public class ActivityPortscan extends TabActivity {
                 holder.port.setText(port + "/tcp ");
             }
             // Banner
-            if (host.banners != null && host.banners[port] != null) {
-                holder.banner.setText(host.banners[port]);
+            if (host.banners != null && host.banners.get(position) != null) {
+                holder.banner.setText(host.banners.get(position));
             } else {
                 holder.banner.setText("");
             }
@@ -365,8 +366,8 @@ final public class ActivityPortscan extends TabActivity {
             host.portsOpen = new ArrayList<Integer>();
             host.portsClosed = new ArrayList<Integer>();
             mBanners = new String[len];
-            host.banners = new String[len];
-            host.services = new String[len];
+            host.banners = new ArrayList<String>();
+            host.services = new ArrayList<String>();
             mTabOpen.setText(String.format(getString(R.string.scan_open), 0));
             mTabClosed.setText(String.format(getString(R.string.scan_closed), 0));
             setProgress(0);
@@ -381,20 +382,22 @@ final public class ActivityPortscan extends TabActivity {
                     if (!port.equals(new Integer(0))) {
                         if (type == 1) {
                             // Open
+                            int location = findLocation(host.portsOpen, port);
                             if (mBanners != null) {
-                                host.banners[port] = mBanners[port];
+                                host.banners.add(location, mBanners[port]);
                             }
-                            host.portsOpen.add(findLocation(host.portsOpen, port), port);
+                            host.portsOpen.add(location, port);
+                            host.services.add(location, getPortService(location, port));
                             adapter_open.add(PLACEHOLDER);
-                            host.services[port] = getPortService(port);
                             cnt_open++;
                             mTabOpen
                                     .setText(String.format(getString(R.string.scan_open), cnt_open));
                         } else if (type == 0) {
                             // Closed
-                            host.portsClosed.add(findLocation(host.portsClosed, port), port);
+                            int location = findLocation(host.portsClosed, port);
+                            host.portsClosed.add(location, port);
+                            host.services.add(location, getPortService(location, port));
                             adapter_closed.add(PLACEHOLDER);
-                            host.services[port] = getPortService(port);
                             cnt_closed++;
                             mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                     cnt_closed));
@@ -433,12 +436,12 @@ final public class ActivityPortscan extends TabActivity {
             stopScan();
         }
 
-        private String getPortService(int port) {
+        private String getPortService(int location, int port) {
             service = null;
 
             // Determinate service with banners
             // TODO: Grab banner/headers of HTTP services with GET/POST/HEAD
-            if (host.banners != null && host.banners[port] != null) {
+            if (host.banners != null && host.banners.get(location) != null) {
                 Pattern pattern;
                 Matcher matcher;
                 Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
@@ -448,7 +451,7 @@ final public class ActivityPortscan extends TabActivity {
                         try {
                             Log.v(TAG, c.getString(1));
                             pattern = Pattern.compile(c.getString(1));
-                            matcher = pattern.matcher(host.banners[port]);
+                            matcher = pattern.matcher(host.banners.get(location));
                             if (matcher.find()) {
                                 service = c.getString(0);
                                 // Log.v(TAG, "FOUND=" + service);
@@ -554,13 +557,24 @@ final public class ActivityPortscan extends TabActivity {
         return portsChar;
     }
 
+    private ArrayList<String> strArrayToArrayList(String[] strArray) {
+        ArrayList<String> out = new ArrayList<String>();
+        if (strArray != null) {
+            for (int i = 0; i < strArray.length; i++) {
+                out.add(strArray[i]);
+            }
+            return out;
+        }
+        return null;
+    }
+
     private ArrayList<Integer> intArrayToArrayList(int[] intArray) {
-        ArrayList<Integer> ports = new ArrayList<Integer>();
+        ArrayList<Integer> out = new ArrayList<Integer>();
         if (intArray != null) {
             for (int i = 0; i < intArray.length; i++) {
-                ports.add(intArray[i]);
+                out.add(intArray[i]);
             }
-            return ports;
+            return out;
         }
         return null;
     }

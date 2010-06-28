@@ -32,8 +32,8 @@ public class HostBean implements Parcelable {
     public String os = "Unknown";
     public float responseTime = 0;
     public int position = 0;
-    public String[] services = null;
-    public String[] banners = null;
+    public ArrayList<String> services = null;
+    public ArrayList<String> banners = null;
     public ArrayList<Integer> portsOpen = null;
     public ArrayList<Integer> portsClosed = null;
 
@@ -54,20 +54,19 @@ public class HostBean implements Parcelable {
         dest.writeInt(isGateway);
         dest.writeString(ipAddress);
         dest.writeString(hostname);
-        dest.writeString(hostname);
-        dest.writeString(hostname);
-        dest.writeString(hostname);
+        dest.writeString(hardwareAddress);
+        dest.writeString(nicVendor);
+        dest.writeString(os);
         dest.writeFloat(responseTime);
         dest.writeInt(position);
-        // dest.writeStringArray(services);
-        // dest.writeStringArray(banners);
+        dest.writeList(services);
+        dest.writeList(banners);
         dest.writeList(portsOpen);
         dest.writeList(portsClosed);
     }
 
     @SuppressWarnings("unchecked")
     private void readFromParcel(Parcel in) {
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
         isGateway = in.readInt();
         ipAddress = in.readString();
         hostname = in.readString();
@@ -76,10 +75,10 @@ public class HostBean implements Parcelable {
         os = in.readString();
         responseTime = in.readFloat();
         position = in.readInt();
-        // services = (String[]) in.readArray(cl);
-        // banners = (String[]) in.readArray(cl);
-        portsOpen = in.readArrayList(cl);
-        portsClosed = in.readArrayList(cl);
+        services = in.readArrayList(String.class.getClassLoader());
+        banners = in.readArrayList(String.class.getClassLoader());
+        portsOpen = in.readArrayList(Integer.class.getClassLoader());
+        portsClosed = in.readArrayList(Integer.class.getClassLoader());
     }
 
     @SuppressWarnings("unchecked")
