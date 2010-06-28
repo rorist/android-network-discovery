@@ -17,6 +17,7 @@ import android.util.Log;
 public class Banner extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "Banner";
+    private final int BUF = 96;
     private String host;
     private int port;
     private int timeout;
@@ -34,7 +35,7 @@ public class Banner extends AsyncTask<Void, String, Void> {
             Socket s = new Socket();
             s.bind(null);
             s.connect(new InetSocketAddress(host, port), timeout);
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()), 75);
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()), BUF);
             while ((banner = in.readLine()) != null) {
                 break;
             }

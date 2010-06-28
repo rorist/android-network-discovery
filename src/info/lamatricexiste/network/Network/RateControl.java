@@ -29,8 +29,7 @@ public class RateControl {
         // } else {
         is_indicator_discovered = true;
         if ((response_time = getAvgResponseTime(indicator[0], 3)) > 0) {
-            // Add 30% to the response time
-            rate = response_time + (response_time * 3 / 10);
+            rate = response_time * 2; // TODO: Be adaptative
             Log.v(TAG, "rate=" + rate);
         }
         // }

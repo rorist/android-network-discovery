@@ -457,72 +457,8 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             intent.putExtra("wifiDisabled", true);
         }
         intent.putExtra(HostBean.EXTRA, host);
-        // intent.putExtra(HostBean.EXTRA_TIMEOUT, (int) host.responseTime);
-        // intent.putExtra(HostBean.EXTRA_POSITION, position);
-        // intent.putExtra(HostBean.EXTRA_HOST, host.ipAddress);
-        // intent.putExtra(HostBean.EXTRA_HOSTNAME, host.hostname);
-        // intent.putExtra(HostBean.EXTRA_BANNERS, host.banners);
-        // intent.putExtra(HostBean.EXTRA_SERVICES, host.services);
-        // intent.putExtra(HostBean.EXTRA_PORTSO, host.portsOpen);
-        // intent.putExtra(HostBean.EXTRA_PORTSC, host.portsClosed);
         startActivityForResult(intent, SCAN_PORT_RESULT);
     }
-
-    // private void showHostInfo(HostBean host) {
-    // View v = mInflater.inflate(R.layout.info, null);
-    // // Build info dialog
-    // AlertDialog.Builder infoDialog = new
-    // AlertDialog.Builder(ActivityDiscovery.this);
-    // infoDialog.setTitle(host.ipAddress);
-    // // Add all available infos
-    // LinearLayout root = (LinearLayout) v.findViewById(R.id.info);
-    // root.addView(createHostInfoLine(R.string.info_mac,
-    // host.hardwareAddress));
-    // root.addView(createHostInfoLine(R.string.info_nic, host.nicVendor));
-    // if (host.portsOpen != null) {
-    // root.addView(createHostInfoLine(R.string.info_ports_open, String
-    // .valueOf(host.portsOpen.length)));
-    // }
-    // if (host.portsClosed != null) {
-    // root.addView(createHostInfoLine(R.string.info_ports_closed, String
-    // .valueOf(host.portsClosed.length)));
-    // }
-    // // Show dialog
-    // infoDialog.setView(v);
-    // infoDialog.setNegativeButton(R.string.btn_close, null);
-    // infoDialog.show();
-    // }
-
-    // private LinearLayout createHostInfoLine(int title, String value) {
-    // LinearLayout line = (LinearLayout) mInflater.inflate(R.layout.info_line,
-    // null);
-    // ((TextView) line.findViewById(R.id.info_title)).setText(title);
-    // ((TextView) line.findViewById(R.id.info_value)).setText(value);
-    // return line;
-    // }
-
-    // private void sendPacket(){
-    // CheckBox cb = (CheckBox) findViewById(R.id.repeat);
-    // final boolean repeat = cb.isChecked();
-    // final CharSequence[] items = {"Ping (ICMP)","Samba exploit"};
-    // setButtonOff(btn);
-    // @SuppressWarnings("unused")
-    // AlertDialog dialog = new AlertDialog.Builder(ctxt)
-    // .setTitle("Select method")
-    // .setItems(items, new DialogInterface.OnClickListener() {
-    // public void onClick(DialogInterface dialog, int item) {
-    // try {
-    // makeToast("Sending request ...");
-    // netInterface.inSendPacket(getSelectedHosts(), item, repeat);
-    // } catch (RemoteException e) {
-    // Log.e(TAG, e.getMessage());
-    // } catch (IllegalStateException e){
-    // Log.e(TAG, e.getMessage());
-    // }
-    // }
-    // })
-    // .show();
-    // }
 
     public static void scanSingle(final Context ctxt, String ip) {
         // Alert dialog
