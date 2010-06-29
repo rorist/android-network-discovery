@@ -41,14 +41,14 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
     private final int MAX_READ = 75;
     private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 300; // milliseconds
-    private final long TIMEOUT_READ = 5000;
+    private final long TIMEOUT_READ = 1500;
     private int cnt_selected;
     private long time;
     private Selector connSelector = null;
     private Selector readSelector = null;
+
     protected WeakReference<Activity> mActivity;
     protected String[] mBanners = null;
-
     protected String ipAddr = null;
     protected long timeout = 0;
     protected int port_start = 0;
@@ -122,8 +122,7 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
                     Iterator<SelectionKey> iterator = selector.keys().iterator();
                     synchronized (iterator) {
                         while (iterator.hasNext()) {
-                            publishProgress(0, -2); // FIXME: Filter read
-                            // channel ? Probably not
+                            publishProgress(0, -2);
                             finishKey(iterator.next());
                         }
                     }
@@ -183,8 +182,6 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
                             .getApplicationContext());
                     if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
                         // Create a new selector and register for reading
-                        // FIXME: Read selector should be created once (at
-                        // start)
                         SelectionKey tmpKey = ((SocketChannel) key.channel()).register(
                                 readSelector, SelectionKey.OP_READ);
                         tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
@@ -212,26 +209,22 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
     }
 
     private void handleRead(SelectionKey key, int port) {
-        // new Banner(host, ((SparseArray<Integer>) key.attachment()).get(0),
-        // 8000).execute();
-
         ByteBuffer bbuf = ByteBuffer.allocate(MAX_READ);
         int numRead = 0;
         try {
-            // TODO: Get banner until there is no more data to read or the
-            // buffer is filled
             // while (numRead > 0) {
             numRead = ((SocketChannel) key.channel()).read(bbuf);
             // }
+            if (numRead > 8) {
+                mBanners[port] = new String(bbuf.array()).substring(0, numRead).trim();
+            }
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
+        } finally {
+            publishProgress(port, (int) 1);
+            finishKey(key);
+            cnt_selected--; // Hack for finishKey();
         }
-        if (numRead != -1) {
-            mBanners[port] = new String(bbuf.array()).substring(0, numRead).trim();
-        }
-        publishProgress(port, (int) 1);
-        finishKey(key);
-        cnt_selected--; // Hack for finishKey();
     }
 
     private void finishKey(SelectionKey key) {

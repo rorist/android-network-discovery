@@ -55,7 +55,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 final public class ActivityDiscovery extends Activity implements OnItemClickListener {
 
-    private final String TAG = "ActivityDiscover";
+    private final String TAG = "ActivityDiscovery";
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
     public static final int MENU_SCAN_SINGLE = 0;

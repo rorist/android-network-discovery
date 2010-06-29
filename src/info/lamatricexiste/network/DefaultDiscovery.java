@@ -25,7 +25,7 @@ import android.util.Log;
 
 public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
 
-    private final String TAG = "Discovery";
+    private final String TAG = "DefaultDiscovery";
     private final int mRateMult = 50; // Number of hosts between Rate Checks
     private int mRateCnt = 0;
     private int pt_move = 2; // 1=backward 2=forward

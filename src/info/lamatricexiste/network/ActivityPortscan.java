@@ -13,6 +13,7 @@ import info.lamatricexiste.network.Utils.Prefs;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,12 +88,11 @@ final public class ActivityPortscan extends TabActivity {
                 host.ipAddress = extras.getString(HostBean.EXTRA_HOST);
                 host.hostname = extras.getString(HostBean.EXTRA_HOSTNAME);
                 host.position = extras.getInt(HostBean.EXTRA_POSITION);
-                host.banners = strArrayToArrayList(extras.getStringArray(HostBean.EXTRA_BANNERS));
-                host.services = strArrayToArrayList(extras.getStringArray(HostBean.EXTRA_SERVICES));
                 host.portsOpen = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSO));
                 host.portsClosed = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSC));
                 host.responseTime = extras.getInt(HostBean.EXTRA_TIMEOUT, Integer
                         .parseInt(Prefs.DEFAULT_TIMEOUT));
+                // FIXME: banners and services not supported (HashMap's)
             }
         }
         // TODO: Include this in the HostBean class
@@ -236,7 +236,7 @@ final public class ActivityPortscan extends TabActivity {
             final int port = (type == "open") ? host.portsOpen.get(position) : host.portsClosed
                     .get(position);
             if (host.services != null) {
-                final String service = host.services.get(position);
+                final String service = host.services.get(port);
                 holder.port.setText(port + "/tcp " + "(" + service + ")");
 
                 // Service is known
@@ -259,8 +259,8 @@ final public class ActivityPortscan extends TabActivity {
                 holder.port.setText(port + "/tcp ");
             }
             // Banner
-            if (host.banners != null && host.banners.get(position) != null) {
-                holder.banner.setText(host.banners.get(position));
+            if (host.banners != null && host.banners.get(port) != null) {
+                holder.banner.setText(host.banners.get(port));
             } else {
                 holder.banner.setText("");
             }
@@ -288,6 +288,8 @@ final public class ActivityPortscan extends TabActivity {
             // intent.putExtra("ftp_resume", "true");
             // intent.putExtra("ftp_encoding", "UTF8");
         } else if (service.equals("ssh")) {
+            // TODO: Compatibility with Better Terminal Pro SSH client
+            // http://www.magicandroidapps.com/wiki/index.php?title=Intents
             pk = "org.connectbot";
             action = Intent.ACTION_VIEW;
             if (isPackageInstalled(ctxt, pk)) {
@@ -362,12 +364,12 @@ final public class ActivityPortscan extends TabActivity {
             }
             nb_port = port_end - port_start + 2;
             // Initialize arrays and views
-            int len = port_end + 1; // TODO: Not really efficient?
+            final int len = port_end + 1;
+            mBanners = new String[len];
+            host.banners = new HashMap<Integer, String>();
+            host.services = new HashMap<Integer, String>();
             host.portsOpen = new ArrayList<Integer>();
             host.portsClosed = new ArrayList<Integer>();
-            mBanners = new String[len];
-            host.banners = new ArrayList<String>();
-            host.services = new ArrayList<String>();
             mTabOpen.setText(String.format(getString(R.string.scan_open), 0));
             mTabClosed.setText(String.format(getString(R.string.scan_closed), 0));
             setProgress(0);
@@ -377,26 +379,24 @@ final public class ActivityPortscan extends TabActivity {
         protected void onProgressUpdate(Integer... values) {
             if (!isCancelled()) {
                 if (values.length > 1) {
-                    Integer port = values[0];
-                    int type = values[1];
+                    final Integer port = values[0];
+                    final int type = values[1];
                     if (!port.equals(new Integer(0))) {
                         if (type == 1) {
                             // Open
-                            int location = findLocation(host.portsOpen, port);
-                            if (mBanners != null) {
-                                host.banners.add(location, mBanners[port]);
+                            if (mBanners != null && mBanners[port] != null) {
+                                host.banners.put(port, mBanners[port]);
                             }
-                            host.portsOpen.add(location, port);
-                            host.services.add(location, getPortService(location, port));
+                            host.portsOpen.add(findLocation(host.portsOpen, port), port);
+                            host.services.put(port, getPortService(port));
                             adapter_open.add(PLACEHOLDER);
                             cnt_open++;
                             mTabOpen
                                     .setText(String.format(getString(R.string.scan_open), cnt_open));
                         } else if (type == 0) {
                             // Closed
-                            int location = findLocation(host.portsClosed, port);
-                            host.portsClosed.add(location, port);
-                            host.services.add(location, getPortService(location, port));
+                            host.portsClosed.add(findLocation(host.portsClosed, port), port);
+                            host.services.put(port, getPortService(port));
                             adapter_closed.add(PLACEHOLDER);
                             cnt_closed++;
                             mTabClosed.setText(String.format(getString(R.string.scan_closed),
@@ -436,12 +436,12 @@ final public class ActivityPortscan extends TabActivity {
             stopScan();
         }
 
-        private String getPortService(int location, int port) {
+        private String getPortService(int port) {
             service = null;
 
             // Determinate service with banners
             // TODO: Grab banner/headers of HTTP services with GET/POST/HEAD
-            if (host.banners != null && host.banners.get(location) != null) {
+            if (host.banners != null && host.banners.containsKey(port)) {
                 Pattern pattern;
                 Matcher matcher;
                 Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
@@ -449,12 +449,10 @@ final public class ActivityPortscan extends TabActivity {
                     c.moveToFirst();
                     do {
                         try {
-                            Log.v(TAG, c.getString(1));
                             pattern = Pattern.compile(c.getString(1));
-                            matcher = pattern.matcher(host.banners.get(location));
+                            matcher = pattern.matcher(host.banners.get(port));
                             if (matcher.find()) {
                                 service = c.getString(0);
-                                // Log.v(TAG, "FOUND=" + service);
                                 break;
                             }
                         } catch (PatternSyntaxException e) {
@@ -555,17 +553,6 @@ final public class ActivityPortscan extends TabActivity {
             }
         }
         return portsChar;
-    }
-
-    private ArrayList<String> strArrayToArrayList(String[] strArray) {
-        ArrayList<String> out = new ArrayList<String>();
-        if (strArray != null) {
-            for (int i = 0; i < strArray.length; i++) {
-                out.add(strArray[i]);
-            }
-            return out;
-        }
-        return null;
     }
 
     private ArrayList<Integer> intArrayToArrayList(int[] intArray) {

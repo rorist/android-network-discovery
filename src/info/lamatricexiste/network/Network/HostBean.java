@@ -7,6 +7,7 @@
 package info.lamatricexiste.network.Network;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,8 +33,10 @@ public class HostBean implements Parcelable {
     public String os = "Unknown";
     public float responseTime = 0;
     public int position = 0;
-    public ArrayList<String> services = null;
-    public ArrayList<String> banners = null;
+    public HashMap<Integer, String> services = null;
+    public HashMap<Integer, String> banners = null;
+    // public ArrayList<String> services = null;
+    // public ArrayList<String> banners = null;
     public ArrayList<Integer> portsOpen = null;
     public ArrayList<Integer> portsClosed = null;
 
@@ -59,8 +62,8 @@ public class HostBean implements Parcelable {
         dest.writeString(os);
         dest.writeFloat(responseTime);
         dest.writeInt(position);
-        dest.writeList(services);
-        dest.writeList(banners);
+        dest.writeMap(services);
+        dest.writeMap(banners);
         dest.writeList(portsOpen);
         dest.writeList(portsClosed);
     }
@@ -75,8 +78,8 @@ public class HostBean implements Parcelable {
         os = in.readString();
         responseTime = in.readFloat();
         position = in.readInt();
-        services = in.readArrayList(String.class.getClassLoader());
-        banners = in.readArrayList(String.class.getClassLoader());
+        services = in.readHashMap(null);
+        banners = in.readHashMap(null);
         portsOpen = in.readArrayList(Integer.class.getClassLoader());
         portsClosed = in.readArrayList(Integer.class.getClassLoader());
     }
