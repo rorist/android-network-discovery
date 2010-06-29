@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.InetAddress;
+import java.io.IOException;
 
 import android.util.Log;
 
@@ -17,6 +19,7 @@ public class RateControl {
 
     // TODO: Calculate a rounded up value from experiments in different networks
     private final String TAG = "RateControl";
+    private final int REACH_TIMEOUT = 5000;
     public String[] indicator;
     public long rate = 800; // Slow start
     public boolean is_indicator_discovered = false;
@@ -55,7 +58,16 @@ public class RateControl {
             }
         } catch (Exception e) {
             Log.e(TAG, "Can't use native ping: " + e.getMessage());
+            try {
+                final long start = System.nanoTime();
+                if(InetAddress.getByName(host).isReachable(REACH_TIMEOUT)){
+                    Log.i(TAG, "Using Java ICMP request instead ...");
+                    return (System.nanoTime() - start) / 1000;
+                }
+            } catch (IOException e1){
+                Log.e(TAG, e1.getMessage());
+            }
         }
-        return 0;
+        return rate;
     }
 }

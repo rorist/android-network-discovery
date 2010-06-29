@@ -81,7 +81,7 @@ final public class ActivityPortscan extends TabActivity {
         if (extras != null) {
             if (intent.hasExtra(HostBean.EXTRA)) {
                 host = intent.getParcelableExtra(HostBean.EXTRA);
-                Log.v(TAG, "Parcalable used ..."); // FIXME: todo
+                Log.v(TAG, "Parcalable used ...");
             } else {
                 // Intents for 3rd party usage
                 host = new HostBean();
