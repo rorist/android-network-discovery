@@ -26,13 +26,13 @@ public class HostBean implements Parcelable {
     public static final String EXTRA_SERVICES = PKG + ".extra_services";
 
     public int isGateway = 0;
+    public int position = 0;
+    public int responseTime = 0; // ms
     public String ipAddress = null;
     public String hostname = null;
     public String hardwareAddress = "00:00:00:00:00:00";
     public String nicVendor = "Unknown";
     public String os = "Unknown";
-    public float responseTime = 0;
-    public int position = 0;
     public HashMap<Integer, String> services = null;
     public HashMap<Integer, String> banners = null;
     // public ArrayList<String> services = null;
@@ -60,7 +60,7 @@ public class HostBean implements Parcelable {
         dest.writeString(hardwareAddress);
         dest.writeString(nicVendor);
         dest.writeString(os);
-        dest.writeFloat(responseTime);
+        dest.writeInt(responseTime);
         dest.writeInt(position);
         dest.writeMap(services);
         dest.writeMap(banners);
@@ -76,7 +76,7 @@ public class HostBean implements Parcelable {
         hardwareAddress = in.readString();
         nicVendor = in.readString();
         os = in.readString();
-        responseTime = in.readFloat();
+        responseTime = in.readInt();
         position = in.readInt();
         services = in.readHashMap(null);
         banners = in.readHashMap(null);

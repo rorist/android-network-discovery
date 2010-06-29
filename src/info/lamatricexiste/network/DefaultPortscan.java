@@ -38,11 +38,12 @@ import android.util.SparseArray;
 
 public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
 
+    private final String TAG = "DefaultPortscan";
     private final int MAX_READ = 75;
-    private final String TAG = "PortScan";
     private final int TIMEOUT_SELECT = 300; // milliseconds
     private final long TIMEOUT_READ = 1500;
     private int cnt_selected;
+    private long timeout = 0;
     private long time;
     private Selector connSelector = null;
     private Selector readSelector = null;
@@ -50,19 +51,19 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
     protected WeakReference<Activity> mActivity;
     protected String[] mBanners = null;
     protected String ipAddr = null;
-    protected long timeout = 0;
     protected int port_start = 0;
     protected int port_end = 0;
     protected int nb_port = 0;
 
-    protected DefaultPortscan(Activity activity, String host, final long timeout) {
+    protected DefaultPortscan(Activity activity, String host, final int rate) {
         mActivity = new WeakReference<Activity>(activity);
         this.ipAddr = host;
-        this.timeout = timeout;
+        // From milliseconds to nanoseconds
+        this.timeout = (long) (rate * 1000 * 1000);
+        Log.v(TAG, "timeout=" + rate + "ms");
     }
 
     protected Void doInBackground(Void... params) {
-        Log.v(TAG, "timeout=" + timeout / 1000 + "ms");
         try {
             int step = 127;
             InetAddress ina = InetAddress.getByName(ipAddr);

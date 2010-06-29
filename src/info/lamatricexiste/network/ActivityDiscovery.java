@@ -70,7 +70,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
     public SharedPreferences prefs = null;
     private ConnectivityManager connMgr;
     private AsyncTask<Void, String, Void> mDiscoveryTask = null;
-    private RootDaemon mRootDaemon = null;
+    // private RootDaemon mRootDaemon = null;
     private Context ctxt;
     private NetInfo net = null;
 
@@ -130,7 +130,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
         // Scan button state
-        if(mDiscoveryTask != null){
+        if (mDiscoveryTask != null) {
             setButton(btn_discover, R.drawable.cancel, false);
             btn_discover.setText(R.string.btn_discover_cancel);
             btn_discover.setOnClickListener(new View.OnClickListener() {
@@ -147,26 +147,28 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         unregisterReceiver(receiver);
     }
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        // Root Daemon
-//        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-//            mRootDaemon = new RootDaemon(ActivityDiscovery.this);
-//            mRootDaemon.start();
-//        }
-//    }
-//
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        // Root Daemon
-//        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-//            if (mRootDaemon != null) {
-//                mRootDaemon.kill();
-//            }
-//        }
-//    }
+    // @Override
+    // public void onStart() {
+    // super.onStart();
+    // // Root Daemon
+    // if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
+    // Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+    // mRootDaemon = new RootDaemon(ActivityDiscovery.this);
+    // mRootDaemon.start();
+    // }
+    // }
+    //
+    // @Override
+    // protected void onStop() {
+    // super.onStop();
+    // // Root Daemon
+    // if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
+    // Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+    // if (mRootDaemon != null) {
+    // mRootDaemon.kill();
+    // }
+    // }
+    // }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -359,8 +361,6 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
      * Discover hosts
      */
     private void startDiscovering() {
-        Log.v(TAG, "METHOD="
-                + prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER));
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
             mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
@@ -408,14 +408,16 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         hosts = new ArrayList<HostBean>();
     }
 
-    public void addHost(String addr, long timeout) {
+    public void addHost(String addr, int rtt) {
         String haddr = mHardwareAddress.getHardwareAddress(addr);
         if (!hardwareAddressAlreadyExists(haddr)) {
             HostBean host = new HostBean();
             host.position = hosts.size();
             host.hardwareAddress = haddr;
             host.ipAddress = addr;
-            host.responseTime = timeout;
+            host.responseTime = rtt;
+            Log.v(TAG, "rtt=" + rtt);
+            // NIC vendor
             try {
                 host.nicVendor = mHardwareAddress.getNicVendor(ctxt, haddr);
             } catch (SQLiteDatabaseCorruptException e) {

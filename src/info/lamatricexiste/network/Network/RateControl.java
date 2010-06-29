@@ -8,11 +8,9 @@ package info.lamatricexiste.network.Network;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.net.InetAddress;
-import java.io.IOException;
-import java.lang.NumberFormatException;
 
 import android.util.Log;
 
@@ -22,24 +20,28 @@ public class RateControl {
     private final String TAG = "RateControl";
     private final int REACH_TIMEOUT = 5000;
     public String[] indicator;
-    public long rate = 800; // Slow start
+    public int rate = 800; // Slow start
     public boolean is_indicator_discovered = false;
 
     public void adaptRate() {
-        long response_time = 0;
+        int response_time = 0;
         // TODO: Use an indicator with a port, calculate java round trip time
         // if (indicator.length > 1) {
         // Log.v(TAG, "use a socket here, port=" + getIndicator()[1]);
         // } else {
         is_indicator_discovered = true;
         if ((response_time = getAvgResponseTime(indicator[0], 3)) > 0) {
-            rate = response_time * 2; // TODO: Be adaptative
-            Log.v(TAG, "rate=" + rate);
+            if (response_time > 100) { // Most distanced hosts
+                rate = response_time * 5; // Minimum 500ms
+            } else {
+                rate = response_time * 10; // Maximum 1000ms
+            }
+            Log.v(TAG, "adapt=" + response_time + "ms -> " + rate + "ms");
         }
         // }
     }
 
-    private long getAvgResponseTime(String host, int count) {
+    private int getAvgResponseTime(String host, int count) {
         try {
             String cmd = "/system/bin/ping";
             if ((new File(cmd)).exists() == true) {
@@ -48,14 +50,14 @@ public class RateControl {
                 Process p = Runtime.getRuntime().exec(cmd + " -q -n -W 2 -c " + count + " " + host);
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
                 while ((line = r.readLine()) != null) {
-                    //Log.d("    ", line);
-                    //rtt min/avg/max/mdev = 1.281/2.693/4.939/1.605 ms
+                    // Log.d("    ", line);
+                    // rtt min/avg/max/mdev = 1.281/2.693/4.939/1.605 ms
                     matcher = Pattern
                             .compile(
                                     "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/[0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+ ms$")
                             .matcher(line);
                     if (matcher.matches()) {
-                        return (long) Float.parseFloat(matcher.group(1));
+                        return (int) Float.parseFloat(matcher.group(1));
                     }
                 }
             }
@@ -63,11 +65,11 @@ public class RateControl {
             Log.e(TAG, "Can't use native ping: " + e.getMessage());
             try {
                 final long start = System.nanoTime();
-                if(InetAddress.getByName(host).isReachable(REACH_TIMEOUT)){
+                if (InetAddress.getByName(host).isReachable(REACH_TIMEOUT)) {
                     Log.i(TAG, "Using Java ICMP request instead ...");
-                    return (long) ((System.nanoTime() - start) / 1000);
+                    return (int) ((System.nanoTime() - start) / 1000);
                 }
-            } catch (IOException e1){
+            } catch (Exception e1) {
                 Log.e(TAG, e1.getMessage());
             }
         }

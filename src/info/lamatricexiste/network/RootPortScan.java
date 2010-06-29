@@ -13,12 +13,10 @@ import android.os.AsyncTask;
 public class RootPortScan extends AsyncTask<Void, Integer, Void> {
 
     // private final String TAG = "RootPortScan";
-    protected long timeout;
     protected String ipAddr = null;
 
     protected RootPortScan(String host, final long timeout) {
         this.ipAddr = host;
-        this.timeout = timeout;
     }
 
     @Override

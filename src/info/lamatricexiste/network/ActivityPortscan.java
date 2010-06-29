@@ -91,7 +91,7 @@ final public class ActivityPortscan extends TabActivity {
                 host.portsOpen = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSO));
                 host.portsClosed = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSC));
                 host.responseTime = extras.getInt(HostBean.EXTRA_TIMEOUT, Integer
-                        .parseInt(Prefs.DEFAULT_TIMEOUT));
+                        .parseInt(Prefs.DEFAULT_TIMEOUT_PORTSCAN));
                 // FIXME: banners and services not supported (HashMap's)
             }
         }
@@ -101,7 +101,8 @@ final public class ActivityPortscan extends TabActivity {
 
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
-            ((TextView) findViewById(R.id.host)).setText(host.hostname + "(" + host.ipAddress + ")");
+            ((TextView) findViewById(R.id.host))
+                    .setText(host.hostname + "(" + host.ipAddress + ")");
         } else {
             ((TextView) findViewById(R.id.host)).setText(host.ipAddress);
         }
@@ -339,7 +340,7 @@ final public class ActivityPortscan extends TabActivity {
         private String service;
         private Cursor c;
 
-        ScanPortTask(Activity activity, String ip, long timeout) {
+        ScanPortTask(Activity activity, String ip, int timeout) {
             super(activity, ip, timeout);
             WeakReference<Activity> a = new WeakReference<Activity>(activity);
             final Activity d = a.get();
@@ -456,7 +457,7 @@ final public class ActivityPortscan extends TabActivity {
                                 break;
                             }
                         } catch (PatternSyntaxException e) {
-                            Log.e(TAG, e.getMessage());
+                            // Log.e(TAG, e.getMessage());
                         }
                     } while (c.moveToNext());
                 }
@@ -536,12 +537,12 @@ final public class ActivityPortscan extends TabActivity {
         });
     }
 
-    private long getTimeout() {
+    private int getTimeout() {
         if (prefs.getBoolean(Prefs.KEY_TIMEOUT_FORCE, Prefs.DEFAULT_TIMEOUT_FORCE)) {
-            return (long) Integer.parseInt(prefs
-                    .getString(Prefs.KEY_TIMEOUT, Prefs.DEFAULT_TIMEOUT)) * 1000000;
+            return Integer.parseInt(prefs.getString(Prefs.KEY_TIMEOUT_PORTSCAN,
+                    Prefs.DEFAULT_TIMEOUT_PORTSCAN));
         }
-        return (long) host.responseTime;
+        return host.responseTime;
     }
 
     private List<String> preparePort(ArrayList<Integer> ports) {

@@ -37,7 +37,7 @@
             android:summary="@string/preferences_timeout_force_summary"
             android:defaultValue="false" />
         <EditTextPreference
-            android:key="timeout"
+            android:key="timeout_portscan"
             android:title="@string/preferences_timeout_title"
             android:summary="@string/preferences_timeout_summary"
             android:defaultValue="500"

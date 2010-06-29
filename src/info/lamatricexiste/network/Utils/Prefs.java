@@ -66,8 +66,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public final static String KEY_TIMEOUT_FORCE = "timeout_force";
     public final static boolean DEFAULT_TIMEOUT_FORCE = false;
 
-    public final static String KEY_TIMEOUT = "timeout";
-    public final static String DEFAULT_TIMEOUT = "500";
+    public final static String KEY_TIMEOUT_PORTSCAN = "timeout_portscan";
+    public final static String DEFAULT_TIMEOUT_PORTSCAN = "500";
 
     public static final String KEY_RATECTRL_ENABLE = "ratecontrol_enable";
     public static final boolean DEFAULT_RATECTRL_ENABLE = true;
@@ -96,7 +96,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         ps.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
         // Default state of checkboxes
-        checkTimeout(KEY_TIMEOUT, KEY_TIMEOUT_FORCE, true);
+        checkTimeout(KEY_TIMEOUT_PORTSCAN, KEY_TIMEOUT_FORCE, true);
         checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
 
         // Reset Nic DB click listener
@@ -139,7 +139,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         } else if (key.equals(KEY_NTHREADS)) {
             checkMaxThreads();
         } else if (key.equals(KEY_TIMEOUT_FORCE)) {
-            checkTimeout(KEY_TIMEOUT, KEY_TIMEOUT_FORCE, true);
+            checkTimeout(KEY_TIMEOUT_PORTSCAN, KEY_TIMEOUT_FORCE, true);
         } else if (key.equals(KEY_RATECTRL_ENABLE)) {
             checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
         }

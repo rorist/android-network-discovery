@@ -26,12 +26,14 @@ import android.util.Log;
 public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "DefaultDiscovery";
+    //FIXME: this should be alive hosts, not all ip's
     private final int mRateMult = 50; // Number of hosts between Rate Checks
     private int mRateCnt = 0;
     private int pt_move = 2; // 1=backward 2=forward
     private ExecutorService mPool;
     private SharedPreferences mPrefs;
     private int hosts_done = 0;
+    private boolean doRateControl;
     private WeakReference<ActivityDiscovery> mDiscover;
     protected RateControl mRateControl;
 
@@ -63,6 +65,7 @@ public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
             end = (start | ((1 << shift) - 1)) - 1;
             size = (int) (end - start + 1);
             discover.setProgress(0);
+            doRateControl = mPrefs.getBoolean(Prefs.KEY_RATECTRL_ENABLE, Prefs.DEFAULT_RATECTRL_ENABLE);
         }
     }
 
@@ -113,7 +116,7 @@ public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
         if (discover != null) {
             if (!isCancelled()) {
                 if (item[0] != null) {
-                    discover.addHost(item[0], mRateControl.rate);
+                    discover.addHost(item[0], getRate());
                 }
                 hosts_done++;
                 discover.setProgress((int) (hosts_done * 10000 / size));
@@ -149,6 +152,14 @@ public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
         mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
     }
 
+    private int getRate() {
+        if (doRateControl) {
+            return mRateControl.rate;
+        }
+        return Integer.parseInt(mPrefs.getString(Prefs.KEY_TIMEOUT_DISCOVER,
+                Prefs.DEFAULT_TIMEOUT_DISCOVER));
+    }
+
     private class CheckRunnable implements Runnable {
         private String host;
 
@@ -161,13 +172,13 @@ public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
                 Thread.sleep(getRate());
                 InetAddress h = InetAddress.getByName(host);
                 // Rate control check
-                if (mRateControl.is_indicator_discovered && mRateCnt % mRateMult == 0) {
+                if (doRateControl && mRateControl.is_indicator_discovered && mRateCnt % mRateMult == 0) {
                     mRateControl.adaptRate();
                 }
                 // Native InetAddress check
                 if (h.isReachable(getRate())) {
                     publish(host);
-                    if (!mRateControl.is_indicator_discovered) {
+                    if (doRateControl && !mRateControl.is_indicator_discovered) {
                         mRateControl.indicator = new String[] { host };
                         mRateControl.adaptRate();
                     }
@@ -194,14 +205,6 @@ public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
             } catch (InterruptedException e) {
                 Log.i(TAG, "InterruptedException");
             }
-        }
-
-        private int getRate() {
-            if (mPrefs.getBoolean(Prefs.KEY_RATECTRL_ENABLE, Prefs.DEFAULT_RATECTRL_ENABLE)) {
-                return (int) mRateControl.rate;
-            }
-            return Integer.parseInt(mPrefs.getString(Prefs.KEY_TIMEOUT_DISCOVER,
-                    Prefs.DEFAULT_TIMEOUT_DISCOVER));
         }
     }
 }
