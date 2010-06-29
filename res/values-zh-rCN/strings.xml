@@ -71,12 +71,13 @@
     <string name="help_links_content">- 扫描 TCP 连接：http://nmap.org/book/man-port-scanning-techniques.html#id421401\n\n- 主机发掘：http://nmap.org/book/man-host-discovery.html\n\n- 安智网汉化（http://goapk.com)</string>
     
     <string name="preferences_help">帮助</string>
-    <string name="preferences_notifications">通知设置</string>
+    <string name="preferences_export">导出</string>
+    <string name="preferences_credits">學分</string>
     <string name="preferences_discover">发掘设置</string>
     <string name="preferences_portscan">端口扫描设置</string>
     <string name="preferences_advanced">高级设置</string>
     <string name="preferences_resolve_name_title">解析主机名</string>
-    <string name="preferences_resolve_name_summary">在网络上将消耗更多的流量</string>
+    <string name="preferences_resolve_name_summary">使用系統 DNS來解析IP地址</string>
     <string name="preferences_vibrate_title">震动</string>
     <string name="preferences_vibrate_summary">当扫描完成后震动</string>
     <string name="preferences_ratecontrol_enable_title">速率控制</string>
@@ -97,7 +98,7 @@
     <string name="preferences_ssh_user_summary">SSH 连接的用户名</string>
     <string name="preferences_threads_title">发掘线程</string>
     <string name="preferences_threads_summary">发掘主机的最大线程数(1-256)</string>
-    <string name="preferences_resetdb_title">重装网卡数据库</string>
+    <string name="preferences_resetdb_title">更新信用卡資料庫</string>
     <string name="preferences_resetdb_summary">获取并更新MAC地址数据库</string>
     <string name="preferences_resetdb_action">是否需要下载网卡数据库？ (~500k)</string>
     <string name="preferences_resetdb_ok">已升级数据库！更新 %s 个新条目 ...</string>

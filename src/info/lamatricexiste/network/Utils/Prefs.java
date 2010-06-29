@@ -21,6 +21,8 @@ import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.view.Window;
 import android.widget.Toast;
+import android.content.Intent;
+import android.net.Uri;
 
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
@@ -75,6 +77,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
     public static final String KEY_BANNER = "banner";
     public static final boolean DEFAULT_BANNER = true;
+    
+    public static final String KEY_DONATE = "donate";
 
     private Context ctxt;
     private PreferenceScreen ps = null;
@@ -101,6 +105,17 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
             public boolean onPreferenceClick(Preference preference) {
                 new UpdateNicDb(Prefs.this);
                 return false;
+            }
+        });
+
+        // Donate click listener
+        Preference donate = (Preference) ps.findPreference(KEY_DONATE);
+        donate.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MDSDWG83PJSNG&lc=CH&item_name=Network%20Discovery%20for%20Android&currency_code=CHF&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted"));
+                startActivity(i);
+                return true;
             }
         });
 

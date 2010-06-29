@@ -71,12 +71,13 @@
     <string name="help_links_content">- 掃瞄 TCP 連接：http://nmap.org/book/man-port-scanning-techniques.html#id421401\n\n- 主機發掘：http://nmap.org/book/man-host-discovery.html\n\n- 安智網中文化 (http://goapk.com)</string>
     
     <string name="preferences_help">說明</string>
-    <string name="preferences_notifications">通知設定</string>
+    <string name="preferences_export">匯出</string>
+    <string name="preferences_credits">学分</string>
     <string name="preferences_discover">發掘設定</string>
     <string name="preferences_portscan">通訊埠掃瞄設定</string>
     <string name="preferences_advanced">進階設定</string>
     <string name="preferences_resolve_name_title">剖析主機名</string>
-    <string name="preferences_resolve_name_summary">在網路上將消耗更多的資料流量</string>
+    <string name="preferences_resolve_name_summary">使用系统DNS来解析IP地址</string>
     <string name="preferences_vibrate_title">震動</string>
     <string name="preferences_vibrate_summary">當掃瞄完成後震動</string>
     <string name="preferences_ratecontrol_enable_title">速率控制</string>
@@ -97,7 +98,7 @@
     <string name="preferences_ssh_user_summary">SSH 連接的使用者名</string>
     <string name="preferences_threads_title">發掘執行緒</string>
     <string name="preferences_threads_summary">發掘主機的最大執行緒數(1-256)</string>
-    <string name="preferences_resetdb_title">重裝網卡資料庫</string>
+    <string name="preferences_resetdb_title">更新信用卡资料库</string>
     <string name="preferences_resetdb_summary">獲取並更新MAC位址資料庫</string>
     <string name="preferences_resetdb_action">是否需要下載網卡資料庫？ (~500k)</string>
     <string name="preferences_resetdb_ok">已升級資料庫！更新 %s 個新項目 ...</string>

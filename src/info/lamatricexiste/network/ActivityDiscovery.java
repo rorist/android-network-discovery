@@ -123,11 +123,22 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
     @Override
     public void onResume() {
         super.onResume();
+        // Listening for network events
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         registerReceiver(receiver, filter);
+        // Scan button state
+        if(mDiscoveryTask != null){
+            setButton(btn_discover, R.drawable.cancel, false);
+            btn_discover.setText(R.string.btn_discover_cancel);
+            btn_discover.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    cancelTasks();
+                }
+            });
+        }
     }
 
     @Override
@@ -136,28 +147,26 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         unregisterReceiver(receiver);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-            mRootDaemon = new RootDaemon(ActivityDiscovery.this);
-            mRootDaemon.start();
-        }
-        // Scan button state
-        if(mDiscoveryTask != null){
-            setButtonOff(btn_discover, R.drawable.cancel, false);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-            if (mRootDaemon != null) {
-                mRootDaemon.kill();
-            }
-        }
-    }
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        // Root Daemon
+//        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+//            mRootDaemon = new RootDaemon(ActivityDiscovery.this);
+//            mRootDaemon.start();
+//        }
+//    }
+//
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        // Root Daemon
+//        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+//            if (mRootDaemon != null) {
+//                mRootDaemon.kill();
+//            }
+//        }
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -364,7 +373,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         initList();
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
-        setButtonOff(btn_discover, R.drawable.cancel, false);
+        setButton(btn_discover, R.drawable.cancel, false);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 cancelTasks();
@@ -568,11 +577,11 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void setButtonOff(Button b, int drawable, boolean disable) {
+    private void setButton(Button b, int drawable, boolean disable) {
         if (disable) {
             setButtonOff(b, drawable);
         } else {
-            b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
+            setButtonOn(b, drawable);
         }
     }
 

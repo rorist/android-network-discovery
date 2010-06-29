@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.net.InetAddress;
 import java.io.IOException;
+import java.lang.NumberFormatException;
 
 import android.util.Log;
 
@@ -47,12 +48,14 @@ public class RateControl {
                 Process p = Runtime.getRuntime().exec(cmd + " -q -n -W 2 -c " + count + " " + host);
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
                 while ((line = r.readLine()) != null) {
+                    //Log.d("    ", line);
+                    //rtt min/avg/max/mdev = 1.281/2.693/4.939/1.605 ms
                     matcher = Pattern
                             .compile(
-                                    "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+\\/[0-9\\.]+ ms$")
+                                    "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/[0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+ ms$")
                             .matcher(line);
                     if (matcher.matches()) {
-                        return Long.parseLong(matcher.group(1));
+                        return (long) Float.parseFloat(matcher.group(1));
                     }
                 }
             }
@@ -62,7 +65,7 @@ public class RateControl {
                 final long start = System.nanoTime();
                 if(InetAddress.getByName(host).isReachable(REACH_TIMEOUT)){
                     Log.i(TAG, "Using Java ICMP request instead ...");
-                    return (System.nanoTime() - start) / 1000;
+                    return (long) ((System.nanoTime() - start) / 1000);
                 }
             } catch (IOException e1){
                 Log.e(TAG, e1.getMessage());

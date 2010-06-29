@@ -75,12 +75,12 @@
     
     <string name="preferences_help">Aide</string>
     <string name="preferences_export">Exporter</string>
-    <string name="preferences_notifications">Options de Notifications</string>
-    <string name="preferences_discover">Options de Découverte de Machines</string>
-    <string name="preferences_portscan">Options du Scan de Ports</string>
-    <string name="preferences_advanced">Options Avancés</string>
+    <string name="preferences_credits">Credits</string>
+    <string name="preferences_discover">Découverte de Machines</string>
+    <string name="preferences_portscan">Scan de Ports</string>
+    <string name="preferences_advanced">Avancés</string>
     <string name="preferences_resolve_name_title">Résoudre les noms d\'hôtes</string>
-    <string name="preferences_resolve_name_summary">Augmente le nombre de requêtes effectuées sur le réseaux</string>
+    <string name="preferences_resolve_name_summary">Utiliser la résolution DNS du système pour résoudre les IP</string>
     <string name="preferences_vibrate_title">Vibration</string>
     <string name="preferences_vibrate_summary">Vibre lorsque le Scan est terminé</string>
     <string name="preferences_ratecontrol_enable_title">Contrôle fréquence de scan</string>
@@ -101,8 +101,8 @@
     <string name="preferences_ssh_user_summary">Utilisateur à utiliser pour se connecter en SSH</string>
     <string name="preferences_threads_title">Discovery Threads</string>
     <string name="preferences_threads_summary">Nombre maximum de threads à utiliser lors de la découverte de machines (1-256)</string>
-    <string name="preferences_resetdb_title">Reinstaller la base des NIC</string>
-    <string name="preferences_resetdb_summary">Syncroniser et installer la base des adresses MAC</string>
+    <string name="preferences_resetdb_title">Mettre à jour la base des NIC</string>
+    <string name="preferences_resetdb_summary">Syncroniser la base des adresses MAC et des constructeurs de NIC</string>
     <string name="preferences_resetdb_action">Voulez-vous télécharger la BDD de cartes réseaux ? (~500k)</string>
     <string name="preferences_resetdb_ok">Base de donnée mise à jour ! %S nouveaux éléments ...</string>
     <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>

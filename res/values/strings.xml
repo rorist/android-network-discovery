@@ -75,12 +75,13 @@
     
     <string name="preferences_help">Help</string>
     <string name="preferences_export">Export</string>
-    <string name="preferences_notifications">Notifications settings</string>
-    <string name="preferences_discover">Discover settings</string>
-    <string name="preferences_portscan">Port Scan settings</string>
-    <string name="preferences_advanced">Advanced Settings</string>
+    <string name="preferences_credits">Credits</string>
+    <string name="preferences_discover">Discovery</string>
+    <string name="preferences_portscan">Port Scan</string>
+    <string name="preferences_advanced">Advanced</string>
+    <string name="preferences_donate">Donate: If you like this app, you can buy me a beer.</string>
     <string name="preferences_resolve_name_title">Resolve Hostname</string>
-    <string name="preferences_resolve_name_summary">Produce more traffic on the network</string>
+    <string name="preferences_resolve_name_summary">Use system DNS to resolve ip addresses</string>
     <string name="preferences_vibrate_title">Vibrate</string>
     <string name="preferences_vibrate_summary">Vibrate when Scan is completed</string>
     <string name="preferences_ratecontrol_enable_title">Rate control</string>
@@ -101,7 +102,7 @@
     <string name="preferences_ssh_user_summary">Username for the SSH connection</string>
     <string name="preferences_threads_title">Discovery Threads</string>
     <string name="preferences_threads_summary">Maximum number of threads to use in host discovery (1-256)</string>
-    <string name="preferences_resetdb_title">Reinstall NIC Database</string>
+    <string name="preferences_resetdb_title">Update NIC Database</string>
     <string name="preferences_resetdb_summary">Pull and update MAC addresses database</string>
     <string name="preferences_resetdb_action">Do you want to download NIC database ? (~500k)</string>
     <string name="preferences_resetdb_ok">Database updated ! %s new entries ...</string>
