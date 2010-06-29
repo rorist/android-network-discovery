@@ -101,7 +101,7 @@ final public class ActivityPortscan extends TabActivity {
 
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
-            ((TextView) findViewById(R.id.host)).setText(host.hostname);
+            ((TextView) findViewById(R.id.host)).setText(host.hostname + "(" + host.ipAddress + ")");
         } else {
             ((TextView) findViewById(R.id.host)).setText(host.ipAddress);
         }

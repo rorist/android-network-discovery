@@ -143,6 +143,10 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             mRootDaemon = new RootDaemon(ActivityDiscovery.this);
             mRootDaemon.start();
         }
+        // Scan button state
+        if(mDiscoveryTask != null){
+            setButtonOff(btn_discover, R.drawable.cancel, false);
+        }
     }
 
     @Override
@@ -332,7 +336,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                     }
                 } else if (type == 3) { // ETH
                     Log.i(TAG, "Ethernet connectivity detected!");
-                    info_mo.setText("MODE: Ethernet");
+                    info_mo.setText("MODE: Ethernet (Not supported yet)");
                 }
             } else if (mDiscoveryTask != null) {
                 cancelTasks();
