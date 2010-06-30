@@ -4,17 +4,11 @@
  Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
  Licensed under GNU's GPL 2, see README
 -->
-
+<PreferenceCategory
+    android:title="@string/btn_options">
     <PreferenceScreen
         android:title="@string/preferences_discover"
         android:summary="">
-<!--        <ListPreference-->
-<!--            android:key="method_discover"-->
-<!--            android:title="Discovery Method"-->
-<!--            android:summary="Select a different discovery method"-->
-<!--            android:entries="@array/method_discover_name"-->
-<!--            android:entryValues="@array/method_discover_value"-->
-<!--            android:dialogTitle="Choose the method"/>-->
         <CheckBoxPreference
             android:key="ratecontrol_enable"
             android:title="@string/preferences_ratecontrol_enable_title"
@@ -26,22 +20,18 @@
             android:summary="@string/preferences_timeout_discover_summary"
             android:defaultValue="500"
             android:inputType="number" />
+<!--        <ListPreference-->
+<!--            android:key="method_discover"-->
+<!--            android:title="Discovery Method"-->
+<!--            android:summary="Select a different discovery method"-->
+<!--            android:entries="@array/method_discover_name"-->
+<!--            android:entryValues="@array/method_discover_value"-->
+<!--            android:dialogTitle="Choose the method"/>-->
     </PreferenceScreen>
 
     <PreferenceScreen
         android:title="@string/preferences_portscan"
         android:summary="">
-        <CheckBoxPreference
-            android:key="timeout_force"
-            android:title="@string/preferences_timeout_force_title"
-            android:summary="@string/preferences_timeout_force_summary"
-            android:defaultValue="false" />
-        <EditTextPreference
-            android:key="timeout_portscan"
-            android:title="@string/preferences_timeout_title"
-            android:summary="@string/preferences_timeout_summary"
-            android:defaultValue="500"
-            android:inputType="number" />
         <EditTextPreference
             android:key="ssh_user"
             android:title="@string/preferences_ssh_user_title"
@@ -58,6 +48,17 @@
             android:title="@string/preferences_port_end_title"
             android:summary="@string/preferences_port_end_summary"
             android:defaultValue="1024"
+            android:inputType="number" />
+        <CheckBoxPreference
+            android:key="timeout_force"
+            android:title="@string/preferences_timeout_force_title"
+            android:summary="@string/preferences_timeout_force_summary"
+            android:defaultValue="false" />
+        <EditTextPreference
+            android:key="timeout_portscan"
+            android:title="@string/preferences_timeout_title"
+            android:summary="@string/preferences_timeout_summary"
+            android:defaultValue="500"
             android:inputType="number" />
     </PreferenceScreen>
     
@@ -91,12 +92,19 @@
             android:summary="@string/preferences_resetdb_summary"
             android:defaultValue="1"/>
     </PreferenceScreen>
+</PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/preferences_credits">
-        <Preference
-            android:key="donate"
-            android:layout="@layout/donate" />
-    </PreferenceCategory>
+<PreferenceCategory
+    android:title="@string/preferences_credits">
+    <Preference
+        android:key="donate"
+        android:layout="@layout/donate" />
+    <Preference
+        android:key="version"
+        android:title="@string/preferences_version_title"/>
+    <Preference
+        android:key="website"
+        android:title="@string/preferences_website_title"/>
+</PreferenceCategory>
 
 </PreferenceScreen>

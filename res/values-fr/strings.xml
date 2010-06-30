@@ -79,6 +79,7 @@
     <string name="preferences_discover">Découverte de Machines</string>
     <string name="preferences_portscan">Scan de Ports</string>
     <string name="preferences_advanced">Avancés</string>
+    
     <string name="preferences_resolve_name_title">Résoudre les noms d\'hôtes</string>
     <string name="preferences_resolve_name_summary">Utiliser la résolution DNS du système pour résoudre les IP</string>
     <string name="preferences_vibrate_title">Vibration</string>
@@ -105,6 +106,9 @@
     <string name="preferences_resetdb_summary">Syncroniser la base des adresses MAC et des constructeurs de NIC</string>
     <string name="preferences_resetdb_action">Voulez-vous télécharger la BDD de cartes réseaux ? (~500k)</string>
     <string name="preferences_resetdb_ok">Base de donnée mise à jour ! %S nouveaux éléments ...</string>
+    <string name="preferences_version_title">Version</string>
+    <string name="preferences_website_title">Site internet</string>
+    
     <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
     <string name="preferences_error2">Erreur: Le nombre de Threads doit être entre 1 et 256 !</string>
     <string name="preferences_error3">Erreur: Le téléchargement du fichier a été interrompu !</string>

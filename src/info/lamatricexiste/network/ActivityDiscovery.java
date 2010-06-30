@@ -251,7 +251,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             }
             final HostBean host = hosts.get(position);
             if (host.isGateway == 1) {
-                holder.logo.setImageResource(R.drawable.router1);
+                holder.logo.setImageResource(R.drawable.router);
             } else {
                 holder.logo.setImageResource(R.drawable.computer);
             }

@@ -79,6 +79,7 @@
     <string name="preferences_discover">Discovery</string>
     <string name="preferences_portscan">Port Scan</string>
     <string name="preferences_advanced">Advanced</string>
+    
     <string name="preferences_donate">Donate: If you like this app, you can buy me a beer.</string>
     <string name="preferences_resolve_name_title">Resolve Hostname</string>
     <string name="preferences_resolve_name_summary">Use system DNS to resolve ip addresses</string>
@@ -105,7 +106,9 @@
     <string name="preferences_resetdb_title">Update NIC Database</string>
     <string name="preferences_resetdb_summary">Pull and update MAC addresses database</string>
     <string name="preferences_resetdb_action">Do you want to download NIC database ? (~500k)</string>
-    <string name="preferences_resetdb_ok">Database updated ! %s new entries ...</string>
+    <string name="preferences_version_title">Version</string>
+    <string name="preferences_website_title">Website</string>
+    
     <string name="preferences_error1">Error: First port is bigger than Last port !</string>
     <string name="preferences_error2">Error: Number of Threads must be between 1 and 256 !</string>
     <string name="preferences_error3">Error: File transfer interrupted !</string>

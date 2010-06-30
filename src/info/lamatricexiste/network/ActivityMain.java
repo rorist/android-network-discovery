@@ -27,7 +27,7 @@ import android.view.Window;
 
 final public class ActivityMain extends Activity {
 
-    private final static String TAG = "info.lamatricexiste.network";
+    public final static String TAG = "info.lamatricexiste.network";
     public static SharedPreferences prefs = null;
 
     @Override

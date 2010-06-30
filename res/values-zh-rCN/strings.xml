@@ -76,6 +76,7 @@
     <string name="preferences_discover">发掘设置</string>
     <string name="preferences_portscan">端口扫描设置</string>
     <string name="preferences_advanced">高级设置</string>
+    
     <string name="preferences_resolve_name_title">解析主机名</string>
     <string name="preferences_resolve_name_summary">使用系統 DNS來解析IP地址</string>
     <string name="preferences_vibrate_title">震动</string>
@@ -102,6 +103,9 @@
     <string name="preferences_resetdb_summary">获取并更新MAC地址数据库</string>
     <string name="preferences_resetdb_action">是否需要下载网卡数据库？ (~500k)</string>
     <string name="preferences_resetdb_ok">已升级数据库！更新 %s 个新条目 ...</string>
+    <string name="preferences_version_title">Version</string>
+    <string name="preferences_website_title">Website</string>
+    
     <string name="preferences_error1">错误：起始端口大于终止端口！</string>
     <string name="preferences_error2">错误：线程数必须介于1和256！</string>
     <string name="preferences_error3">错误：文件传输中断！</string>

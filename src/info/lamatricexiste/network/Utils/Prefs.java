@@ -6,10 +6,14 @@
 package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.AbstractRoot;
+import info.lamatricexiste.network.ActivityMain;
 import info.lamatricexiste.network.R;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -21,8 +25,6 @@ import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.view.Window;
 import android.widget.Toast;
-import android.content.Intent;
-import android.net.Uri;
 
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
@@ -77,8 +79,13 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
     public static final String KEY_BANNER = "banner";
     public static final boolean DEFAULT_BANNER = true;
-    
+
     public static final String KEY_DONATE = "donate";
+    public static final String KEY_WEBSITE = "website";
+    public static final String KEY_VERSION = "version";
+
+    private static final String URL_DONATE = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MDSDWG83PJSNG&lc=CH&item_name=Network%20Discovery%20for%20Android&currency_code=CHF&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted";
+    private static final String URL_WEB = "http://rorist.github.com/android-network-discovery/";
 
     private Context ctxt;
     private PreferenceScreen ps = null;
@@ -108,17 +115,6 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
             }
         });
 
-        // Donate click listener
-        Preference donate = (Preference) ps.findPreference(KEY_DONATE);
-        donate.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MDSDWG83PJSNG&lc=CH&item_name=Network%20Discovery%20for%20Android&currency_code=CHF&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted"));
-                startActivity(i);
-                return true;
-            }
-        });
-
         // Before change values
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         before_port_start = prefs.getString(KEY_PORT_START, DEFAULT_PORT_START);
@@ -131,6 +127,38 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
                 md.setEnabled(false);
             }
         }
+
+        // Donate click listener
+        ((Preference) ps.findPreference(KEY_DONATE))
+                .setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(URL_DONATE));
+                        startActivity(i);
+                        return true;
+                    }
+                });
+
+        // Website
+        Preference website = (Preference) ps.findPreference(KEY_WEBSITE);
+        website.setSummary(URL_WEB);
+        website.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(URL_WEB));
+                startActivity(i);
+                return true;
+            }
+        });
+
+        // Version
+        Preference version = (Preference) ps.findPreference(KEY_VERSION);
+        try {
+            version.setSummary(getPackageManager().getPackageInfo(ActivityMain.TAG, 0).versionName);
+        } catch (NameNotFoundException e) {
+            version.setSummary("0.3x");
+        }
+
     }
 
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {

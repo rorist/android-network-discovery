@@ -76,6 +76,7 @@
     <string name="preferences_discover">發掘設定</string>
     <string name="preferences_portscan">通訊埠掃瞄設定</string>
     <string name="preferences_advanced">進階設定</string>
+    
     <string name="preferences_resolve_name_title">剖析主機名</string>
     <string name="preferences_resolve_name_summary">使用系统DNS来解析IP地址</string>
     <string name="preferences_vibrate_title">震動</string>
@@ -102,6 +103,9 @@
     <string name="preferences_resetdb_summary">獲取並更新MAC位址資料庫</string>
     <string name="preferences_resetdb_action">是否需要下載網卡資料庫？ (~500k)</string>
     <string name="preferences_resetdb_ok">已升級資料庫！更新 %s 個新項目 ...</string>
+    <string name="preferences_version_title">Version</string>
+    <string name="preferences_website_title">Website</string>
+    
     <string name="preferences_error1">錯誤：開始通訊埠大於終止通訊埠！</string>
     <string name="preferences_error2">錯誤：執行緒數必須介於1和256！</string>
     <string name="preferences_error3">錯誤：檔案傳輸中斷！</string>
