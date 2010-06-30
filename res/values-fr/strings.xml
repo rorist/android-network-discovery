@@ -78,7 +78,7 @@
     <string name="preferences_credits">Credits</string>
     <string name="preferences_discover">Découverte de Machines</string>
     <string name="preferences_portscan">Scan de Ports</string>
-    <string name="preferences_advanced">Avancés</string>
+    <string name="preferences_advanced">Général</string>
     
     <string name="preferences_resolve_name_title">Résoudre les noms d\'hôtes</string>
     <string name="preferences_resolve_name_summary">Utiliser la résolution DNS du système pour résoudre les IP</string>
@@ -100,7 +100,7 @@
     <string name="preferences_timeout_summary">Délai maximum d\'une connection à un port, en millisecondes</string>
     <string name="preferences_ssh_user_title">Nom d\'utilisateur SSH</string>
     <string name="preferences_ssh_user_summary">Utilisateur à utiliser pour se connecter en SSH</string>
-    <string name="preferences_threads_title">Discovery Threads</string>
+    <string name="preferences_threads_title">Threads</string>
     <string name="preferences_threads_summary">Nombre maximum de threads à utiliser lors de la découverte de machines (1-256)</string>
     <string name="preferences_resetdb_title">Mettre à jour la base des NIC</string>
     <string name="preferences_resetdb_summary">Syncroniser la base des adresses MAC et des constructeurs de NIC</string>

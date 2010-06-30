@@ -78,7 +78,7 @@
     <string name="preferences_credits">Credits</string>
     <string name="preferences_discover">Discovery</string>
     <string name="preferences_portscan">Port Scan</string>
-    <string name="preferences_advanced">Advanced</string>
+    <string name="preferences_advanced">General</string>
     
     <string name="preferences_donate">Donate: If you like this app, you can buy me a beer.</string>
     <string name="preferences_resolve_name_title">Resolve Hostname</string>
@@ -99,9 +99,11 @@
     <string name="preferences_timeout_force_summary">Manually set connect timeout</string>
     <string name="preferences_timeout_title">Connect timeout</string>
     <string name="preferences_timeout_summary">Timeout of a port connection in millisecondes</string>
+    <string name="preferences_allow_mobile_title">Allow mobile discovery</string>
+    <string name="preferences_allow_mobile_summary">Enable the ability to scan edge/3g/... networks (usually leading to strange results, if any)</string>
     <string name="preferences_ssh_user_title">SSH User</string>
     <string name="preferences_ssh_user_summary">Username for the SSH connection</string>
-    <string name="preferences_threads_title">Discovery Threads</string>
+    <string name="preferences_threads_title">Threads pool</string>
     <string name="preferences_threads_summary">Maximum number of threads to use in host discovery (1-256)</string>
     <string name="preferences_resetdb_title">Update NIC Database</string>
     <string name="preferences_resetdb_summary">Pull and update MAC addresses database</string>
