@@ -10,6 +10,11 @@
         android:title="@string/preferences_discover"
         android:summary="">
         <CheckBoxPreference
+            android:key="allow_mobile"
+            android:title="@string/preferences_allow_mobile_title"
+            android:summary="@string/preferences_allow_mobile_summary"
+            android:defaultValue="false" />
+        <CheckBoxPreference
             android:key="ratecontrol_enable"
             android:title="@string/preferences_ratecontrol_enable_title"
             android:summary="@string/preferences_ratecontrol_enable_summary"
@@ -19,6 +24,12 @@
             android:title="@string/preferences_timeout_discover_title"
             android:summary="@string/preferences_timeout_discover_summary"
             android:defaultValue="500"
+            android:inputType="number" />
+        <EditTextPreference
+            android:key="nthreads"
+            android:title="@string/preferences_threads_title"
+            android:summary="@string/preferences_threads_summary"
+            android:defaultValue="32"
             android:inputType="number" />
 <!--        <ListPreference-->
 <!--            android:key="method_discover"-->
@@ -80,12 +91,6 @@
             android:title="@string/preferences_resolve_name_title"
             android:summary="@string/preferences_resolve_name_summary"
             android:defaultValue="false" />
-        <EditTextPreference
-            android:key="nthreads"
-            android:title="@string/preferences_threads_title"
-            android:summary="@string/preferences_threads_summary"
-            android:defaultValue="32"
-            android:inputType="number" />
         <Preference
             android:key="resetdb"
             android:title="@string/preferences_resetdb_title"
@@ -100,11 +105,11 @@
         android:key="donate"
         android:layout="@layout/donate" />
     <Preference
-        android:key="version"
-        android:title="@string/preferences_version_title"/>
-    <Preference
         android:key="website"
         android:title="@string/preferences_website_title"/>
+    <Preference
+        android:key="version"
+        android:title="@string/preferences_version_title"/>
 </PreferenceCategory>
 
 </PreferenceScreen>
