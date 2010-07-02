@@ -5,11 +5,11 @@
 
 /**
  * Java NIO Documentation:
- * http://weblogs.java.net/blog/2006/05/30/tricks-and-tips-nio-part-i-why-you-must-handle-opwrite
- * http://www.java.net/blog/2006/06/06/tricks-and-tips-nio-part-ii-why-selectionkeyattach-evil
- * http://weblogs.java.net/blog/2006/07/07/tricks-and-tips-nio-part-iii-thread-or-not-thread
- * http://weblogs.java.net/blog/2006/07/19/tricks-and-tips-nio-part-iv-meet-selectors
- * http://weblogs.java.net/blog/2006/09/21/tricks-and-tips-nio-part-v-ssl-and-nio-friend-or-foe
+ * http://jfarcand.wordpress.com/2006/05/30/tricks-and-tips-with-nio-part-i-why-you-must-handle-op_write
+ * http://jfarcand.wordpress.com/2006/06/06/tricks-and-tips-with-nio-part-ii-why-selectionkeyattach-evil
+ * http://jfarcand.wordpress.com/2006/07/07/tricks-and-tips-with-nio-part-iii-thread-or-not-thread
+ * http://jfarcand.wordpress.com/2006/07/19/tricks-and-tips-with-nio-part-iv-meet-selectors
+ * http://jfarcand.wordpress.com/2006/09/21/tricks-and-tips-with-nio-part-v-ssl-and-nio-friend-or-foe
  */
 
 package info.lamatricexiste.network;
@@ -182,6 +182,27 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
                             .getApplicationContext());
                     if (prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER)) {
+                        // TODO: Send a Probe before reading !
+                        // SelectionKey tmpKey = ((SocketChannel)
+                        // key.channel()).register(
+                        // readSelector, SelectionKey.OP_WRITE);
+                        // tmpKey.interestOps(tmpKey.interestOps() |
+                        // SelectionKey.OP_WRITE);
+                        // int code = readSelector.select(TIMEOUT_READ);
+                        // tmpKey.interestOps(tmpKey.interestOps() &
+                        // (~SelectionKey.OP_WRITE));
+                        // if (code != 0) {
+                        // ByteBuffer data =
+                        // Charset.forName("ISO-8859-1").encode(
+                        // "GET / HTTP/1.0\r\n\r\n");
+                        // SocketChannel sock = (SocketChannel)
+                        // tmpKey.channel();
+                        // while (data.hasRemaining()) {
+                        // sock.write(data);
+                        // }
+                        // data.clear();
+                        // Log.v(TAG, "writing ...");
+                        // }
                         // Create a new selector and register for reading
                         SelectionKey tmpKey = ((SocketChannel) key.channel()).register(
                                 readSelector, SelectionKey.OP_READ);
@@ -189,14 +210,12 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
                         int code = readSelector.select(TIMEOUT_READ);
                         tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
                         if (code != 0) {
-                            // TODO: Send a Probe before reading ! Something
-                            // like \n\r\n\r
                             handleRead(tmpKey, ((SparseArray<Integer>) key.attachment()).get(0));
                             time = System.nanoTime(); // Reset selector timeout
                             finishKey(key);
                             return;
                         }
-                        time = System.nanoTime(); // Reset the selector timeout
+                        time = System.nanoTime();
                         finishKey(tmpKey);
                     }
                 }

@@ -80,6 +80,9 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_BANNER = "banner";
     public static final boolean DEFAULT_BANNER = true;
 
+    public static final String KEY_MOBILE = "allow_mobile";
+    public static final boolean DEFAULT_MOBILE = false;
+
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
     public static final String KEY_VERSION = "version";

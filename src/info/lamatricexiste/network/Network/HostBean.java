@@ -35,8 +35,6 @@ public class HostBean implements Parcelable {
     public String os = "Unknown";
     public HashMap<Integer, String> services = null;
     public HashMap<Integer, String> banners = null;
-    // public ArrayList<String> services = null;
-    // public ArrayList<String> banners = null;
     public ArrayList<Integer> portsOpen = null;
     public ArrayList<Integer> portsClosed = null;
 

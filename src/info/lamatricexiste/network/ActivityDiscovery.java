@@ -255,8 +255,10 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             } else {
                 holder.logo.setImageResource(R.drawable.computer);
             }
+            Log.v(TAG, host.hostname);
+            Log.v(TAG, host.ipAddress);
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
-                    && host.hostname != null) {
+                    && host.hostname != null && !host.hostname.equals(host.ipAddress)) {
                 holder.host.setText(host.hostname + " (" + host.ipAddress + ")");
             } else {
                 holder.host.setText(host.ipAddress);
@@ -338,12 +340,14 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                         setButtonOn(btn_discover, R.drawable.discover);
                     }
                 } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
-                    net.getMobileInfo();
-                    if (net.carrier != null) {
-                        info_mo.setText("MODE: Mobile");
-                        info_ip.setText("IP: " + net.ip + "/" + net.cidr);
-                        info_in.setText("CARRIER: " + net.carrier);
-                        setButtonOn(btn_discover, R.drawable.discover);
+                    if(prefs.getBoolean(Prefs.KEY_MOBILE, Prefs.DEFAULT_MOBILE)){
+                        net.getMobileInfo();
+                        if (net.carrier != null) {
+                            info_mo.setText("MODE: Mobile");
+                            info_ip.setText("IP: " + net.ip + "/" + net.cidr);
+                            info_in.setText("CARRIER: " + net.carrier);
+                            setButtonOn(btn_discover, R.drawable.discover);
+                        }
                     }
                 } else if (type == 3) { // ETH
                     Log.i(TAG, "Ethernet connectivity detected!");

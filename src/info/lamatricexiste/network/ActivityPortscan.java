@@ -100,9 +100,10 @@ final public class ActivityPortscan extends TabActivity {
         cnt_closed = (host.portsClosed == null) ? 0 : host.portsClosed.size();
 
         // Title
-        if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
-            ((TextView) findViewById(R.id.host))
-                    .setText(host.hostname + "(" + host.ipAddress + ")");
+        if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
+                && host.hostname != null && !host.hostname.equals(host.ipAddress)) {
+            ((TextView) findViewById(R.id.host)).setText(host.hostname + " (" + host.ipAddress
+                    + ")");
         } else {
             ((TextView) findViewById(R.id.host)).setText(host.ipAddress);
         }
@@ -238,7 +239,7 @@ final public class ActivityPortscan extends TabActivity {
                     .get(position);
             if (host.services != null) {
                 final String service = host.services.get(port);
-                holder.port.setText(port + "/tcp " + "(" + service + ")");
+                holder.port.setText(port + "/tcp" + " (" + service + ")");
 
                 // Service is known
                 if (knownServices.contains(service)) {
