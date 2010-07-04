@@ -25,8 +25,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -96,7 +94,6 @@ final public class ActivityPortscan extends TabActivity {
                 // FIXME: banners and services not supported (HashMap's)
             }
         }
-        // TODO: Include this in the HostBean class
         cnt_open = (host.portsOpen == null) ? 0 : host.portsOpen.size();
         cnt_closed = (host.portsClosed == null) ? 0 : host.portsClosed.size();
 
@@ -309,11 +306,10 @@ final public class ActivityPortscan extends TabActivity {
     private void openPortService(String service, int port) {
         // Action for the service
         String pk = "";
-        String action = "";
+        String search = null;
         Intent intent = null;
         if (service.equals("ftp") || service.equals("ftps") || service.equals("sftp")) {
-            action = Intent.ACTION_VIEW;
-            intent = new Intent(action);
+            intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(service.equals("ftp") ? Uri.parse("ftp://" + host.ipAddress) : Uri
                     .parse("sftp://" + host.ipAddress));
             intent.putExtra("ftp_pasv", "true");
@@ -326,31 +322,17 @@ final public class ActivityPortscan extends TabActivity {
             // intent.putExtra("ftp_resume", "true");
             // intent.putExtra("ftp_encoding", "UTF8");
         } else if (service.equals("ssh")) {
-            // TODO: Compatibility with Better Terminal Pro SSH client
-            // http://www.magicandroidapps.com/wiki/index.php?title=Intents
-            pk = "org.connectbot";
-            action = Intent.ACTION_VIEW;
-            if (isPackageInstalled(ctxt, pk)) {
-                String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
-                intent = new Intent(action);
-                intent.setData(Uri.parse("ssh://" + user + "@" + host.ipAddress + ":" + port + "/#"
-                        + user + "@" + host.ipAddress + ":" + port));
-            } else {
-                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
-                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
-                        .parse("market://search?q=pname:" + pk));
-            }
+            pk = "ConnectBot (ssh)";
+            search = "market://search?q=pname:org.connectbot";
+            String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("ssh://" + user + "@" + host.ipAddress + ":" + port + "/#"
+                    + user + "@" + host.ipAddress + ":" + port));
         } else if (service.equals("telnet")) {
-            pk = "org.connectbot";
-            action = Intent.ACTION_VIEW;
-            if (isPackageInstalled(ctxt, pk)) {
-                intent = new Intent(action);
-                intent.setData(Uri.parse("telnet://" + host.ipAddress + ":" + port));
-            } else {
-                makeToast(String.format(getString(R.string.package_missing, "ConnectBot")));
-                intent = new Intent(Intent.ACTION_VIEW).setData(Uri
-                        .parse("market://search?q=pname:" + pk));
-            }
+            pk = "ConnectBot (telnet)";
+            search = "market://search?q=pname:org.connectbot";
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("telnet://" + host.ipAddress + ":" + port));
         } else if (service.equals("http")) {
             intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("http://" + host.hostname + ":" + port));
@@ -365,6 +347,10 @@ final public class ActivityPortscan extends TabActivity {
             try {
                 startActivity(intent);
             } catch (ActivityNotFoundException e) {
+                if (search != null) {
+                    makeToast(String.format(getString(R.string.package_missing, pk)));
+                    startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(search)));
+                }
                 Log.e(TAG, e.getMessage());
             }
         }
@@ -476,9 +462,7 @@ final public class ActivityPortscan extends TabActivity {
 
         private String getPortService(int port) {
             service = null;
-
             // Determinate service with banners
-            // TODO: Grab banner/headers of HTTP services with GET/POST/HEAD
             if (host.banners != null && host.banners.containsKey(port)) {
                 Pattern pattern;
                 Matcher matcher;
@@ -604,15 +588,15 @@ final public class ActivityPortscan extends TabActivity {
         return null;
     }
 
-    private boolean isPackageInstalled(Context context, String p) {
-        PackageManager packageManager = context.getPackageManager();
-        try {
-            packageManager.getPackageInfo(p, 0);
-        } catch (NameNotFoundException e) {
-            return false;
-        }
-        return true;
-    }
+    // private boolean isPackageInstalled(Context context, String p) {
+    // PackageManager packageManager = context.getPackageManager();
+    // try {
+    // packageManager.getPackageInfo(p, 0);
+    // } catch (NameNotFoundException e) {
+    // return false;
+    // }
+    // return true;
+    // }
 
     private void makeToast(String msg) {
         Toast.makeText(getApplicationContext(), (CharSequence) msg, Toast.LENGTH_SHORT).show();
