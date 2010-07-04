@@ -42,6 +42,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -99,6 +100,14 @@ final public class ActivityPortscan extends TabActivity {
         cnt_open = (host.portsOpen == null) ? 0 : host.portsOpen.size();
         cnt_closed = (host.portsClosed == null) ? 0 : host.portsClosed.size();
 
+        // Logo
+        ImageView logo = (ImageView) findViewById(R.id.logo);
+        if (host.isGateway == 1) {
+            logo.setImageResource(R.drawable.router);
+        } else {
+            logo.setImageResource(R.drawable.computer);
+        }
+
         // Title
         if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
                 && host.hostname != null && !host.hostname.equals(host.ipAddress)) {
@@ -106,6 +115,22 @@ final public class ActivityPortscan extends TabActivity {
                     + ")");
         } else {
             ((TextView) findViewById(R.id.host)).setText(host.ipAddress);
+        }
+
+        // MAC Address
+        TextView hw = (TextView) findViewById(R.id.mac);
+        if (host.hardwareAddress != null && !host.hardwareAddress.equals("00:00:00:00:00:00")) {
+            hw.setText(host.hardwareAddress);
+        } else {
+            hw.setVisibility(View.GONE);
+        }
+
+        // Vendor name
+        TextView nic = (TextView) findViewById(R.id.vendor);
+        if (host.nicVendor != null && !host.nicVendor.equals("Unknown")) {
+            nic.setText(host.nicVendor);
+        } else {
+            nic.setVisibility(View.GONE);
         }
 
         // Scan
@@ -177,6 +202,17 @@ final public class ActivityPortscan extends TabActivity {
         }
         super.onStop();
     }
+
+    // TODO: Handle orientation change without canceling the scan
+    // @Override
+    // public void onConfigurationChanged(Configuration newConfig) {
+    // super.onConfigurationChanged(newConfig);
+    // if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    // setContentView(R.layout.portscan_portrait);
+    // } else {
+    // setContentView(R.layout.portscan);
+    // }
+    // }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -512,7 +548,7 @@ final public class ActivityPortscan extends TabActivity {
         scanPortTask = new ScanPortTask(this, host.ipAddress, getTimeout());
         scanPortTask.execute();
         btn_scan.setText(R.string.btn_discover_cancel);
-        btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cancel, 0, 0);
+        btn_scan.setCompoundDrawablesWithIntrinsicBounds(R.drawable.cancel, 0, 0, 0);
         btn_scan.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 scanPortTask.cancel(true);
@@ -530,7 +566,7 @@ final public class ActivityPortscan extends TabActivity {
         setProgressBarIndeterminateVisibility(false);
         setProgress(10000);
         btn_scan.setText(R.string.btn_scan);
-        btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.discover, 0, 0);
+        btn_scan.setCompoundDrawablesWithIntrinsicBounds(R.drawable.discover, 0, 0, 0);
         btn_scan.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startScan();

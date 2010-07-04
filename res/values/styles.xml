@@ -43,7 +43,7 @@
     </style>
     <style name="ListTextTitle" parent="ListText">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">15sp</item>
     </style>
     <style name="ListTextSummary" parent="ListText">
         <item name="android:textColor">?android:attr/textColorSecondary</item>

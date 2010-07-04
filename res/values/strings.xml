@@ -108,6 +108,7 @@
     <string name="preferences_resetdb_title">Update NIC Database</string>
     <string name="preferences_resetdb_summary">Pull and update MAC addresses database</string>
     <string name="preferences_resetdb_action">Do you want to download NIC database ? (~500k)</string>
+    <string name="preferences_resetdb_ok">Database updated ! %s new entries ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Website</string>
     

@@ -31,38 +31,31 @@
         android:layout_weight="1"
         android:dividerHeight="0dip"
         android:cacheColorHint="#000000" />
-    <LinearLayout
-        android:orientation="horizontal"
+    <TextView
+        android:id="@+id/info_ip"
         android:layout_width="fill_parent"
-        android:layout_height="54dip">
-        <ImageButton
-            android:id="@+id/btn_wifi"
-            android:src="@drawable/wifi"
-            style="@style/ButtonBottom" />
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-            <TextView
-                android:id="@+id/info_ip"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textSize="10dip"
-                android:typeface="monospace" />
-            <TextView
-                android:id="@+id/info_in"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textSize="10dip"
-                android:typeface="monospace"
-                android:text="@string/wifi_unknown" />
-            <TextView
-                android:id="@+id/info_mo"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textSize="10dip"
-                android:typeface="monospace" />
-        </LinearLayout>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dip"
+        android:layout_marginLeft="15dip"
+        android:layout_marginRight="15dip"
+        android:textSize="10dip"
+        android:typeface="monospace" />
+    <TextView
+        android:id="@+id/info_in"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:layout_marginRight="15dip"
+        android:textSize="10dip"
+        android:typeface="monospace"
+        android:text="@string/wifi_unknown" />
+    <TextView
+        android:id="@+id/info_mo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:layout_marginRight="15dip"
+        android:layout_marginBottom="15dip"
+        android:textSize="10dip"
+        android:typeface="monospace" />
 </LinearLayout>

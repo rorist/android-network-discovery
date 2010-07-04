@@ -26,8 +26,7 @@ import android.util.Log;
 public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "DefaultDiscovery";
-    //FIXME: this should be alive hosts, not all ip's
-    private final int mRateMult = 50; // Number of hosts between Rate Checks
+    private final int mRateMult = 5; // Number of alive hosts between Rate Checks
     private int mRateCnt = 0;
     private int pt_move = 2; // 1=backward 2=forward
     private ExecutorService mPool;

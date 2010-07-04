@@ -34,7 +34,6 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,7 +45,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -99,14 +97,6 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         btn_options.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startActivity(new Intent(ctxt, Prefs.class));
-            }
-        });
-
-        // Wifi Settings
-        ImageButton btn_wifi = (ImageButton) findViewById(R.id.btn_wifi);
-        btn_wifi.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
             }
         });
 
@@ -255,8 +245,6 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             } else {
                 holder.logo.setImageResource(R.drawable.computer);
             }
-            Log.v(TAG, host.hostname);
-            Log.v(TAG, host.ipAddress);
             if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
                     && host.hostname != null && !host.hostname.equals(host.ipAddress)) {
                 holder.host.setText(host.hostname + " (" + host.ipAddress + ")");
@@ -340,7 +328,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                         setButtonOn(btn_discover, R.drawable.discover);
                     }
                 } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
-                    if(prefs.getBoolean(Prefs.KEY_MOBILE, Prefs.DEFAULT_MOBILE)){
+                    if (prefs.getBoolean(Prefs.KEY_MOBILE, Prefs.DEFAULT_MOBILE)) {
                         net.getMobileInfo();
                         if (net.carrier != null) {
                             info_mo.setText("MODE: Mobile");
@@ -370,7 +358,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
             mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
         }
-        mHardwareAddress = new HardwareAddress();
+        mHardwareAddress = new HardwareAddress(this);
         makeToast(R.string.discover_start);
         setProgressBarVisibility(true);
         setProgressBarIndeterminateVisibility(true);
@@ -423,7 +411,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
             Log.v(TAG, "rtt=" + rtt);
             // NIC vendor
             try {
-                host.nicVendor = mHardwareAddress.getNicVendor(ctxt, haddr);
+                host.nicVendor = mHardwareAddress.getNicVendor(haddr);
             } catch (SQLiteDatabaseCorruptException e) {
                 Log.e(TAG, e.getMessage());
                 Editor edit = prefs.edit();
@@ -481,7 +469,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
 
     public static void scanSingle(final Context ctxt, String ip) {
         // Alert dialog
-        View v = mInflater.inflate(R.layout.scan_single, null);
+        View v = LayoutInflater.from(ctxt).inflate(R.layout.scan_single, null);
         final EditText txt = (EditText) v.findViewById(R.id.ip);
         if (ip != null) {
             txt.setText(ip);

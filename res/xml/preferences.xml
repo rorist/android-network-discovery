@@ -97,6 +97,11 @@
             android:summary="@string/preferences_resetdb_summary"
             android:defaultValue="1"/>
     </PreferenceScreen>
+    
+    <Preference
+        android:key="wifi"
+        android:title="Wifi"/>
+    
 </PreferenceCategory>
 
 <PreferenceCategory

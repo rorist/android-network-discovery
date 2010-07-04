@@ -23,6 +23,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.provider.Settings;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -86,6 +87,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
     public static final String KEY_VERSION = "version";
+    public static final String KEY_WIFI = "wifi";
 
     private static final String URL_DONATE = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MDSDWG83PJSNG&lc=CH&item_name=Network%20Discovery%20for%20Android&currency_code=CHF&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted";
     private static final String URL_WEB = "http://rorist.github.com/android-network-discovery/";
@@ -130,6 +132,15 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
                 md.setEnabled(false);
             }
         }
+
+        // Wifi settings listener
+        ((Preference) ps.findPreference(KEY_WIFI))
+                .setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                        return true;
+                    }
+                });
 
         // Donate click listener
         ((Preference) ps.findPreference(KEY_DONATE))

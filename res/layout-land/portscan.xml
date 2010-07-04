@@ -14,9 +14,9 @@
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="?android:attr/listPreferredItemHeight"
-            android:layout_marginTop="10dip"
-            android:layout_marginLeft="15dip"
-            android:layout_marginRight="15dip"
+            android:layout_marginTop="5dip"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dip"
             android:paddingBottom="5dip">
             <ImageView
                 android:id="@+id/logo"
@@ -56,6 +56,24 @@
                 android:text="NIC Vendor"
                 android:layout_toRightOf="@+id/logo"
                 android:layout_alignParentBottom="true" />
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:drawableLeft="@drawable/back"
+                android:layout_alignParentRight="true"
+                android:drawablePadding="5dip"
+                android:text="@string/btn_back"
+                style="@style/ButtonTop" />
+            <Button
+                android:id="@+id/btn_scan"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_toLeftOf="@id/btn_back"
+                android:drawableLeft="@drawable/discover"
+                android:drawablePadding="5dip"
+                android:text="@string/btn_scan"
+                style="@style/ButtonTop" />
         </RelativeLayout>
         <TabWidget
             android:id="@android:id/tabs"
@@ -77,29 +95,5 @@
                 android:layout_width="fill_parent" 
                 android:layout_height="fill_parent" />
         </FrameLayout>
-        <RelativeLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dip">
-            <Button
-                android:id="@+id/btn_scan"
-                android:layout_width="wrap_content"
-                android:layout_weight="0"
-                android:layout_alignParentRight="true"
-                android:drawableLeft="@drawable/discover"
-                android:drawablePadding="15dip"
-                android:text="@string/btn_scan"
-                style="@style/ButtonTop" />
-            <Button
-                android:id="@+id/btn_back"
-                android:layout_width="wrap_content"
-                android:layout_weight="0"
-                android:layout_alignParentLeft="true"
-                android:drawableLeft="@drawable/back"
-                android:drawablePadding="15dip"
-                android:text="@string/btn_back"
-                style="@style/ButtonTop" />
-        </RelativeLayout>
     </LinearLayout>
 </TabHost>
