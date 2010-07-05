@@ -6,6 +6,32 @@
 -->
 <PreferenceCategory
     android:title="@string/btn_options">
+    
+    <PreferenceScreen
+        android:title="@string/preferences_advanced"
+        android:summary="">
+        <CheckBoxPreference
+            android:key="vibrate_finish"
+            android:title="@string/preferences_vibrate_title"
+            android:summary="@string/preferences_vibrate_summary"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="banner"
+            android:title="@string/preferences_banner_title"
+            android:summary="@string/preferences_banner_summary"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="resolve_name"
+            android:title="@string/preferences_resolve_name_title"
+            android:summary="@string/preferences_resolve_name_summary"
+            android:defaultValue="false" />
+        <Preference
+            android:key="resetdb"
+            android:title="@string/preferences_resetdb_title"
+            android:summary="@string/preferences_resetdb_summary"
+            android:defaultValue="1"/>
+    </PreferenceScreen>
+    
     <PreferenceScreen
         android:title="@string/preferences_discover"
         android:summary="">
@@ -71,31 +97,6 @@
             android:summary="@string/preferences_timeout_summary"
             android:defaultValue="500"
             android:inputType="number" />
-    </PreferenceScreen>
-    
-    <PreferenceScreen
-        android:title="@string/preferences_advanced"
-        android:summary="">
-        <CheckBoxPreference
-            android:key="vibrate_finish"
-            android:title="@string/preferences_vibrate_title"
-            android:summary="@string/preferences_vibrate_summary"
-            android:defaultValue="false" />
-        <CheckBoxPreference
-            android:key="banner"
-            android:title="@string/preferences_banner_title"
-            android:summary="@string/preferences_banner_summary"
-            android:defaultValue="true" />
-        <CheckBoxPreference
-            android:key="resolve_name"
-            android:title="@string/preferences_resolve_name_title"
-            android:summary="@string/preferences_resolve_name_summary"
-            android:defaultValue="false" />
-        <Preference
-            android:key="resetdb"
-            android:title="@string/preferences_resetdb_title"
-            android:summary="@string/preferences_resetdb_summary"
-            android:defaultValue="1"/>
     </PreferenceScreen>
     
     <Preference
