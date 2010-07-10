@@ -11,9 +11,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class Reachable {
-    private final static int[] ports = { 445, 22, 80, 111 };
-
+    private final static int[] dports = { 445, 22, 80, 111 };
     public static int isReachable(InetAddress host, int timeout) {
+        return isReachable(dports, host, timeout);
+    }
+    public static int isReachable(int[] ports, InetAddress host, int timeout) {
         for (int i = 0; i < ports.length; i++) {
             try {
                 Socket s = new Socket();

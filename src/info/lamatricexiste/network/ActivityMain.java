@@ -39,10 +39,6 @@ final public class ActivityMain extends Activity {
         final Context ctxt = this;
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
 
-        // FIXME: HACK FOR TESTING
-        // ActivityDiscovery.scanSingle(ctxt, "10.0.10.1");
-        // FIXME: END
-
         // Determine the needed installation phases
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
             phase1(ctxt);

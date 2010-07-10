@@ -106,6 +106,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         list.setAdapter(adapter);
         list.setItemsCanFocus(false);
         list.setOnItemClickListener(this);
+        list.setEmptyView(findViewById(R.id.list_empty));
 
         connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }

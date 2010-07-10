@@ -185,6 +185,7 @@ public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
                 }
                 // Custom check
                 int port;
+                // TODO: Get ports from options
                 if ((port = Reachable.isReachable(h, getRate())) > -1) {
                     Log.v(TAG, "used Network.Reachable object, port=" + port);
                     publish(host);

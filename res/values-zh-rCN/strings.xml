@@ -37,6 +37,7 @@
     <string name="discover_root_title">安装： Root</string>
     <string name="discover_root_install">是否需要以ROOT权限安装后台扫描程序？</string>
     <string name="discover_root_restart">程序重启中 ...</string>
+    <string name="discover_empty">Press Discover to start</string>
         
     <string name="scan_single_title">扫描 IP</string>
     <string name="scan_single_summary">输入一个IP地址或者域名以供扫描，例如 scanme.nmap.org</string>

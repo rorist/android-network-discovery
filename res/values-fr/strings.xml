@@ -40,6 +40,7 @@
     <string name="discover_root_title">Installation: Root</string>
     <string name="discover_root_install">Voulez-vous installer le service de scan en root ?</string>
     <string name="discover_root_restart">Redémarrage de l\'application ...</string>
+    <string name="discover_empty">Appuyez sur Rechercher pour démarrer</string>
         
     <string name="scan_single_title">Scanner une IP</string>
     <string name="scan_single_summary">Entrez une adresse IP ou un nom d\'hôte sur lequel effectuer un scan de ports, p.ex. scanme.nmap.org</string>

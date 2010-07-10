@@ -40,6 +40,7 @@
     <string name="discover_root_title">Installation: Root</string>
     <string name="discover_root_install">Do you want to install the scan daemon for root ?</string>
     <string name="discover_root_restart">Restarting application ...</string>
+    <string name="discover_empty">Press Discover to start</string>
         
     <string name="scan_single_title">Scan IP</string>
     <string name="scan_single_summary">Enter an IP address or FQDN to scan, i.e. scanme.nmap.org</string>

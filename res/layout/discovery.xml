@@ -24,13 +24,26 @@
             android:text="@string/btn_options"
             style="@style/ButtonTop" />
     </LinearLayout>
-    <ListView
-        android:id="@+id/output"
-        android:layout_width="fill_parent"
+    <FrameLayout
+        android:layout_width="fill_parent" 
         android:layout_height="0dip"
-        android:layout_weight="1"
-        android:dividerHeight="0dip"
-        android:cacheColorHint="#000000" />
+        android:layout_weight="1" >
+        <ListView
+            android:id="@+id/output"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:dividerHeight="0dip"
+            android:cacheColorHint="#000000" />
+        <TextView
+            android:id="@+id/list_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_horizontal"
+            android:textSize="10dip"
+            android:typeface="monospace"
+            android:text="@string/discover_empty" />
+    </FrameLayout>
     <TextView
         android:id="@+id/info_ip"
         android:layout_width="fill_parent"

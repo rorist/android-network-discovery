@@ -37,6 +37,7 @@
     <string name="discover_root_title">安裝： Root</string>
     <string name="discover_root_install">是否需要以ROOT權限安裝後台掃瞄程式？</string>
     <string name="discover_root_restart">程式重啟中 ...</string>
+    <string name="discover_empty">Press Discover to start</string>
         
     <string name="scan_single_title">掃瞄 IP</string>
     <string name="scan_single_summary">輸入一個IP位址或者域名以供掃瞄，例如 scanme.nmap.org</string>
