@@ -1,6 +1,21 @@
--------------------
- Network Discovery 
--------------------
+---------------------------
+ Network Discovery ChangeLog
+---------------------------
+
+---------------------------
+ 0.2.7.2.1 - May 28th 2010
+---------------------------
+
+- Bugfixes (Thanks to new Android Market error reports)
+  - Redownload corrupt nic database file (and do not crash)
+  - Check for null object in fastChannelCopy
+  - Close db in a finally block for UpdateNicDb (if db rows count fails)
+
+---------------------------
+ 0.2.7.2 - May 20th 2010
+---------------------------
+
+- Localization: Chinese (Traditional and Simplified) translation provided by http://goapk.com
 
 ---------------------------
  Mar. 23rd 2010
