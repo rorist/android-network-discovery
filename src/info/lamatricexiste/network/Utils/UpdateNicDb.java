@@ -33,7 +33,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     private final static String TAG = "UpdateNicDb";
     private final static String DB_REMOTE = "http://download.lamatricexiste.info/oui.db";
-    private final static String DB_PATH = "/data/data/info.lamatricexiste.network/";
+    private final static String DB_PATH = "/data/data/info.lamatricexiste.network/databases/";
     private final static String DB_NAME = "oui.db";
     private int nb;
     private ProgressDialog progress;

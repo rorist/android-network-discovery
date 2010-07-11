@@ -42,6 +42,13 @@ public class HardwareAddress {
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         } catch (SQLiteException e) {
             Log.e(TAG, e.getMessage());
+            final Activity d = mActivity.get();
+            if (d != null) {
+                Context ctxt = d.getApplicationContext();
+                Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+                edit.putInt(Prefs.KEY_RESET_NICDB, 1);
+                edit.commit();
+            }
         }
     }
 
@@ -55,7 +62,7 @@ public class HardwareAddress {
         // Get intf
         String intf = "(tiwlan0|eth0)";
         final Activity d = mActivity.get();
-        if (d !=null) {
+        if (d != null) {
             NetInfo net = new NetInfo(d.getApplicationContext());
             intf = net.intf;
         }
@@ -86,13 +93,14 @@ public class HardwareAddress {
     public String getNicVendor(String hw) throws SQLiteDatabaseCorruptException {
         final Activity a = mActivity.get();
         if (a != null) {
-            Context ctxt = a.getApplicationContext();
+            final Context ctxt = a.getApplicationContext();
             String ni = ctxt.getString(R.string.info_unknown);
             if (db != null) {
                 String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
                 // Db request
                 try {
-                    Cursor c = db.rawQuery("select vendor from oui where mac='" + macid + "'", null);
+                    Cursor c = db
+                            .rawQuery("select vendor from oui where mac='" + macid + "'", null);
                     if (c.getCount() > 0) {
                         c.moveToFirst();
                         ni = c.getString(c.getColumnIndex("vendor"));
