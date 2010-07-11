@@ -30,8 +30,9 @@ import android.util.Log;
 public class DownloadFile {
 
     private static String TAG = "DownloadFile";
+    // FIXME: Get the real application version without context ?
     private final String USERAGENT = "Android/" + android.os.Build.VERSION.RELEASE + " ("
-            + android.os.Build.MODEL + ") NetworkDiscovery/0.2.8";
+            + android.os.Build.MODEL + ") NetworkDiscovery/0.3.0";
     private HttpClient httpclient;
 
     public DownloadFile(String url, String dst) throws IOException {
