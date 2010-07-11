@@ -68,6 +68,8 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
             int step = 127;
             InetAddress ina = InetAddress.getByName(ipAddr);
             if (nb_port > step) {
+                // FIXME: Selector leaks file descriptors (Dalvik bug)
+                // http://code.google.com/p/android/issues/detail?id=4825
                 for (int i = port_start; i <= port_end - step; i += step + 1) {
                     time = System.nanoTime();
                     start(ina, i, i + ((i + step <= port_end - step) ? step : port_end - i));
@@ -133,6 +135,10 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
                     Log.e(TAG, "ClosedSelectorException: " + selector.toString());
                 } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
+                } catch (NullPointerException e) {
+                    // FIXME: Bug in 2.2 Froyo
+                    // http://code.google.com/p/android/issues/detail?id=9431
+                    Log.e(TAG, "IPv6 not supported, so java.nio.channels.Selector crashes");
                 }
             }
         }
