@@ -96,6 +96,8 @@
     <string name="preferences_timeout_force_summary">手动设置连接超时</string>
     <string name="preferences_timeout_title">连接超时</string>
     <string name="preferences_timeout_summary">端口连接超时的毫秒数</string>
+    <string name="preferences_allow_mobile_title">Allow mobile discovery</string>
+    <string name="preferences_allow_mobile_summary">Scan over edge/3g/... usually leading to strange results, if any</string>
     <string name="preferences_ssh_user_title">SSH 用户</string>
     <string name="preferences_ssh_user_summary">SSH 连接的用户名</string>
     <string name="preferences_threads_title">发掘线程</string>

@@ -99,6 +99,8 @@
     <string name="preferences_timeout_force_summary">Régler manuellement le délai de connection</string>
     <string name="preferences_timeout_title">Délai de connection</string>
     <string name="preferences_timeout_summary">Délai maximum d\'une connection à un port, en millisecondes</string>
+    <string name="preferences_allow_mobile_title">Scan par 3G</string>
+    <string name="preferences_allow_mobile_summary">Permet de scanner le réseau 3g/edge, résultats peuvent être inattendus</string>
     <string name="preferences_ssh_user_title">Nom d\'utilisateur SSH</string>
     <string name="preferences_ssh_user_summary">Utilisateur à utiliser pour se connecter en SSH</string>
     <string name="preferences_threads_title">Threads</string>

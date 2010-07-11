@@ -27,8 +27,11 @@ c = conn.cursor()
 c.execute("CREATE TABLE probes (_id INTEGER PRIMARY KEY, service TEXT, regex TEXT, desc TEXT);")
 c.execute("CREATE INDEX regexIndex ON probes (regex);")
 
-ptn1 = re.compile("^(soft)?match (ftp|sftp|ssh|telnet|http) m\|(.*?)\|[si]? ?[pvihod]?/?(.*?)")
-ptn2 = re.compile("^(soft)?match (ftp|sftp|ssh|telnet|http) m\/(.*?)\/[si]? ?[pvihod]?/?(.*?)")
+#ptn1 = re.compile("^(soft)?match (ftp|sftp|ssh|telnet|http) m\|(.*?)\|[si]? ?[pvihod]?/?(.*?)")
+#ptn2 = re.compile("^(soft)?match (ftp|sftp|ssh|telnet|http) m\/(.*?)\/[si]? ?[pvihod]?/?(.*?)")
+
+ptn1 = re.compile("^(soft)?match (ftp|sftp|ssh|telnet) m\|(.*?)\|[si]? ?[pvihod]?/?(.*?)")
+ptn2 = re.compile("^(soft)?match (ftp|sftp|ssh|telnet) m\/(.*?)\/[si]? ?[pvihod]?/?(.*?)")
 
 for line in open("nmap-service-probes"):
   if "Probes" in line:

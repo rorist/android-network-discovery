@@ -157,8 +157,10 @@ final public class ActivityMain extends Activity {
         @Override
         protected void onPreExecute() {
             final Activity d = mActivity.get();
-            d.setProgressBarIndeterminateVisibility(true);
-            progress = ProgressDialog.show(d, "", d.getString(R.string.task_services));
+            if (d != null) {
+                d.setProgressBarIndeterminateVisibility(true);
+                progress = ProgressDialog.show(d, "", d.getString(R.string.task_services));
+            }
         }
 
         @Override
@@ -172,8 +174,10 @@ final public class ActivityMain extends Activity {
                 } catch (NullPointerException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (IOException e) {
-                    if (e != null) {
+                    if (e != null && e.getMessage() != null) {
                         Log.e(TAG, e.getMessage());
+                    } else {
+                        Log.e(TAG, "IOException");
                     }
                 }
             }
@@ -183,19 +187,21 @@ final public class ActivityMain extends Activity {
         @Override
         protected void onPostExecute(Void unused) {
             final ActivityMain d = (ActivityMain) mActivity.get();
-            d.setProgressBarIndeterminateVisibility(true);
-            if (progress.isShowing()) {
-                progress.dismiss();
-            }
-            try {
-                Editor edit = prefs.edit();
-                edit.putInt(Prefs.KEY_RESET_SERVICESDB, d.getPackageManager().getPackageInfo(
-                        "info.lamatricexiste.network", 0).versionCode);
-                edit.commit();
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, e.getMessage());
-            } finally {
-                d.startDiscoverActivity(d);
+            if (d != null) {
+                d.setProgressBarIndeterminateVisibility(true);
+                if (progress.isShowing()) {
+                    progress.dismiss();
+                }
+                try {
+                    Editor edit = prefs.edit();
+                    edit.putInt(Prefs.KEY_RESET_SERVICESDB, d.getPackageManager().getPackageInfo(
+                            "info.lamatricexiste.network", 0).versionCode);
+                    edit.commit();
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, e.getMessage());
+                } finally {
+                    d.startDiscoverActivity(d);
+                }
             }
         }
     }

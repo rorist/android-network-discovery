@@ -25,8 +25,10 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -80,7 +82,6 @@ final public class ActivityPortscan extends TabActivity {
         if (extras != null) {
             if (intent.hasExtra(HostBean.EXTRA)) {
                 host = intent.getParcelableExtra(HostBean.EXTRA);
-                Log.v(TAG, "Parcalable used ...");
             } else {
                 // Intents for 3rd party usage
                 host = new HostBean();
@@ -309,6 +310,8 @@ final public class ActivityPortscan extends TabActivity {
         String search = null;
         Intent intent = null;
         if (service.equals("ftp") || service.equals("ftps") || service.equals("sftp")) {
+            pk = "AndFTP";
+            search = "market://search?q=ftp";
             intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(service.equals("ftp") ? Uri.parse("ftp://" + host.ipAddress) : Uri
                     .parse("sftp://" + host.ipAddress));
@@ -351,7 +354,11 @@ final public class ActivityPortscan extends TabActivity {
             } catch (ActivityNotFoundException e) {
                 if (search != null) {
                     makeToast(String.format(getString(R.string.package_missing, pk)));
-                    startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(search)));
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(search)));
+                    } catch (ActivityNotFoundException e2) {
+                        Log.e(TAG, "Market not found !");
+                    }
                 }
                 Log.e(TAG, e.getMessage());
             }
@@ -468,23 +475,30 @@ final public class ActivityPortscan extends TabActivity {
             if (host.banners != null && host.banners.containsKey(port)) {
                 Pattern pattern;
                 Matcher matcher;
-                Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
-                if (c.getCount() > 0) {
-                    c.moveToFirst();
-                    do {
-                        try {
-                            pattern = Pattern.compile(c.getString(1));
-                            matcher = pattern.matcher(host.banners.get(port));
-                            if (matcher.find()) {
-                                service = c.getString(0);
-                                break;
+                try {
+                    Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
+                    if (c.getCount() > 0) {
+                        c.moveToFirst();
+                        do {
+                            try {
+                                pattern = Pattern.compile(c.getString(1));
+                                matcher = pattern.matcher(host.banners.get(port));
+                                if (matcher.find()) {
+                                    service = c.getString(0);
+                                    break;
+                                }
+                            } catch (PatternSyntaxException e) {
+                                // Log.e(TAG, e.getMessage());
                             }
-                        } catch (PatternSyntaxException e) {
-                            // Log.e(TAG, e.getMessage());
-                        }
-                    } while (c.moveToNext());
+                        } while (c.moveToNext());
+                    }
+                    c.close();
+                } catch (SQLiteException e) {
+                    Log.e(TAG, e.getMessage());
+                    Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+                    edit.putInt(Prefs.KEY_RESET_SERVICESDB, 1);
+                    edit.commit();
                 }
-                c.close();
             }
 
             // Get the service from port number
