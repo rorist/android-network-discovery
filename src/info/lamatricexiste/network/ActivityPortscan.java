@@ -335,10 +335,12 @@ final public class ActivityPortscan extends TabActivity {
             intent.setData(Uri.parse("telnet://" + host.ipAddress + ":" + port));
         } else if (service.equals("http")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://" + host.hostname + ":" + port));
+            intent.setData(Uri.parse("http://"
+                    + (host.hostname != null ? host.hostname : host.ipAddress) + ":" + port));
         } else if (service.equals("https")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://" + host.hostname + ":" + port));
+            intent.setData(Uri.parse("https://"
+                    + (host.hostname != null ? host.hostname : host.ipAddress) + ":" + port));
         } else {
             makeToast(R.string.scan_noaction);
         }
