@@ -27,9 +27,10 @@ public class Db {
     private Context ctxt = null;
 
     // Databases information
-    private static final String PATH = "/data/data/info.lamatricexiste.network/databases/";
+    public static final String PATH = "/data/data/info.lamatricexiste.network/databases/";
     public static final String DB_SERVICES = "services.db";
     public static final String DB_PROBES = "probes.db";
+    public static final String DB_NIC = "nic.db";
 
     public Db(Context ctxt) {
         this.ctxt = ctxt;

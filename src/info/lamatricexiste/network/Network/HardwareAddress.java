@@ -9,6 +9,7 @@ package info.lamatricexiste.network.Network;
 
 import info.lamatricexiste.network.R;
 import info.lamatricexiste.network.Utils.Prefs;
+import info.lamatricexiste.network.Utils.Db;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -30,15 +31,13 @@ import android.util.Log;
 public class HardwareAddress {
 
     private final String TAG = "HardwareAddress";
-    private final String DB_PATH = "/data/data/info.lamatricexiste.network/";
-    private final String DB_NAME = "oui.db";
     private SQLiteDatabase db = null;
     private WeakReference<Activity> mActivity;
 
     public HardwareAddress(Activity activity) {
         mActivity = new WeakReference<Activity>(activity);
         try {
-            db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
+            db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null,
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         } catch (SQLiteException e) {
             Log.e(TAG, e.getMessage());

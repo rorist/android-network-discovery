@@ -8,6 +8,7 @@ package info.lamatricexiste.network.Utils;
 import info.lamatricexiste.network.R;
 import info.lamatricexiste.network.Network.DownloadFile;
 import info.lamatricexiste.network.Network.NetInfo;
+import info.lamatricexiste.network.Utils.Db;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -33,8 +34,6 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     private final static String TAG = "UpdateNicDb";
     private final static String DB_REMOTE = "http://download.lamatricexiste.info/oui.db";
-    private final static String DB_PATH = "/data/data/info.lamatricexiste.network/databases/";
-    private final static String DB_NAME = "oui.db";
     private int nb;
     private ProgressDialog progress;
     protected WeakReference<Activity> mActivity;
@@ -85,14 +84,14 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
     private void remoteCopy(Context ctxt) throws IOException {
         Log.v(TAG, "Copying oui.db remotly");
         if (NetInfo.isConnected(ctxt)) {
-            new DownloadFile(DB_REMOTE, DB_PATH + DB_NAME);
+            new DownloadFile(DB_REMOTE, Db.PATH + Db.DB_NIC);
         }
     }
 
     private int countEntries() {
         int nb = 0;
         try {
-            SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null,
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC , null,
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             Cursor c = db.rawQuery("select count(mac) from oui", null);
             if (c.getCount() > 0) {
