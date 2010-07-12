@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
@@ -57,6 +58,10 @@ public class NetInfo {
                 for (Enumeration<InetAddress> nis = ni.getInetAddresses(); nis.hasMoreElements();) {
                     InetAddress ia = nis.nextElement();
                     if (!ia.isLoopbackAddress()) {
+                        if (ia instanceof Inet6Address) {
+                            Log.i(TAG, "IPv6 detected and not supported yet!");
+                            return;
+                        }
                         ip = ia.getHostAddress();
                         return;
                     }
