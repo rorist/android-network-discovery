@@ -50,7 +50,7 @@
           <a href="http://www.insydemarket.com/AndSb.php?pageid=ENDWNDTL&amp;dtid=88">Insyde Market</a>.<br /><br />
           <ul>
             <li><a href="release">Download APK</a></li>
-            <li><a href="http://github.com/rorist/android-network-discovery" title="Source Code">Project on github</a></li>
+            <li><a href="http://github.com/rorist/android-network-discovery" title="Source Code">Project on github (source code)</a></li>
           </ul>
       </div>
       
@@ -72,26 +72,37 @@
         <li>Discover Machines on a Network</li>
         <li>TCP Port Scanner</li>
         <li>NIC vendor database</li>
+        <li>Service banner retrieval</li>
+        <li>Service detection according to the service banner</li>
         <li>Connect to known services (http, ssh, telnet, ftp, ...) directly from the application results</li>
         <li>Export results to your sdcard in XML</li>
         <li>Fast access to Wifi Settings</li>
         <li>Adaptive scanning rate (slow start, then adaptive to network latency)</li>
+        <li>Mobile network (3g) scans, even if it's not relevant</li>
         <li>Open Source</li>
       </ul>
       
       <h2>Future releases</h2>
       <ul>
-        <li>Service banner retrieval</li>
-        <li>Service fingerprinting according to the service banner</li>
         <li>Open port OS Fingerprint</li>
-        <li>Mobile network (3g) scans, even if it's not relevant</li>
-        <li>New design</li>
         <li>Root features: SYN port scan, and other improvements or additions. But first I really want the non-root version to be complete.</li>
         <li>Nmap wrapper</li>
         <li>Metasploit wrapper</li>
       </ul>
 
       <h2>Last Changes</h2>
+      
+      <h3>0.3.0 - July 16th 2010</h3>
+      <ul>
+        <li>Service banner retrieval (ex.: SSH-2.0-OpenSSH_5.1p1 Debian-5)</li>
+        <li>Service detection if there is a banner</li>
+        <li>Rate Control: Automatically adapt timeout and rates according to ping RTT</li>
+        <li>Set custom timeouts</li>
+        <li>3G discovery (results may vary, use at your own risks!)</li>
+        <li>Little redesign (Thanks to Richard)</li>
+        <li>Preferences reorganized</li>
+        <li>Lots of bugfixes, code rewrite and factorization</li>
+      </ul>
       
       <h3>0.2.7.2.1 - May 28th 2010</h3>
       <ul>
