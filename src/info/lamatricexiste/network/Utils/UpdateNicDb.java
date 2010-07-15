@@ -84,14 +84,14 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
     private void remoteCopy(Context ctxt) throws IOException {
         Log.v(TAG, "Copying oui.db remotly");
         if (NetInfo.isConnected(ctxt)) {
-            new DownloadFile(DB_REMOTE, Db.PATH + Db.DB_NIC);
+            new DownloadFile(DB_REMOTE, ctxt.openFileOutput(Db.DB_NIC, Context.MODE_PRIVATE));
         }
     }
 
     private int countEntries() {
         int nb = 0;
         try {
-            SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC , null,
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null,
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             Cursor c = db.rawQuery("select count(mac) from oui", null);
             if (c.getCount() > 0) {
@@ -113,11 +113,13 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
         }
         final Activity d = mActivity.get();
         if (d != null) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d.getApplication());
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
+                    .getApplication());
             d.setProgressBarIndeterminateVisibility(false);
-            Toast.makeText(d.getApplicationContext(),
-                    String.format(d.getString(R.string.preferences_resetdb_ok), (countEntries() - nb)),
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(
+                    d.getApplicationContext(),
+                    String.format(d.getString(R.string.preferences_resetdb_ok),
+                            (countEntries() - nb)), Toast.LENGTH_LONG).show();
             try {
                 Editor edit = prefs.edit();
                 edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
@@ -136,8 +138,8 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
         }
         final Activity d = mActivity.get();
         if (d != null) {
-            Toast.makeText(d.getApplicationContext(), R.string.preferences_error3, Toast.LENGTH_SHORT)
-                    .show();
+            Toast.makeText(d.getApplicationContext(), R.string.preferences_error3,
+                    Toast.LENGTH_SHORT).show();
         }
     }
 }

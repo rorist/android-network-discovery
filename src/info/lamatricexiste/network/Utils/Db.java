@@ -7,8 +7,6 @@ package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.Network.DownloadFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,14 +25,14 @@ public class Db {
     private Context ctxt = null;
 
     // Databases information
-    public static final String PATH = "/data/data/info.lamatricexiste.network/databases/";
+    public static final String PATH = "/data/data/info.lamatricexiste.network/files/";
     public static final String DB_SERVICES = "services.db";
     public static final String DB_PROBES = "probes.db";
     public static final String DB_NIC = "nic.db";
 
     public Db(Context ctxt) {
         this.ctxt = ctxt;
-        new File(PATH).mkdirs();
+        // new File(PATH).mkdirs();
     }
 
     public SQLiteDatabase openDb(String db_name) {
@@ -49,7 +47,8 @@ public class Db {
 
     public void copyDbToDevice(int res, String db_name) throws NullPointerException, IOException {
         InputStream in = ctxt.getResources().openRawResource(res);
-        OutputStream out = new FileOutputStream(PATH + db_name);
+        // OutputStream out = new FileOutputStream(PATH + db_name);
+        OutputStream out = ctxt.openFileOutput(db_name, Context.MODE_PRIVATE);
         final ReadableByteChannel ic = Channels.newChannel(in);
         final WritableByteChannel oc = Channels.newChannel(out);
         DownloadFile.fastChannelCopy(ic, oc);

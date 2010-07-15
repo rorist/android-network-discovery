@@ -143,7 +143,9 @@ public class DefaultDiscovery extends AsyncTask<Void, String, Void> {
             discover.makeToast(R.string.discover_canceled);
             discover.stopDiscovering();
         }
-        mPool.shutdownNow();
+        if (mPool != null) {
+            mPool.shutdownNow();
+        }
         super.onCancelled();
     }
 

@@ -179,9 +179,9 @@ final public class ActivityPortscan extends TabActivity {
 
         // TODO: Get from resource array ?
         knownServices = new ArrayList<String>();
-        knownServices.add("sftp");
-        knownServices.add("ftps");
-        knownServices.add("ftp");
+        // knownServices.add("sftp");
+        // knownServices.add("ftps");
+        // knownServices.add("ftp");
         knownServices.add("ssh");
         knownServices.add("telnet");
         knownServices.add("http");
@@ -309,22 +309,27 @@ final public class ActivityPortscan extends TabActivity {
         String pk = "";
         String search = null;
         Intent intent = null;
-        if (service.equals("ftp") || service.equals("ftps") || service.equals("sftp")) {
-            pk = "AndFTP";
-            search = "market://search?q=ftp";
-            intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(service.equals("ftp") ? Uri.parse("ftp://" + host.ipAddress) : Uri
-                    .parse("sftp://" + host.ipAddress));
-            intent.putExtra("ftp_pasv", "true");
-            // intent.setDataAndType(ftpUri,
-            // "vnd.android.cursor.dir/lysesoft.andftp.uri");
-            // intent.putExtra("ftp_username", "anonymous");
-            // intent.putExtra("ftp_password", "anonymous");
-            // intent.putExtra("ftp_keyfile", "/sdcard/dsakey.txt");
-            // intent.putExtra("ftp_keypass", "");
-            // intent.putExtra("ftp_resume", "true");
-            // intent.putExtra("ftp_encoding", "UTF8");
-        } else if (service.equals("ssh")) {
+        // if (service.equals("ftp") || service.equals("ftps") ||
+        // service.equals("sftp")) {
+        // pk = "AndFTP";
+        // search = "market://search?q=andftp";
+        // intent = new Intent(Intent.ACTION_PICK);
+        // // intent.setData(service.equals("ftp") ? Uri.parse("ftp://" +
+        // // host.ipAddress) : Uri
+        // // .parse("sftp://" + host.ipAddress));
+        // intent.setDataAndType(service.equals("ftp") ? Uri.parse("ftp://" +
+        // host.ipAddress)
+        // : Uri.parse("sftp://" + host.ipAddress),
+        // "vnd.android.cursor.dir/lysesoft.andftp.uri");
+        // intent.putExtra("ftp_pasv", "true");
+        // // intent.putExtra("ftp_username", "anonymous");
+        // // intent.putExtra("ftp_password", "anonymous");
+        // // intent.putExtra("ftp_keyfile", "/sdcard/dsakey.txt");
+        // // intent.putExtra("ftp_keypass", "");
+        // // intent.putExtra("ftp_resume", "true");
+        // // intent.putExtra("ftp_encoding", "UTF8");
+        // } else
+        if (service.equals("ssh")) {
             pk = "ConnectBot (ssh)";
             search = "market://search?q=pname:org.connectbot";
             String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
@@ -454,8 +459,12 @@ final public class ActivityPortscan extends TabActivity {
             if (host.portsOpen.size() == 0) {
                 makeToast(R.string.scan_noport);
             }
-            dbServices.close();
-            dbProbes.close();
+            if (dbServices != null) {
+                dbServices.close();
+            }
+            if (dbProbes != null) {
+                dbProbes.close();
+            }
             stopScan();
             makeToast(R.string.scan_finished);
         }
@@ -464,15 +473,19 @@ final public class ActivityPortscan extends TabActivity {
         protected void onCancelled() {
             super.onCancelled();
             makeToast(R.string.scan_canceled);
-            dbServices.close();
-            dbProbes.close();
+            if (dbServices != null) {
+                dbServices.close();
+            }
+            if (dbProbes != null) {
+                dbProbes.close();
+            }
             stopScan();
         }
 
         private String getPortService(int port) {
             service = null;
             // Determinate service with banners
-            if (host.banners != null && host.banners.containsKey(port)) {
+            if (host.banners != null && host.banners.containsKey(port) && dbProbes != null) {
                 Pattern pattern;
                 Matcher matcher;
                 try {
@@ -502,7 +515,7 @@ final public class ActivityPortscan extends TabActivity {
             }
 
             // Get the service from port number
-            if (service == null) {
+            if (service == null && dbServices != null) {
                 c = dbServices.rawQuery("SELECT service FROM services WHERE port=" + port
                         + " LIMIT 1", null);
                 if (c.getCount() > 0) {

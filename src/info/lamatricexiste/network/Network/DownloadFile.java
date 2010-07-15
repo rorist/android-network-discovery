@@ -10,7 +10,6 @@ package info.lamatricexiste.network.Network;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -35,12 +34,11 @@ public class DownloadFile {
             + android.os.Build.MODEL + ") NetworkDiscovery/0.3.0";
     private HttpClient httpclient;
 
-    public DownloadFile(String url, String dst) throws IOException {
-        Log.i(TAG, "Downloading " + url + " to " + dst);
+    public DownloadFile(String url, FileOutputStream out) throws IOException {
+        Log.i(TAG, "Downloading " + url);
         httpclient = new DefaultHttpClient();
         httpclient.getParams().setParameter("http.useragent", USERAGENT);
         InputStream in = openURL(url);
-        OutputStream out = new FileOutputStream(dst);
         final ReadableByteChannel inputChannel = Channels.newChannel(in);
         final WritableByteChannel outputChannel = Channels.newChannel(out);
 
