@@ -6,9 +6,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="info.lamatricexiste.network"
-    android:versionCode="32"
-    android:versionName="0.3.0"
-    android:installLocation="preferExternal">
+    android:versionCode="36"
+    android:versionName="0.3.0">
     
     <application
         android:icon="@drawable/icon"
@@ -62,15 +61,10 @@
     </application>
     
     <supports-screens />
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8" /> <!-- FIXME: Isn't the app compatible with API Level 1 ? -->
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="3" /> <!-- FIXME: Isn't the app compatible with API Level 1 ? -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-configuration
-        android:reqFiveWayNav="true"
-        android:reqHardKeyboard="false"
-        android:reqKeyboardType="nokeys" 
-        android:reqTouchScreen="notouch"/>
 </manifest> 
