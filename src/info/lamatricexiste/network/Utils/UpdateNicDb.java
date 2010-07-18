@@ -108,11 +108,11 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPostExecute(Void unused) {
-        if (progress.isShowing()) {
-            progress.dismiss();
-        }
         final Activity d = mActivity.get();
         if (d != null) {
+            if (progress.isShowing()) {
+                progress.dismiss();
+            }
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
                     .getApplication());
             d.setProgressBarIndeterminateVisibility(false);
