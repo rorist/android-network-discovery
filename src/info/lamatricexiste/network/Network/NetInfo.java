@@ -48,7 +48,7 @@ public class NetInfo {
         getWifiInfo();
     }
 
-    private void getIp() {
+    public void getIp() {
         // Iterate throught interfaces
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en

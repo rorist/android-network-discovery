@@ -19,13 +19,10 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -33,7 +30,7 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,7 +48,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-final public class ActivityDiscovery extends Activity implements OnItemClickListener {
+final public class ActivityDiscovery extends ActivityNet implements OnItemClickListener {
 
     private final String TAG = "ActivityDiscovery";
     public final static long VIBRATE = (long) 250;
@@ -65,12 +62,8 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
     private HostsAdapter adapter;
     private HardwareAddress mHardwareAddress;
     private Button btn_discover;
-    public SharedPreferences prefs = null;
-    private ConnectivityManager connMgr;
     private AsyncTask<Void, String, Void> mDiscoveryTask = null;
     // private RootDaemon mRootDaemon = null;
-    private Context ctxt;
-    private NetInfo net = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,11 +71,7 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         requestWindowFeature(Window.FEATURE_PROGRESS);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.discovery);
-        ctxt = getApplicationContext();
-        prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         mInflater = LayoutInflater.from(ctxt);
-        net = new NetInfo(ctxt);
-        net.getWifiInfo();
 
         // Discover
         btn_discover = (Button) findViewById(R.id.btn_discover);
@@ -107,19 +96,11 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         list.setItemsCanFocus(false);
         list.setOnItemClickListener(this);
         list.setEmptyView(findViewById(R.id.list_empty));
-
-        connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Listening for network events
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        registerReceiver(receiver, filter);
         // Scan button state
         if (mDiscoveryTask != null) {
             setButton(btn_discover, R.drawable.cancel, false);
@@ -130,12 +111,6 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                 }
             });
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        unregisterReceiver(receiver);
     }
 
     // @Override
@@ -191,6 +166,27 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                 return true;
         }
         return false;
+    }
+
+    protected void setInfo(){
+        ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
+        ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
+        ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
+    }
+    
+    protected void setButtons(boolean disable){
+        if(disable){
+            setButtonOff(btn_discover, R.drawable.disabled);
+        } else {
+            setButtonOn(btn_discover, R.drawable.discover);
+        }
+    }
+
+    protected void cancelTasks() {
+        if (mDiscoveryTask != null) {
+            mDiscoveryTask.cancel(true);
+            mDiscoveryTask = null;
+        }
     }
 
     // Listen for Activity results
@@ -258,98 +254,6 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         }
     }
 
-    // Broadcast Receiver
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context ctxt, Intent intent) {
-            networkStateChanged(intent);
-        }
-    };
-
-    private void networkStateChanged(Intent intent) {
-        // Use NetworkInfo
-        TextView info_ip = (TextView) findViewById(R.id.info_ip);
-        TextView info_in = (TextView) findViewById(R.id.info_in);
-        TextView info_mo = (TextView) findViewById(R.id.info_mo);
-
-        info_ip.setText("");
-        info_mo.setText("");
-        setButtonOff(btn_discover, R.drawable.disabled);
-
-        // Wifi state
-        String action = intent.getAction();
-        if (action != null) {
-            if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-                int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-                // Log.d(TAG, "WifiState=" + WifiState);
-                switch (WifiState) {
-                    case WifiManager.WIFI_STATE_ENABLING:
-                        info_in.setText(R.string.wifi_enabling);
-                        break;
-                    case WifiManager.WIFI_STATE_ENABLED:
-                        info_in.setText(R.string.wifi_enabled);
-                        break;
-                    case WifiManager.WIFI_STATE_DISABLING:
-                        info_in.setText(R.string.wifi_disabling);
-                        break;
-                    case WifiManager.WIFI_STATE_DISABLED:
-                        info_in.setText(R.string.wifi_disabled);
-                        break;
-                    default:
-                        info_in.setText(R.string.wifi_unknown);
-                }
-            }
-
-            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) && net.getWifiInfo()) {
-                SupplicantState sstate = net.getSupplicantState();
-                // Log.d(TAG, "SupplicantState=" + sstate);
-                if (sstate == SupplicantState.SCANNING) {
-                    info_in.setText(R.string.wifi_scanning);
-                } else if (sstate == SupplicantState.ASSOCIATING) {
-                    info_in.setText(String.format(getString(R.string.wifi_associating),
-                            (net.ssid != null ? net.ssid : (net.bssid != null ? net.bssid
-                                    : net.macAddress))));
-                } else if (sstate == SupplicantState.COMPLETED) {
-                    info_in.setText(String.format(getString(R.string.wifi_dhcp), net.ssid));
-                }
-            }
-        }
-
-        // 3G(connected) -> Wifi(connected)
-        // Support Ethernet, with ConnectivityManager.TYPE_ETHER=3
-        final NetworkInfo ni = connMgr.getActiveNetworkInfo();
-        if (ni != null) {
-            if (ni.getState() == NetworkInfo.State.CONNECTED) {
-                int type = ni.getType();
-                if (type == ConnectivityManager.TYPE_WIFI) { // WIFI
-                    net.getWifiInfo();
-                    if (net.ssid != null) {
-                        info_mo.setText("MODE: WiFi");
-                        info_ip.setText("IP: " + net.ip + "/" + net.cidr);
-                        info_in.setText("SSID: " + net.ssid);
-                        setButtonOn(btn_discover, R.drawable.discover);
-                    }
-                } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
-                    if (prefs.getBoolean(Prefs.KEY_MOBILE, Prefs.DEFAULT_MOBILE)) {
-                        net.getMobileInfo();
-                        if (net.carrier != null) {
-                            info_mo.setText("MODE: Mobile");
-                            info_ip.setText("IP: " + net.ip + "/" + net.cidr);
-                            info_in.setText("CARRIER: " + net.carrier);
-                            setButtonOn(btn_discover, R.drawable.discover);
-                        }
-                    }
-                } else if (type == 3) { // ETH
-                    Log.i(TAG, "Ethernet connectivity detected!");
-                    info_mo.setText("MODE: Ethernet (Not supported yet)");
-                }
-            } else if (mDiscoveryTask != null) {
-                cancelTasks();
-            }
-        } else if (mDiscoveryTask != null) {
-            cancelTasks();
-        }
-    }
-
     /**
      * Discover hosts
      */
@@ -386,13 +290,6 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
                 startDiscovering();
             }
         });
-    }
-
-    private void cancelTasks() {
-        if (mDiscoveryTask != null) {
-            mDiscoveryTask.cancel(true);
-            mDiscoveryTask = null;
-        }
     }
 
     private void initList() {
@@ -572,11 +469,11 @@ final public class ActivityDiscovery extends Activity implements OnItemClickList
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void setButton(Button b, int drawable, boolean disable) {
+    private void setButton(Button btn, int res, boolean disable) {
         if (disable) {
-            setButtonOff(b, drawable);
+            setButtonOff(btn, res);
         } else {
-            setButtonOn(b, drawable);
+            setButtonOn(btn, res);
         }
     }
 
