@@ -41,413 +41,413 @@ import android.widget.AdapterView.OnItemClickListener;
 
 final public class ActivityDiscovery extends ActivityNet implements OnItemClickListener {
 
-	// private final String TAG = "ActivityDiscovery";
-	public final static long VIBRATE = (long) 250;
-	public final static int SCAN_PORT_RESULT = 1;
-	public static final int MENU_SCAN_SINGLE = 0;
-	public static final int MENU_OPTIONS = 1;
-	public static final int MENU_HELP = 2;
-	private static final int MENU_EXPORT = 3;
-	private static LayoutInflater mInflater;
-	private List<HostBean> hosts = null;
-	private HostsAdapter adapter;
-	private Button btn_discover;
-	private AsyncTask<Void, HostBean, Void> mDiscoveryTask = null;
-	public HardwareAddress mHardwareAddress;
+    // private final String TAG = "ActivityDiscovery";
+    public final static long VIBRATE = (long) 250;
+    public final static int SCAN_PORT_RESULT = 1;
+    public static final int MENU_SCAN_SINGLE = 0;
+    public static final int MENU_OPTIONS = 1;
+    public static final int MENU_HELP = 2;
+    private static final int MENU_EXPORT = 3;
+    private static LayoutInflater mInflater;
+    private List<HostBean> hosts = null;
+    private HostsAdapter adapter;
+    private Button btn_discover;
+    private AsyncTask<Void, HostBean, Void> mDiscoveryTask = null;
+    public HardwareAddress mHardwareAddress;
 
-	// private RootDaemon mRootDaemon = null;
+    // private RootDaemon mRootDaemon = null;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_PROGRESS);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.discovery);
-		mInflater = LayoutInflater.from(ctxt);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setContentView(R.layout.discovery);
+        mInflater = LayoutInflater.from(ctxt);
 
-		// Discover
-		btn_discover = (Button) findViewById(R.id.btn_discover);
-		btn_discover.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				startDiscovering();
-			}
-		});
+        // Discover
+        btn_discover = (Button) findViewById(R.id.btn_discover);
+        btn_discover.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startDiscovering();
+            }
+        });
 
-		// Options
-		Button btn_options = (Button) findViewById(R.id.btn_options);
-		btn_options.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				startActivity(new Intent(ctxt, Prefs.class));
-			}
-		});
+        // Options
+        Button btn_options = (Button) findViewById(R.id.btn_options);
+        btn_options.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent(ctxt, Prefs.class));
+            }
+        });
 
-		// Hosts list
-		adapter = new HostsAdapter(ctxt);
-		ListView list = (ListView) findViewById(R.id.output);
-		list.setAdapter(adapter);
-		list.setItemsCanFocus(false);
-		list.setOnItemClickListener(this);
-		list.setEmptyView(findViewById(R.id.list_empty));
-	}
+        // Hosts list
+        adapter = new HostsAdapter(ctxt);
+        ListView list = (ListView) findViewById(R.id.output);
+        list.setAdapter(adapter);
+        list.setItemsCanFocus(false);
+        list.setOnItemClickListener(this);
+        list.setEmptyView(findViewById(R.id.list_empty));
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		// Scan button state
-		if (mDiscoveryTask != null) {
-			setButton(btn_discover, R.drawable.cancel, false);
-			btn_discover.setText(R.string.btn_discover_cancel);
-			btn_discover.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					cancelTasks();
-				}
-			});
-		}
-	}
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Scan button state
+        if (mDiscoveryTask != null) {
+            setButton(btn_discover, R.drawable.cancel, false);
+            btn_discover.setText(R.string.btn_discover_cancel);
+            btn_discover.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    cancelTasks();
+                }
+            });
+        }
+    }
 
-	// @Override
-	// public void onStart() {
-	// super.onStart();
-	// // Root Daemon
-	// if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
-	// Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-	// mRootDaemon = new RootDaemon(ActivityDiscovery.this);
-	// mRootDaemon.start();
-	// }
-	// }
-	//
-	// @Override
-	// protected void onStop() {
-	// super.onStop();
-	// // Root Daemon
-	// if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
-	// Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-	// if (mRootDaemon != null) {
-	// mRootDaemon.kill();
-	// }
-	// }
-	// }
+    // @Override
+    // public void onStart() {
+    // super.onStart();
+    // // Root Daemon
+    // if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
+    // Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+    // mRootDaemon = new RootDaemon(ActivityDiscovery.this);
+    // mRootDaemon.start();
+    // }
+    // }
+    //
+    // @Override
+    // protected void onStop() {
+    // super.onStop();
+    // // Root Daemon
+    // if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
+    // Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+    // if (mRootDaemon != null) {
+    // mRootDaemon.kill();
+    // }
+    // }
+    // }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
-				android.R.drawable.ic_menu_mylocation);
-		menu.add(0, ActivityDiscovery.MENU_EXPORT, 0, R.string.preferences_export).setIcon(
-				android.R.drawable.ic_menu_save);
-		menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, "Options").setIcon(
-				android.R.drawable.ic_menu_preferences);
-		menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
-				android.R.drawable.ic_menu_help);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+                android.R.drawable.ic_menu_mylocation);
+        menu.add(0, ActivityDiscovery.MENU_EXPORT, 0, R.string.preferences_export).setIcon(
+                android.R.drawable.ic_menu_save);
+        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, "Options").setIcon(
+                android.R.drawable.ic_menu_preferences);
+        menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
+                android.R.drawable.ic_menu_help);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case ActivityDiscovery.MENU_SCAN_SINGLE:
-			scanSingle(this, null);
-			return true;
-		case ActivityDiscovery.MENU_OPTIONS:
-			startActivity(new Intent(ctxt, Prefs.class));
-			return true;
-		case ActivityDiscovery.MENU_HELP:
-			startActivity(new Intent(ctxt, Help.class));
-			return true;
-		case ActivityDiscovery.MENU_EXPORT:
-			export();
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case ActivityDiscovery.MENU_SCAN_SINGLE:
+                scanSingle(this, null);
+                return true;
+            case ActivityDiscovery.MENU_OPTIONS:
+                startActivity(new Intent(ctxt, Prefs.class));
+                return true;
+            case ActivityDiscovery.MENU_HELP:
+                startActivity(new Intent(ctxt, Help.class));
+                return true;
+            case ActivityDiscovery.MENU_EXPORT:
+                export();
+                return true;
+        }
+        return false;
+    }
 
-	protected void setInfo() {
-		((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
-		((TextView) findViewById(R.id.info_in)).setText(info_in_str);
-		((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
-	}
+    protected void setInfo() {
+        ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
+        ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
+        ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
+    }
 
-	protected void setButtons(boolean disable) {
-		if (disable) {
-			setButtonOff(btn_discover, R.drawable.disabled);
-		} else {
-			setButtonOn(btn_discover, R.drawable.discover);
-		}
-	}
+    protected void setButtons(boolean disable) {
+        if (disable) {
+            setButtonOff(btn_discover, R.drawable.disabled);
+        } else {
+            setButtonOn(btn_discover, R.drawable.discover);
+        }
+    }
 
-	protected void cancelTasks() {
-		if (mDiscoveryTask != null) {
-			mDiscoveryTask.cancel(true);
-			mDiscoveryTask = null;
-		}
-	}
+    protected void cancelTasks() {
+        if (mDiscoveryTask != null) {
+            mDiscoveryTask.cancel(true);
+            mDiscoveryTask = null;
+        }
+    }
 
-	// Listen for Activity results
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-		case SCAN_PORT_RESULT:
-			if (resultCode == RESULT_OK) {
-				// Get scanned ports
-				if (data.hasExtra(HostBean.EXTRA)) {
-					HostBean host = data.getParcelableExtra(HostBean.EXTRA);
-					hosts.set(host.position, host);
-				}
-			}
-		default:
-			break;
-		}
-	}
+    // Listen for Activity results
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case SCAN_PORT_RESULT:
+                if (resultCode == RESULT_OK) {
+                    // Get scanned ports
+                    if (data.hasExtra(HostBean.EXTRA)) {
+                        HostBean host = data.getParcelableExtra(HostBean.EXTRA);
+                        hosts.set(host.position, host);
+                    }
+                }
+            default:
+                break;
+        }
+    }
 
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		startPortscan(hosts.get(position), position);
-	}
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        startPortscan(hosts.get(position), position);
+    }
 
-	static class ViewHolder {
-		TextView host;
-		TextView mac;
-		TextView vendor;
-		ImageView logo;
-	}
+    static class ViewHolder {
+        TextView host;
+        TextView mac;
+        TextView vendor;
+        ImageView logo;
+    }
 
-	// Custom ArrayAdapter
-	private class HostsAdapter extends ArrayAdapter<Void> {
-		public HostsAdapter(Context ctxt) {
-			super(ctxt, R.layout.list_host, R.id.list);
-		}
+    // Custom ArrayAdapter
+    private class HostsAdapter extends ArrayAdapter<Void> {
+        public HostsAdapter(Context ctxt) {
+            super(ctxt, R.layout.list_host, R.id.list);
+        }
 
-		@Override
-		public View getView(final int position, View convertView, ViewGroup parent) {
-			ViewHolder holder;
-			if (convertView == null) {
-				convertView = mInflater.inflate(R.layout.list_host, null);
-				holder = new ViewHolder();
-				holder.host = (TextView) convertView.findViewById(R.id.list);
-				holder.mac = (TextView) convertView.findViewById(R.id.mac);
-				holder.vendor = (TextView) convertView.findViewById(R.id.vendor);
-				holder.logo = (ImageView) convertView.findViewById(R.id.logo);
-				convertView.setTag(holder);
-			} else {
-				holder = (ViewHolder) convertView.getTag();
-			}
-			final HostBean host = hosts.get(position);
-			if (host.isGateway == 1) {
-				holder.logo.setImageResource(R.drawable.router);
-			} else {
-				holder.logo.setImageResource(R.drawable.computer);
-			}
-			if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
-					&& host.hostname != null && !host.hostname.equals(host.ipAddress)) {
-				holder.host.setText(host.hostname + " (" + host.ipAddress + ")");
-			} else {
-				holder.host.setText(host.ipAddress);
-			}
-			holder.mac.setText(host.hardwareAddress);
-			holder.vendor.setText(host.nicVendor);
-			return convertView;
-		}
-	}
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.list_host, null);
+                holder = new ViewHolder();
+                holder.host = (TextView) convertView.findViewById(R.id.list);
+                holder.mac = (TextView) convertView.findViewById(R.id.mac);
+                holder.vendor = (TextView) convertView.findViewById(R.id.vendor);
+                holder.logo = (ImageView) convertView.findViewById(R.id.logo);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            final HostBean host = hosts.get(position);
+            if (host.isGateway == 1) {
+                holder.logo.setImageResource(R.drawable.router);
+            } else {
+                holder.logo.setImageResource(R.drawable.computer);
+            }
+            if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
+                    && host.hostname != null && !host.hostname.equals(host.ipAddress)) {
+                holder.host.setText(host.hostname + " (" + host.ipAddress + ")");
+            } else {
+                holder.host.setText(host.ipAddress);
+            }
+            holder.mac.setText(host.hardwareAddress);
+            holder.vendor.setText(host.nicVendor);
+            return convertView;
+        }
+    }
 
-	/**
-	 * Discover hosts
-	 */
-	private void startDiscovering() {
-		if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
-			mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
-		} else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-			mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
-		}
-		mHardwareAddress = new HardwareAddress(this);
-		makeToast(R.string.discover_start);
-		setProgressBarVisibility(true);
-		setProgressBarIndeterminateVisibility(true);
-		initList();
-		mDiscoveryTask.execute();
-		btn_discover.setText(R.string.btn_discover_cancel);
-		setButton(btn_discover, R.drawable.cancel, false);
-		btn_discover.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				cancelTasks();
-			}
-		});
-	}
+    /**
+     * Discover hosts
+     */
+    private void startDiscovering() {
+        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
+            mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
+        } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
+            mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
+        }
+        mHardwareAddress = new HardwareAddress(this);
+        makeToast(R.string.discover_start);
+        setProgressBarVisibility(true);
+        setProgressBarIndeterminateVisibility(true);
+        initList();
+        mDiscoveryTask.execute();
+        btn_discover.setText(R.string.btn_discover_cancel);
+        setButton(btn_discover, R.drawable.cancel, false);
+        btn_discover.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                cancelTasks();
+            }
+        });
+    }
 
-	public void stopDiscovering() {
-		mHardwareAddress.dbClose();
-		mDiscoveryTask = null;
-		setProgressBarVisibility(false);
-		setProgressBarIndeterminateVisibility(false);
-		btn_discover.setText(R.string.btn_discover);
-		setButtonOn(btn_discover, R.drawable.discover);
-		btn_discover.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				startDiscovering();
-			}
-		});
-	}
+    public void stopDiscovering() {
+        mHardwareAddress.dbClose();
+        mDiscoveryTask = null;
+        setProgressBarVisibility(false);
+        setProgressBarIndeterminateVisibility(false);
+        btn_discover.setText(R.string.btn_discover);
+        setButtonOn(btn_discover, R.drawable.discover);
+        btn_discover.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startDiscovering();
+            }
+        });
+    }
 
-	private void initList() {
-		// setSelectedHosts(false);
-		adapter.clear();
-		hosts = new ArrayList<HostBean>();
-	}
+    private void initList() {
+        // setSelectedHosts(false);
+        adapter.clear();
+        hosts = new ArrayList<HostBean>();
+    }
 
-	public void addHost(HostBean host) {
-		host.position = hosts.size();
-		// if (!hardwareAddressAlreadyExists(host.hardwareAddress)) {
-		hosts.add(host);
-		adapter.add(null);
-		// } else {
-		// if (mDiscoveryTask != null) {
-		// cancelTasks();
-		// }
-		// AlertDialog.Builder infoDialog = new AlertDialog.Builder(this);
-		// infoDialog.setTitle(R.string.discover_proxy_title);
-		// infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg),
-		// net.gatewayIp));
-		// infoDialog.setNegativeButton(R.string.btn_close, null);
-		// infoDialog.show();
-		// }
-	}
+    public void addHost(HostBean host) {
+        host.position = hosts.size();
+        // if (!hardwareAddressAlreadyExists(host.hardwareAddress)) {
+        hosts.add(host);
+        adapter.add(null);
+        // } else {
+        // if (mDiscoveryTask != null) {
+        // cancelTasks();
+        // }
+        // AlertDialog.Builder infoDialog = new AlertDialog.Builder(this);
+        // infoDialog.setTitle(R.string.discover_proxy_title);
+        // infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg),
+        // net.gatewayIp));
+        // infoDialog.setNegativeButton(R.string.btn_close, null);
+        // infoDialog.show();
+        // }
+    }
 
-	// private boolean hardwareAddressAlreadyExists(String addr) {
-	// // FIXME: Find a more performant method
-	// for (HostBean host : hosts) {
-	// if (host.hardwareAddress == addr) {
-	// return true;
-	// }
-	// }
-	// return false;
-	// }
+    // private boolean hardwareAddressAlreadyExists(String addr) {
+    // // FIXME: Find a more performant method
+    // for (HostBean host : hosts) {
+    // if (host.hardwareAddress == addr) {
+    // return true;
+    // }
+    // }
+    // return false;
+    // }
 
-	private void startPortscan(HostBean host, int position) {
-		Intent intent = new Intent(ctxt, ActivityPortscan.class);
-		if (NetInfo.isConnected(ctxt) == false) {
-			intent.putExtra("wifiDisabled", true);
-		}
-		intent.putExtra(HostBean.EXTRA, host);
-		startActivityForResult(intent, SCAN_PORT_RESULT);
-	}
+    private void startPortscan(HostBean host, int position) {
+        Intent intent = new Intent(ctxt, ActivityPortscan.class);
+        if (NetInfo.isConnected(ctxt) == false) {
+            intent.putExtra("wifiDisabled", true);
+        }
+        intent.putExtra(HostBean.EXTRA, host);
+        startActivityForResult(intent, SCAN_PORT_RESULT);
+    }
 
-	public static void scanSingle(final Context ctxt, String ip) {
-		// Alert dialog
-		View v = LayoutInflater.from(ctxt).inflate(R.layout.scan_single, null);
-		final EditText txt = (EditText) v.findViewById(R.id.ip);
-		if (ip != null) {
-			txt.setText(ip);
-		}
-		AlertDialog.Builder dialogIp = new AlertDialog.Builder(ctxt);
-		dialogIp.setTitle(R.string.scan_single_title);
-		dialogIp.setView(v);
-		dialogIp.setPositiveButton(R.string.btn_scan, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dlg, int sumthin) {
-				// start scanportactivity
-				Intent intent = new Intent(ctxt, ActivityPortscan.class);
-				intent.putExtra(HostBean.EXTRA_HOST, txt.getText().toString());
-				try {
-					intent.putExtra(HostBean.EXTRA_HOSTNAME, (InetAddress.getByName(txt.getText()
-							.toString()).getHostName()));
-				} catch (UnknownHostException e) {
-					intent.putExtra(HostBean.EXTRA_HOSTNAME, txt.getText().toString());
-				}
-				ctxt.startActivity(intent);
-			}
-		});
-		dialogIp.setNegativeButton(R.string.btn_discover_cancel, null);
-		dialogIp.show();
-	}
+    public static void scanSingle(final Context ctxt, String ip) {
+        // Alert dialog
+        View v = LayoutInflater.from(ctxt).inflate(R.layout.scan_single, null);
+        final EditText txt = (EditText) v.findViewById(R.id.ip);
+        if (ip != null) {
+            txt.setText(ip);
+        }
+        AlertDialog.Builder dialogIp = new AlertDialog.Builder(ctxt);
+        dialogIp.setTitle(R.string.scan_single_title);
+        dialogIp.setView(v);
+        dialogIp.setPositiveButton(R.string.btn_scan, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dlg, int sumthin) {
+                // start scanportactivity
+                Intent intent = new Intent(ctxt, ActivityPortscan.class);
+                intent.putExtra(HostBean.EXTRA_HOST, txt.getText().toString());
+                try {
+                    intent.putExtra(HostBean.EXTRA_HOSTNAME, (InetAddress.getByName(txt.getText()
+                            .toString()).getHostName()));
+                } catch (UnknownHostException e) {
+                    intent.putExtra(HostBean.EXTRA_HOSTNAME, txt.getText().toString());
+                }
+                ctxt.startActivity(intent);
+            }
+        });
+        dialogIp.setNegativeButton(R.string.btn_discover_cancel, null);
+        dialogIp.show();
+    }
 
-	private void export() {
-		final Export e = new Export(ctxt, hosts);
-		final String file = e.getFileName();
+    private void export() {
+        final Export e = new Export(ctxt, hosts);
+        final String file = e.getFileName();
 
-		View v = mInflater.inflate(R.layout.file, null);
-		final EditText txt = (EditText) v.findViewById(R.id.export_file);
-		txt.setText(file);
+        View v = mInflater.inflate(R.layout.file, null);
+        final EditText txt = (EditText) v.findViewById(R.id.export_file);
+        txt.setText(file);
 
-		AlertDialog.Builder getFileName = new AlertDialog.Builder(this);
-		getFileName.setTitle(R.string.export_choose);
-		getFileName.setView(v);
-		getFileName.setPositiveButton(R.string.export_save, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dlg, int sumthin) {
-				final String fileEdit = txt.getText().toString();
-				if (e.fileExists(fileEdit)) {
-					AlertDialog.Builder fileExists = new AlertDialog.Builder(ActivityDiscovery.this);
-					fileExists.setTitle(R.string.export_exists_title);
-					fileExists.setMessage(R.string.export_exists_msg);
-					fileExists.setPositiveButton(R.string.btn_yes,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int which) {
-									if (e.writeToSd(fileEdit)) {
-										makeToast(R.string.export_finished);
-									} else {
-										export();
-									}
-								}
-							});
-					fileExists.setNegativeButton(R.string.btn_no, null);
-					fileExists.show();
-				} else {
-					if (e.writeToSd(fileEdit)) {
-						makeToast(R.string.export_finished);
-					} else {
-						export();
-					}
-				}
-			}
-		});
-		getFileName.setNegativeButton(R.string.btn_discover_cancel, null);
-		getFileName.show();
-	}
+        AlertDialog.Builder getFileName = new AlertDialog.Builder(this);
+        getFileName.setTitle(R.string.export_choose);
+        getFileName.setView(v);
+        getFileName.setPositiveButton(R.string.export_save, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dlg, int sumthin) {
+                final String fileEdit = txt.getText().toString();
+                if (e.fileExists(fileEdit)) {
+                    AlertDialog.Builder fileExists = new AlertDialog.Builder(ActivityDiscovery.this);
+                    fileExists.setTitle(R.string.export_exists_title);
+                    fileExists.setMessage(R.string.export_exists_msg);
+                    fileExists.setPositiveButton(R.string.btn_yes,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if (e.writeToSd(fileEdit)) {
+                                        makeToast(R.string.export_finished);
+                                    } else {
+                                        export();
+                                    }
+                                }
+                            });
+                    fileExists.setNegativeButton(R.string.btn_no, null);
+                    fileExists.show();
+                } else {
+                    if (e.writeToSd(fileEdit)) {
+                        makeToast(R.string.export_finished);
+                    } else {
+                        export();
+                    }
+                }
+            }
+        });
+        getFileName.setNegativeButton(R.string.btn_discover_cancel, null);
+        getFileName.show();
+    }
 
-	// private List<String> getSelectedHosts(){
-	// List<String> hosts_s = new ArrayList<String>();
-	// int listCount = list.getChildCount();
-	// for(int i=0; i<listCount; i++){
-	// CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
-	// if(cb.isChecked()){
-	// hosts_s.add(hosts.get(i));
-	// }
-	// }
-	// return hosts_s;
-	// }
-	//    
-	// private void setSelectedHosts(Boolean all){
-	// int listCount = list.getChildCount();
-	// for(int i=0; i<listCount; i++){
-	// CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
-	// if(all){
-	// cb.setChecked(true);
-	// } else {
-	// cb.setChecked(false);
-	// }
-	// }
-	// }
+    // private List<String> getSelectedHosts(){
+    // List<String> hosts_s = new ArrayList<String>();
+    // int listCount = list.getChildCount();
+    // for(int i=0; i<listCount; i++){
+    // CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
+    // if(cb.isChecked()){
+    // hosts_s.add(hosts.get(i));
+    // }
+    // }
+    // return hosts_s;
+    // }
+    //    
+    // private void setSelectedHosts(Boolean all){
+    // int listCount = list.getChildCount();
+    // for(int i=0; i<listCount; i++){
+    // CheckBox cb = (CheckBox) list.getChildAt(i).findViewById(R.id.list);
+    // if(all){
+    // cb.setChecked(true);
+    // } else {
+    // cb.setChecked(false);
+    // }
+    // }
+    // }
 
-	// private void makeToast(String msg) {
-	// Toast.makeText(getApplicationContext(), (CharSequence) msg,
-	// Toast.LENGTH_SHORT).show();
-	// }
+    // private void makeToast(String msg) {
+    // Toast.makeText(getApplicationContext(), (CharSequence) msg,
+    // Toast.LENGTH_SHORT).show();
+    // }
 
-	public void makeToast(int msg) {
-		Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-	}
+    public void makeToast(int msg) {
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+    }
 
-	private void setButton(Button btn, int res, boolean disable) {
-		if (disable) {
-			setButtonOff(btn, res);
-		} else {
-			setButtonOn(btn, res);
-		}
-	}
+    private void setButton(Button btn, int res, boolean disable) {
+        if (disable) {
+            setButtonOff(btn, res);
+        } else {
+            setButtonOn(btn, res);
+        }
+    }
 
-	private void setButtonOff(Button b, int drawable) {
-		b.setClickable(false);
-		b.setEnabled(false);
-		b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
-	}
+    private void setButtonOff(Button b, int drawable) {
+        b.setClickable(false);
+        b.setEnabled(false);
+        b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
+    }
 
-	private void setButtonOn(Button b, int drawable) {
-		b.setClickable(true);
-		b.setEnabled(true);
-		b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
-	}
+    private void setButtonOn(Button b, int drawable) {
+        b.setClickable(true);
+        b.setEnabled(true);
+        b.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
+    }
 }
