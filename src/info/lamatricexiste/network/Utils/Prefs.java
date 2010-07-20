@@ -47,7 +47,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String DEFAULT_SSH_USER = "root";
 
     public static final String KEY_NTHREADS = "nthreads";
-    public static final String DEFAULT_NTHREADS = "32";
+    public static final String DEFAULT_NTHREADS = "16";
 
     public static final String KEY_RESET_NICDB = "resetdb";
     public static final int DEFAULT_RESET_NICDB = 1;
