@@ -95,7 +95,7 @@
     <string name="preferences_port_end_title">Last Port</string>
     <string name="preferences_port_end_summary">Last TCP Port to scan. 1-65535</string>
     <string name="preferences_banner_title">Services banners</string>
-    <string name="preferences_banner_summary">Connects to a TCP port and prints out anything sent by the listening service (produces traffic)</string>
+    <string name="preferences_banner_summary">Read banner from a connected socket (ex.: SSH-2.0-OpenSSH_5.1p1 Debian-5)</string>
     <string name="preferences_timeout_force_title">Custom timeout</string>
     <string name="preferences_timeout_force_summary">Manually set connect timeout</string>
     <string name="preferences_timeout_title">Connect timeout</string>

@@ -94,7 +94,7 @@
     <string name="preferences_port_end_title">Dernier port</string>
     <string name="preferences_port_end_summary">Le dernier port TCP à scanner. 1-65535</string>
     <string name="preferences_banner_title">Bannière de services</string>
-    <string name="preferences_banner_summary">Se connecte au port et affiche les données envoyées par un service (produit du traffic)</string>
+    <string name="preferences_banner_summary">Lit la banière pour un connection établie. (ex.: SSH-2.0-OpenSSH_5.1p1 Debian-5)</string>
     <string name="preferences_timeout_force_title">Délai de connection personnalisé</string>
     <string name="preferences_timeout_force_summary">Régler manuellement le délai de connection</string>
     <string name="preferences_timeout_title">Délai de connection</string>
