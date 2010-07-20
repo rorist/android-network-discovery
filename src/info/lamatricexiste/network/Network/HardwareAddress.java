@@ -30,90 +30,100 @@ import android.util.Log;
 
 public class HardwareAddress {
 
-    private final String TAG = "HardwareAddress";
-    private SQLiteDatabase db = null;
-    private WeakReference<Activity> mActivity;
+	private final String TAG = "HardwareAddress";
+	private SQLiteDatabase db = null;
+	private WeakReference<Activity> mActivity;
 
-    public HardwareAddress(Activity activity) {
-        mActivity = new WeakReference<Activity>(activity);
-        try {
-            db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null,
-                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
-        } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
-            final Activity d = mActivity.get();
-            if (d != null) {
-                Context ctxt = d.getApplicationContext();
-                Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-                edit.putInt(Prefs.KEY_RESET_NICDB, 1);
-                edit.commit();
-            }
-        }
-    }
+	public HardwareAddress(Activity activity) {
+		mActivity = new WeakReference<Activity>(activity);
+		try {
+			db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null,
+					SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+		} catch (SQLiteException e) {
+			Log.e(TAG, e.getMessage());
+			final Activity d = mActivity.get();
+			if (d != null) {
+				Context ctxt = d.getApplicationContext();
+				Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+				edit.putInt(Prefs.KEY_RESET_NICDB, 1);
+				edit.commit();
+			}
+		}
+	}
 
-    public void dbClose() {
-        if (db != null) {
-            db.close();
-        }
-    }
+	public void dbClose() {
+		if (db != null) {
+			db.close();
+		}
+	}
 
-    public String getHardwareAddress(String ip) {
-        // Get intf
-        String intf = "(tiwlan0|eth0)";
-        final Activity d = mActivity.get();
-        if (d != null) {
-            NetInfo net = new NetInfo(d.getApplicationContext());
-            intf = net.intf;
-        }
-        // Get HW Addr
-        String hw = "00:00:00:00:00:00";
-        try {
-            FileReader fileReader = new FileReader("/proc/net/arp");
-            String ptrn = "^" + ip.replace(".", "\\.")
-                    + "\\s+0x1\\s+0x2\\s+([:0-9a-fA-F]+)\\s+\\*\\s+" + intf + "$";
-            Pattern pattern = Pattern.compile(ptrn);
-            BufferedReader bufferedReader = new BufferedReader(fileReader, 2);
-            String line;
-            Matcher matcher;
-            while ((line = bufferedReader.readLine()) != null) {
-                matcher = pattern.matcher(line);
-                if (matcher.matches()) {
-                    hw = matcher.group(1);
-                }
-            }
-            bufferedReader.close();
-            fileReader.close();
-        } catch (IOException e) {
-            Log.d(TAG, "Can't open/read file ARP: " + e.getMessage());
-        }
-        return hw;
-    }
+	public String getHardwareAddress(String ip) {
+		// Get intf
+		String intf = "(tiwlan0|eth0)";
+		if (mActivity != null) {
+			final Activity a = mActivity.get();
+			if (a != null) {
+				NetInfo net = new NetInfo(a.getApplicationContext());
+				intf = net.intf;
+			}
+		}
+		// Get HW Addr
+		String hw = "00:00:00:00:00:00";
+		try {
+			if (ip != null) {
+				FileReader fileReader = new FileReader("/proc/net/arp");
+				String ptrn = "^" + ip.replace(".", "\\.")
+						+ "\\s+0x1\\s+0x2\\s+([:0-9a-fA-F]+)\\s+\\*\\s+" + intf + "$";
+				Pattern pattern = Pattern.compile(ptrn);
+				BufferedReader bufferedReader = new BufferedReader(fileReader, 2);
+				String line;
+				Matcher matcher;
+				while ((line = bufferedReader.readLine()) != null) {
+					matcher = pattern.matcher(line);
+					if (matcher.matches()) {
+						hw = matcher.group(1);
+					}
+				}
+				bufferedReader.close();
+				fileReader.close();
+			} else {
+				Log.e(TAG, "ip is null");
+			}
+		} catch (IOException e) {
+			Log.d(TAG, "Can't open/read file ARP: " + e.getMessage());
+		}
+		return hw;
+	}
 
-    public String getNicVendor(String hw) throws SQLiteDatabaseCorruptException {
-        final Activity a = mActivity.get();
-        if (a != null) {
-            final Context ctxt = a.getApplicationContext();
-            String ni = ctxt.getString(R.string.info_unknown);
-            if (db != null) {
-                String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
-                // Db request
-                try {
-                    Cursor c = db
-                            .rawQuery("select vendor from oui where mac='" + macid + "'", null);
-                    if (c.getCount() > 0) {
-                        c.moveToFirst();
-                        ni = c.getString(c.getColumnIndex("vendor"));
-                    }
-                    c.close();
-                } catch (SQLiteException e) {
-                    Log.e(TAG, e.getMessage());
-                    Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-                    edit.putInt(Prefs.KEY_RESET_NICDB, 1);
-                    edit.commit();
-                }
-            }
-            return ni;
-        }
-        return "Unknown";
-    }
+	public String getNicVendor(String hw) throws SQLiteDatabaseCorruptException {
+		if (mActivity != null) {
+			final Activity a = mActivity.get();
+			if (a != null) {
+				final Context ctxt = a.getApplicationContext();
+				String ni = ctxt.getString(R.string.info_unknown);
+				if (db != null) {
+					String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
+					// Db request
+					try {
+						if (db.isOpen()) {
+							Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
+									+ "'", null);
+							if (c.getCount() > 0) {
+								c.moveToFirst();
+								ni = c.getString(c.getColumnIndex("vendor"));
+							}
+							c.close();
+						}
+					} catch (SQLiteException e) {
+						Log.e(TAG, e.getMessage());
+						Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+						edit.putInt(Prefs.KEY_RESET_NICDB, 1);
+						edit.commit();
+					}
+				}
+				return ni;
+			}
+		}
+		return "Unknown";
+	}
 }
