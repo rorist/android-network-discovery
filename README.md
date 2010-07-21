@@ -7,37 +7,36 @@ Machines discovery/mapping (over Wifi) and port scan (over 3G/Wifi) utility for 
 Features
 --------
 
- *  Discover Machines on a LAN
- *  TCP Port Scanner (connect() scan)
- *  NIC vendor database
- *  Export results to your sdcard in XML
- *  Fast access to Wifi Settings
- *  Adaptive scanning rate (slow start, then adaptive to network latency)
- *  Open Source, available at http://github.com/rorist/android-network-discovery
+-  Discover Machines on a LAN
+-  TCP Port Scanner (connect() scan)
+-  NIC vendor database
+-  Export results to your sdcard in XML
+-  Fast access to Wifi Settings
+-  Adaptive scanning rate (slow start, then adaptive to network latency)
+-  Open Source, available at http://github.com/rorist/android-network-discovery
 
 Build
 -----
 
- *  Native Code: Follow instructions in native/README
- *  APK: 
-  * build.xml is provided for ant
-  * simply type this command: ant debug
+-  Native Code: Follow instructions in native/README
+-  APK: 
+    - build.xml is provided for ant
+    - simply type this command: ant debug
 
 Todo
 ----
 
- * Network interface choice in preferences
- * Uses-intents in manifest
- * Save all scan in DB, open previous scan, export previous scan, etc
- * Discovery: restrict range or change cidr
- * Settings: prevent phone from sleeping, discovery method (root/non-root)
- * RateControl: better rate by host ?
- * NMAP build script (ARM and other arch (using AOSP?))
- * Refactor host info (inflater + dynamic layouts), and add new info such as Hops (using MTR?)
- * Support of other protocol: UDP, SCTP
- * Send custom packets (shell codes, exploits, ...)
- * Nat Traversal
- * Proxy (auto)support
+- Network interface choice in preferences
+- Uses-intents in manifest
+- Save all scan in DB, open previous scan, export previous scan, etc
+- Discovery: restrict/change range or change cidr
+- Settings: prevent phone from sleeping
+- NMAP build script (ARM and other arch (using AOSP?))
+- Add new info such as Hops (using MTR?)
+- Support of other protocol: UDP, SCTP
+- Send custom packets (shell codes, exploits, probes, ...)
+- Nat Traversal
+- Proxy (auto)support
 
 GPLv2 License
 -------
