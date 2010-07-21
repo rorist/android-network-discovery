@@ -22,6 +22,8 @@ public class RateControl {
 	private final String ARG = " -q -n -W 2 -c ";
 	private final String PTN = "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/[0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+ ms$";
 	private Pattern mPattern;
+	private Matcher matcher;
+	private String line;
 	public String[] indicator;
 	public int rate = 800; // Slow start
 	public boolean is_indicator_discovered = false;
@@ -51,14 +53,12 @@ public class RateControl {
 	private int getAvgResponseTime(String host, int count) {
 		try {
 			// TODO: Reduce allocation
-			String line;
-			Matcher matcher;
 			Process proc = Runtime.getRuntime().exec(CMD + ARG + count + " " + host);
 			BufferedReader reader = new BufferedReader(
 					new InputStreamReader(proc.getInputStream()), 1);
 			while ((line = reader.readLine()) != null) {
 				matcher = mPattern.matcher(line);
-				if (matcher != null && matcher.matches()) {
+				if (matcher.matches()) {
 					return (int) Float.parseFloat(matcher.group(1));
 				}
 			}
