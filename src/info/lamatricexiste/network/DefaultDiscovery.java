@@ -51,6 +51,7 @@ public class DefaultDiscovery extends AsyncTask<Void, HostBean, Void> {
 
 	@Override
 	protected void onPreExecute() {
+        // FIXME: Move that in ActivityDiscovey
 		if (mDiscover != null) {
 			final ActivityDiscovery discover = mDiscover.get();
 			if (discover != null) {
