@@ -7,6 +7,12 @@ package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.ActivityMain;
 import info.lamatricexiste.network.R;
+
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,19 +22,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
-    // TODO: Show value in summary
-    // private final String TAG = "Prefs";
+    // TODO: Show values in summary
+
+    private final String TAG = "Prefs";
 
     public final static String KEY_RESOLVE_NAME = "resolve_name";
     public final static boolean DEFAULT_RESOLVE_NAME = false;
@@ -82,6 +91,9 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_MOBILE = "allow_mobile";
     public static final boolean DEFAULT_MOBILE = false;
 
+    public static final String KEY_INTF = "interface";
+    public static final String DEFAULT_INTF = null;
+
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
     public static final String KEY_VERSION = "version";
@@ -131,6 +143,35 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         // md.setEnabled(false);
         // }
         // }
+
+        // Interfaces list
+        ListPreference intf = (ListPreference) ps.findPreference(KEY_INTF);
+        try {
+            ArrayList<NetworkInterface> nis = Collections.list(NetworkInterface
+                    .getNetworkInterfaces());
+            final int len = nis.size();
+            // If there's more than just 2 interfaces (local + network)
+            if (len > 2) {
+                String[] intf_entries = new String[len - 1];
+                String[] intf_values = new String[len - 1];
+                int i = 0;
+                for (int j = 0; j < len; j++) {
+                    NetworkInterface ni = nis.get(j);
+                    if (!ni.getName().equals("lo")) {
+                        intf_entries[i] = ni.getDisplayName();
+                        intf_values[i] = ni.getName();
+                        i++;
+                    }
+                }
+                intf.setEntries(intf_entries);
+                intf.setEntryValues(intf_values);
+            } else {
+                intf.setEnabled(false);
+            }
+        } catch (SocketException e) {
+            Log.e(TAG, e.getMessage());
+            intf.setEnabled(false);
+        }
 
         // Wifi settings listener
         ((Preference) ps.findPreference(KEY_WIFI))

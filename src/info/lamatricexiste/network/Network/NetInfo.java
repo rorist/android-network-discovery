@@ -6,11 +6,13 @@
 //am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
 package info.lamatricexiste.network.Network;
 
+import info.lamatricexiste.network.Utils.Prefs;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
@@ -18,18 +20,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class NetInfo {
     private final String TAG = "NetInfo";
+    private final String NOIP = "0.0.0.0";
     private Context ctxt;
     private WifiInfo info;
+    private SharedPreferences prefs;
 
     public String intf = "eth0";
     public String ip = "0.0.0.0";
@@ -41,35 +48,66 @@ public class NetInfo {
     public String macAddress = "00:00:00:00:00:00";
     public Object gatewayIp = "0.0.0.0";
 
-    public NetInfo(Context ctxt) {
+    public NetInfo(final Context ctxt) {
         this.ctxt = ctxt;
+        prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
         getIp();
-        getCidr();
         getWifiInfo();
+
+        // Set ARP enabled
+        // try {
+        // Runtime.getRuntime().exec("su -C ip link set dev " + intf +
+        // " arp on");
+        // } catch (Exception e) {
+        // Log.e(TAG, e.getMessage());
+        // }
+        // Runtime.getRuntime().exec("echo 1 > /proc/sys/net/ipv4/conf/" + intf
+        // + "/proxy_arp");
+        // Runtime.getRuntime().exec("echo 1 > /proc/sys/net/ipv4/conf/tun0/proxy_arp");
     }
 
     public void getIp() {
-        // Iterate throught interfaces
+        intf = prefs.getString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
         try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-                    .hasMoreElements();) {
-                NetworkInterface ni = en.nextElement();
-                intf = ni.getName();
-                for (Enumeration<InetAddress> nis = ni.getInetAddresses(); nis.hasMoreElements();) {
-                    InetAddress ia = nis.nextElement();
-                    if (!ia.isLoopbackAddress()) {
-                        if (ia instanceof Inet6Address) {
-                            Log.i(TAG, "IPv6 detected and not supported yet!");
-                            return;
-                        }
-                        ip = ia.getHostAddress();
-                        return;
+            if (intf == null) {
+                // Automatic interface selection
+                for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
+                        .hasMoreElements();) {
+                    NetworkInterface ni = en.nextElement();
+                    intf = ni.getName();
+                    ip = getInterfaceFirstIp(ni);
+                }
+            } else {
+                // Defined interface from Prefs
+                ip = getInterfaceFirstIp(NetworkInterface.getByName(intf));
+            }
+        } catch (SocketException e) {
+            Log.e(TAG, e.getMessage());
+            Editor edit = prefs.edit();
+            edit.putString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
+            edit.commit();
+        }
+        getCidr();
+    }
+
+    private String getInterfaceFirstIp(NetworkInterface ni) {
+        if (ni != null) {
+            Log.v(TAG, "intf=" + intf);
+            Log.v(TAG, "ni=" + ni.getName());
+            for (Enumeration<InetAddress> nis = ni.getInetAddresses(); nis.hasMoreElements();) {
+                InetAddress ia = nis.nextElement();
+                if (!ia.isLoopbackAddress()) {
+                    if (ia instanceof Inet6Address) {
+                        Log.i(TAG, "IPv6 detected and not supported yet!");
+                        return NOIP;
                     }
+                    return ia.getHostAddress();
                 }
             }
-        } catch (SocketException ex) {
-            Log.e(TAG, ex.getMessage());
+        } else {
+            Log.i(TAG, "ni is NULL");
         }
+        return NOIP;
     }
 
     private void getCidr() {
@@ -77,12 +115,19 @@ public class NetInfo {
         if (runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
                 "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) {
             return;
+        } else if (runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
+                "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global " + intf + "$")) {
+            return;
         } else if (runCommand(new File("/system/bin/ifconfig"), "ifconfig " + intf, "^" + intf
                 + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags")) {
+            // FIXME: This probably does not work, we want an integer mask
             return;
+        } else {
+            Log.i(TAG, "cannot find cidr, using default /24");
         }
     }
 
+    // FIXME: Factorize, this isn't a generic runCommand()
     private boolean runCommand(File file, String cmd, String ptrn) {
         try {
             if (file.exists() == true) {
@@ -101,6 +146,7 @@ public class NetInfo {
             }
         } catch (Exception e) {
             Log.e(TAG, "Can't use native command: " + e.getMessage());
+            return false;
         }
         return false;
     }

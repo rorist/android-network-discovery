@@ -10,11 +10,11 @@
     <PreferenceScreen
         android:title="@string/preferences_advanced"
         android:summary="">
-        <CheckBoxPreference
-            android:key="vibrate_finish"
-            android:title="@string/preferences_vibrate_title"
-            android:summary="@string/preferences_vibrate_summary"
-            android:defaultValue="false" />
+        <ListPreference
+            android:key="interface"
+            android:title="@string/preferences_intf_title"
+            android:summary="@string/preferences_intf_summary"
+            android:dialogTitle="@string/preferences_intf_title" />
         <CheckBoxPreference
             android:key="banner"
             android:title="@string/preferences_banner_title"
@@ -24,6 +24,11 @@
             android:key="resolve_name"
             android:title="@string/preferences_resolve_name_title"
             android:summary="@string/preferences_resolve_name_summary"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="vibrate_finish"
+            android:title="@string/preferences_vibrate_title"
+            android:summary="@string/preferences_vibrate_summary"
             android:defaultValue="false" />
         <Preference
             android:key="resetdb"

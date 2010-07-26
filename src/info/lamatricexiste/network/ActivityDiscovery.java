@@ -292,31 +292,12 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
 
     public void addHost(HostBean host) {
         host.position = hosts.size();
-        // if (!hardwareAddressAlreadyExists(host.hardwareAddress)) {
         hosts.add(host);
         adapter.add(null);
-        // } else {
-        // if (mDiscoveryTask != null) {
-        // cancelTasks();
-        // }
-        // AlertDialog.Builder infoDialog = new AlertDialog.Builder(this);
-        // infoDialog.setTitle(R.string.discover_proxy_title);
-        // infoDialog.setMessage(String.format(getString(R.string.discover_proxy_msg),
-        // net.gatewayIp));
-        // infoDialog.setNegativeButton(R.string.btn_close, null);
-        // infoDialog.show();
-        // }
+        if(host.hardwareAddress=="00:00:00:00:00:00"){
+            makeToast(R.string.discover_arperror);
+        }
     }
-
-    // private boolean hardwareAddressAlreadyExists(String addr) {
-    // // FIXME: Find a more performant method
-    // for (HostBean host : hosts) {
-    // if (host.hardwareAddress == addr) {
-    // return true;
-    // }
-    // }
-    // return false;
-    // }
 
     private void startPortscan(HostBean host, int position) {
         Intent intent = new Intent(ctxt, ActivityPortscan.class);

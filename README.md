@@ -38,6 +38,11 @@ Todo
 - Nat Traversal
 - Proxy (auto)support
 
+Credits
+------
+Design: oblivioncreations.se
+Chinese translation: goapk.com
+
 GPLv2 License
 -------
 

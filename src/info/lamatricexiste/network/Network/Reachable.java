@@ -3,6 +3,8 @@
  * Licensed under GNU's GPL 2, see README
  */
 
+// FIXME: This class must be integrated into DefaultDiscovery
+
 package info.lamatricexiste.network.Network;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ public class Reachable {
     public static int isReachable(InetAddress host, int timeout) {
         return isReachable(dports, host, timeout);
     }
+
     public static int isReachable(int[] ports, InetAddress host, int timeout) {
         for (int i = 0; i < ports.length; i++) {
             try {

@@ -120,7 +120,7 @@ public abstract class ActivityNet extends Activity {
                         net.getWifiInfo();
                         if (net.ssid != null) {
                             net.getIp();
-                            info_ip_str = "IP: " + net.ip + "/" + net.cidr;
+                            info_ip_str = "IP: " + net.ip + "/" + net.cidr + " (" + net.intf + ")";
                             info_in_str = "SSID: " + net.ssid;
                             info_mo_str = "MODE: WiFi";
                             setButtons(false);
@@ -130,7 +130,7 @@ public abstract class ActivityNet extends Activity {
                             net.getMobileInfo();
                             if (net.carrier != null) {
                                 net.getIp();
-                                info_ip_str = "IP: " + net.ip + "/" + net.cidr;
+                                info_ip_str = "IP: " + net.ip + "/" + net.cidr + " (" + net.intf + ")";
                                 info_in_str = "CARRIER: " + net.carrier;
                                 info_mo_str = "MODE: Mobile";
                                 setButtons(false);

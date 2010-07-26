@@ -39,6 +39,11 @@ final public class ActivityMain extends Activity {
         final Context ctxt = this;
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
 
+        // Reset interface
+        Editor edit = prefs.edit();
+        edit.putString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
+        edit.commit();
+
         // Determine the needed installation phases
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
             phase1(ctxt);

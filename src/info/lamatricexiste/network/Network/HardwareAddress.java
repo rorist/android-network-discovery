@@ -82,6 +82,7 @@ public class HardwareAddress {
 					matcher = pattern.matcher(line);
 					if (matcher.matches()) {
 						hw = matcher.group(1);
+                        break;
 					}
 				}
 				bufferedReader.close();
