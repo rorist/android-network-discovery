@@ -92,8 +92,6 @@ public class NetInfo {
 
     private String getInterfaceFirstIp(NetworkInterface ni) {
         if (ni != null) {
-            Log.v(TAG, "intf=" + intf);
-            Log.v(TAG, "ni=" + ni.getName());
             for (Enumeration<InetAddress> nis = ni.getInetAddresses(); nis.hasMoreElements();) {
                 InetAddress ia = nis.nextElement();
                 if (!ia.isLoopbackAddress()) {
@@ -104,51 +102,60 @@ public class NetInfo {
                     return ia.getHostAddress();
                 }
             }
-        } else {
-            Log.i(TAG, "ni is NULL");
         }
         return NOIP;
     }
 
     private void getCidr() {
+        String match;
         // Running ip tools
-        if (runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
-                "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) {
-            return;
-        } else if (runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
-                "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global " + intf + "$")) {
-            return;
-        } else if (runCommand(new File("/system/bin/ifconfig"), "ifconfig " + intf, "^" + intf
-                + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags")) {
-            // FIXME: This probably does not work, we want an integer mask
-            return;
-        } else {
+        try {
+            if ((match = runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
+                    "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) != null) {
+                cidr = Integer.parseInt(match);
+                return;
+            } else if ((match = runCommand(new File("/system/xbin/ip"), "ip -f inet addr show "
+                    + intf, "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global " + intf
+                    + "$")) != null) {
+                cidr = Integer.parseInt(match);
+                return;
+            } else if ((match = runCommand(new File("/system/bin/ifconfig"), "ifconfig " + intf,
+                    "^" + intf + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags.*")) != null) {
+                double sum = -2;
+                String[] part = match.split("\\.");
+                for (String p : part) {
+                    sum += 256D - Double.parseDouble(p);
+                }
+                cidr = 32 - (int) (Math.log(sum) / Math.log(2d));
+                return;
+            } else {
+                Log.i(TAG, "cannot find cidr, using default /24");
+            }
+        } catch (NumberFormatException e) {
             Log.i(TAG, "cannot find cidr, using default /24");
         }
     }
 
     // FIXME: Factorize, this isn't a generic runCommand()
-    private boolean runCommand(File file, String cmd, String ptrn) {
+    private String runCommand(File file, String cmd, String ptrn) {
         try {
             if (file.exists() == true) {
                 String line;
                 Matcher matcher;
                 Process p = Runtime.getRuntime().exec(cmd);
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
-                // Log.i(TAG, "CMD=" + cmd);
                 while ((line = r.readLine()) != null) {
                     matcher = Pattern.compile(ptrn).matcher(line);
                     if (matcher.matches()) {
-                        cidr = Integer.parseInt(matcher.group(1));
-                        return true;
+                        return matcher.group(1);
                     }
                 }
             }
         } catch (Exception e) {
             Log.e(TAG, "Can't use native command: " + e.getMessage());
-            return false;
+            return null;
         }
-        return false;
+        return null;
     }
 
     public boolean getMobileInfo() {
