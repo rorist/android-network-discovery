@@ -126,7 +126,8 @@ public abstract class ActivityNet extends Activity {
                             setButtons(false);
                         }
                     } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
-                        if (prefs.getBoolean(Prefs.KEY_MOBILE, Prefs.DEFAULT_MOBILE)) {
+                        if (prefs.getBoolean(Prefs.KEY_MOBILE, Prefs.DEFAULT_MOBILE)
+                                || prefs.getString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF) != null) {
                             net.getMobileInfo();
                             if (net.carrier != null) {
                                 net.getIp();
