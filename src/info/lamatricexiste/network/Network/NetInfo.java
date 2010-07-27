@@ -110,16 +110,16 @@ public class NetInfo {
         String match;
         // Running ip tools
         try {
-            if ((match = runCommand(new File("/system/xbin/ip"), "ip -f inet addr show " + intf,
+            if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show " + intf,
                     "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) != null) {
                 cidr = Integer.parseInt(match);
                 return;
-            } else if ((match = runCommand(new File("/system/xbin/ip"), "ip -f inet addr show "
+            } else if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show "
                     + intf, "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global " + intf
                     + "$")) != null) {
                 cidr = Integer.parseInt(match);
                 return;
-            } else if ((match = runCommand(new File("/system/bin/ifconfig"), "ifconfig " + intf,
+            } else if ((match = runCommand("/system/bin/ifconfig", "/system/bin/ifconfig " + intf,
                     "^" + intf + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags.*")) != null) {
                 double sum = -2;
                 String[] part = match.split("\\.");
@@ -137,7 +137,8 @@ public class NetInfo {
     }
 
     // FIXME: Factorize, this isn't a generic runCommand()
-    private String runCommand(File file, String cmd, String ptrn) {
+    private String runCommand(String path, String cmd, String ptrn) {
+        final File file = new File(path);
         try {
             if (file.exists() == true) {
                 String line;

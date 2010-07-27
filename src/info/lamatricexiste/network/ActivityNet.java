@@ -17,8 +17,6 @@ import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
 import android.util.Log;
 
- // TODO: Simplification accoding to use cases
-
 public abstract class ActivityNet extends Activity {
 
     private final String TAG = "NetState";
@@ -30,7 +28,7 @@ public abstract class ActivityNet extends Activity {
     protected String info_ip_str = "";
     protected String info_in_str = "";
     protected String info_mo_str = "";
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +57,9 @@ public abstract class ActivityNet extends Activity {
     }
 
     protected abstract void setInfo();
+
     protected abstract void setButtons(boolean disable);
+
     protected abstract void cancelTasks();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -72,7 +72,7 @@ public abstract class ActivityNet extends Activity {
             if (action != null) {
                 if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                     int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-                    Log.d(TAG, "WifiState=" + WifiState);
+                    // Log.d(TAG, "WifiState=" + WifiState);
                     switch (WifiState) {
                         case WifiManager.WIFI_STATE_ENABLING:
                             info_in_str = getString(R.string.wifi_enabling);
@@ -94,14 +94,14 @@ public abstract class ActivityNet extends Activity {
 
                 if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) && net.getWifiInfo()) {
                     SupplicantState sstate = net.getSupplicantState();
-                    Log.d(TAG, "SupplicantState=" + sstate);
+                    // Log.d(TAG, "SupplicantState=" + sstate);
                     if (sstate == SupplicantState.SCANNING) {
                         info_in_str = getString(R.string.wifi_scanning);
                         setInfo();
                     } else if (sstate == SupplicantState.ASSOCIATING) {
                         info_in_str = String.format(getString(R.string.wifi_associating),
-                            (net.ssid != null ? net.ssid : (net.bssid != null ? net.bssid
-                                    : net.macAddress)));
+                                (net.ssid != null ? net.ssid : (net.bssid != null ? net.bssid
+                                        : net.macAddress)));
                         setInfo();
                     } else if (sstate == SupplicantState.COMPLETED) {
                         info_in_str = String.format(getString(R.string.wifi_dhcp), net.ssid);
@@ -130,7 +130,8 @@ public abstract class ActivityNet extends Activity {
                             net.getMobileInfo();
                             if (net.carrier != null) {
                                 net.getIp();
-                                info_ip_str = "IP: " + net.ip + "/" + net.cidr + " (" + net.intf + ")";
+                                info_ip_str = "IP: " + net.ip + "/" + net.cidr + " (" + net.intf
+                                        + ")";
                                 info_in_str = "CARRIER: " + net.carrier;
                                 info_mo_str = "MODE: Mobile";
                                 setButtons(false);
