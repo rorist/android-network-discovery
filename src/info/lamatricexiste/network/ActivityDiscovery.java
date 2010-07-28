@@ -255,8 +255,8 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
      */
     private void startDiscovering() {
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
-            //mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
-            mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
+            mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
+            // mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
         } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
             mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
         }
