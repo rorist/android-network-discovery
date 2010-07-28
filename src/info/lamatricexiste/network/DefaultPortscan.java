@@ -184,7 +184,6 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void handleConnect(SelectionKey key) {
         try {
             if (((SocketChannel) key.channel()).finishConnect()) { // Open
