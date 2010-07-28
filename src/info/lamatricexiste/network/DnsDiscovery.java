@@ -34,7 +34,6 @@ public class DnsDiscovery extends AbstractDiscovery {
 
                 for (long i = start; i < end + 1; i++) {
                     hosts_done++;
-
                     HostBean host = new HostBean();
                     host.ipAddress = NetInfo.getIpFromLongUnsigned(i);
                     try {
@@ -47,16 +46,13 @@ public class DnsDiscovery extends AbstractDiscovery {
                         Log.e(TAG, e.getMessage());
                     }
                     if (host.hostname != null && !host.hostname.equals(host.ipAddress)) {
-
                         // Is gateway ?
                         if (discover.net.gatewayIp.equals(host.ipAddress)) {
                             host.isGateway = 1;
                         }
-
                         // Mac Addr
                         host.hardwareAddress = discover.mHardwareAddress
                                 .getHardwareAddress(host.ipAddress);
-
                         // NIC vendor
                         try {
                             host.nicVendor = discover.mHardwareAddress
@@ -64,7 +60,6 @@ public class DnsDiscovery extends AbstractDiscovery {
                         } catch (SQLiteDatabaseCorruptException e) {
                             Log.e(TAG, e.getMessage());
                         }
-
                         publishProgress(host);
                     }
                 }
