@@ -232,8 +232,10 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             final HostBean host = hosts.get(position);
             if (host.isGateway == 1) {
                 holder.logo.setImageResource(R.drawable.router);
-            } else {
+            } else if (host.isAlive == 1) {
                 holder.logo.setImageResource(R.drawable.computer);
+            } else {
+                holder.logo.setImageResource(R.drawable.computer_down);
             }
             if (host.hostname != null && !host.hostname.equals(host.ipAddress)) {
                 holder.host.setText(host.hostname + " (" + host.ipAddress + ")");

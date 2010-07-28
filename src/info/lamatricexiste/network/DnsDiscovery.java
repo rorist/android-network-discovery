@@ -8,6 +8,7 @@ package info.lamatricexiste.network;
 import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 import android.database.sqlite.SQLiteDatabaseCorruptException;
@@ -15,6 +16,7 @@ import android.util.Log;
 
 public class DnsDiscovery extends AbstractDiscovery {
 
+    private static final int TIMEOUT = 500;
     private final String TAG = "DnsDiscovery";
 
     public DnsDiscovery(ActivityDiscovery discover) {
@@ -36,9 +38,12 @@ public class DnsDiscovery extends AbstractDiscovery {
                     HostBean host = new HostBean();
                     host.ipAddress = NetInfo.getIpFromLongUnsigned(i);
                     try {
-                        host.hostname = (InetAddress.getByName(host.ipAddress))
-                                .getCanonicalHostName();
+                        InetAddress ia = InetAddress.getByName(host.ipAddress);
+                        host.hostname = ia.getCanonicalHostName();
+                        host.isAlive = ia.isReachable(TIMEOUT) ? 1 : 0;
                     } catch (java.net.UnknownHostException e) {
+                        Log.e(TAG, e.getMessage());
+                    } catch (IOException e) {
                         Log.e(TAG, e.getMessage());
                     }
                     if (host.hostname != null && !host.hostname.equals(host.ipAddress)) {
@@ -46,18 +51,18 @@ public class DnsDiscovery extends AbstractDiscovery {
                         // Is gateway ?
                         if (discover.net.gatewayIp.equals(host.ipAddress)) {
                             host.isGateway = 1;
+                        }
 
-                            // Mac Addr
-                            host.hardwareAddress = discover.mHardwareAddress
-                                    .getHardwareAddress(host.ipAddress);
+                        // Mac Addr
+                        host.hardwareAddress = discover.mHardwareAddress
+                                .getHardwareAddress(host.ipAddress);
 
-                            // NIC vendor
-                            try {
-                                host.nicVendor = discover.mHardwareAddress
-                                        .getNicVendor(host.hardwareAddress);
-                            } catch (SQLiteDatabaseCorruptException e) {
-                                Log.e(TAG, e.getMessage());
-                            }
+                        // NIC vendor
+                        try {
+                            host.nicVendor = discover.mHardwareAddress
+                                    .getNicVendor(host.hardwareAddress);
+                        } catch (SQLiteDatabaseCorruptException e) {
+                            Log.e(TAG, e.getMessage());
                         }
 
                         publishProgress(host);

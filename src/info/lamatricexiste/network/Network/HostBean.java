@@ -26,6 +26,7 @@ public class HostBean implements Parcelable {
     public static final String EXTRA_SERVICES = PKG + ".extra_services";
 
     public int isGateway = 0;
+    public int isAlive = 1;
     public int position = 0;
     public int responseTime = 0; // ms
     public String ipAddress = null;
@@ -53,6 +54,7 @@ public class HostBean implements Parcelable {
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(isGateway);
+        dest.writeInt(isAlive);
         dest.writeString(ipAddress);
         dest.writeString(hostname);
         dest.writeString(hardwareAddress);
@@ -69,6 +71,7 @@ public class HostBean implements Parcelable {
     @SuppressWarnings("unchecked")
     private void readFromParcel(Parcel in) {
         isGateway = in.readInt();
+        isAlive = in.readInt();
         ipAddress = in.readString();
         hostname = in.readString();
         hardwareAddress = in.readString();
