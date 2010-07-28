@@ -41,7 +41,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             style="@style/ListTextSummary"
-            android:text="00:00:00:00:00:00" />
+            android:text="" />
             
         <TextView
             android:id="@+id/vendor"
@@ -50,7 +50,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             style="@style/ListTextSummary"
-            android:text="NIC Vendor" />
+            android:text="" />
             
     </LinearLayout>
     

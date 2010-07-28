@@ -234,14 +234,18 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             } else {
                 holder.logo.setImageResource(R.drawable.computer);
             }
-            if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
-                    && host.hostname != null && !host.hostname.equals(host.ipAddress)) {
+            if (host.hostname != null && !host.hostname.equals(host.ipAddress)) {
                 holder.host.setText(host.hostname + " (" + host.ipAddress + ")");
             } else {
                 holder.host.setText(host.ipAddress);
             }
-            holder.mac.setText(host.hardwareAddress);
-            holder.vendor.setText(host.nicVendor);
+            if (host.hardwareAddress != "00:00:00:00:00:00") {
+                holder.mac.setText(host.hardwareAddress);
+                holder.vendor.setText(host.nicVendor);
+            } else {
+                holder.mac.setText("");
+                holder.vendor.setText("");
+            }
             return convertView;
         }
     }
@@ -251,7 +255,8 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
      */
     private void startDiscovering() {
         if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
-            mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
+            //mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
+            mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
         } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
             mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
         }
@@ -294,9 +299,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         host.position = hosts.size();
         hosts.add(host);
         adapter.add(null);
-        if(host.hardwareAddress=="00:00:00:00:00:00"){
-            makeToast(R.string.discover_arperror);
-        }
     }
 
     private void startPortscan(HostBean host, int position) {
