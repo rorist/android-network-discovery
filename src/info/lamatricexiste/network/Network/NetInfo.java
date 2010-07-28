@@ -76,6 +76,9 @@ public class NetInfo {
                     NetworkInterface ni = en.nextElement();
                     intf = ni.getName();
                     ip = getInterfaceFirstIp(ni);
+                    if (ip != NOIP) {
+                        break;
+                    }
                 }
             } else {
                 // Defined interface from Prefs
