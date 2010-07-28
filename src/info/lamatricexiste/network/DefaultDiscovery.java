@@ -129,7 +129,9 @@ public class DefaultDiscovery extends AsyncTask<Void, HostBean, Void> {
 			if (discover != null) {
 				if (!isCancelled()) {
 					discover.addHost(host[0]);
-					discover.setProgress((int) (hosts_done * 10000 / size));
+                    if (size > 0) {
+    					discover.setProgress((int) (hosts_done * 10000 / size));
+                    }
 				}
 			}
 		}
