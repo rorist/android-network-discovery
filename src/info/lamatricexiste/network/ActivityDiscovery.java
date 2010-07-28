@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,7 +42,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 final public class ActivityDiscovery extends ActivityNet implements OnItemClickListener {
 
-    // private final String TAG = "ActivityDiscovery";
+    private final String TAG = "ActivityDiscovery";
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
     public static final int MENU_SCAN_SINGLE = 0;
@@ -254,11 +255,23 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
      * Discover hosts
      */
     private void startDiscovering() {
-        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "0") {
-            mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
-            // mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
-        } else if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-            mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
+        int method = 0;
+        try {
+            method = Integer.parseInt(prefs.getString(Prefs.KEY_METHOD_DISCOVER,
+                    Prefs.DEFAULT_METHOD_DISCOVER));
+        } catch (NumberFormatException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        switch (method) {
+            case 1:
+                mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
+                break;
+            case 2:
+                mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
+                break;
+            case 0:
+            default:
+                mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
         makeToast(R.string.discover_start);

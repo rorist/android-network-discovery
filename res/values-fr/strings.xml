@@ -113,8 +113,17 @@
     <string name="preferences_website_title">Site internet</string>
     <string name="preferences_intf_title">Interface réseau</string>
     <string name="preferences_intf_summary">Choix de l\'interface à utiliser</string>
+    <string name="preferences_discover_method_title">Méthode de découverte</string>
+    <string name="preferences_discover_method_summary">Changer la méthode de découverte des machines</string>
+    <string name="preferences_discover_method_title_dialog">Choisissez une méthode</string>
     
     <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
     <string name="preferences_error2">Erreur: Le nombre de Threads doit être entre 1 et 256 !</string>
-    <string name="preferences_error3">Erreur: Le téléchargement du fichier a été interrompu !</string>
+    <string name="preferences_error3">Erreur: Le téléchargement du fichier a été interrompu !</string> 
+       
+    <string-array name="method_discover_name">
+        <item>Ping/connect (défaut)</item>
+        <item>Requêtes DNS</item>
+    </string-array>
+    
 </resources>

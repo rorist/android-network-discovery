@@ -114,8 +114,17 @@
     <string name="preferences_website_title">Website</string>
     <string name="preferences_intf_title">Network interface</string>
     <string name="preferences_intf_summary">Choose which interface to use</string>
+    <string name="preferences_discover_method_title">Discover Method</string>
+    <string name="preferences_discover_method_summary">Change to different method of host discovery</string>
+    <string name="preferences_discover_method_title_dialog">Choose a method</string>
     
     <string name="preferences_error1">Error: First port is bigger than Last port !</string>
     <string name="preferences_error2">Error: Number of Threads must be between 1 and 256 !</string>
     <string name="preferences_error3">Error: File transfer interrupted !</string>
+    
+    <string-array name="method_discover_name">
+        <item>Ping/connect (default)</item>
+        <item>DNS requests</item>
+    </string-array>
+    
 </resources>

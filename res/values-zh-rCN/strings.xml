@@ -108,8 +108,19 @@
     <string name="preferences_resetdb_ok">已升级数据库！更新 %s 个新条目 ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Website</string>
-    
+    <string name="preferences_intf_title">Network interface</string>
+    <string name="preferences_intf_summary">Choose which interface to use</string>
+    <string name="preferences_discover_method_title">Discover Method</string>
+    <string name="preferences_discover_method_summary">Change to different method of host discovery</string>
+    <string name="preferences_discover_method_title_dialog">Choose a method</string>
+        
     <string name="preferences_error1">错误：起始端口大于终止端口！</string>
     <string name="preferences_error2">错误：线程数必须介于1和256！</string>
     <string name="preferences_error3">错误：文件传输中断！</string>
+    
+    <string-array name="method_discover_name">
+        <item>Ping/connect (default)</item>
+        <item>DNS requests</item>
+    </string-array>
+
 </resources>

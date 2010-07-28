@@ -40,6 +40,13 @@
     <PreferenceScreen
         android:title="@string/preferences_discover"
         android:summary="">
+        <ListPreference
+            android:key="discovery_method"
+            android:title="@string/preferences_discover_method_title"
+            android:summary="@string/preferences_discover_method_summary"
+            android:entries="@array/method_discover_name"
+            android:entryValues="@array/method_discover_value"
+            android:dialogTitle="@string/preferences_discover_method_title_dialog"/>
         <CheckBoxPreference
             android:key="allow_mobile"
             android:title="@string/preferences_allow_mobile_title"
@@ -62,13 +69,6 @@
             android:summary="@string/preferences_threads_summary"
             android:defaultValue="32"
             android:inputType="number" />
-<!--        <ListPreference-->
-<!--            android:key="method_discover"-->
-<!--            android:title="Discovery Method"-->
-<!--            android:summary="Select a different discovery method"-->
-<!--            android:entries="@array/method_discover_name"-->
-<!--            android:entryValues="@array/method_discover_value"-->
-<!--            android:dialogTitle="Choose the method"/>-->
     </PreferenceScreen>
 
     <PreferenceScreen

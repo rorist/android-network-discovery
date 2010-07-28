@@ -5,11 +5,6 @@
 -->
 <resources>
 
-    <string-array name="method_discover_name">
-        <item>Ping (default)</item>
-        <item>Root</item>
-    </string-array>
-
     <string-array name="method_discover_value">
         <item>0</item>
         <item>1</item>

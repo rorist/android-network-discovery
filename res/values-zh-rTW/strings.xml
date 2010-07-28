@@ -108,8 +108,19 @@
     <string name="preferences_resetdb_ok">已升級資料庫！更新 %s 個新項目 ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Website</string>
+    <string name="preferences_intf_title">Network interface</string>
+    <string name="preferences_intf_summary">Choose which interface to use</string>
+    <string name="preferences_discover_method_title">Discover Method</string>
+    <string name="preferences_discover_method_summary">Change to different method of host discovery</string>
+    <string name="preferences_discover_method_title_dialog">Choose a method</string>
     
     <string name="preferences_error1">錯誤：開始通訊埠大於終止通訊埠！</string>
     <string name="preferences_error2">錯誤：執行緒數必須介於1和256！</string>
     <string name="preferences_error3">錯誤：檔案傳輸中斷！</string>
+    
+    <string-array name="method_discover_name">
+        <item>Ping/connect (default)</item>
+        <item>DNS requests</item>
+    </string-array>
+
 </resources>

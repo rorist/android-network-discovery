@@ -67,7 +67,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_ROOT_INSTALLED = "root_installed";
     public static final int DEFAULT_ROOT_INSTALLED = 0;
 
-    public static final String KEY_METHOD_DISCOVER = "method_discovery";
+    public static final String KEY_METHOD_DISCOVER = "discovery_method";
     public static final String DEFAULT_METHOD_DISCOVER = "0";
 
     public static final String KEY_METHOD_PORTSCAN = "method_portscan";
