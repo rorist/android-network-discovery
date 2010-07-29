@@ -68,7 +68,7 @@ public class HardwareAddress {
 			}
 		}
 		// Get HW Addr
-		String hw = "00:00:00:00:00:00";
+		String hw = NetInfo.NOMAC;
 		try {
 			if (ip != null) {
 				FileReader fileReader = new FileReader("/proc/net/arp");

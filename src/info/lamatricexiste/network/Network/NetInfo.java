@@ -33,20 +33,21 @@ import android.util.Log;
 
 public class NetInfo {
     private final String TAG = "NetInfo";
-    private final String NOIP = "0.0.0.0";
+    public static final String NOIP = "0.0.0.0";
+    public static final String NOMAC = "00:00:00:00:00:00";
     private Context ctxt;
     private WifiInfo info;
     private SharedPreferences prefs;
 
     public String intf = "eth0";
-    public String ip = "0.0.0.0";
+    public String ip = NOIP;
     public int cidr = 24;
 
     public String ssid = null;
     public String bssid = null;
     public String carrier = null;
-    public String macAddress = "00:00:00:00:00:00";
-    public Object gatewayIp = "0.0.0.0";
+    public String macAddress = NOMAC;
+    public String gatewayIp = NOIP;
 
     public NetInfo(final Context ctxt) {
         this.ctxt = ctxt;
