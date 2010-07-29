@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
+import android.os.AsyncTask.Status;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -46,7 +47,9 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
             dialog.setMessage(R.string.preferences_resetdb_action);
             dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    execute();
+                    if (!getStatus().equals(Status.RUNNING)) {
+                        execute();
+                    }
                 }
             });
             dialog.setNegativeButton(R.string.btn_no, new OnClickListener() {
