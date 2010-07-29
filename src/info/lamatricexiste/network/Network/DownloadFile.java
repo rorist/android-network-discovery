@@ -49,10 +49,18 @@ public class DownloadFile {
         } catch (NullPointerException e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            inputChannel.close();
-            outputChannel.close();
-            in.close();
-            out.close();
+            if (inputChannel != null) {
+                inputChannel.close();
+            }
+            if (outputChannel != null) {
+                outputChannel.close();
+            }
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
         }
     }
 
