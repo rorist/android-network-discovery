@@ -31,15 +31,19 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
 
     @Override
     protected void onPreExecute() {
-        // FIXME: Move that in ActivityDiscovey
         if (mDiscover != null) {
             final ActivityDiscovery discover = mDiscover.get();
             if (discover != null) {
                 NetInfo net = new NetInfo(discover);
                 ip = NetInfo.getUnsignedLongFromIp(net.ip);
                 int shift = (32 - net.cidr);
-                start = (ip >> shift << shift) + 1;
-                end = (start | ((1 << shift) - 1)) - 1;
+                if (net.cidr < 31){ 
+                    start = (ip >> shift << shift) + 1;
+                    end = (start | ((1 << shift) - 1)) - 1;
+                } else {
+                    start = (ip >> shift << shift);
+                    end = (start | ((1 << shift) - 1));
+                }
                 size = (int) (end - start + 1);
                 discover.setProgress(0);
             }
