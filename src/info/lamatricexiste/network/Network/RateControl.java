@@ -19,14 +19,12 @@ public class RateControl {
     private final String TAG = "RateControl";
     private final int REACH_TIMEOUT = 5000;
     private final String CMD = "/system/bin/ping";
-    private final String ARG = " -q -n -W 2 -c ";
-    private final String PTN = "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/[0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+ ms$";
+    private final String ARG = " -A -q -n -w 3 -W 2 -c 3";
+    private final String PTN = "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/[0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+ ms.*";
     private Pattern mPattern;
-    private Matcher matcher;
     private String line;
-    public String[] indicator;
+    public String indicator = null;
     public int rate = 800; // Slow start
-    public boolean is_indicator_discovered = false;
 
     public RateControl() {
         mPattern = Pattern.compile(PTN);
@@ -34,27 +32,24 @@ public class RateControl {
 
     public void adaptRate() {
         int response_time = 0;
-        // TODO: Use an indicator with a port, calculate java round trip time
-        // if (indicator.length > 1) {
-        // Log.v(TAG, "use a socket here, port=" + getIndicator()[1]);
-        // } else {
-        is_indicator_discovered = true;
-        if ((response_time = getAvgResponseTime(indicator[0], 3)) > 0) {
+        if ((response_time = getAvgResponseTime(indicator)) > 0) {
             if (response_time > 100) { // Most distanced hosts
                 rate = response_time * 5; // Minimum 500ms
             } else {
                 rate = response_time * 10; // Maximum 1000ms
             }
-            // Log.v(TAG, "adapt=" + response_time + "ms -> " + rate + "ms");
+            if (rate > REACH_TIMEOUT) {
+                rate = REACH_TIMEOUT;
+            }
         }
-        // }
     }
 
-    private int getAvgResponseTime(String host, int count) {
+    private int getAvgResponseTime(String host) {
         BufferedReader reader = null;
+        Matcher matcher;
         try {
             // TODO: Reduce allocation
-            Process proc = Runtime.getRuntime().exec(CMD + ARG + count + " " + host);
+            Process proc = Runtime.getRuntime().exec(CMD + ARG + " " + host);
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()), 1);
             while ((line = reader.readLine()) != null) {
                 matcher = mPattern.matcher(line);
