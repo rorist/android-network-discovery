@@ -1,7 +1,6 @@
 package info.lamatricexiste.network;
 
 import info.lamatricexiste.network.Network.HostBean;
-import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
 
 import java.lang.ref.WeakReference;
@@ -18,6 +17,7 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
     protected WeakReference<ActivityDiscovery> mDiscover;
 
     // TODO: Adaptiv value or changeable by Prefs
+    protected int cidr;
     protected long ip;
     protected long start;
     protected long end;
@@ -27,24 +27,27 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
         mDiscover = new WeakReference<ActivityDiscovery>(discover);
     }
 
+    public void setNetwork(long ip, int cidr) {
+        this.cidr = cidr;
+        this.ip = ip;
+    }
+
     abstract protected Void doInBackground(Void... params);
 
     @Override
     protected void onPreExecute() {
+        int shift = (32 - cidr);
+        if (cidr < 31) {
+            start = (ip >> shift << shift) + 1;
+            end = (start | ((1 << shift) - 1)) - 1;
+        } else {
+            start = (ip >> shift << shift);
+            end = (start | ((1 << shift) - 1));
+        }
+        size = (int) (end - start + 1);
         if (mDiscover != null) {
             final ActivityDiscovery discover = mDiscover.get();
             if (discover != null) {
-                NetInfo net = new NetInfo(discover);
-                ip = NetInfo.getUnsignedLongFromIp(net.ip);
-                int shift = (32 - net.cidr);
-                if (net.cidr < 31){ 
-                    start = (ip >> shift << shift) + 1;
-                    end = (start | ((1 << shift) - 1)) - 1;
-                } else {
-                    start = (ip >> shift << shift);
-                    end = (start | ((1 << shift) - 1));
-                }
-                size = (int) (end - start + 1);
                 discover.setProgress(0);
             }
         }
