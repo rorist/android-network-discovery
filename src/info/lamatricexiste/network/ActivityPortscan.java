@@ -125,7 +125,7 @@ final public class ActivityPortscan extends TabActivity {
 
         // Vendor name
         TextView nic = (TextView) findViewById(R.id.vendor);
-        if (host.nicVendor != null && !host.hardwareAddress.equals(NetInfo.NOMAC) {
+        if (host.nicVendor != null && !host.hardwareAddress.equals(NetInfo.NOMAC)) {
             nic.setText(host.nicVendor);
         } else {
             nic.setVisibility(View.GONE);
