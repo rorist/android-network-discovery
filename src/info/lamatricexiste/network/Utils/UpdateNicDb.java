@@ -8,7 +8,6 @@ package info.lamatricexiste.network.Utils;
 import info.lamatricexiste.network.R;
 import info.lamatricexiste.network.Network.DownloadFile;
 import info.lamatricexiste.network.Network.NetInfo;
-import info.lamatricexiste.network.Utils.Db;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -26,7 +25,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
-import android.os.AsyncTask.Status;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;

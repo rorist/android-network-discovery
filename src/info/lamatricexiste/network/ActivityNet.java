@@ -57,9 +57,7 @@ public abstract class ActivityNet extends Activity {
     }
 
     protected abstract void setInfo();
-
     protected abstract void setButtons(boolean disable);
-
     protected abstract void cancelTasks();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {

@@ -58,10 +58,6 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         + "), length=" + size);
                 mPool = Executors.newFixedThreadPool(Integer.parseInt(discover.prefs.getString(
                         Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
-                // mPool = Executors.newCachedThreadPool();
-                // mPool =
-                // Executors.newScheduledThreadPool(Integer.parseInt(discover.prefs.getString(
-                // Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
 
                 try {
                     // gateway
@@ -112,9 +108,6 @@ public class DefaultDiscovery extends AbstractDiscovery {
 
     private void launch(long i) {
         mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
-        // mPool.scheduleAtFixedRate(new
-        // CheckRunnable(NetInfo.getIpFromLongUnsigned(i)), 50,
-        // getRate(), TimeUnit.MILLISECONDS);
     }
 
     private int getRate() {
@@ -143,15 +136,15 @@ public class DefaultDiscovery extends AbstractDiscovery {
             try {
                 InetAddress h = InetAddress.getByName(host);
                 // Rate control check
-                if (doRateControl && mRateControl.is_indicator_discovered
-                        && hosts_done % mRateMult == 0) {
+                if (doRateControl && mRateControl.indicator != null && hosts_done % mRateMult == 0) {
                     mRateControl.adaptRate();
                 }
                 // Native InetAddress check
                 if (h.isReachable(getRate())) {
                     publish(host);
-                    if (doRateControl && !mRateControl.is_indicator_discovered) {
-                        mRateControl.indicator = new String[] { host };
+                    // Set indicator and get a rate
+                    if (doRateControl && mRateControl.indicator == null) {
+                        mRateControl.indicator = host;
                         mRateControl.adaptRate();
                     }
                     return;
@@ -162,12 +155,6 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 if ((port = Reachable.isReachable(h, getRate())) > -1) {
                     Log.v(TAG, "used Network.Reachable object, port=" + port);
                     publish(host);
-                    // if (!mRateControl.isIndicatorDiscovered()) {
-                    // mRateControl.setIndicator(host,
-                    // String.valueOf(port));
-                    // mRateControl.adaptRate();
-                    // discover_rate = mRateControl.getRate();
-                    // }
                     return;
                 }
                 publish((String) null);
@@ -175,8 +162,6 @@ public class DefaultDiscovery extends AbstractDiscovery {
             } catch (IOException e) {
                 publish((String) null);
                 Log.e(TAG, e.getMessage());
-                // } catch (InterruptedException e) {
-                // Log.i(TAG, "InterruptedException");
             }
         }
     }

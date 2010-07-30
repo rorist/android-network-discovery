@@ -70,8 +70,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_METHOD_DISCOVER = "discovery_method";
     public static final String DEFAULT_METHOD_DISCOVER = "0";
 
-    public static final String KEY_METHOD_PORTSCAN = "method_portscan";
-    public static final String DEFAULT_METHOD_PORTSCAN = "0";
+    //public static final String KEY_METHOD_PORTSCAN = "method_portscan";
+    //public static final String DEFAULT_METHOD_PORTSCAN = "0";
 
     public final static String KEY_TIMEOUT_FORCE = "timeout_force";
     public final static boolean DEFAULT_TIMEOUT_FORCE = false;
