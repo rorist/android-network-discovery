@@ -2,6 +2,8 @@
 <!--
  Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
  Licensed under GNU's GPL 2, see README
+ 
+ FIXME: Use RelativeLayout !!!
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -42,33 +44,81 @@
             android:layout_gravity="center_horizontal"
             android:textSize="10dip"
             android:typeface="monospace"
-            android:text="@string/discover_empty" />
+            android:text="@string/discover_empty" /> <!--
+        <SlidingDrawer
+            android:id="@+id/drawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:handle="@+id/handle"
+            android:content="@+id/content">
+            <ImageView
+                android:id="@id/handle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/drawer_handle" />
+            <LinearLayout
+                android:id="@id/content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/drawer_bg">
+                <TextView
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="10dip"
+                    android:typeface="monospace"
+                    android:text="Network Block" />
+                <Button
+                    android:id="@+id/btn_cidr_minus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+                <EditText
+                    android:id="@+id/cidr_value"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    style="?android:attr/textAppearanceLargeInverse"
+                    android:textColor="@android:color/primary_text_light"
+                    android:textSize="30sp" />
+                <Button
+                    android:id="@+id/btn_cidr_plus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+" />
+            </LinearLayout>
+         </SlidingDrawer>
+          -->
     </FrameLayout>
-    <TextView
-        android:id="@+id/info_ip"
+    <LinearLayout
+        android:id="@+id/info_container"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dip"
-        android:layout_marginLeft="15dip"
-        android:layout_marginRight="15dip"
-        android:textSize="10dip"
-        android:typeface="monospace" />
-    <TextView
-        android:id="@+id/info_in"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dip"
-        android:layout_marginRight="15dip"
-        android:textSize="10dip"
-        android:typeface="monospace"
-        android:text="@string/wifi_unknown" />
-    <TextView
-        android:id="@+id/info_mo"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dip"
-        android:layout_marginRight="15dip"
-        android:layout_marginBottom="15dip"
-        android:textSize="10dip"
-        android:typeface="monospace" />
+        android:paddingTop="10dip"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:paddingBottom="5dip"
+        android:background="@drawable/drawer_bg"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/info_ip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10dip"
+            android:typeface="monospace" />
+        <TextView
+            android:id="@+id/info_in"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10dip"
+            android:typeface="monospace"
+            android:text="@string/wifi_unknown" />
+        <TextView
+            android:id="@+id/info_mo"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10dip"
+            android:typeface="monospace" />
+    </LinearLayout>
 </LinearLayout>

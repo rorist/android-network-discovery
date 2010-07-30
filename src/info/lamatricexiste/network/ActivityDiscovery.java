@@ -21,7 +21,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,7 +38,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 final public class ActivityDiscovery extends ActivityNet implements OnItemClickListener {
 
@@ -53,8 +52,10 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     private Button btn_discover;
-    private AsyncTask<Void, HostBean, Void> mDiscoveryTask = null;
+    private AbstractDiscovery mDiscoveryTask = null;
     public HardwareAddress mHardwareAddress;
+    //private SlidingDrawer mDrawer;
+    //private int mCustomCidr;
 
     // private RootDaemon mRootDaemon = null;
 
@@ -89,6 +90,34 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         list.setItemsCanFocus(false);
         list.setOnItemClickListener(this);
         list.setEmptyView(findViewById(R.id.list_empty));
+
+        // Drawer
+        /*
+        final View info = findViewById(R.id.info_container);
+        mDrawer = (SlidingDrawer) findViewById(R.id.drawer);
+        mDrawer.setOnDrawerScrollListener(new SlidingDrawer.OnDrawerScrollListener() {
+            public void onScrollStarted() {
+                info.setBackgroundResource(R.drawable.drawer_bg2);
+            }
+
+            public void onScrollEnded() {
+            }
+        });
+        mDrawer.setOnDrawerCloseListener(new SlidingDrawer.OnDrawerCloseListener() {
+            public void onDrawerClosed() {
+                info.setBackgroundResource(R.drawable.drawer_bg);
+            }
+        });
+        EditText cidr_value = (EditText) findViewById(R.id.cidr_value);
+        ((Button) findViewById(R.id.btn_cidr_plus)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            }
+        });
+        ((Button) findViewById(R.id.btn_cidr_minus)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            }
+        });
+        */
     }
 
     @Override
@@ -232,7 +261,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             final HostBean host = hosts.get(position);
             if (host.isGateway == 1) {
                 holder.logo.setImageResource(R.drawable.router);
-            } else if (host.isAlive == 1) {
+            } else if (host.isAlive == 1 || !host.hardwareAddress.equals(NetInfo.NOMAC)) {
                 holder.logo.setImageResource(R.drawable.computer);
             } else {
                 holder.logo.setImageResource(R.drawable.computer_down);
@@ -242,7 +271,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             } else {
                 holder.host.setText(host.ipAddress);
             }
-            if (host.hardwareAddress != "00:00:00:00:00:00") {
+            if (host.hardwareAddress != NetInfo.NOMAC) {
                 holder.mac.setText(host.hardwareAddress);
                 holder.vendor.setText(host.nicVendor);
             } else {
@@ -276,10 +305,8 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
-        makeToast(R.string.discover_start);
-        setProgressBarVisibility(true);
-        setProgressBarIndeterminateVisibility(true);
-        initList();
+        // FIXME: TEMP TEST
+        mDiscoveryTask.setNetwork(NetInfo.getUnsignedLongFromIp(net.ip), net.cidr);
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
         setButton(btn_discover, R.drawable.cancel, false);
@@ -288,20 +315,24 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 cancelTasks();
             }
         });
+        makeToast(R.string.discover_start);
+        setProgressBarVisibility(true);
+        setProgressBarIndeterminateVisibility(true);
+        initList();
     }
 
     public void stopDiscovering() {
         mHardwareAddress.dbClose();
         mDiscoveryTask = null;
-        setProgressBarVisibility(false);
-        setProgressBarIndeterminateVisibility(false);
-        btn_discover.setText(R.string.btn_discover);
         setButtonOn(btn_discover, R.drawable.discover);
         btn_discover.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startDiscovering();
             }
         });
+        setProgressBarVisibility(false);
+        setProgressBarIndeterminateVisibility(false);
+        btn_discover.setText(R.string.btn_discover);
     }
 
     private void initList() {
