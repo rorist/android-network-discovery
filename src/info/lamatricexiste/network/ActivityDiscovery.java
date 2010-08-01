@@ -54,9 +54,9 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     private Button btn_discover;
     private AbstractDiscovery mDiscoveryTask = null;
     public HardwareAddress mHardwareAddress;
-    //private SlidingDrawer mDrawer;
-    //private int mCustomCidr;
 
+    // private SlidingDrawer mDrawer;
+    // private int mCustomCidr;
     // private RootDaemon mRootDaemon = null;
 
     @Override
@@ -93,31 +93,23 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
 
         // Drawer
         /*
-        final View info = findViewById(R.id.info_container);
-        mDrawer = (SlidingDrawer) findViewById(R.id.drawer);
-        mDrawer.setOnDrawerScrollListener(new SlidingDrawer.OnDrawerScrollListener() {
-            public void onScrollStarted() {
-                info.setBackgroundResource(R.drawable.drawer_bg2);
-            }
-
-            public void onScrollEnded() {
-            }
-        });
-        mDrawer.setOnDrawerCloseListener(new SlidingDrawer.OnDrawerCloseListener() {
-            public void onDrawerClosed() {
-                info.setBackgroundResource(R.drawable.drawer_bg);
-            }
-        });
-        EditText cidr_value = (EditText) findViewById(R.id.cidr_value);
-        ((Button) findViewById(R.id.btn_cidr_plus)).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            }
-        });
-        ((Button) findViewById(R.id.btn_cidr_minus)).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            }
-        });
-        */
+         * final View info = findViewById(R.id.info_container); mDrawer =
+         * (SlidingDrawer) findViewById(R.id.drawer);
+         * mDrawer.setOnDrawerScrollListener(new
+         * SlidingDrawer.OnDrawerScrollListener() { public void
+         * onScrollStarted() {
+         * info.setBackgroundResource(R.drawable.drawer_bg2); }
+         * 
+         * public void onScrollEnded() { } });
+         * mDrawer.setOnDrawerCloseListener(new
+         * SlidingDrawer.OnDrawerCloseListener() { public void onDrawerClosed()
+         * { info.setBackgroundResource(R.drawable.drawer_bg); } }); EditText
+         * cidr_value = (EditText) findViewById(R.id.cidr_value); ((Button)
+         * findViewById(R.id.btn_cidr_plus)).setOnClickListener(new
+         * View.OnClickListener() { public void onClick(View v) { } });
+         * ((Button) findViewById(R.id.btn_cidr_minus)).setOnClickListener(new
+         * View.OnClickListener() { public void onClick(View v) { } });
+         */
     }
 
     @Override
