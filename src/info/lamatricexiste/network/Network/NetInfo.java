@@ -33,6 +33,7 @@ import android.util.Log;
 
 public class NetInfo {
     private final String TAG = "NetInfo";
+    private static final int BUF = 8 * 1024;
     public static final String NOIP = "0.0.0.0";
     public static final String NOMAC = "00:00:00:00:00:00";
     private Context ctxt;
@@ -148,7 +149,8 @@ public class NetInfo {
                 String line;
                 Matcher matcher;
                 Process p = Runtime.getRuntime().exec(cmd);
-                BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
+                BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()),
+                        BUF);
                 while ((line = r.readLine()) != null) {
                     matcher = Pattern.compile(ptrn).matcher(line);
                     if (matcher.matches()) {

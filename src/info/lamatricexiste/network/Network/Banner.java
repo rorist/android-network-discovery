@@ -17,7 +17,7 @@ import android.util.Log;
 public class Banner extends AsyncTask<Void, String, Void> {
 
     private final String TAG = "Banner";
-    private final int BUF = 96;
+    private static final int BUF = 8 * 1024;
     private String host;
     private int port;
     private int timeout;
