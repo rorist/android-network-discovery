@@ -17,6 +17,7 @@ public class RateControl {
 
     // TODO: Calculate a rounded up value from experiments in different networks
     private final String TAG = "RateControl";
+    private static final int BUF = 8 * 1024;
     private final int REACH_TIMEOUT = 5000;
     private final String CMD = "/system/bin/ping";
     private final String ARG = " -A -q -n -w 3 -W 2 -c 3";
@@ -50,7 +51,7 @@ public class RateControl {
         try {
             // TODO: Reduce allocation
             Process proc = Runtime.getRuntime().exec(CMD + ARG + " " + host);
-            reader = new BufferedReader(new InputStreamReader(proc.getInputStream()), 1);
+            reader = new BufferedReader(new InputStreamReader(proc.getInputStream()), BUF);
             while ((line = reader.readLine()) != null) {
                 matcher = mPattern.matcher(line);
                 if (matcher.matches()) {
