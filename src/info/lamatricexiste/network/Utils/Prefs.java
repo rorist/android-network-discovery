@@ -13,6 +13,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -56,7 +57,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String DEFAULT_SSH_USER = "root";
 
     public static final String KEY_NTHREADS = "nthreads";
-    public static final String DEFAULT_NTHREADS = "16";
+    public static final String DEFAULT_NTHREADS = "8";
 
     public static final String KEY_RESET_NICDB = "resetdb";
     public static final int DEFAULT_RESET_NICDB = 1;
@@ -70,8 +71,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_METHOD_DISCOVER = "discovery_method";
     public static final String DEFAULT_METHOD_DISCOVER = "0";
 
-    //public static final String KEY_METHOD_PORTSCAN = "method_portscan";
-    //public static final String DEFAULT_METHOD_PORTSCAN = "0";
+    // public static final String KEY_METHOD_PORTSCAN = "method_portscan";
+    // public static final String DEFAULT_METHOD_PORTSCAN = "0";
 
     public final static String KEY_TIMEOUT_FORCE = "timeout_force";
     public final static boolean DEFAULT_TIMEOUT_FORCE = false;
@@ -96,11 +97,13 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
+    public static final String KEY_EMAIL = "email";
     public static final String KEY_VERSION = "version";
     public static final String KEY_WIFI = "wifi";
 
     private static final String URL_DONATE = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MDSDWG83PJSNG&lc=CH&item_name=Network%20Discovery%20for%20Android&currency_code=CHF&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted";
     private static final String URL_WEB = "http://rorist.github.com/android-network-discovery/";
+    private static final String URL_EMAIL = "aubort.jeanbaptiste@gmail.com";
 
     private Context ctxt;
     private PreferenceScreen ps = null;
@@ -201,6 +204,23 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(URL_WEB));
                 startActivity(i);
+                return true;
+            }
+        });
+
+        // Contact
+        Preference contact = (Preference) ps.findPreference(KEY_EMAIL);
+        contact.setSummary(URL_EMAIL);
+        contact.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                final Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                emailIntent.setType("plain/text");
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { URL_EMAIL });
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Network Discovery");
+                try {
+                    startActivity(emailIntent);
+                } catch (ActivityNotFoundException e) {
+                }
                 return true;
             }
         });

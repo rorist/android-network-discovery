@@ -108,6 +108,7 @@
     <string name="preferences_resetdb_ok">已升級資料庫！更新 %s 個新項目 ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Website</string>
+    <string name="preferences_email_title">Contact</string>
     <string name="preferences_intf_title">Network interface</string>
     <string name="preferences_intf_summary">Choose which interface to use</string>
     <string name="preferences_discover_method_title">Discover Method</string>

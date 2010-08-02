@@ -67,7 +67,7 @@
             android:key="nthreads"
             android:title="@string/preferences_threads_title"
             android:summary="@string/preferences_threads_summary"
-            android:defaultValue="32"
+            android:defaultValue="8"
             android:inputType="number" />
     </PreferenceScreen>
 
@@ -118,6 +118,9 @@
     <Preference
         android:key="website"
         android:title="@string/preferences_website_title"/>
+    <Preference
+        android:key="email"
+        android:title="@string/preferences_email_title"/>
     <Preference
         android:key="version"
         android:title="@string/preferences_version_title"/>

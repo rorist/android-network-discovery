@@ -111,6 +111,7 @@
     <string name="preferences_resetdb_ok">Base de donnée mise à jour ! %S nouveaux éléments ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Site internet</string>
+    <string name="preferences_email_title">Contact</string>
     <string name="preferences_intf_title">Interface réseau</string>
     <string name="preferences_intf_summary">Choix de l\'interface à utiliser</string>
     <string name="preferences_discover_method_title">Méthode de découverte</string>
