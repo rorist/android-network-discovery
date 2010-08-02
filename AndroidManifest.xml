@@ -8,12 +8,12 @@
     package="info.lamatricexiste.network"
     android:versionCode="42"
     android:versionName="0.3.4"
-    android:debuggable="true"
     android:installLocation="preferExternal">
     
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:debuggable="true">
         
         <activity
             android:name=".ActivityMain"
