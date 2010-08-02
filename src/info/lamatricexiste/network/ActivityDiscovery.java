@@ -115,16 +115,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     @Override
     public void onResume() {
         super.onResume();
-        // Scan button state
-        if (mDiscoveryTask != null) {
-            setButton(btn_discover, R.drawable.cancel, false);
-            btn_discover.setText(R.string.btn_discover_cancel);
-            btn_discover.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    cancelTasks();
-                }
-            });
-        }
     }
 
     // @Override
@@ -183,6 +173,16 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     }
 
     protected void setInfo() {
+        // Scan button state
+        if (mDiscoveryTask != null) {
+            setButton(btn_discover, R.drawable.cancel, false);
+            btn_discover.setText(R.string.btn_discover_cancel);
+            btn_discover.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    cancelTasks();
+                }
+            });
+        }
         ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
         ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
         ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
