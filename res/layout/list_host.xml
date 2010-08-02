@@ -32,7 +32,8 @@
             android:id="@+id/list"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+            android:ellipsize="start"
+            android:maxLines="2"
             style="@style/ListTextTitle"
             android:text="List" />
             
@@ -47,7 +48,7 @@
             android:id="@+id/vendor"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
+            android:lines="1"
             android:ellipsize="end"
             style="@style/ListTextSummary"
             android:text="" />

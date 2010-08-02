@@ -106,15 +106,20 @@ public class HardwareAddress {
                     String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
                     // Db request
                     try {
-                        if (db.isOpen()) {
-                            Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
-                                    + "'", null);
-                            if (c.getCount() > 0) {
-                                c.moveToFirst();
-                                ni = c.getString(c.getColumnIndex("vendor"));
+                        synchronized (db) {
+                            if (db.isOpen()) {
+                                Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
+                                        + "'", null);
+                                if (c.getCount() > 0) {
+                                    c.moveToFirst();
+                                    ni = c.getString(c.getColumnIndex("vendor"));
+                                }
+                                c.close();
                             }
-                            c.close();
+
                         }
+                    } catch (IllegalStateException e) {
+                        Log.e(TAG, e.getMessage());
                     } catch (SQLiteException e) {
                         Log.e(TAG, e.getMessage());
                         Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();

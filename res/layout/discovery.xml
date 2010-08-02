@@ -78,7 +78,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:singleLine="true"
+                    android:lines="1"
                     style="?android:attr/textAppearanceLargeInverse"
                     android:textColor="@android:color/primary_text_light"
                     android:textSize="30sp" />

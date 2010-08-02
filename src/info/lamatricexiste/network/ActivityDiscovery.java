@@ -156,18 +156,18 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case ActivityDiscovery.MENU_SCAN_SINGLE:
-                scanSingle(this, null);
-                return true;
-            case ActivityDiscovery.MENU_OPTIONS:
-                startActivity(new Intent(ctxt, Prefs.class));
-                return true;
-            case ActivityDiscovery.MENU_HELP:
-                startActivity(new Intent(ctxt, Help.class));
-                return true;
-            case ActivityDiscovery.MENU_EXPORT:
-                export();
-                return true;
+        case ActivityDiscovery.MENU_SCAN_SINGLE:
+            scanSingle(this, null);
+            return true;
+        case ActivityDiscovery.MENU_OPTIONS:
+            startActivity(new Intent(ctxt, Prefs.class));
+            return true;
+        case ActivityDiscovery.MENU_HELP:
+            startActivity(new Intent(ctxt, Help.class));
+            return true;
+        case ActivityDiscovery.MENU_EXPORT:
+            export();
+            return true;
         }
         return false;
     }
@@ -206,16 +206,16 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     // Listen for Activity results
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case SCAN_PORT_RESULT:
-                if (resultCode == RESULT_OK) {
-                    // Get scanned ports
-                    if (data.hasExtra(HostBean.EXTRA)) {
-                        HostBean host = data.getParcelableExtra(HostBean.EXTRA);
-                        hosts.set(host.position, host);
-                    }
+        case SCAN_PORT_RESULT:
+            if (resultCode == RESULT_OK) {
+                // Get scanned ports
+                if (data.hasExtra(HostBean.EXTRA)) {
+                    HostBean host = data.getParcelableExtra(HostBean.EXTRA);
+                    hosts.set(host.position, host);
                 }
-            default:
-                break;
+            }
+        default:
+            break;
         }
     }
 
@@ -263,12 +263,14 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             } else {
                 holder.host.setText(host.ipAddress);
             }
-            if (host.hardwareAddress != NetInfo.NOMAC) {
+            if (!host.hardwareAddress.equals(NetInfo.NOMAC)) {
                 holder.mac.setText(host.hardwareAddress);
                 holder.vendor.setText(host.nicVendor);
+                holder.mac.setVisibility(View.VISIBLE);
+                holder.vendor.setVisibility(View.VISIBLE);
             } else {
-                holder.mac.setText("");
-                holder.vendor.setText("");
+                holder.mac.setVisibility(View.GONE);
+                holder.vendor.setVisibility(View.GONE);
             }
             return convertView;
         }
@@ -286,15 +288,15 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             Log.e(TAG, e.getMessage());
         }
         switch (method) {
-            case 1:
-                mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
-                break;
-            case 2:
-                mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
-                break;
-            case 0:
-            default:
-                mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
+        case 1:
+            mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
+            break;
+        case 2:
+            mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
+            break;
+        case 0:
+        default:
+            mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
         // FIXME: TEMP TEST

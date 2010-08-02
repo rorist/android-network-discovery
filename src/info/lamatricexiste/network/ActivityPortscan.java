@@ -107,8 +107,8 @@ final public class ActivityPortscan extends TabActivity {
         }
 
         // Title
-        if (prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true
-                && host.hostname != null && !host.hostname.equals(host.ipAddress)) {
+        ((TextView) findViewById(R.id.host)).setSelected(true); // for marquee
+        if (host.hostname != null && !host.hostname.equals(host.ipAddress)) {
             ((TextView) findViewById(R.id.host)).setText(host.hostname + " (" + host.ipAddress
                     + ")");
         } else {
@@ -226,15 +226,15 @@ final public class ActivityPortscan extends TabActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case ActivityDiscovery.MENU_SCAN_SINGLE:
-                ActivityDiscovery.scanSingle(this, host.ipAddress);
-                return true;
-            case ActivityDiscovery.MENU_OPTIONS:
-                startActivity(new Intent(ctxt, Prefs.class));
-                return true;
-            case ActivityDiscovery.MENU_HELP:
-                startActivity(new Intent(ctxt, Help.class));
-                return true;
+        case ActivityDiscovery.MENU_SCAN_SINGLE:
+            ActivityDiscovery.scanSingle(this, host.ipAddress);
+            return true;
+        case ActivityDiscovery.MENU_OPTIONS:
+            startActivity(new Intent(ctxt, Prefs.class));
+            return true;
+        case ActivityDiscovery.MENU_HELP:
+            startActivity(new Intent(ctxt, Help.class));
+            return true;
         }
         return false;
     }
@@ -297,8 +297,9 @@ final public class ActivityPortscan extends TabActivity {
             // Banner
             if (host.banners != null && host.banners.get(port) != null) {
                 holder.banner.setText(host.banners.get(port));
+                holder.banner.setVisibility(View.VISIBLE);
             } else {
-                holder.banner.setText("");
+                holder.banner.setVisibility(View.GONE);
             }
             return convertView;
         }
