@@ -209,7 +209,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         case SCAN_PORT_RESULT:
             if (resultCode == RESULT_OK) {
                 // Get scanned ports
-                if (data.hasExtra(HostBean.EXTRA)) {
+                if (data != null && data.hasExtra(HostBean.EXTRA)) {
                     HostBean host = data.getParcelableExtra(HostBean.EXTRA);
                     hosts.set(host.position, host);
                 }
