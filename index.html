@@ -69,7 +69,7 @@
 
       <h2>Features</h2>
       <ul>
-        <li>Discover Machines on a Network</li>
+        <li>Discover Machines on a Network (Ping/Connect/DNS)</li>
         <li>TCP Port Scanner</li>
         <li>NIC vendor database</li>
         <li>Service banner retrieval</li>
@@ -84,7 +84,6 @@
       
       <h2>Future releases</h2>
       <ul>
-        <li>DNS Discovery</li>
         <li>Save scans in a db (TBD: object or relationnal) and reload them in the application</li>
         <li>NETBIOS name resolution (with jcifs?)</li>
         <li>Scan other IP subnet ranges</li>
@@ -96,6 +95,14 @@
       </ul>
 
       <h2>Last Changes</h2>
+      
+      <h3>0.3.4 - August 2nd 2010</h3>
+      <ul>
+        <li>DNS discovery (dns resolution + ping)</li>
+        <li>Discovery performances (RateControl actually)</li>
+        <li>Bugfixes: cidr &gt;30, black screen bug, ...</li>
+        <li>Design tweaks (do not show undefined mac addr, alignement when no mac addr, ...)</li>
+      </ul>
       
       <h3>0.3.3 - July 28th 2010</h3>
       <ul>
