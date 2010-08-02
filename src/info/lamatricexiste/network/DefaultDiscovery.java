@@ -170,6 +170,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
         hosts_done++;
 
         if (addr == null) {
+            publishProgress((HostBean) null);
             return;
         }
 
