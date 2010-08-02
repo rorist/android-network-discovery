@@ -59,11 +59,14 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
             final ActivityDiscovery discover = mDiscover.get();
             if (discover != null) {
                 if (!isCancelled()) {
-                    discover.addHost(host[0]);
+                    if (host[0] != null) {
+                        discover.addHost(host[0]);
+                    }
                     if (size > 0) {
                         discover.setProgress((int) (hosts_done * 10000 / size));
                     }
                 }
+
             }
         }
     }
