@@ -178,6 +178,11 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     }
 
     protected void setInfo() {
+        // Info
+        ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
+        ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
+        ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
+        
         // Scan button state
         if (mDiscoveryTask != null) {
             setButton(btn_discover, R.drawable.cancel, false);
@@ -197,11 +202,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             if (mDiscoveryTask != null) {
                 mDiscoveryTask.cancel(true);
             }
-
-            // Info
-            ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
-            ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
-            ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
 
             // Get ip information
             int shift = (32 - net.cidr);
