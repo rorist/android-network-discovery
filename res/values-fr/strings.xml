@@ -121,6 +121,8 @@
     <string name="preferences_ip_start_summary">Première adresse IP à scanner</string>
     <string name="preferences_ip_end_title">IP fin</string>
     <string name="preferences_ip_end_summary">Dernière adresse IP à scanner</string>
+    <string name="preferences_ip_custom_title">Plage d\'adresse IP personnalisée</string>
+    <string name="preferences_ip_custom_summary"></string>
     
     <string name="preferences_error1">Erreur: Le premier est plus grand que le dernier.</string>
     <string name="preferences_error2">Erreur: Le nombre de Threads doit être entre 1 et 256 !</string>

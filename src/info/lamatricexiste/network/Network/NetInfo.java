@@ -70,7 +70,7 @@ public class NetInfo {
 
     @Override
     public int hashCode() {
-        return 42 + ip.hashCode() + cidr;
+        return 42 + intf.hashCode() + ip.hashCode() + cidr;
     }
 
     public void getIp() {

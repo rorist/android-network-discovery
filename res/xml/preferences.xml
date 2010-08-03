@@ -24,7 +24,7 @@
             android:key="resolve_name"
             android:title="@string/preferences_resolve_name_title"
             android:summary="@string/preferences_resolve_name_summary"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
         <CheckBoxPreference
             android:key="vibrate_finish"
             android:title="@string/preferences_vibrate_title"
@@ -47,21 +47,23 @@
             android:entries="@array/method_discover_name"
             android:entryValues="@array/method_discover_value"
             android:dialogTitle="@string/preferences_discover_method_title_dialog"/>
+        <CheckBoxPreference
+            android:key="ip_custom"
+            android:title="@string/preferences_ip_custom_title"
+            android:summary="@string/preferences_ip_custom_summary"
+            android:defaultValue="false" />
         <EditTextPreference
             android:key="ip_start"
             android:title="@string/preferences_ip_start_title"
             android:summary="@string/preferences_ip_start_summary"
-            android:inputType="phone" />
+            android:inputType="phone"
+            android:dependency="ip_custom" />
         <EditTextPreference
             android:key="ip_end"
             android:title="@string/preferences_ip_end_title"
             android:summary="@string/preferences_ip_end_summary"
-            android:inputType="phone" />
-        <CheckBoxPreference
-            android:key="allow_mobile"
-            android:title="@string/preferences_allow_mobile_title"
-            android:summary="@string/preferences_allow_mobile_summary"
-            android:defaultValue="false" />
+            android:inputType="phone"
+            android:dependency="ip_custom" />
         <CheckBoxPreference
             android:key="ratecontrol_enable"
             android:title="@string/preferences_ratecontrol_enable_title"
@@ -73,6 +75,11 @@
             android:summary="@string/preferences_timeout_discover_summary"
             android:defaultValue="500"
             android:inputType="number" />
+        <CheckBoxPreference
+            android:key="allow_mobile"
+            android:title="@string/preferences_allow_mobile_title"
+            android:summary="@string/preferences_allow_mobile_summary"
+            android:defaultValue="false" />
         <EditTextPreference
             android:key="nthreads"
             android:title="@string/preferences_threads_title"
@@ -111,7 +118,8 @@
             android:title="@string/preferences_timeout_title"
             android:summary="@string/preferences_timeout_summary"
             android:defaultValue="500"
-            android:inputType="number" />
+            android:inputType="number"
+            android:dependency="timeout_force" />
     </PreferenceScreen>
     
     <Preference

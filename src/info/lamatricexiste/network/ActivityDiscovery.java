@@ -51,6 +51,9 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     private static final int MENU_EXPORT = 3;
     private static LayoutInflater mInflater;
     private int currentNetwork = 0;
+    private long ip = 0;
+    private long start = 0;
+    private long end = 0;
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     private Button btn_discover;
@@ -185,11 +188,11 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 }
             });
         }
-        
+
         if (currentNetwork != net.hashCode()) {
             Log.i(TAG, "Network info changed");
             currentNetwork = net.hashCode();
-            
+
             // Cancel running tasks
             if (mDiscoveryTask != null) {
                 mDiscoveryTask.cancel(true);
@@ -200,11 +203,9 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
             ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
 
-            // Reset ip start-end
-            long ip = NetInfo.getUnsignedLongFromIp(net.ip);
-            long start = 0;
-            long end = 0;
+            // Get ip information
             int shift = (32 - net.cidr);
+            ip = NetInfo.getUnsignedLongFromIp(net.ip);
             if (net.cidr < 31) {
                 start = (ip >> shift << shift) + 1;
                 end = (start | ((1 << shift) - 1)) - 1;
@@ -212,10 +213,14 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 start = (ip >> shift << shift);
                 end = (start | ((1 << shift) - 1));
             }
-            Editor edit = prefs.edit();
-            edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(start));
-            edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(end));
-            edit.commit();
+
+            // Reset ip start-end (is it really convenient ?)
+            if (!prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
+                Editor edit = prefs.edit();
+                edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(start));
+                edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(end));
+                edit.commit();
+            }
         }
     }
 
@@ -330,10 +335,14 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
-        mDiscoveryTask.setNetwork(NetInfo.getUnsignedLongFromIp(net.ip),
-                NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
-                        Prefs.DEFAULT_IP_START)), NetInfo.getUnsignedLongFromIp(prefs.getString(
-                        Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END)));
+        if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
+            mDiscoveryTask.setNetwork(NetInfo.getUnsignedLongFromIp(net.ip), NetInfo
+                    .getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
+                            Prefs.DEFAULT_IP_START)), NetInfo.getUnsignedLongFromIp(prefs
+                    .getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END)));
+        } else {
+            mDiscoveryTask.setNetwork(ip, start, end);
+        }
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
         setButton(btn_discover, R.drawable.cancel, false);

@@ -122,6 +122,8 @@
     <string name="preferences_ip_start_summary">First IP address to scan</string>
     <string name="preferences_ip_end_title">IP end</string>
     <string name="preferences_ip_end_summary">Last IP address to scan</string>
+    <string name="preferences_ip_custom_title">Custom IP range</string>
+    <string name="preferences_ip_custom_summary">Manually set start/end IPs</string>
     
     <string name="preferences_error1">Error: First is bigger than Last !</string>
     <string name="preferences_error2">Error: Number of Threads must be between 1 and 256 !</string>

@@ -44,7 +44,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     private final String TAG = "Prefs";
 
     public final static String KEY_RESOLVE_NAME = "resolve_name";
-    public final static boolean DEFAULT_RESOLVE_NAME = false;
+    public final static boolean DEFAULT_RESOLVE_NAME = true;
 
     public final static String KEY_VIBRATE_FINISH = "vibrate_finish";
     public final static boolean DEFAULT_VIBRATE_FINISH = false;
@@ -104,6 +104,9 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_IP_END = "ip_end";
     public static final String DEFAULT_IP_END = "0.0.0.0";
 
+    public static final String KEY_IP_CUSTOM = "ip_custom";
+    public static final boolean DEFAULT_IP_CUSTOM = false;
+
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
     public static final String KEY_EMAIL = "email";
@@ -132,7 +135,6 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         ps.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
         // Default state of checkboxes
-        checkTimeout(KEY_TIMEOUT_PORTSCAN, KEY_TIMEOUT_FORCE, true);
         checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
 
         // Reset Nic DB click listener
@@ -255,8 +257,6 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
             checkIpRange();
         } else if (key.equals(KEY_NTHREADS)) {
             checkMaxThreads();
-        } else if (key.equals(KEY_TIMEOUT_FORCE)) {
-            checkTimeout(KEY_TIMEOUT_PORTSCAN, KEY_TIMEOUT_FORCE, true);
         } else if (key.equals(KEY_RATECTRL_ENABLE)) {
             checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
         }
@@ -293,7 +293,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         try {
             long ipStart = NetInfo.getUnsignedLongFromIp(ipStartEdit.getText());
             long ipEnd = NetInfo.getUnsignedLongFromIp(ipEndEdit.getText());
-            if (ipStart >= ipEnd) {
+            if (ipStart > ipEnd) {
                 ipStartEdit.setText(before_ip_start);
                 ipEndEdit.setText(before_ip_end);
                 Toast.makeText(ctxt, R.string.preferences_error1, Toast.LENGTH_LONG).show();

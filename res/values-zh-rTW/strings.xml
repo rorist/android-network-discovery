@@ -117,6 +117,8 @@
     <string name="preferences_ip_start_summary">First IP address to scan</string>
     <string name="preferences_ip_end_title">IP end</string>
     <string name="preferences_ip_end_summary">Last IP address to scan</string>
+    <string name="preferences_ip_custom_title">Custom IP range</string>
+    <string name="preferences_ip_custom_summary">Manually set start/end IPs</string>
     
     <string name="preferences_error1">錯誤：開始通訊埠大於終止通訊埠！</string>
     <string name="preferences_error2">錯誤：執行緒數必須介於1和256！</string>
