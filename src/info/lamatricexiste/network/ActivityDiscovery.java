@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,6 +50,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     public static final int MENU_HELP = 2;
     private static final int MENU_EXPORT = 3;
     private static LayoutInflater mInflater;
+    private int currentNetwork = 0;
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     private Button btn_discover;
@@ -183,9 +185,38 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 }
             });
         }
-        ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
-        ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
-        ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
+        
+        if (currentNetwork != net.hashCode()) {
+            Log.i(TAG, "Network info changed");
+            currentNetwork = net.hashCode();
+            
+            // Cancel running tasks
+            if (mDiscoveryTask != null) {
+                mDiscoveryTask.cancel(true);
+            }
+
+            // Info
+            ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
+            ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
+            ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
+
+            // Reset ip start-end
+            long ip = NetInfo.getUnsignedLongFromIp(net.ip);
+            long start = 0;
+            long end = 0;
+            int shift = (32 - net.cidr);
+            if (net.cidr < 31) {
+                start = (ip >> shift << shift) + 1;
+                end = (start | ((1 << shift) - 1)) - 1;
+            } else {
+                start = (ip >> shift << shift);
+                end = (start | ((1 << shift) - 1));
+            }
+            Editor edit = prefs.edit();
+            edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(start));
+            edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(end));
+            edit.commit();
+        }
     }
 
     protected void setButtons(boolean disable) {
@@ -299,8 +330,10 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
-        // FIXME: TEMP TEST
-        mDiscoveryTask.setNetwork(NetInfo.getUnsignedLongFromIp(net.ip), net.cidr);
+        mDiscoveryTask.setNetwork(NetInfo.getUnsignedLongFromIp(net.ip),
+                NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
+                        Prefs.DEFAULT_IP_START)), NetInfo.getUnsignedLongFromIp(prefs.getString(
+                        Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END)));
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
         setButton(btn_discover, R.drawable.cancel, false);

@@ -17,33 +17,27 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
     protected WeakReference<ActivityDiscovery> mDiscover;
 
     // TODO: Adaptiv value or changeable by Prefs
-    protected int cidr;
+    // protected int cidr;
     protected long ip;
-    protected long start;
-    protected long end;
-    protected long size;
+    protected long start = 0;
+    protected long end = 0;
+    protected long size = 0;
 
     public AbstractDiscovery(ActivityDiscovery discover) {
         mDiscover = new WeakReference<ActivityDiscovery>(discover);
     }
 
-    public void setNetwork(long ip, int cidr) {
-        this.cidr = cidr;
+    public void setNetwork(long ip, long start, long end) {
         this.ip = ip;
+        this.start = start;
+        this.end = end;
+        // this.cidr = cidr;
     }
 
     abstract protected Void doInBackground(Void... params);
 
     @Override
     protected void onPreExecute() {
-        int shift = (32 - cidr);
-        if (cidr < 31) {
-            start = (ip >> shift << shift) + 1;
-            end = (start | ((1 << shift) - 1)) - 1;
-        } else {
-            start = (ip >> shift << shift);
-            end = (start | ((1 << shift) - 1));
-        }
         size = (int) (end - start + 1);
         if (mDiscover != null) {
             final ActivityDiscovery discover = mDiscover.get();

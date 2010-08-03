@@ -7,11 +7,14 @@ package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.ActivityMain;
 import info.lamatricexiste.network.R;
+import info.lamatricexiste.network.Network.NetInfo;
 
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -95,6 +98,12 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_INTF = "interface";
     public static final String DEFAULT_INTF = null;
 
+    public static final String KEY_IP_START = "ip_start";
+    public static final String DEFAULT_IP_START = "0.0.0.0";
+
+    public static final String KEY_IP_END = "ip_end";
+    public static final String DEFAULT_IP_END = "0.0.0.0";
+
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
     public static final String KEY_EMAIL = "email";
@@ -107,6 +116,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
     private Context ctxt;
     private PreferenceScreen ps = null;
+    private String before_ip_start;
+    private String before_ip_end;
     private String before_port_start;
     private String before_port_end;
 
@@ -135,6 +146,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
         // Before change values
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
+        before_ip_start = prefs.getString(KEY_IP_START, DEFAULT_IP_START);
+        before_ip_end = prefs.getString(KEY_IP_END, DEFAULT_IP_END);
         before_port_start = prefs.getString(KEY_PORT_START, DEFAULT_PORT_START);
         before_port_end = prefs.getString(KEY_PORT_END, DEFAULT_PORT_END);
 
@@ -230,7 +243,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         try {
             version.setSummary(getPackageManager().getPackageInfo(ActivityMain.TAG, 0).versionName);
         } catch (NameNotFoundException e) {
-            version.setSummary("0.3x");
+            version.setSummary("0.3.x");
         }
 
     }
@@ -238,6 +251,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
         if (key.equals(KEY_PORT_START) || key.equals(KEY_PORT_END)) {
             checkPortRange();
+        } else if (key.equals(KEY_IP_START) || key.equals(KEY_IP_END)) {
+            checkIpRange();
         } else if (key.equals(KEY_NTHREADS)) {
             checkMaxThreads();
         } else if (key.equals(KEY_TIMEOUT_FORCE)) {
@@ -254,6 +269,39 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
             timeout.setEnabled(value);
         } else {
             timeout.setEnabled(!value);
+        }
+    }
+
+    private void checkIpRange() {
+        EditTextPreference ipStartEdit = (EditTextPreference) ps.findPreference(KEY_IP_START);
+        EditTextPreference ipEndEdit = (EditTextPreference) ps.findPreference(KEY_IP_END);
+        // Check if these are valid IP's
+        Pattern pattern = Pattern
+                .compile("((25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\\.(25[0-5]|2[0-4]"
+                        + "[0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1]"
+                        + "[0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}"
+                        + "|[1-9][0-9]|[0-9]))");
+        Matcher matcher1 = pattern.matcher(ipStartEdit.getText());
+        Matcher matcher2 = pattern.matcher(ipEndEdit.getText());
+        if (!matcher1.matches() || !matcher2.matches()) {
+            ipStartEdit.setText(before_ip_start);
+            ipEndEdit.setText(before_ip_end);
+            Toast.makeText(ctxt, R.string.preferences_error4, Toast.LENGTH_LONG).show();
+            return;
+        }
+        // Check if ip start is bigger or equal than ip end
+        try {
+            long ipStart = NetInfo.getUnsignedLongFromIp(ipStartEdit.getText());
+            long ipEnd = NetInfo.getUnsignedLongFromIp(ipEndEdit.getText());
+            if (ipStart >= ipEnd) {
+                ipStartEdit.setText(before_ip_start);
+                ipEndEdit.setText(before_ip_end);
+                Toast.makeText(ctxt, R.string.preferences_error1, Toast.LENGTH_LONG).show();
+            }
+        } catch (NumberFormatException e) {
+            ipStartEdit.setText(before_ip_start);
+            ipEndEdit.setText(before_ip_end);
+            Toast.makeText(ctxt, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
     }
 

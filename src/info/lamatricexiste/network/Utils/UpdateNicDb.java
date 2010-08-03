@@ -101,8 +101,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null,
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             Cursor c = db.rawQuery("select count(mac) from oui", null);
-            if (c.getCount() > 0) {
-                c.moveToFirst();
+            if (c.moveToFirst()) {
                 nb = c.getInt(0);
             }
             c.close();

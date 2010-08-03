@@ -47,6 +47,16 @@
             android:entries="@array/method_discover_name"
             android:entryValues="@array/method_discover_value"
             android:dialogTitle="@string/preferences_discover_method_title_dialog"/>
+        <EditTextPreference
+            android:key="ip_start"
+            android:title="@string/preferences_ip_start_title"
+            android:summary="@string/preferences_ip_start_summary"
+            android:inputType="phone" />
+        <EditTextPreference
+            android:key="ip_end"
+            android:title="@string/preferences_ip_end_title"
+            android:summary="@string/preferences_ip_end_summary"
+            android:inputType="phone" />
         <CheckBoxPreference
             android:key="allow_mobile"
             android:title="@string/preferences_allow_mobile_title"

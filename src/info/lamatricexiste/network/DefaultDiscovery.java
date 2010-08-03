@@ -60,29 +60,38 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
 
                 try {
-                    // gateway
-                    launch(start);
-                    // hosts
-                    long pt_backward = ip - 1;
-                    long pt_forward = ip + 1;
-                    long size_hosts = size - 2;
+                    if (ip < end && ip > start) {
+                        Log.i(TAG, "Back and forth scanning");
+                        // gateway
+                        launch(start);
+                        
+                        // hosts
+                        long pt_backward = ip - 1;
+                        long pt_forward = ip + 1;
+                        long size_hosts = size - 2;
 
-                    for (int i = 0; i < size_hosts; i++) {
-                        // Set pointer if of limits
-                        if (pt_backward <= start) {
-                            pt_move = 2;
-                        } else if (pt_forward > end) {
-                            pt_move = 1;
+                        for (int i = 0; i < size_hosts; i++) {
+                            // Set pointer if of limits
+                            if (pt_backward <= start) {
+                                pt_move = 2;
+                            } else if (pt_forward > end) {
+                                pt_move = 1;
+                            }
+                            // Move back and forth
+                            if (pt_move == 1) {
+                                launch(pt_backward);
+                                pt_backward--;
+                                pt_move = 2;
+                            } else if (pt_move == 2) {
+                                launch(pt_forward);
+                                pt_forward++;
+                                pt_move = 1;
+                            }
                         }
-                        // Move back and forth
-                        if (pt_move == 1) {
-                            launch(pt_backward);
-                            pt_backward--;
-                            pt_move = 2;
-                        } else if (pt_move == 2) {
-                            launch(pt_forward);
-                            pt_forward++;
-                            pt_move = 1;
+                    } else {
+                        Log.i(TAG, "Sequencial scanning");
+                        for (long i = start; i <= end; i++) {
+                            launch(i);
                         }
                     }
                     mPool.shutdown();

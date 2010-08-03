@@ -491,8 +491,7 @@ final public class ActivityPortscan extends TabActivity {
                 Matcher matcher;
                 try {
                     Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
-                    if (c.getCount() > 0) {
-                        c.moveToFirst();
+                    if (c.moveToFirst()) {
                         do {
                             try {
                                 pattern = Pattern.compile(c.getString(1));
@@ -519,10 +518,8 @@ final public class ActivityPortscan extends TabActivity {
             if (service == null && dbServices != null) {
                 c = dbServices.rawQuery("SELECT service FROM services WHERE port=" + port
                         + " LIMIT 1", null);
-                if (c.getCount() > 0) {
-                    c.moveToFirst();
+                if (c.moveToFirst()) {
                     service = c.getString(0);
-                    c.close();
                 } else {
                     service = getString(R.string.info_unknown);
                 }

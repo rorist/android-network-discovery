@@ -117,10 +117,15 @@
     <string name="preferences_discover_method_title">Méthode de découverte</string>
     <string name="preferences_discover_method_summary">Changer la méthode de découverte des machines</string>
     <string name="preferences_discover_method_title_dialog">Choisissez une méthode</string>
+    <string name="preferences_ip_start_title">IP début</string>
+    <string name="preferences_ip_start_summary">Première adresse IP à scanner</string>
+    <string name="preferences_ip_end_title">IP fin</string>
+    <string name="preferences_ip_end_summary">Dernière adresse IP à scanner</string>
     
-    <string name="preferences_error1">Erreur: Le Premier port est plus grand que le Dernier port.</string>
+    <string name="preferences_error1">Erreur: Le premier est plus grand que le dernier.</string>
     <string name="preferences_error2">Erreur: Le nombre de Threads doit être entre 1 et 256 !</string>
-    <string name="preferences_error3">Erreur: Le téléchargement du fichier a été interrompu !</string> 
+    <string name="preferences_error3">Erreur: Le téléchargement du fichier a été interrompu !</string>
+    <string name="preferences_error4">Erreur: La valeur n\'est pas une adresse IP valide !</string>
        
     <string-array name="method_discover_name">
         <item>Ping/connect (défaut)</item>

@@ -114,10 +114,14 @@
     <string name="preferences_discover_method_title">Discover Method</string>
     <string name="preferences_discover_method_summary">Change to different method of host discovery</string>
     <string name="preferences_discover_method_title_dialog">Choose a method</string>
+    <string name="preferences_ip_start_summary">First IP address to scan</string>
+    <string name="preferences_ip_end_title">IP end</string>
+    <string name="preferences_ip_end_summary">Last IP address to scan</string>
         
     <string name="preferences_error1">错误：起始端口大于终止端口！</string>
     <string name="preferences_error2">错误：线程数必须介于1和256！</string>
     <string name="preferences_error3">错误：文件传输中断！</string>
+    <string name="preferences_error4">Error: Value is not a valid IP address !</string>
     
     <string-array name="method_discover_name">
         <item>Ping/connect (default)</item>

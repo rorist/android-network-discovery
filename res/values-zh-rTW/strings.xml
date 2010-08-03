@@ -114,10 +114,14 @@
     <string name="preferences_discover_method_title">Discover Method</string>
     <string name="preferences_discover_method_summary">Change to different method of host discovery</string>
     <string name="preferences_discover_method_title_dialog">Choose a method</string>
+    <string name="preferences_ip_start_summary">First IP address to scan</string>
+    <string name="preferences_ip_end_title">IP end</string>
+    <string name="preferences_ip_end_summary">Last IP address to scan</string>
     
     <string name="preferences_error1">錯誤：開始通訊埠大於終止通訊埠！</string>
     <string name="preferences_error2">錯誤：執行緒數必須介於1和256！</string>
     <string name="preferences_error3">錯誤：檔案傳輸中斷！</string>
+    <string name="preferences_error4">Error: Value is not a valid IP address !</string>
     
     <string-array name="method_discover_name">
         <item>Ping/connect (default)</item>

@@ -68,6 +68,11 @@ public class NetInfo {
         // Runtime.getRuntime().exec("echo 1 > /proc/sys/net/ipv4/conf/tun0/proxy_arp");
     }
 
+    @Override
+    public int hashCode() {
+        return 42 + ip.hashCode() + cidr;
+    }
+
     public void getIp() {
         intf = prefs.getString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
         try {

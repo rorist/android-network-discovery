@@ -110,8 +110,7 @@ public class HardwareAddress {
                             if (db.isOpen()) {
                                 Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
                                         + "'", null);
-                                if (c.getCount() > 0) {
-                                    c.moveToFirst();
+                                if (c.moveToFirst()) {
                                     ni = c.getString(c.getColumnIndex("vendor"));
                                 }
                                 c.close();
