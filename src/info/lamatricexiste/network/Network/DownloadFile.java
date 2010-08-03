@@ -7,6 +7,8 @@
 
 package info.lamatricexiste.network.Network;
 
+import info.lamatricexiste.network.ActivityMain;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +26,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
 public class DownloadFile {
@@ -31,18 +35,24 @@ public class DownloadFile {
     private static String TAG = "DownloadFile";
     // FIXME: Get the real application version without context ?
     private final String USERAGENT = "Android/" + android.os.Build.VERSION.RELEASE + " ("
-            + android.os.Build.MODEL + ") NetworkDiscovery/0.3.4";
+            + android.os.Build.MODEL + ") NetworkDiscovery/";
     private HttpClient httpclient;
 
-    public DownloadFile(String url, FileOutputStream out) throws IOException {
-        Log.i(TAG, "Downloading " + url);
+    public DownloadFile(final Context ctxt, String url, FileOutputStream out) throws IOException {
+        String version = "0.3.x";
+        try {
+            version = ctxt.getPackageManager().getPackageInfo(ActivityMain.TAG, 0).versionName;
+        } catch (NameNotFoundException e) {
+        }
+
         httpclient = new DefaultHttpClient();
-        httpclient.getParams().setParameter("http.useragent", USERAGENT);
+        httpclient.getParams().setParameter("http.useragent", USERAGENT + version);
         InputStream in = openURL(url);
         final ReadableByteChannel inputChannel = Channels.newChannel(in);
         final WritableByteChannel outputChannel = Channels.newChannel(out);
 
         try {
+            Log.i(TAG, "Downloading " + url);
             fastChannelCopy(inputChannel, outputChannel);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());

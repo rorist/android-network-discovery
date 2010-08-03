@@ -39,32 +39,36 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     public UpdateNicDb(Activity activity) {
         mActivity = new WeakReference<Activity>(activity);
-        final Activity d = mActivity.get();
-        if (d != null) {
-            final AlertDialog.Builder dialog = new AlertDialog.Builder(d);
-            dialog.setMessage(R.string.preferences_resetdb_action);
-            dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    if (!getStatus().equals(Status.RUNNING)) {
-                        execute();
+        if (mActivity != null) {
+            final Activity d = mActivity.get();
+            if (d != null) {
+                final AlertDialog.Builder dialog = new AlertDialog.Builder(d);
+                dialog.setMessage(R.string.preferences_resetdb_action);
+                dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!getStatus().equals(Status.RUNNING)) {
+                            execute();
+                        }
                     }
-                }
-            });
-            dialog.setNegativeButton(R.string.btn_no, new OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    cancel(true);
-                }
-            });
-            dialog.show();
+                });
+                dialog.setNegativeButton(R.string.btn_no, new OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        cancel(true);
+                    }
+                });
+                dialog.show();
+            }
         }
     }
 
     @Override
     protected void onPreExecute() {
-        final Activity d = mActivity.get();
-        if (d != null) {
-            d.setProgressBarIndeterminateVisibility(true);
-            progress = ProgressDialog.show(d, "", d.getString(R.string.task_nic));
+        if (mActivity != null) {
+            final Activity d = mActivity.get();
+            if (d != null) {
+                d.setProgressBarIndeterminateVisibility(true);
+                progress = ProgressDialog.show(d, "", d.getString(R.string.task_nic));
+            }
         }
     }
 
@@ -72,9 +76,11 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
     protected Void doInBackground(Void... params) {
         try {
             nb = countEntries();
-            final Activity d = mActivity.get();
-            if (d != null) {
-                remoteCopy(d);
+            if (mActivity != null) {
+                final Activity d = mActivity.get();
+                if (d != null) {
+                    remoteCopy(d);
+                }
             }
         } catch (IOException e) {
             cancel(true);
@@ -82,10 +88,10 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
         return null;
     }
 
-    private void remoteCopy(Context ctxt) throws IOException {
+    private void remoteCopy(final Context ctxt) throws IOException {
         Log.v(TAG, "Copying oui.db remotly");
         if (NetInfo.isConnected(ctxt)) {
-            new DownloadFile(DB_REMOTE, ctxt.openFileOutput(Db.DB_NIC, Context.MODE_PRIVATE));
+            new DownloadFile(ctxt, DB_REMOTE, ctxt.openFileOutput(Db.DB_NIC, Context.MODE_PRIVATE));
         }
     }
 
@@ -109,25 +115,27 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPostExecute(Void unused) {
-        final Activity d = mActivity.get();
-        if (d != null) {
-            if (progress.isShowing()) {
-                progress.dismiss();
-            }
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
-                    .getApplication());
-            d.setProgressBarIndeterminateVisibility(false);
-            Toast.makeText(
-                    d.getApplicationContext(),
-                    String.format(d.getString(R.string.preferences_resetdb_ok),
-                            (countEntries() - nb)), Toast.LENGTH_LONG).show();
-            try {
-                Editor edit = prefs.edit();
-                edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
-                        "info.lamatricexiste.network", 0).versionCode);
-                edit.commit();
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, e.getMessage());
+        if (mActivity != null) {
+            final Activity d = mActivity.get();
+            if (d != null) {
+                if (progress.isShowing()) {
+                    progress.dismiss();
+                }
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
+                        .getApplication());
+                d.setProgressBarIndeterminateVisibility(false);
+                Toast.makeText(
+                        d.getApplicationContext(),
+                        String.format(d.getString(R.string.preferences_resetdb_ok),
+                                (countEntries() - nb)), Toast.LENGTH_LONG).show();
+                try {
+                    Editor edit = prefs.edit();
+                    edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
+                            "info.lamatricexiste.network", 0).versionCode);
+                    edit.commit();
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, e.getMessage());
+                }
             }
         }
     }
@@ -137,10 +145,12 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
         if (progress != null && progress.isShowing()) {
             progress.dismiss();
         }
-        final Activity d = mActivity.get();
-        if (d != null) {
-            Toast.makeText(d.getApplicationContext(), R.string.preferences_error3,
-                    Toast.LENGTH_SHORT).show();
+        if (mActivity != null) {
+            final Activity d = mActivity.get();
+            if (d != null) {
+                Toast.makeText(d.getApplicationContext(), R.string.preferences_error3,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
