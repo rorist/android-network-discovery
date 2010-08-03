@@ -59,7 +59,8 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
         WeakReference<Activity> mActivity = new WeakReference<Activity>(activity);
         final Activity d = mActivity.get();
         if (d != null) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d.getApplicationContext());
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
+                    .getApplicationContext());
             getBanner = prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER);
         }
         this.ipAddr = host;
@@ -114,7 +115,6 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
         readSelector = Selector.open();
         for (int i = PORT_START; i <= PORT_END; i++) {
             connectSocket(ina, i);
-            // Thread.sleep(timeout);
         }
         time = System.nanoTime();
         doSelect(PORT_END - PORT_START);
@@ -163,13 +163,14 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
     private void doSelect(final int NB) {
         try {
             while (connSelector.isOpen()) {
-                connSelector.select(TIMEOUT_SELECT);
-                Iterator<SelectionKey> iterator = connSelector.selectedKeys().iterator();
-                while (iterator.hasNext()) {
-                    SelectionKey key = (SelectionKey) iterator.next();
-                    iterator.remove();
-                    if (key.isValid() && key.isConnectable()) {
-                        handleConnect(key);
+                if (connSelector.select(TIMEOUT_SELECT) > 0) {
+                    Iterator<SelectionKey> iterator = connSelector.selectedKeys().iterator();
+                    while (iterator.hasNext()) {
+                        SelectionKey key = (SelectionKey) iterator.next();
+                        iterator.remove();
+                        if (key.isValid() && key.isConnectable()) {
+                            handleConnect(key);
+                        }
                     }
                 }
                 cancelTimeouts(); // Filtered or Unresponsive
@@ -211,8 +212,8 @@ public class DefaultPortscan extends AsyncTask<Void, Integer, Void> {
                     // }
 
                     // Register for reading on the read selector
-                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(
-                            readSelector, SelectionKey.OP_READ);
+                    SelectionKey tmpKey = ((SocketChannel) key.channel()).register(readSelector,
+                            SelectionKey.OP_READ);
                     tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
                     int code = readSelector.select(TIMEOUT_READ);
                     tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));

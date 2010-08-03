@@ -371,7 +371,7 @@ final public class ActivityPortscan extends TabActivity {
         }
     }
 
-    private class ScanPortTask extends DefaultPortscan {
+    private class ScanPortTask extends AsyncPortscan {
         private int progress_current = 0;
         private SQLiteDatabase dbServices;
         private SQLiteDatabase dbProbes;
