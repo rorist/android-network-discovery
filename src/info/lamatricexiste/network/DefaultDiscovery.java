@@ -60,11 +60,11 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
 
                 try {
-                    if (ip < end && ip > start) {
+                    if (ip <= end && ip >= start) {
                         Log.i(TAG, "Back and forth scanning");
                         // gateway
                         launch(start);
-                        
+
                         // hosts
                         long pt_backward = ip - 1;
                         long pt_forward = ip + 1;

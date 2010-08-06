@@ -226,15 +226,15 @@ final public class ActivityPortscan extends TabActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case ActivityDiscovery.MENU_SCAN_SINGLE:
-            ActivityDiscovery.scanSingle(this, host.ipAddress);
-            return true;
-        case ActivityDiscovery.MENU_OPTIONS:
-            startActivity(new Intent(ctxt, Prefs.class));
-            return true;
-        case ActivityDiscovery.MENU_HELP:
-            startActivity(new Intent(ctxt, Help.class));
-            return true;
+            case ActivityDiscovery.MENU_SCAN_SINGLE:
+                ActivityDiscovery.scanSingle(this, host.ipAddress);
+                return true;
+            case ActivityDiscovery.MENU_OPTIONS:
+                startActivity(new Intent(ctxt, Prefs.class));
+                return true;
+            case ActivityDiscovery.MENU_HELP:
+                startActivity(new Intent(ctxt, Help.class));
+                return true;
         }
         return false;
     }
@@ -371,7 +371,8 @@ final public class ActivityPortscan extends TabActivity {
         }
     }
 
-    private class ScanPortTask extends AsyncPortscan {
+    // private class ScanPortTask extends AsyncPortscan {
+    private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
         private SQLiteDatabase dbServices;
         private SQLiteDatabase dbProbes;
