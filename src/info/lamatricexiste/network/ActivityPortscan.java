@@ -371,8 +371,8 @@ final public class ActivityPortscan extends TabActivity {
         }
     }
 
-    // private class ScanPortTask extends AsyncPortscan {
-    private class ScanPortTask extends DefaultPortscan {
+    private class ScanPortTask extends AsyncPortscan {
+    //private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
         private SQLiteDatabase dbServices;
         private SQLiteDatabase dbProbes;
@@ -422,7 +422,7 @@ final public class ActivityPortscan extends TabActivity {
                     final Integer port = values[0];
                     final int type = values[1];
                     if (!port.equals(new Integer(0))) {
-                        if (type == 1) {
+                        if (type == AsyncPortscan.OPEN) {
                             // Open
                             if (mBanners != null && mBanners[port] != null) {
                                 host.banners.put(port, mBanners[port]);
@@ -433,7 +433,7 @@ final public class ActivityPortscan extends TabActivity {
                             cnt_open++;
                             mTabOpen
                                     .setText(String.format(getString(R.string.scan_open), cnt_open));
-                        } else if (type == 0) {
+                        } else if (type == AsyncPortscan.CLOSED) {
                             // Closed
                             host.portsClosed.add(findLocation(host.portsClosed, port), port);
                             host.services.put(port, getPortService(port));
@@ -441,7 +441,7 @@ final public class ActivityPortscan extends TabActivity {
                             cnt_closed++;
                             mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                     cnt_closed));
-                        } else if (type == -1) {
+                        } else if (type == AsyncPortscan.UNREACHABLE) {
                             makeToast(R.string.scan_host_unreachable);
                         }
                     }
