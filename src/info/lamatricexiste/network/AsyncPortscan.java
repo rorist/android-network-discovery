@@ -101,16 +101,18 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                 if (!key.isValid()) {
                                     continue;
                                 }
+                                Data data = (Data) key.attachment();
+                                //long start = data[1];
                                 if (key.isConnectable()) {
-                                    Log.i(TAG, "connectable=" + (Integer) key.attachment());
+                                    Log.i(TAG, "connectable=" + data.port);
                                     if (((SocketChannel) key.channel()).finishConnect()) {
-                                        Log.i(TAG, "connected=" + (Integer) key.attachment());
+                                        Log.i(TAG, "connected=" + data.port);
                                         // key.interestOps(SelectionKey.OP_READ
                                         // | SelectionKey.OP_WRITE);
                                         key.interestOps(SelectionKey.OP_WRITE);
                                     }
                                 } else if (key.isWritable()) {
-                                    Log.i(TAG, "writable=" + (Integer) key.attachment());
+                                    Log.i(TAG, "writable=" + data.port);
                                     // write something (blocking)
                                     // ByteBuffer data =
                                     // Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
@@ -123,7 +125,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                     // key.interestOps(SelectionKey.OP_READ);
                                     finishKey(key, OPEN);
                                 } else if (key.isReadable()) {
-                                    Log.i(TAG, "readable=" + (Integer) key.attachment());
+                                    Log.i(TAG, "readable=" + data.port);
                                     finishKey(key, OPEN);
                                 }
                             } catch (ConnectException e) {
@@ -161,7 +163,10 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
             socket.configureBlocking(false);
             socket.connect(new InetSocketAddress(ina, port));
             // socket.socket().connect(new InetSocketAddress(ina, port), rate);
-            socket.register(selector, SelectionKey.OP_CONNECT, new Integer(port));
+            Data data = new Data();
+            data.port = port;
+            data.start = System.nanoTime();
+            socket.register(selector, SelectionKey.OP_CONNECT, data);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -200,15 +205,17 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             } finally {
-                publishProgress((Integer) key.attachment(), state);
+                Data data = (Data) key.attachment();
+                publishProgress(data.port, state);
                 key.cancel();
             }
         }
     }
 
     // Port private object
-    private static class Port {
+    // FIXME: Better use a simple long[] array ?
+    private static class Data {
         public int port;
-        public int start;
+        public long start;
     }
 }
