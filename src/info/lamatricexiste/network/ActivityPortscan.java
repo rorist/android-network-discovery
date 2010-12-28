@@ -372,7 +372,7 @@ final public class ActivityPortscan extends TabActivity {
     }
 
     private class ScanPortTask extends AsyncPortscan {
-    //private class ScanPortTask extends DefaultPortscan {
+        // private class ScanPortTask extends DefaultPortscan {
         private int progress_current = 0;
         private SQLiteDatabase dbServices;
         private SQLiteDatabase dbProbes;
@@ -404,8 +404,6 @@ final public class ActivityPortscan extends TabActivity {
             }
             nb_port = port_end - port_start + 2;
             // Initialize arrays and views
-            final int len = port_end + 1;
-            mBanners = new String[len];
             host.banners = new HashMap<Integer, String>();
             host.services = new HashMap<Integer, String>();
             host.portsOpen = new ArrayList<Integer>();
@@ -416,31 +414,33 @@ final public class ActivityPortscan extends TabActivity {
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
+        protected void onProgressUpdate(Object... values) {
             if (!isCancelled()) {
                 if (values.length > 1) {
-                    final Integer port = values[0];
-                    final int type = values[1];
+                    final Integer port = (Integer) values[0];
+                    final int type = (Integer) values[1];
                     if (!port.equals(new Integer(0))) {
                         if (type == AsyncPortscan.OPEN) {
                             // Open
-                            if (mBanners != null && mBanners[port] != null) {
-                                host.banners.put(port, mBanners[port]);
+                            if (values[2] != null) {
+                                host.banners.put(port, (String) values[2]);
                             }
-                            host.portsOpen.add(findLocation(host.portsOpen, port), port);
+                            findLocationAndAdd(host.portsOpen, port);
                             host.services.put(port, getPortService(port));
                             adapter_open.add(PLACEHOLDER);
                             cnt_open++;
                             mTabOpen
                                     .setText(String.format(getString(R.string.scan_open), cnt_open));
+                            adapter_open.notifyDataSetChanged(); //FIXME: Check this
                         } else if (type == AsyncPortscan.CLOSED) {
                             // Closed
-                            host.portsClosed.add(findLocation(host.portsClosed, port), port);
+                            findLocationAndAdd(host.portsClosed, port);
                             host.services.put(port, getPortService(port));
                             adapter_closed.add(PLACEHOLDER);
                             cnt_closed++;
                             mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                     cnt_closed));
+                            adapter_closed.notifyDataSetChanged();
                         } else if (type == AsyncPortscan.UNREACHABLE) {
                             makeToast(R.string.scan_host_unreachable);
                         }
@@ -531,7 +531,7 @@ final public class ActivityPortscan extends TabActivity {
         }
     }
 
-    private int findLocation(ArrayList<Integer> array, int value) {
+    private void findLocationAndAdd(ArrayList<Integer> array, int value) {
         int index;
         int current;
         int size = array.size();
@@ -540,10 +540,14 @@ final public class ActivityPortscan extends TabActivity {
             if (value > current) {
                 continue;
             } else if (value < current) {
+                // Add new value
+                array.add(value);
+                break;
+            } else if (value == current) {
+                // Value already exists
                 break;
             }
         }
-        return index;
     }
 
     private void startScan() {

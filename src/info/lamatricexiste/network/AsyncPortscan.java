@@ -20,41 +20,43 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.ClosedSelectorException;
 import java.util.Iterator;
 
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class AsyncPortscan extends AsyncTask<Void, Integer, Void> {
+public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     private final String TAG = "AsyncPortscan";
-    private final int TIMEOUT_SELECT = 300;
-    private final int TIMEOUT_CONNECT = 1500;
-    private int cnt_selected = 0;
+    private static final int TIMEOUT_SELECT = 300;
+    private static final int TIMEOUT_CONNECT = 5000; // ms
+    private static final int TIMEOUT_WRITE = 5000; // ms
+    private static final int TIMEOUT_READ = 5000; // ms
+    private static final String E_REFUSED = "Connection refused";
+    private static final String E_TIMEOUT = "The operation timed out";
+    private int rate;
     private long time;
     private boolean select = true;
     private Selector selector;
 
-    protected String[] mBanners = null;
     protected String ipAddr = null;
     protected int port_start = 0;
     protected int port_end = 0;
     protected int nb_port = 0;
-    
+
     public final static int OPEN = 0;
     public final static int CLOSED = 1;
     public final static int FILTERED = -1;
     public final static int UNREACHABLE = -2;
 
-    protected AsyncPortscan(Activity activity, String host, int rate) {
+    protected AsyncPortscan(Activity activity, String host, int _rate) {
         ipAddr = host;
+        rate = _rate;
     }
 
     @Override
@@ -66,7 +68,9 @@ public class AsyncPortscan extends AsyncTask<Void, Integer, Void> {
                 // FIXME: Selector leaks file descriptors (Dalvik bug)
                 // http://code.google.com/p/android/issues/detail?id=4825
                 for (int i = port_start; i <= port_end - step; i += step + 1) {
-                    start(ina, i, i + ((i + step <= port_end - step) ? step : port_end - i));
+                    if (select) {
+                        start(ina, i, i + ((i + step <= port_end - step) ? step : port_end - i));
+                    }
                 }
             } else {
                 start(ina, port_start, port_end);
@@ -81,16 +85,15 @@ public class AsyncPortscan extends AsyncTask<Void, Integer, Void> {
 
     private void start(InetAddress ina, final int PORT_START, final int PORT_END) {
         select = true;
-        long size = PORT_END - PORT_START;
         try {
             selector = Selector.open();
             for (int j = PORT_START; j <= PORT_END; j++) {
                 connectSocket(ina, j);
             }
             time = System.nanoTime();
-            while(select && selector.keys().size() > 0) {
-                synchronized (selector) {
-                    if (selector.select(TIMEOUT_SELECT) > 0) {
+            while (select && selector.keys().size() > 0) {
+                if (selector.select(TIMEOUT_SELECT) > 0) {
+                    synchronized (selector.selectedKeys()) {
                         Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                         while (iterator.hasNext()) {
                             SelectionKey key = (SelectionKey) iterator.next();
@@ -99,35 +102,43 @@ public class AsyncPortscan extends AsyncTask<Void, Integer, Void> {
                                     continue;
                                 }
                                 if (key.isConnectable()) {
-                                    //Log.i(TAG, "connectable=" + (Integer) key.attachment());
+                                    Log.i(TAG, "connectable=" + (Integer) key.attachment());
                                     if (((SocketChannel) key.channel()).finishConnect()) {
                                         Log.i(TAG, "connected=" + (Integer) key.attachment());
-                                        key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                                        // key.interestOps(SelectionKey.OP_READ
+                                        // | SelectionKey.OP_WRITE);
+                                        key.interestOps(SelectionKey.OP_WRITE);
                                     }
                                 } else if (key.isWritable()) {
                                     Log.i(TAG, "writable=" + (Integer) key.attachment());
-                                    // write something
-                                    ByteBuffer data = Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
-                                    SocketChannel sock = (SocketChannel) key.channel();
-                                    while (data.hasRemaining()) {
-                                        sock.write(data);
-                                    }
-                                    data.clear();
-                                    key.interestOps(SelectionKey.OP_READ);
+                                    // write something (blocking)
+                                    // ByteBuffer data =
+                                    // Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
+                                    // SocketChannel sock = (SocketChannel)
+                                    // key.channel();
+                                    // while (data.hasRemaining()) {
+                                    // sock.write(data);
+                                    // }
+                                    // data.clear();
+                                    // key.interestOps(SelectionKey.OP_READ);
+                                    finishKey(key, OPEN);
                                 } else if (key.isReadable()) {
                                     Log.i(TAG, "readable=" + (Integer) key.attachment());
                                     finishKey(key, OPEN);
                                 }
                             } catch (ConnectException e) {
-                                if (e.getMessage().equals("Connection refused")) {
+                                if (e.getMessage().equals(E_REFUSED)) {
                                     finishKey(key, CLOSED);
-                                } else if (e.getMessage().equals("The operation timed out")) {
+                                } else if (e.getMessage().equals(E_TIMEOUT)) {
                                     finishKey(key, FILTERED);
                                 } else {
                                     Log.e(TAG, e.getMessage());
+                                    e.printStackTrace();
+                                    finishKey(key, FILTERED);
                                 }
-                            } catch (IOException e) {
+                            } catch (Exception e) {
                                 Log.e(TAG, e.getMessage());
+                                e.printStackTrace();
                                 finishKey(key, FILTERED);
                             } finally {
                                 iterator.remove();
@@ -149,50 +160,36 @@ public class AsyncPortscan extends AsyncTask<Void, Integer, Void> {
             SocketChannel socket = SocketChannel.open();
             socket.configureBlocking(false);
             socket.connect(new InetSocketAddress(ina, port));
+            // socket.socket().connect(new InetSocketAddress(ina, port), rate);
             socket.register(selector, SelectionKey.OP_CONNECT, new Integer(port));
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }
     }
 
-     @Override
-    protected void onPostExecute(Void unused) {
-        closeSelector();
-        super.onPostExecute(unused);
-    }
-
     protected void onCancelled() {
-        closeSelector();
+        select = false;
     }
 
-    private void closeSelector(){
-        select = false;
-        synchronized (selector) {
-            try {
-                if (selector.isOpen()) {
+    private void closeSelector() {
+        try {
+            if (selector.isOpen()) {
+                synchronized (selector.keys()) {
                     Iterator<SelectionKey> iterator = selector.keys().iterator();
                     while (iterator.hasNext()) {
                         finishKey((SelectionKey) iterator.next(), FILTERED);
                     }
                     selector.close();
                 }
-            } catch (IOException e) {
+            }
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (ClosedSelectorException e) {
+            if (e.getMessage() != null) {
                 Log.e(TAG, e.getMessage());
-            } catch (ClosedSelectorException e) {
             }
-        }
-    }
-
-    private void clearTimeout(){
-        long now = System.nanoTime();
-        if (now - time > TIMEOUT_CONNECT && selector.isOpen()) {
-            Iterator<SelectionKey> iterator = selector.keys().iterator();
-            while (iterator.hasNext()) {
-                SelectionKey key = iterator.next();
-                if (key.interestOps()==SelectionKey.OP_CONNECT) {
-                    finishKey(key, FILTERED);
-                }
-            }
+        } finally {
+            Log.i(TAG, "Selector closed");
         }
     }
 
@@ -203,10 +200,15 @@ public class AsyncPortscan extends AsyncTask<Void, Integer, Void> {
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             } finally {
-                cnt_selected++;
                 publishProgress((Integer) key.attachment(), state);
                 key.cancel();
             }
         }
+    }
+
+    // Port private object
+    private static class Port {
+        public int port;
+        public int start;
     }
 }
