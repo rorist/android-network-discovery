@@ -124,6 +124,9 @@
     <string name="preferences_ip_end_summary">Last IP address to scan</string>
     <string name="preferences_ip_custom_title">Custom IP range</string>
     <string name="preferences_ip_custom_summary">Manually set start/end IPs</string>
+    <string name="preferences_cidr_custom_title">Custom CIDR</string>
+    <string name="preferences_cidr_custom_summary">Manually set CIDR (defines subnet)</string>
+    <string name="preferences_cidr">Change CIDR</string>
     
     <string name="preferences_error1">Error: First is bigger than Last !</string>
     <string name="preferences_error2">Error: Number of Threads must be between 1 and 256 !</string>

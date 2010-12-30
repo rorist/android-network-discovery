@@ -1,4 +1,5 @@
 
+- Uses-intents in manifest
 Network Discovery
 =================
 
@@ -27,7 +28,7 @@ Todo
 ----
 
 - Save all scan in DB, open previous scan, export previous scan, etc
-- Discovery: restrict/change range or change cidr
+- Discovery: Change cidr
 - Settings: prevent phone from sleeping
 - NMAP build script (ARM and other arch (using AOSP?))
 - Add new info such as Hops (using MTR?)

@@ -106,6 +106,12 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 
     public static final String KEY_IP_CUSTOM = "ip_custom";
     public static final boolean DEFAULT_IP_CUSTOM = false;
+    
+    public static final String KEY_CIDR_CUSTOM = "cidr_custom";
+    public static final boolean DEFAULT_CIDR_CUSTOM = false;
+
+    public static final String KEY_CIDR = "cidr";
+    public static final int DEFAULT_CIDR = 24;
 
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
@@ -259,6 +265,10 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
             checkMaxThreads();
         } else if (key.equals(KEY_RATECTRL_ENABLE)) {
             checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
+        } else if (key.equals(KEY_CIDR_CUSTOM)) {
+            ((CheckBoxPreference)ps.findPreference(KEY_IP_CUSTOM)).setEnabled(false);
+        } else if (key.equals(KEY_IP_CUSTOM)) {
+            ((CheckBoxPreference)ps.findPreference(KEY_CIDR_CUSTOM)).setEnabled(false);
         }
     }
 

@@ -61,7 +61,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     public HardwareAddress mHardwareAddress;
 
     // private SlidingDrawer mDrawer;
-    // private int mCustomCidr;
     // private RootDaemon mRootDaemon = null;
 
     @Override
@@ -204,14 +203,25 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             }
 
             // Get ip information
-            int shift = (32 - net.cidr);
             ip = NetInfo.getUnsignedLongFromIp(net.ip);
-            if (net.cidr < 31) {
-                start = (ip >> shift << shift) + 1;
-                end = (start | ((1 << shift) - 1)) - 1;
+            if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
+                // Custom IP
+                start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START, Prefs.DEFAULT_IP_START));
+                end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END));
             } else {
-                start = (ip >> shift << shift);
-                end = (start | ((1 << shift) - 1));
+                // Custom CIDR
+                if (prefs.getBoolean(Prefs.KEY_CIDR_CUSTOM, Prefs.DEFAULT_CIDR_CUSTOM)) {
+                    net.cidr = prefs.getInt(Prefs.KEY_CIDR, Prefs.DEFAULT_CIDR);
+                }
+                // Detected IP
+                int shift = (32 - net.cidr);
+                if (net.cidr < 31) {
+                    start = (ip >> shift << shift) + 1;
+                    end = (start | ((1 << shift) - 1)) - 1;
+                } else {
+                    start = (ip >> shift << shift);
+                    end = (start | ((1 << shift) - 1));
+                }
             }
 
             // Reset ip start-end (is it really convenient ?)
@@ -335,14 +345,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
-        if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
-            mDiscoveryTask.setNetwork(NetInfo.getUnsignedLongFromIp(net.ip), NetInfo
-                    .getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
-                            Prefs.DEFAULT_IP_START)), NetInfo.getUnsignedLongFromIp(prefs
-                    .getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END)));
-        } else {
-            mDiscoveryTask.setNetwork(ip, start, end);
-        }
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
         setButton(btn_discover, R.drawable.cancel, false);

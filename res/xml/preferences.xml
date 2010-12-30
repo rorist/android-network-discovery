@@ -65,6 +65,17 @@
             android:inputType="phone"
             android:dependency="ip_custom" />
         <CheckBoxPreference
+            android:key="cidr_custom"
+            android:title="@string/preferences_cidr_custom_title"
+            android:summary="@string/preferences_cidr_custom_summary"
+            android:defaultValue="false" />
+        <EditTextPreference
+            android:key="cidr"
+            android:title="@string/preferences_cidr"
+            android:summary="@string/preferences_cidr"
+            android:inputType="number" 
+            android:dependency="cidr_custom" />
+        <CheckBoxPreference
             android:key="ratecontrol_enable"
             android:title="@string/preferences_ratecontrol_enable_title"
             android:summary="@string/preferences_ratecontrol_enable_summary"
