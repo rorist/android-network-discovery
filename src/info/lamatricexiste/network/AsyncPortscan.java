@@ -40,7 +40,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     private static final String E_REFUSED = "Connection refused";
     private static final String E_TIMEOUT = "The operation timed out";
     private int rate;
-    private long time;
     private boolean select = true;
     private Selector selector;
 
@@ -90,7 +89,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
             for (int j = PORT_START; j <= PORT_END; j++) {
                 connectSocket(ina, j);
             }
-            time = System.nanoTime();
             while (select && selector.keys().size() > 0) {
                 if (selector.select(TIMEOUT_SELECT) > 0) {
                     synchronized (selector.selectedKeys()) {
@@ -102,7 +100,12 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                     continue;
                                 }
                                 Data data = (Data) key.attachment();
-                                //long start = data[1];
+                                // FIXME: Terminate the key if too old
+                                if(System.nanoTime() - data.start > TIMEOUT_CONNECT){
+                                    finishKey(key, UNREACHABLE);
+                                }
+
+                                // Try to do stuff
                                 if (key.isConnectable()) {
                                     Log.i(TAG, "connectable=" + data.port);
                                     if (((SocketChannel) key.channel()).finishConnect()) {

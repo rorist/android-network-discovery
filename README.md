@@ -26,8 +26,6 @@ Build
 Todo
 ----
 
-- Network interface choice in preferences
-- Uses-intents in manifest
 - Save all scan in DB, open previous scan, export previous scan, etc
 - Discovery: restrict/change range or change cidr
 - Settings: prevent phone from sleeping
