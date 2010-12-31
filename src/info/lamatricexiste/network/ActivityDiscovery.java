@@ -222,6 +222,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                     start = (ip >> shift << shift);
                     end = (start | ((1 << shift) - 1));
                 }
+                Log.v(TAG, "start="+start);
             }
 
             // Reset ip start-end (is it really convenient ?)

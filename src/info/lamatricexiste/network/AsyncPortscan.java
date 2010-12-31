@@ -142,7 +142,10 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                     finishKey(key, FILTERED);
                                 }
                             } catch (Exception e) {
-                                Log.e(TAG, e.getMessage());
+                                try {
+                                    Log.e(TAG, e.getMessage());
+                                } catch (java.lang.NullPointerException e1) {
+                                }
                                 e.printStackTrace();
                                 finishKey(key, FILTERED);
                             } finally {

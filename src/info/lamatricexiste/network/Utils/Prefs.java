@@ -266,9 +266,9 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         } else if (key.equals(KEY_RATECTRL_ENABLE)) {
             checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
         } else if (key.equals(KEY_CIDR_CUSTOM)) {
-            ((CheckBoxPreference)ps.findPreference(KEY_IP_CUSTOM)).setEnabled(false);
+            ((CheckBoxPreference)ps.findPreference(KEY_IP_CUSTOM)).setChecked(false);
         } else if (key.equals(KEY_IP_CUSTOM)) {
-            ((CheckBoxPreference)ps.findPreference(KEY_CIDR_CUSTOM)).setEnabled(false);
+            ((CheckBoxPreference)ps.findPreference(KEY_CIDR_CUSTOM)).setChecked(false);
         }
     }
 
