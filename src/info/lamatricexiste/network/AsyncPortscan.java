@@ -34,7 +34,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     private final String TAG = "AsyncPortscan";
     private static final int TIMEOUT_SELECT = 300;
-    private static final long TIMEOUT_CONNECT = 5000000000L; // ns, 5000 ms
+    private static final long TIMEOUT_CONNECT = 5000 * 1000000; // ns
     private static final int TIMEOUT_WRITE = 5000; // ms
     private static final int TIMEOUT_READ = 5000; // ms
     private static final String E_REFUSED = "Connection refused";
@@ -77,7 +77,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
         } catch (UnknownHostException e) {
             Log.e(TAG, e.getMessage());
-            publishProgress(0, UNREACHABLE);
+            publishProgress(0, UNREACHABLE, null);
         }
         return null;
     }
@@ -101,7 +101,9 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                 }
                                 Data data = (Data) key.attachment();
                                 // FIXME: Terminate the key if too old
-                                if(System.nanoTime() - data.start > TIMEOUT_CONNECT){
+                                long diff = System.nanoTime() - data.start;
+                                Log.i(TAG, "diff="+diff);
+                                if(diff > TIMEOUT_CONNECT){
                                     finishKey(key, UNREACHABLE);
                                     continue;
                                 }
@@ -116,23 +118,24 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                         //key.interestOps(SelectionKey.OP_WRITE);
                                         finishKey(key, OPEN, "FIXME Banner");
                                     }
-                                } else if (key.isWritable()) {
-                                    Log.i(TAG, "writable=" + data.port);
-                                    // write something (blocking)
-                                    // ByteBuffer data =
-                                    // Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
-                                    // SocketChannel sock = (SocketChannel)
-                                    // key.channel();
-                                    // while (data.hasRemaining()) {
-                                    // sock.write(data);
-                                    // }
-                                    // data.clear();
-                                    // key.interestOps(SelectionKey.OP_READ);
-                                    finishKey(key, OPEN);
-                                } else if (key.isReadable()) {
-                                    Log.i(TAG, "readable=" + data.port);
-                                    finishKey(key, OPEN);
                                 }
+                                //} else if (key.isWritable()) {
+                                //    Log.i(TAG, "writable=" + data.port);
+                                //    // write something (blocking)
+                                //    // ByteBuffer data =
+                                //    // Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
+                                //    // SocketChannel sock = (SocketChannel)
+                                //    // key.channel();
+                                //    // while (data.hasRemaining()) {
+                                //    // sock.write(data);
+                                //    // }
+                                //    // data.clear();
+                                //    // key.interestOps(SelectionKey.OP_READ);
+                                //    finishKey(key, OPEN);
+                                //} else if (key.isReadable()) {
+                                //    Log.i(TAG, "readable=" + data.port);
+                                //    finishKey(key, OPEN);
+                                //}
                             } catch (ConnectException e) {
                                 if (e.getMessage().equals(E_REFUSED)) {
                                     finishKey(key, CLOSED);
@@ -172,7 +175,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
             SocketChannel socket = SocketChannel.open();
             socket.configureBlocking(false);
             socket.connect(new InetSocketAddress(ina, port));
-            // socket.socket().connect(new InetSocketAddress(ina, port), rate);
             Data data = new Data();
             data.port = port;
             data.start = System.nanoTime();
@@ -220,6 +222,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                 Log.e(TAG, e.getMessage());
             } finally {
                 Data data = (Data) key.attachment();
+                Log.v(TAG, "key="+data.port);
                 publishProgress(data.port, state, banner);
                 key.cancel();
             }
@@ -227,7 +230,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     }
 
     // Port private object
-    // FIXME: Better use a simple long[] array ?
     private static class Data {
         public int port;
         public long start;

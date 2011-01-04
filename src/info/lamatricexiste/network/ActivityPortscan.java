@@ -372,7 +372,7 @@ final public class ActivityPortscan extends TabActivity {
     }
 
     private class ScanPortTask extends AsyncPortscan {
-        // private class ScanPortTask extends DefaultPortscan {
+        // FIXME: Create AbstractPortscan class
         private int progress_current = 0;
         private SQLiteDatabase dbServices;
         private SQLiteDatabase dbProbes;
@@ -448,6 +448,10 @@ final public class ActivityPortscan extends TabActivity {
                             Log.e(TAG, "Host Unreachable: "+ipAddr+":"+port);
                             // TODO: Cancel task ?
                         }
+                    } else {
+                        cancel(true);
+                        makeToast(R.string.scan_host_unreachable);
+                        Log.e(TAG, "Host Unreachable: "+ipAddr);
                     }
                 }
                 progress_current++;
