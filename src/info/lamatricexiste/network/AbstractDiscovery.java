@@ -17,7 +17,6 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
     protected WeakReference<ActivityDiscovery> mDiscover;
 
     // TODO: Adaptiv value or changeable by Prefs
-    // protected int cidr;
     protected long ip;
     protected long start = 0;
     protected long end = 0;
@@ -31,7 +30,6 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
         this.ip = ip;
         this.start = start;
         this.end = end;
-        // this.cidr = cidr;
     }
 
     abstract protected Void doInBackground(Void... params);

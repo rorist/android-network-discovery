@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -111,7 +112,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final boolean DEFAULT_CIDR_CUSTOM = false;
 
     public static final String KEY_CIDR = "cidr";
-    public static final int DEFAULT_CIDR = 24;
+    public static final String DEFAULT_CIDR = "24";
 
     public static final String KEY_DONATE = "donate";
     public static final String KEY_WEBSITE = "website";
@@ -266,9 +267,17 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         } else if (key.equals(KEY_RATECTRL_ENABLE)) {
             checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
         } else if (key.equals(KEY_CIDR_CUSTOM)) {
-            ((CheckBoxPreference)ps.findPreference(KEY_IP_CUSTOM)).setChecked(false);
+            CheckBoxPreference cb = (CheckBoxPreference) ps.findPreference(KEY_CIDR_CUSTOM);
+            if (cb.isChecked()) {
+                ((CheckBoxPreference)ps.findPreference(KEY_IP_CUSTOM)).setChecked(false);
+            }
+            sendBroadcast(new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
         } else if (key.equals(KEY_IP_CUSTOM)) {
-            ((CheckBoxPreference)ps.findPreference(KEY_CIDR_CUSTOM)).setChecked(false);
+            CheckBoxPreference cb = (CheckBoxPreference) ps.findPreference(KEY_IP_CUSTOM);
+            if (cb.isChecked()) {
+                ((CheckBoxPreference)ps.findPreference(KEY_CIDR_CUSTOM)).setChecked(false);
+            }
+            sendBroadcast(new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
         }
     }
 

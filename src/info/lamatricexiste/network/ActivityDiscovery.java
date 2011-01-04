@@ -194,44 +194,43 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         }
 
         if (currentNetwork != net.hashCode()) {
-            Log.i(TAG, "Network info changed");
+            Log.i(TAG, "Network info has changed");
             currentNetwork = net.hashCode();
 
             // Cancel running tasks
             if (mDiscoveryTask != null) {
                 mDiscoveryTask.cancel(true);
             }
+        }
 
-            // Get ip information
-            ip = NetInfo.getUnsignedLongFromIp(net.ip);
-            if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
-                // Custom IP
-                start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START, Prefs.DEFAULT_IP_START));
-                end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END));
+        // Get ip information
+        ip = NetInfo.getUnsignedLongFromIp(net.ip);
+        if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
+            // Custom IP
+            start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START, Prefs.DEFAULT_IP_START));
+            end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END));
+        } else {
+            // Custom CIDR
+            if (prefs.getBoolean(Prefs.KEY_CIDR_CUSTOM, Prefs.DEFAULT_CIDR_CUSTOM)) {
+                net.cidr = Integer.parseInt(prefs.getString(Prefs.KEY_CIDR, Prefs.DEFAULT_CIDR));
+            }
+            // Detected IP
+            int shift = (32 - net.cidr);
+            if (net.cidr < 31) {
+                start = (ip >> shift << shift) + 1;
+                end = (start | ((1 << shift) - 1)) - 1;
             } else {
-                // Custom CIDR
-                if (prefs.getBoolean(Prefs.KEY_CIDR_CUSTOM, Prefs.DEFAULT_CIDR_CUSTOM)) {
-                    net.cidr = prefs.getInt(Prefs.KEY_CIDR, Prefs.DEFAULT_CIDR);
-                }
-                // Detected IP
-                int shift = (32 - net.cidr);
-                if (net.cidr < 31) {
-                    start = (ip >> shift << shift) + 1;
-                    end = (start | ((1 << shift) - 1)) - 1;
-                } else {
-                    start = (ip >> shift << shift);
-                    end = (start | ((1 << shift) - 1));
-                }
-                Log.v(TAG, "start="+start);
+                start = (ip >> shift << shift);
+                end = (start | ((1 << shift) - 1));
             }
+        }
 
-            // Reset ip start-end (is it really convenient ?)
-            if (!prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
-                Editor edit = prefs.edit();
-                edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(start));
-                edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(end));
-                edit.commit();
-            }
+        // Reset ip start-end (is it really convenient ?)
+        if (!prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
+            Editor edit = prefs.edit();
+            edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(start));
+            edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(end));
+            edit.commit();
         }
     }
 
@@ -346,6 +345,10 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
+        Log.v(TAG, "ip="+ip);
+        Log.v(TAG, "start="+start);
+        Log.v(TAG, "end="+end);
+        mDiscoveryTask.setNetwork(ip, start, end);
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
         setButton(btn_discover, R.drawable.cancel, false);

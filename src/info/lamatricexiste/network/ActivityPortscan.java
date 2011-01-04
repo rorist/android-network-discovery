@@ -416,7 +416,7 @@ final public class ActivityPortscan extends TabActivity {
         @Override
         protected void onProgressUpdate(Object... values) {
             if (!isCancelled()) {
-                if (values.length > 1) {
+                if (values.length == 3) {
                     final Integer port = (Integer) values[0];
                     final int type = (Integer) values[1];
                     if (!port.equals(new Integer(0))) {
@@ -425,24 +425,28 @@ final public class ActivityPortscan extends TabActivity {
                             if (values[2] != null) {
                                 host.banners.put(port, (String) values[2]);
                             }
-                            findLocationAndAdd(host.portsOpen, port);
-                            host.services.put(port, getPortService(port));
-                            adapter_open.add(PLACEHOLDER);
-                            cnt_open++;
-                            mTabOpen
-                                    .setText(String.format(getString(R.string.scan_open), cnt_open));
+                            if(findLocationAndAdd(host.portsOpen, port)){
+                                host.services.put(port, getPortService(port));
+                                adapter_open.add(PLACEHOLDER);
+                                cnt_open++;
+                                mTabOpen
+                                        .setText(String.format(getString(R.string.scan_open), cnt_open));
+                            }
                             adapter_open.notifyDataSetChanged(); //FIXME: Check this
                         } else if (type == AsyncPortscan.CLOSED) {
                             // Closed
-                            findLocationAndAdd(host.portsClosed, port);
-                            host.services.put(port, getPortService(port));
-                            adapter_closed.add(PLACEHOLDER);
-                            cnt_closed++;
-                            mTabClosed.setText(String.format(getString(R.string.scan_closed),
-                                    cnt_closed));
-                            adapter_closed.notifyDataSetChanged();
+                            if(findLocationAndAdd(host.portsClosed, port)){
+                                host.services.put(port, getPortService(port));
+                                adapter_closed.add(PLACEHOLDER);
+                                cnt_closed++;
+                                mTabClosed.setText(String.format(getString(R.string.scan_closed),
+                                        cnt_closed));
+                            }
+                            adapter_closed.notifyDataSetChanged(); //FIXME: Check this
                         } else if (type == AsyncPortscan.UNREACHABLE) {
                             makeToast(R.string.scan_host_unreachable);
+                            Log.e(TAG, "Host Unreachable: "+ipAddr+":"+port);
+                            // TODO: Cancel task ?
                         }
                     }
                 }
@@ -531,10 +535,14 @@ final public class ActivityPortscan extends TabActivity {
         }
     }
 
-    private void findLocationAndAdd(ArrayList<Integer> array, int value) {
+    private boolean findLocationAndAdd(ArrayList<Integer> array, int value) {
+        int size = array.size();
+        if(size==0){
+            array.add(value);
+            return true;
+        }
         int index;
         int current;
-        int size = array.size();
         for (index = 0; index < size; index++) {
             current = array.get(index);
             if (value > current) {
@@ -542,12 +550,13 @@ final public class ActivityPortscan extends TabActivity {
             } else if (value < current) {
                 // Add new value
                 array.add(value);
-                break;
+                return true;
             } else if (value == current) {
                 // Value already exists
-                break;
+                return false;
             }
         }
+        return false;
     }
 
     private void startScan() {

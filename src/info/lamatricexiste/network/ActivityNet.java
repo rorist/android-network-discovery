@@ -87,7 +87,6 @@ public abstract class ActivityNet extends Activity {
                         default:
                             info_in_str = getString(R.string.wifi_unknown);
                     }
-                    setInfo();
                 }
 
                 if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) && net.getWifiInfo()) {
@@ -95,15 +94,12 @@ public abstract class ActivityNet extends Activity {
                     // Log.d(TAG, "SupplicantState=" + sstate);
                     if (sstate == SupplicantState.SCANNING) {
                         info_in_str = getString(R.string.wifi_scanning);
-                        setInfo();
                     } else if (sstate == SupplicantState.ASSOCIATING) {
                         info_in_str = String.format(getString(R.string.wifi_associating),
                                 (net.ssid != null ? net.ssid : (net.bssid != null ? net.bssid
                                         : net.macAddress)));
-                        setInfo();
                     } else if (sstate == SupplicantState.COMPLETED) {
                         info_in_str = String.format(getString(R.string.wifi_dhcp), net.ssid);
-                        setInfo();
                     }
                 }
             }
@@ -143,13 +139,15 @@ public abstract class ActivityNet extends Activity {
                         Log.i(TAG, "Connectivity unknown!");
                         info_mo_str = "MODE: Connectivity mode unknown!";
                     }
-                    setInfo();
                 } else {
                     cancelTasks();
                 }
             } else {
                 cancelTasks();
             }
+            
+            // Always update network info
+            setInfo();
         }
     };
 }

@@ -34,7 +34,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     private final String TAG = "AsyncPortscan";
     private static final int TIMEOUT_SELECT = 300;
-    private static final int TIMEOUT_CONNECT = 5000; // ms
+    private static final long TIMEOUT_CONNECT = 5000000000L; // ns, 5000 ms
     private static final int TIMEOUT_WRITE = 5000; // ms
     private static final int TIMEOUT_READ = 5000; // ms
     private static final String E_REFUSED = "Connection refused";
@@ -103,16 +103,18 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                 // FIXME: Terminate the key if too old
                                 if(System.nanoTime() - data.start > TIMEOUT_CONNECT){
                                     finishKey(key, UNREACHABLE);
+                                    continue;
                                 }
 
                                 // Try to do stuff
                                 if (key.isConnectable()) {
-                                    Log.i(TAG, "connectable=" + data.port);
+                                    //Log.i(TAG, "connectable=" + data.port);
                                     if (((SocketChannel) key.channel()).finishConnect()) {
                                         Log.i(TAG, "connected=" + data.port);
                                         // key.interestOps(SelectionKey.OP_READ
                                         // | SelectionKey.OP_WRITE);
-                                        key.interestOps(SelectionKey.OP_WRITE);
+                                        //key.interestOps(SelectionKey.OP_WRITE);
+                                        finishKey(key, OPEN, "FIXME Banner");
                                     }
                                 } else if (key.isWritable()) {
                                     Log.i(TAG, "writable=" + data.port);
@@ -145,9 +147,11 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                 try {
                                     Log.e(TAG, e.getMessage());
                                 } catch (java.lang.NullPointerException e1) {
+                                    e1.printStackTrace();
+                                } finally {
+                                    e.printStackTrace();
+                                    finishKey(key, FILTERED);
                                 }
-                                e.printStackTrace();
-                                finishKey(key, FILTERED);
                             } finally {
                                 iterator.remove();
                             }
@@ -205,6 +209,10 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     }
 
     private void finishKey(SelectionKey key, int state) {
+        finishKey(key, state, null);
+    }
+
+    private void finishKey(SelectionKey key, int state, String banner) {
         synchronized (key) {
             try {
                 ((SocketChannel) key.channel()).close();
@@ -212,7 +220,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                 Log.e(TAG, e.getMessage());
             } finally {
                 Data data = (Data) key.attachment();
-                publishProgress(data.port, state);
+                publishProgress(data.port, state, banner);
                 key.cancel();
             }
         }
