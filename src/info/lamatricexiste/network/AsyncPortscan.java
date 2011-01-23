@@ -34,7 +34,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     private final String TAG = "AsyncPortscan";
     private static final int TIMEOUT_SELECT = 300;
-    private static final long TIMEOUT_CONNECT = 5000 * 1000000; // ns
+    private static final long TIMEOUT_CONNECT = 5000000000l; // ns - 5s
     private static final int TIMEOUT_WRITE = 5000; // ms
     private static final int TIMEOUT_READ = 5000; // ms
     private static final String E_REFUSED = "Connection refused";
@@ -52,6 +52,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     public final static int CLOSED = 1;
     public final static int FILTERED = -1;
     public final static int UNREACHABLE = -2;
+    public final static int TIMEOUT = -3;
 
     protected AsyncPortscan(Activity activity, String host, int _rate) {
         ipAddr = host;
@@ -102,40 +103,41 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                 Data data = (Data) key.attachment();
                                 // FIXME: Terminate the key if too old
                                 long diff = System.nanoTime() - data.start;
-                                Log.i(TAG, "diff="+diff);
-                                if(diff > TIMEOUT_CONNECT){
-                                    finishKey(key, UNREACHABLE);
+                                if (diff > TIMEOUT_CONNECT) {
+                                    Log.v(TAG, "key timeout=" + data.port);
+                                    finishKey(key, TIMEOUT);
                                     continue;
                                 }
 
                                 // Try to do stuff
                                 if (key.isConnectable()) {
-                                    //Log.i(TAG, "connectable=" + data.port);
+                                    // Log.v(TAG, "connectable=" + data.port);
                                     if (((SocketChannel) key.channel()).finishConnect()) {
-                                        Log.i(TAG, "connected=" + data.port);
+                                        Log.v(TAG, "connected=" + data.port);
                                         // key.interestOps(SelectionKey.OP_READ
                                         // | SelectionKey.OP_WRITE);
-                                        //key.interestOps(SelectionKey.OP_WRITE);
+                                        // key.interestOps(SelectionKey.OP_WRITE);
                                         finishKey(key, OPEN, "FIXME Banner");
                                     }
                                 }
-                                //} else if (key.isWritable()) {
-                                //    Log.i(TAG, "writable=" + data.port);
-                                //    // write something (blocking)
-                                //    // ByteBuffer data =
-                                //    // Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
-                                //    // SocketChannel sock = (SocketChannel)
-                                //    // key.channel();
-                                //    // while (data.hasRemaining()) {
-                                //    // sock.write(data);
-                                //    // }
-                                //    // data.clear();
-                                //    // key.interestOps(SelectionKey.OP_READ);
-                                //    finishKey(key, OPEN);
-                                //} else if (key.isReadable()) {
-                                //    Log.i(TAG, "readable=" + data.port);
-                                //    finishKey(key, OPEN);
-                                //}
+                                // } else if (key.isWritable()) {
+                                // Log.v(TAG, "writable=" + data.port);
+                                // // write something (blocking)
+                                // // ByteBuffer data =
+                                // //
+                                // Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
+                                // // SocketChannel sock = (SocketChannel)
+                                // // key.channel();
+                                // // while (data.hasRemaining()) {
+                                // // sock.write(data);
+                                // // }
+                                // // data.clear();
+                                // // key.interestOps(SelectionKey.OP_READ);
+                                // finishKey(key, OPEN);
+                                // } else if (key.isReadable()) {
+                                // Log.v(TAG, "readable=" + data.port);
+                                // finishKey(key, OPEN);
+                                // }
                             } catch (ConnectException e) {
                                 if (e.getMessage().equals(E_REFUSED)) {
                                     finishKey(key, CLOSED);
@@ -206,7 +208,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                 Log.e(TAG, e.getMessage());
             }
         } finally {
-            Log.i(TAG, "Selector closed");
+            Log.v(TAG, "Selector closed");
         }
     }
 
@@ -222,7 +224,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                 Log.e(TAG, e.getMessage());
             } finally {
                 Data data = (Data) key.attachment();
-                Log.v(TAG, "key="+data.port);
                 publishProgress(data.port, state, banner);
                 key.cancel();
             }

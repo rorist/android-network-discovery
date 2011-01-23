@@ -425,33 +425,41 @@ final public class ActivityPortscan extends TabActivity {
                             if (values[2] != null) {
                                 host.banners.put(port, (String) values[2]);
                             }
-                            if(findLocationAndAdd(host.portsOpen, port)){
+                            if (findLocationAndAdd(host.portsOpen, port)) {
                                 host.services.put(port, getPortService(port));
                                 adapter_open.add(PLACEHOLDER);
                                 cnt_open++;
-                                mTabOpen
-                                        .setText(String.format(getString(R.string.scan_open), cnt_open));
+                                mTabOpen.setText(String.format(getString(R.string.scan_open),
+                                        cnt_open));
+                            } else {
+                                Log.e(TAG, "port wasnt added=" + port);
                             }
-                            adapter_open.notifyDataSetChanged(); //FIXME: Check this
+                            adapter_open.notifyDataSetChanged(); // FIXME: Check
+                            // this
                         } else if (type == AsyncPortscan.CLOSED) {
                             // Closed
-                            if(findLocationAndAdd(host.portsClosed, port)){
+                            if (findLocationAndAdd(host.portsClosed, port)) {
                                 host.services.put(port, getPortService(port));
                                 adapter_closed.add(PLACEHOLDER);
                                 cnt_closed++;
                                 mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                         cnt_closed));
                             }
-                            adapter_closed.notifyDataSetChanged(); //FIXME: Check this
+                            adapter_closed.notifyDataSetChanged(); // FIXME:
+                            // Check this
                         } else if (type == AsyncPortscan.UNREACHABLE) {
+                            cancel(true);
                             makeToast(R.string.scan_host_unreachable);
-                            Log.e(TAG, "Host Unreachable: "+ipAddr+":"+port);
-                            // TODO: Cancel task ?
+                            Log.e(TAG, "Host Unreachable: " + ipAddr + ":" + port);
+                        } else if (type == AsyncPortscan.TIMEOUT) {
+                            // FIXME: do something ?
+                        } else if (type == AsyncPortscan.FILTERED) {
+                            // FIXME: do something ?
                         }
                     } else {
                         cancel(true);
                         makeToast(R.string.scan_host_unreachable);
-                        Log.e(TAG, "Host Unreachable: "+ipAddr);
+                        Log.e(TAG, "Host Unreachable: " + ipAddr);
                     }
                 }
                 progress_current++;
@@ -540,8 +548,9 @@ final public class ActivityPortscan extends TabActivity {
     }
 
     private boolean findLocationAndAdd(ArrayList<Integer> array, int value) {
+        // FIXME: May be optimized
         int size = array.size();
-        if(size==0){
+        if (size == 0) {
             array.add(value);
             return true;
         }
@@ -553,12 +562,16 @@ final public class ActivityPortscan extends TabActivity {
                 continue;
             } else if (value < current) {
                 // Add new value
-                array.add(value);
+                array.add(index, value);
                 return true;
             } else if (value == current) {
                 // Value already exists
                 return false;
             }
+        }
+        if (index == size) {
+            array.add(value);
+            return true;
         }
         return false;
     }
