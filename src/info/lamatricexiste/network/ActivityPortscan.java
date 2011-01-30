@@ -432,10 +432,10 @@ final public class ActivityPortscan extends TabActivity {
                                 mTabOpen.setText(String.format(getString(R.string.scan_open),
                                         cnt_open));
                             } else {
-                                Log.e(TAG, "port wasnt added=" + port);
+                                Log.w(TAG, "port wasnt added=" + port);
                             }
-                            adapter_open.notifyDataSetChanged(); // FIXME: Check
-                            // this
+                            // FIXME: Check this
+                            adapter_open.notifyDataSetChanged();
                         } else if (type == AsyncPortscan.CLOSED) {
                             // Closed
                             if (findLocationAndAdd(host.portsClosed, port)) {
@@ -445,16 +445,16 @@ final public class ActivityPortscan extends TabActivity {
                                 mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                         cnt_closed));
                             }
-                            adapter_closed.notifyDataSetChanged(); // FIXME:
-                            // Check this
+                            // FIXME: Check this
+                            adapter_closed.notifyDataSetChanged();
                         } else if (type == AsyncPortscan.UNREACHABLE) {
                             cancel(true);
                             makeToast(R.string.scan_host_unreachable);
                             Log.e(TAG, "Host Unreachable: " + ipAddr + ":" + port);
-                        } else if (type == AsyncPortscan.TIMEOUT) {
-                            // FIXME: do something ?
+                        }
+                        // FIXME: do something ?
+                        else if (type == AsyncPortscan.TIMEOUT) {
                         } else if (type == AsyncPortscan.FILTERED) {
-                            // FIXME: do something ?
                         }
                     } else {
                         cancel(true);

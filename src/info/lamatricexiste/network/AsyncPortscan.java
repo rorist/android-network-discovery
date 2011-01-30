@@ -91,29 +91,23 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                 connectSocket(ina, j);
             }
             while (select && selector.keys().size() > 0) {
+                Log.e(TAG, "select=" + selector.keys().size());
                 if (selector.select(TIMEOUT_SELECT) > 0) {
                     synchronized (selector.selectedKeys()) {
                         Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                         while (iterator.hasNext()) {
                             SelectionKey key = (SelectionKey) iterator.next();
+                            Log.e(TAG, "key=" + key.isValid());
                             try {
                                 if (!key.isValid()) {
                                     continue;
                                 }
-                                Data data = (Data) key.attachment();
-                                // FIXME: Terminate the key if too old
-                                long diff = System.nanoTime() - data.start;
-                                if (diff > TIMEOUT_CONNECT) {
-                                    Log.v(TAG, "key timeout=" + data.port);
-                                    finishKey(key, TIMEOUT);
-                                    continue;
-                                }
-
-                                // Try to do stuff
+                                // States
                                 if (key.isConnectable()) {
                                     // Log.v(TAG, "connectable=" + data.port);
                                     if (((SocketChannel) key.channel()).finishConnect()) {
-                                        Log.v(TAG, "connected=" + data.port);
+                                        // Data data = (Data) key.attachment();
+                                        // Log.v(TAG, "connected=" + data.port);
                                         // key.interestOps(SelectionKey.OP_READ
                                         // | SelectionKey.OP_WRITE);
                                         // key.interestOps(SelectionKey.OP_WRITE);
@@ -160,6 +154,16 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                             } finally {
                                 iterator.remove();
                             }
+                        }
+                    }
+                } else {
+                    // Remove old keys
+                    final long now = System.nanoTime();
+                    final Iterator<SelectionKey> iterator = selector.keys().iterator();
+                    while (iterator.hasNext()) {
+                        final SelectionKey key = (SelectionKey) iterator.next();
+                        if ((now - ((Data) key.attachment()).start) > TIMEOUT_CONNECT) {
+                            finishKey(key, FILTERED);
                         }
                     }
                 }
