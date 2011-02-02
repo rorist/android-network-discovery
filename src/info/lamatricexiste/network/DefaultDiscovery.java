@@ -183,11 +183,9 @@ public class DefaultDiscovery extends AbstractDiscovery {
             return;
         }
 
-        int rtt = getRate();
         HostBean host = new HostBean();
         host.ipAddress = addr;
-        host.responseTime = rtt;
-        Log.v(TAG, "rtt=" + rtt);
+        host.responseTime = getRate();
 
         if (mDiscover != null) {
             final ActivityDiscovery discover = mDiscover.get();

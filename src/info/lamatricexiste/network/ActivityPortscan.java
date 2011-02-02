@@ -548,16 +548,10 @@ final public class ActivityPortscan extends TabActivity {
     }
 
     private boolean findLocationAndAdd(ArrayList<Integer> array, int value) {
-        // FIXME: May be optimized
+        int index = 0;
         int size = array.size();
-        if (size == 0) {
-            array.add(value);
-            return true;
-        }
-        int index;
-        int current;
         for (index = 0; index < size; index++) {
-            current = array.get(index);
+            int current = array.get(index);
             if (value > current) {
                 continue;
             } else if (value < current) {

@@ -7,8 +7,8 @@
  * Java NIO Documentation:
  * http://jfarcand.wordpress.com/2006/05/30/tricks-and-tips-with-nio-part-i-why-you-must-handle-op_write
  * http://jfarcand.wordpress.com/2006/07/06/tricks-and-tips-with-nio-part-ii-why-selectionkey-attach-is-evil/ 
- * http://jfarcand.wordpress.com/2006/07/07/tricks-and-tips-with-nio-part-iii-thread-or-not-thread
- * http://jfarcand.wordpress.com/2006/07/19/tricks-and-tips-with-nio-part-iv-meet-selectors
+ * http://jfarcand.wordpress.com/2006/07/07/tricks-and-tips-with-nio-part-iii-to-thread-or-not-to-thread/
+ * http://jfarcand.wordpress.com/2006/07/19/httpweblogs-java-netblog20060719tricks-and-tips-nio-part-iv-meet-selectors/
  * http://jfarcand.wordpress.com/2006/09/21/tricks-and-tips-with-nio-part-v-ssl-and-nio-friend-or-foe
  * http://svn.apache.org/viewvc/mina/trunk/core/src/main/java/org/apache/mina/transport/socket/nio/
  */
@@ -20,10 +20,13 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
 
 import android.app.Activity;
@@ -34,9 +37,8 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     private final String TAG = "AsyncPortscan";
     private static final int TIMEOUT_SELECT = 300;
-    private static final long TIMEOUT_CONNECT = 5000000000l; // ns - 5s
-    private static final int TIMEOUT_WRITE = 5000; // ms
-    private static final int TIMEOUT_READ = 5000; // ms
+    private static long TIMEOUT_CONNECT; // = 3 * 1000 * 1000000; // ns
+    private static final long TIMEOUT_WRITE = 5 * 1000 * 1000000; // ns
     private static final String E_REFUSED = "Connection refused";
     private static final String E_TIMEOUT = "The operation timed out";
     private int rate;
@@ -53,10 +55,14 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     public final static int FILTERED = -1;
     public final static int UNREACHABLE = -2;
     public final static int TIMEOUT = -3;
+    // private static final String PROBE_HTTP = "GET / HTTP/1.1\r\n\r\n";
+    private static final String PROBE_HTTP = "\r\n\r\n";
+    private static final int MAX_READ = 75;
 
     protected AsyncPortscan(Activity activity, String host, int _rate) {
         ipAddr = host;
         rate = _rate;
+        TIMEOUT_CONNECT = rate * 1000000;
     }
 
     @Override
@@ -91,47 +97,55 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                 connectSocket(ina, j);
             }
             while (select && selector.keys().size() > 0) {
-                Log.e(TAG, "select=" + selector.keys().size());
                 if (selector.select(TIMEOUT_SELECT) > 0) {
                     synchronized (selector.selectedKeys()) {
                         Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                         while (iterator.hasNext()) {
                             SelectionKey key = (SelectionKey) iterator.next();
-                            Log.e(TAG, "key=" + key.isValid());
                             try {
                                 if (!key.isValid()) {
                                     continue;
                                 }
                                 // States
+                                final Data data = (Data) key.attachment();
+
                                 if (key.isConnectable()) {
-                                    // Log.v(TAG, "connectable=" + data.port);
                                     if (((SocketChannel) key.channel()).finishConnect()) {
-                                        // Data data = (Data) key.attachment();
-                                        // Log.v(TAG, "connected=" + data.port);
-                                        // key.interestOps(SelectionKey.OP_READ
-                                        // | SelectionKey.OP_WRITE);
-                                        // key.interestOps(SelectionKey.OP_WRITE);
-                                        finishKey(key, OPEN, "FIXME Banner");
+                                        Log.v(TAG, "connected=" + data.port);
+                                        key.interestOps(SelectionKey.OP_READ
+                                                | SelectionKey.OP_WRITE);
+                                        data.state = OPEN;
+                                        data.start = System.nanoTime();
+                                        publishProgress(data.port, OPEN, null);
                                     }
+
+                                } else if (key.isWritable()) {
+                                    Log.v(TAG, "writable=" + data.port);
+                                    // write something (blocking)
+                                    final ByteBuffer bytedata = Charset.forName("ISO-8859-1")
+                                            .encode(PROBE_HTTP);
+                                    final SocketChannel sock = (SocketChannel) key.channel();
+                                    while (bytedata.hasRemaining()) {
+                                        sock.write(bytedata);
+                                    }
+                                    bytedata.clear();
+                                    key.interestOps(SelectionKey.OP_READ);
+                                    data.start = System.nanoTime();
+                                    publishProgress(data.port, OPEN, null);
+
+                                } else if (key.isReadable()) {
+                                    Log.v(TAG, "readable=" + data.port);
+                                    ByteBuffer banner = ByteBuffer.allocate(MAX_READ);
+                                    SocketChannel sock = (SocketChannel) key.channel();
+                                    while (sock.read(banner) > 0) {
+                                        // Do smth ?
+                                    }
+                                    Charset charset = Charset.forName("UTF-8");
+                                    CharsetDecoder decoder = charset.newDecoder();
+                                    finishKey(key, OPEN, decoder.decode(banner).toString());
+                                    banner.clear();
                                 }
-                                // } else if (key.isWritable()) {
-                                // Log.v(TAG, "writable=" + data.port);
-                                // // write something (blocking)
-                                // // ByteBuffer data =
-                                // //
-                                // Charset.forName("ISO-8859-1").encode("asd\r\n\r\n");
-                                // // SocketChannel sock = (SocketChannel)
-                                // // key.channel();
-                                // // while (data.hasRemaining()) {
-                                // // sock.write(data);
-                                // // }
-                                // // data.clear();
-                                // // key.interestOps(SelectionKey.OP_READ);
-                                // finishKey(key, OPEN);
-                                // } else if (key.isReadable()) {
-                                // Log.v(TAG, "readable=" + data.port);
-                                // finishKey(key, OPEN);
-                                // }
+
                             } catch (ConnectException e) {
                                 if (e.getMessage().equals(E_REFUSED)) {
                                     finishKey(key, CLOSED);
@@ -157,13 +171,16 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                         }
                     }
                 } else {
-                    // Remove old keys
+                    // Remove old/non-connected keys
                     final long now = System.nanoTime();
                     final Iterator<SelectionKey> iterator = selector.keys().iterator();
                     while (iterator.hasNext()) {
                         final SelectionKey key = (SelectionKey) iterator.next();
-                        if ((now - ((Data) key.attachment()).start) > TIMEOUT_CONNECT) {
-                            finishKey(key, FILTERED);
+                        final Data data = (Data) key.attachment();
+                        if (data.state == OPEN && (now - data.start) > TIMEOUT_WRITE) {
+                            finishKey(key, TIMEOUT);
+                        } else if (now - data.start > TIMEOUT_CONNECT) {
+                            finishKey(key, TIMEOUT);
                         }
                     }
                 }
@@ -211,8 +228,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
             if (e.getMessage() != null) {
                 Log.e(TAG, e.getMessage());
             }
-        } finally {
-            Log.v(TAG, "Selector closed");
         }
     }
 
@@ -236,7 +251,8 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     // Port private object
     private static class Data {
-        public int port;
-        public long start;
+        protected int state;
+        protected int port;
+        protected long start;
     }
 }

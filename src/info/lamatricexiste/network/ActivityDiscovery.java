@@ -345,9 +345,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
-        Log.v(TAG, "ip="+ip);
-        Log.v(TAG, "start="+start);
-        Log.v(TAG, "end="+end);
         mDiscoveryTask.setNetwork(ip, start, end);
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
