@@ -8,7 +8,7 @@ Machines discovery/mapping (over Wifi) and port scan (over 3G/Wifi) utility for 
 Features
 --------
 
--  Discover Machines on a LAN
+-  Discover Machines on a LAN (connect/ping discovery, dns discovery)
 -  TCP Port Scanner (connect() scan)
 -  NIC vendor database
 -  Export results to your sdcard in XML
@@ -19,7 +19,7 @@ Features
 Build
 -----
 
--  Native Code: Follow instructions in native/README
+-  Native Code: Follow instructions in native/README (native is not used in this version though)
 -  APK: 
     - build.xml is provided for ant
     - simply type this command: ant debug
@@ -28,7 +28,6 @@ Todo
 ----
 
 - Save all scan in DB, open previous scan, export previous scan, etc
-- Discovery: Change cidr
 - Settings: prevent phone from sleeping
 - NMAP build script (ARM and other arch (using AOSP?))
 - Add new info such as Hops (using MTR?)
