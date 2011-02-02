@@ -176,6 +176,7 @@ final public class ActivityMain extends Activity {
                 try {
                     db.copyDbToDevice(R.raw.services, Db.DB_SERVICES);
                     db.copyDbToDevice(R.raw.probes, Db.DB_PROBES);
+                    db.copyDbToDevice(R.raw.save, Db.DB_SAVE);
                 } catch (NullPointerException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (IOException e) {

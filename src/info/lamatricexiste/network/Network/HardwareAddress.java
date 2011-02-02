@@ -108,6 +108,7 @@ public class HardwareAddress {
                     try {
                         synchronized (db) {
                             if (db.isOpen()) {
+                                // FIXME: Use ? instead of concat
                                 Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
                                         + "'", null);
                                 if (c.moveToFirst()) {

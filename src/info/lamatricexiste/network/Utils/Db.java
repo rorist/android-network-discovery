@@ -29,6 +29,7 @@ public class Db {
     public static final String DB_SERVICES = "services.db";
     public static final String DB_PROBES = "probes.db";
     public static final String DB_NIC = "nic.db";
+    public static final String DB_SAVE = "save.db";
 
     public Db(Context ctxt) {
         this.ctxt = ctxt;
