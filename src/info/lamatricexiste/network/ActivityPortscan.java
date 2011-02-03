@@ -277,7 +277,7 @@ final public class ActivityPortscan extends TabActivity {
                 final String service = host.services.get(port);
                 holder.port.setText(port + "/tcp" + " (" + service + ")");
 
-                // Service is known
+                // Service is supported
                 if (knownServices.contains(service)) {
                     holder.btn_c.setText(R.string.scan_connect);
                     holder.btn_c.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connect, 0, 0,
@@ -426,6 +426,7 @@ final public class ActivityPortscan extends TabActivity {
                             // Open
                             if (values[2] != null) {
                                 host.banners.put(port, (String) values[2]);
+                                host.services.put(port, getPortService(port));
                             }
                             if (findLocationAndAdd(host.portsOpen, port)) {
                                 host.services.put(port, getPortService(port));
@@ -434,7 +435,6 @@ final public class ActivityPortscan extends TabActivity {
                                 mTabOpen.setText(String.format(getString(R.string.scan_open),
                                         cnt_open));
                             }
-                            // FIXME: Check this
                             adapter_open.notifyDataSetChanged();
                         } else if (type == AsyncPortscan.CLOSED) {
                             // Closed
@@ -445,7 +445,6 @@ final public class ActivityPortscan extends TabActivity {
                                 mTabClosed.setText(String.format(getString(R.string.scan_closed),
                                         cnt_closed));
                             }
-                            // FIXME: Check this
                             adapter_closed.notifyDataSetChanged();
                         } else if (type == AsyncPortscan.UNREACHABLE) {
                             cancel(true);
@@ -518,7 +517,7 @@ final public class ActivityPortscan extends TabActivity {
                                     break;
                                 }
                             } catch (PatternSyntaxException e) {
-                                // Log.e(TAG, e.getMessage());
+                                Log.e(TAG, e.getMessage());
                             }
                         } while (c.moveToNext());
                     }
