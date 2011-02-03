@@ -15,7 +15,10 @@
 
 package info.lamatricexiste.network;
 
+import info.lamatricexiste.network.Utils.Prefs;
+
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -26,21 +29,28 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     private final String TAG = "AsyncPortscan";
     private static final int TIMEOUT_SELECT = 300;
-    private static long TIMEOUT_CONNECT; // = 3 * 1000 * 1000000; // ns
-    private static final long TIMEOUT_WRITE = 5 * 1000 * 1000000; // ns
+    private static long TIMEOUT_CONNECT = 1000 * 1000000; // ns
+    private static final long TIMEOUT_RW = 3 * 1000 * 1000000; // ns
     private static final String E_REFUSED = "Connection refused";
     private static final String E_TIMEOUT = "The operation timed out";
+    // TODO: Probe system to send other stuff than strings
+    private static final String[] PROBES = new String[] { "", "\r\n\r\n", "GET / HTTP/1.0\r\n\r\n" };
+    private static final int MAX_READ = 512; // FIXME
+    private static final int WRITE_PASS = PROBES.length;
+    private static final long WRITE_COOLDOWN = 200 * 1000000; // ns
+
     private int rate;
     private boolean select = true;
     private Selector selector;
@@ -49,20 +59,27 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     protected int port_start = 0;
     protected int port_end = 0;
     protected int nb_port = 0;
+    private boolean getBanner = false;
 
     public final static int OPEN = 0;
     public final static int CLOSED = 1;
     public final static int FILTERED = -1;
     public final static int UNREACHABLE = -2;
     public final static int TIMEOUT = -3;
-    // private static final String PROBE_HTTP = "GET / HTTP/1.1\r\n\r\n";
-    private static final String PROBE_HTTP = "\r\n\r\n";
-    private static final int MAX_READ = 75;
 
     protected AsyncPortscan(Activity activity, String host, int _rate) {
         ipAddr = host;
         rate = _rate;
         TIMEOUT_CONNECT = rate * 1000000;
+
+        // Preferences
+        WeakReference<Activity> mActivity = new WeakReference<Activity>(activity);
+        final Activity d = mActivity.get();
+        if (d != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
+                    .getApplicationContext());
+            getBanner = prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER);
+        }
     }
 
     @Override
@@ -111,39 +128,60 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
                                 if (key.isConnectable()) {
                                     if (((SocketChannel) key.channel()).finishConnect()) {
-                                        Log.v(TAG, "connected=" + data.port);
-                                        key.interestOps(SelectionKey.OP_READ
-                                                | SelectionKey.OP_WRITE);
-                                        data.state = OPEN;
-                                        data.start = System.nanoTime();
-                                        publishProgress(data.port, OPEN, null);
+                                        if (getBanner) {
+                                            key.interestOps(SelectionKey.OP_READ
+                                                    | SelectionKey.OP_WRITE);
+                                            // key.interestOps(SelectionKey.OP_READ);
+                                            data.state = OPEN;
+                                            data.start = System.nanoTime();
+                                            publishProgress(data.port, OPEN, null);
+                                        } else {
+                                            finishKey(key, OPEN);
+                                        }
                                     }
-
-                                } else if (key.isWritable()) {
-                                    Log.v(TAG, "writable=" + data.port);
-                                    // write something (blocking)
-                                    final ByteBuffer bytedata = Charset.forName("ISO-8859-1")
-                                            .encode(PROBE_HTTP);
-                                    final SocketChannel sock = (SocketChannel) key.channel();
-                                    while (bytedata.hasRemaining()) {
-                                        sock.write(bytedata);
-                                    }
-                                    bytedata.clear();
-                                    key.interestOps(SelectionKey.OP_READ);
-                                    data.start = System.nanoTime();
-                                    publishProgress(data.port, OPEN, null);
 
                                 } else if (key.isReadable()) {
-                                    Log.v(TAG, "readable=" + data.port);
-                                    ByteBuffer banner = ByteBuffer.allocate(MAX_READ);
-                                    SocketChannel sock = (SocketChannel) key.channel();
-                                    while (sock.read(banner) > 0) {
-                                        // Do smth ?
+                                    String banner = "";
+                                    ByteBuffer bbuf = ByteBuffer.allocate(MAX_READ);
+                                    int numRead = 0;
+                                    try {
+                                        // while (numRead > 0) {
+                                        numRead = ((SocketChannel) key.channel()).read(bbuf);
+                                        // }
+                                        if (numRead > 8) {
+                                            banner = new String(bbuf.array()).substring(0, numRead)
+                                                    .trim();
+                                        }
+                                    } catch (StringIndexOutOfBoundsException e) {
+                                        Log.e(TAG, e.getMessage());
+                                    } catch (IOException e) {
+                                        Log.e(TAG, e.getMessage());
+                                    } finally {
+                                        if (banner.length() > 0) {
+                                            finishKey(key, OPEN, banner);
+                                        } else {
+                                            key.interestOps(SelectionKey.OP_WRITE);
+                                        }
                                     }
-                                    Charset charset = Charset.forName("UTF-8");
-                                    CharsetDecoder decoder = charset.newDecoder();
-                                    finishKey(key, OPEN, decoder.decode(banner).toString());
-                                    banner.clear();
+                                } else if (key.isWritable()) {
+                                    key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                                    if (System.nanoTime() - data.start > WRITE_COOLDOWN) {
+                                        if (data.pass < WRITE_PASS) {
+                                            // write something (blocking)
+                                            final ByteBuffer bytedata = Charset.forName(
+                                                    "ISO-8859-1").encode(PROBES[data.pass]);
+                                            final SocketChannel sock = (SocketChannel) key
+                                                    .channel();
+                                            while (bytedata.hasRemaining()) {
+                                                sock.write(bytedata);
+                                            }
+                                            bytedata.clear();
+                                            data.start = System.nanoTime();
+                                            data.pass++;
+                                        } else {
+                                            finishKey(key, OPEN);
+                                        }
+                                    }
                                 }
 
                             } catch (ConnectException e) {
@@ -177,9 +215,9 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                     while (iterator.hasNext()) {
                         final SelectionKey key = (SelectionKey) iterator.next();
                         final Data data = (Data) key.attachment();
-                        if (data.state == OPEN && (now - data.start) > TIMEOUT_WRITE) {
+                        if (data.state == OPEN && now - data.start > TIMEOUT_RW) {
                             finishKey(key, TIMEOUT);
-                        } else if (now - data.start > TIMEOUT_CONNECT) {
+                        } else if (data.state != OPEN && now - data.start > TIMEOUT_CONNECT) {
                             finishKey(key, TIMEOUT);
                         }
                     }
@@ -254,5 +292,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
         protected int state;
         protected int port;
         protected long start;
+        protected int pass = 0;
     }
 }

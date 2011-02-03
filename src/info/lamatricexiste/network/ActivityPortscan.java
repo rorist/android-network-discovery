@@ -50,6 +50,8 @@ import android.widget.Toast;
 
 final public class ActivityPortscan extends TabActivity {
 
+    public static final String REQ_SERVICE = "select service from services where port=? limit 1";
+    public static final String REQ_PROBES = "select service, regex from probes";
     private final String TAG = "ActivityPortscan";
     private final String PLACEHOLDER = "placeholder";
     private Context ctxt;
@@ -431,8 +433,6 @@ final public class ActivityPortscan extends TabActivity {
                                 cnt_open++;
                                 mTabOpen.setText(String.format(getString(R.string.scan_open),
                                         cnt_open));
-                            } else {
-                                Log.w(TAG, "port wasnt added=" + port);
                             }
                             // FIXME: Check this
                             adapter_open.notifyDataSetChanged();
@@ -507,7 +507,7 @@ final public class ActivityPortscan extends TabActivity {
                 Pattern pattern;
                 Matcher matcher;
                 try {
-                    Cursor c = dbProbes.rawQuery("select service, regex from probes", null);
+                    Cursor c = dbProbes.rawQuery(REQ_PROBES, null);
                     if (c.moveToFirst()) {
                         do {
                             try {
@@ -533,8 +533,7 @@ final public class ActivityPortscan extends TabActivity {
 
             // Get the service from port number
             if (service == null && dbServices != null) {
-                c = dbServices.rawQuery("SELECT service FROM services WHERE port=" + port
-                        + " LIMIT 1", null);
+                c = dbServices.rawQuery(REQ_SERVICE, new String[] { "" + port });
                 if (c.moveToFirst()) {
                     service = c.getString(0);
                 } else {
