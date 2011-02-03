@@ -22,6 +22,7 @@ public abstract class ActivityNet extends Activity {
     private final String TAG = "NetState";
     private ConnectivityManager connMgr;
 
+    protected final static String EXTRA_WIFI = "wifiDisabled";
     protected Context ctxt;
     protected SharedPreferences prefs = null;
     protected NetInfo net = null;
@@ -57,7 +58,9 @@ public abstract class ActivityNet extends Activity {
     }
 
     protected abstract void setInfo();
+
     protected abstract void setButtons(boolean disable);
+
     protected abstract void cancelTasks();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -145,7 +148,7 @@ public abstract class ActivityNet extends Activity {
             } else {
                 cancelTasks();
             }
-            
+
             // Always update network info
             setInfo();
         }

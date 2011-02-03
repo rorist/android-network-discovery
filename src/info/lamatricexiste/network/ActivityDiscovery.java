@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +32,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 final public class ActivityDiscovery extends ActivityNet implements OnItemClickListener {
 
@@ -160,18 +161,18 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case ActivityDiscovery.MENU_SCAN_SINGLE:
-            scanSingle(this, null);
-            return true;
-        case ActivityDiscovery.MENU_OPTIONS:
-            startActivity(new Intent(ctxt, Prefs.class));
-            return true;
-        case ActivityDiscovery.MENU_HELP:
-            startActivity(new Intent(ctxt, Help.class));
-            return true;
-        case ActivityDiscovery.MENU_EXPORT:
-            export();
-            return true;
+            case ActivityDiscovery.MENU_SCAN_SINGLE:
+                scanSingle(this, null);
+                return true;
+            case ActivityDiscovery.MENU_OPTIONS:
+                startActivity(new Intent(ctxt, Prefs.class));
+                return true;
+            case ActivityDiscovery.MENU_HELP:
+                startActivity(new Intent(ctxt, Help.class));
+                return true;
+            case ActivityDiscovery.MENU_EXPORT:
+                export();
+                return true;
         }
         return false;
     }
@@ -181,7 +182,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         ((TextView) findViewById(R.id.info_ip)).setText(info_ip_str);
         ((TextView) findViewById(R.id.info_in)).setText(info_in_str);
         ((TextView) findViewById(R.id.info_mo)).setText(info_mo_str);
-        
+
         // Scan button state
         if (mDiscoveryTask != null) {
             setButton(btn_discover, R.drawable.cancel, false);
@@ -207,8 +208,10 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         ip = NetInfo.getUnsignedLongFromIp(net.ip);
         if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
             // Custom IP
-            start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START, Prefs.DEFAULT_IP_START));
-            end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END));
+            start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
+                    Prefs.DEFAULT_IP_START));
+            end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END,
+                    Prefs.DEFAULT_IP_END));
         } else {
             // Custom CIDR
             if (prefs.getBoolean(Prefs.KEY_CIDR_CUSTOM, Prefs.DEFAULT_CIDR_CUSTOM)) {
@@ -252,21 +255,43 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     // Listen for Activity results
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-        case SCAN_PORT_RESULT:
-            if (resultCode == RESULT_OK) {
-                // Get scanned ports
-                if (data != null && data.hasExtra(HostBean.EXTRA)) {
-                    HostBean host = data.getParcelableExtra(HostBean.EXTRA);
-                    hosts.set(host.position, host);
+            case SCAN_PORT_RESULT:
+                if (resultCode == RESULT_OK) {
+                    // Get scanned ports
+                    if (data != null && data.hasExtra(HostBean.EXTRA)) {
+                        HostBean host = data.getParcelableExtra(HostBean.EXTRA);
+                        hosts.set(host.position, host);
+                    }
                 }
-            }
-        default:
-            break;
+            default:
+                break;
         }
     }
 
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        startPortscan(hosts.get(position), position);
+    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+        // Ask for activity
+        AlertDialog.Builder dialog = new AlertDialog.Builder(ActivityDiscovery.this);
+        dialog.setTitle(R.string.discover_action_title);
+        dialog.setItems(new CharSequence[] { getString(R.string.discover_action_scan),
+                getString(R.string.discover_action_rename) }, new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        // Start portscan
+                        Intent intent = new Intent(ctxt, ActivityPortscan.class);
+                        intent.putExtra(EXTRA_WIFI, NetInfo.isConnected(ctxt));
+                        intent.putExtra(HostBean.EXTRA, hosts.get(position));
+                        startActivityForResult(intent, SCAN_PORT_RESULT);
+                        break;
+                    case 1:
+                        // Change name
+                        // FIXME: TODO
+                        break;
+                }
+            }
+        });
+        dialog.setNegativeButton(R.string.btn_discover_cancel, null);
+        dialog.show();
     }
 
     static class ViewHolder {
@@ -334,15 +359,15 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             Log.e(TAG, e.getMessage());
         }
         switch (method) {
-        case 1:
-            mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
-            break;
-        case 2:
-            mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
-            break;
-        case 0:
-        default:
-            mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
+            case 1:
+                mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
+                break;
+            case 2:
+                mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
+                break;
+            case 0:
+            default:
+                mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
         mDiscoveryTask.setNetwork(ip, start, end);
@@ -384,15 +409,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         host.position = hosts.size();
         hosts.add(host);
         adapter.add(null);
-    }
-
-    private void startPortscan(HostBean host, int position) {
-        Intent intent = new Intent(ctxt, ActivityPortscan.class);
-        if (NetInfo.isConnected(ctxt) == false) {
-            intent.putExtra("wifiDisabled", true);
-        }
-        intent.putExtra(HostBean.EXTRA, host);
-        startActivityForResult(intent, SCAN_PORT_RESULT);
     }
 
     public static void scanSingle(final Context ctxt, String ip) {

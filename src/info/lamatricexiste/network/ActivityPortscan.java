@@ -133,7 +133,7 @@ final public class ActivityPortscan extends TabActivity {
 
         // Scan
         btn_scan = (Button) findViewById(R.id.btn_scan);
-        if (extras.getBoolean("wifiDisabled") == true) {
+        if (extras.getBoolean(ActivityNet.EXTRA_WIFI) == false) {
             btn_scan.setClickable(false);
             btn_scan.setEnabled(false);
             btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.disabled, 0, 0);
