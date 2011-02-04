@@ -503,21 +503,19 @@ final public class ActivityPortscan extends TabActivity {
             service = null;
             // Determinate service with banners
             if (host.banners != null && host.banners.containsKey(port) && dbProbes != null) {
-                Pattern pattern;
-                Matcher matcher;
                 try {
                     Cursor c = dbProbes.rawQuery(REQ_PROBES, null);
                     if (c.moveToFirst()) {
                         do {
                             try {
-                                pattern = Pattern.compile(c.getString(1));
-                                matcher = pattern.matcher(host.banners.get(port));
+                                final Pattern pattern = Pattern.compile(c.getString(1));
+                                final Matcher matcher = pattern.matcher(host.banners.get(port));
                                 if (matcher.find()) {
                                     service = c.getString(0);
                                     break;
                                 }
                             } catch (PatternSyntaxException e) {
-                                Log.e(TAG, e.getMessage());
+                                // Log.e(TAG, e.getMessage());
                             }
                         } while (c.moveToNext());
                     }
