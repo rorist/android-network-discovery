@@ -38,7 +38,7 @@
     <string name="net_carrier">CARRIER: %s</string>
     <string name="net_ssid">SSID: %s</string>
     <string name="net_mode">MODE: %s</string>
-    <string name="net_mode_wifi">WiFi (%s)</string>
+    <string name="net_mode_wifi">WiFi (%1$s %2$s)</string>
     <string name="net_mode_mobile">Mobile</string>
     <string name="net_mode_eth">Ethernet (Not supported yet)</string>
     <string name="net_mode_unknown">Unknown</string>

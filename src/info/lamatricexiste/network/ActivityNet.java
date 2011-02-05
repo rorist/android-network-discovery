@@ -121,7 +121,7 @@ public abstract class ActivityNet extends Activity {
                             info_ip_str = getString(R.string.net_ip, net.ip, net.cidr, net.intf);
                             info_in_str = getString(R.string.net_ssid, net.ssid);
                             info_mo_str = getString(R.string.net_mode, getString(
-                                    R.string.net_mode_wifi, net.speed + WifiInfo.LINK_SPEED_UNITS));
+                                    R.string.net_mode_wifi, net.speed, WifiInfo.LINK_SPEED_UNITS));
                             setButtons(false);
                         }
                     } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G

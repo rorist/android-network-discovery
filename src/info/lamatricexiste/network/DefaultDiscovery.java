@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import jcifs.netbios.NbtAddress;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Log;
@@ -67,9 +68,9 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         launch(start);
 
                         // hosts
-                        long pt_backward = ip - 1;
+                        long pt_backward = ip;
                         long pt_forward = ip + 1;
-                        long size_hosts = size - 2;
+                        long size_hosts = size - 1;
 
                         for (int i = 0; i < size_hosts; i++) {
                             // Set pointer if of limits
@@ -176,7 +177,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
         }
     }
 
-    private void publish(String addr) {
+    private void publish(final String addr) {
         hosts_done++;
 
         if (addr == null) {
@@ -222,18 +223,11 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         }
                     }
                     // TODO: NETBIOS
-                    // if (NbtAddress.getByName(addr).isActive()) {
-                    // UniAddress test = new UniAddress(addr);
-                    // if (test != null) {
-                    // try {
-                    // Log.i(TAG, "netbios=" +
-                    // test.getHostName().toString());
-                    // } catch (ClassCastException e) {
-                    // Log.e(TAG, e.getMessage());
-                    // e.printStackTrace();
-                    // }
-                    // }
-                    // }
+                    try {
+                        host.hostname = NbtAddress.getByName(addr).getHostName();
+                    } catch (UnknownHostException e) {
+                        Log.i(TAG, e.getMessage());
+                    }
                 }
             }
         }

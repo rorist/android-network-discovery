@@ -67,6 +67,9 @@ public class HardwareAddress {
             if (a != null) {
                 NetInfo net = new NetInfo(a.getApplicationContext());
                 intf = net.intf;
+                if (net.ip.equals(ip)) {
+                    return net.macAddress;
+                }
             }
         }
         // Get HW Addr
@@ -92,7 +95,7 @@ public class HardwareAddress {
                 Log.e(TAG, "ip is null");
             }
         } catch (IOException e) {
-            Log.d(TAG, "Can't open/read file ARP: " + e.getMessage());
+            Log.e(TAG, "Can't open/read file ARP: " + e.getMessage());
         }
         return hw;
     }
