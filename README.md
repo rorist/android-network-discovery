@@ -19,10 +19,11 @@ Features
 Build
 -----
 
--  Native Code: Follow instructions in native/README (native is not used in this version though)
--  APK: 
-    - build.xml is provided for ant
-    - simply type this command: ant debug
+# Checkout, build and install
+git clone git://github.com/rorist/android-network-discovery.git
+cd android-network-discovery;
+ant debug
+adb install bin/NetworkDiscovery-debug.apk
 
 Todo
 ----
