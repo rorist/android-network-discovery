@@ -1,5 +1,3 @@
-
-- Uses-intents in manifest
 Network Discovery
 =================
 
