@@ -30,8 +30,9 @@ import android.util.Log;
 
 public class HardwareAddress {
 
-    private final String TAG = "HardwareAddress";
-    private static final int BUF = 8 * 1024;
+    private final static String TAG = "HardwareAddress";
+    private final static String REQ = "select vendor from oui where mac=?";
+    private final static int BUF = 8 * 1024;
     private SQLiteDatabase db = null;
     private WeakReference<Activity> mActivity;
 
@@ -103,16 +104,14 @@ public class HardwareAddress {
                 final Context ctxt = a.getApplicationContext();
                 String ni = ctxt.getString(R.string.info_unknown);
                 if (db != null) {
-                    String macid = hw.replace(":", "").substring(0, 6).toUpperCase();
                     // Db request
                     try {
                         synchronized (db) {
                             if (db.isOpen()) {
-                                // FIXME: Use ? instead of concat
-                                Cursor c = db.rawQuery("select vendor from oui where mac='" + macid
-                                        + "'", null);
+                                Cursor c = db.rawQuery(REQ, new String[] { hw.replace(":", "")
+                                        .substring(0, 6).toUpperCase() });
                                 if (c.moveToFirst()) {
-                                    ni = c.getString(c.getColumnIndex("vendor"));
+                                    ni = c.getString(0);
                                 }
                                 c.close();
                             }

@@ -144,7 +144,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                 } else if (key.isReadable()) {
                                     String banner = "";
                                     try {
-                                        Log.v(TAG, "read " + data.port);
+                                        // Log.v(TAG, "read " + data.port);
                                         byteBuffer.clear();
                                         final int numRead = ((SocketChannel) key.channel())
                                                 .read(byteBuffer);
@@ -167,7 +167,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                     key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
                                     if (System.nanoTime() - data.start > WRITE_COOLDOWN) {
                                         if (data.pass < WRITE_PASS) {
-                                            Log.v(TAG, "write " + data.port);
+                                            // Log.v(TAG, "write " + data.port);
                                             // write something (blocking)
                                             final ByteBuffer bytedata = charset
                                                     .encode(PROBES[data.pass]);

@@ -8,10 +8,10 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     <EditText
-        android:id="@+id/export_file"
+        android:id="@+id/edittext"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dip"
         android:layout_marginRight="5dip"
-        android:lines="1" />
+        android:maxLines="3" />
 </LinearLayout>

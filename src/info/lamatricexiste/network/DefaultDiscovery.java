@@ -9,8 +9,8 @@ import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Network.RateControl;
 import info.lamatricexiste.network.Network.Reachable;
-import info.lamatricexiste.network.Utils.Db;
 import info.lamatricexiste.network.Utils.Prefs;
+import info.lamatricexiste.network.Utils.Save;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -20,9 +20,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Log;
 
@@ -209,59 +206,38 @@ public class DefaultDiscovery extends AbstractDiscovery {
 
                 // Is gateway ?
                 if (discover.net.gatewayIp.equals(host.ipAddress)) {
-                    host.isGateway = 1;
+                    host.deviceType = HostBean.TYPE_GATEWAY;
                 }
 
                 // FQDN
                 // Static
-                if ((host.hostname = getCustomName(host.hardwareAddress))==null) {
+                if ((host.hostname = Save.getCustomName(host.hardwareAddress)) == null) {
                     // DNS
-                    if (discover.prefs.getBoolean(Prefs.KEY_RESOLVE_NAME, Prefs.DEFAULT_RESOLVE_NAME) == true) {
+                    if (discover.prefs.getBoolean(Prefs.KEY_RESOLVE_NAME,
+                            Prefs.DEFAULT_RESOLVE_NAME) == true) {
                         try {
                             host.hostname = (InetAddress.getByName(addr)).getCanonicalHostName();
-                            // TODO: NETBIOS
-                            // if (NbtAddress.getByName(addr).isActive()) {
-                            // UniAddress test = new UniAddress(addr);
-                            // if (test != null) {
-                            // try {
-                            // Log.i(TAG, "netbios=" +
-                            // test.getHostName().toString());
-                            // } catch (ClassCastException e) {
-                            // Log.e(TAG, e.getMessage());
-                            // e.printStackTrace();
-                            // }
-                            // }
-                            // }
                         } catch (UnknownHostException e) {
+                            Log.e(TAG, e.getMessage());
                         }
                     }
+                    // TODO: NETBIOS
+                    // if (NbtAddress.getByName(addr).isActive()) {
+                    // UniAddress test = new UniAddress(addr);
+                    // if (test != null) {
+                    // try {
+                    // Log.i(TAG, "netbios=" +
+                    // test.getHostName().toString());
+                    // } catch (ClassCastException e) {
+                    // Log.e(TAG, e.getMessage());
+                    // e.printStackTrace();
+                    // }
+                    // }
+                    // }
                 }
             }
         }
 
         publishProgress(host);
-    }
-
-    private String getCustomName(String mac){
-        String name = null;
-        SQLiteDatabase db = null;
-        try {
-            db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
-                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
-            if (db.isOpen()) {
-                // FIXME: Use ? instead of concat
-                Cursor c = db.rawQuery("select name from nic where mac='" + mac.replace(":", "").toUpperCase() + "'", null);
-                if (c.moveToFirst()) {
-                    name = c.getString(0);
-                }
-                c.close();
-            }
-        } catch (SQLiteException e) {
-        } finally {
-            if (db!=null) {
-                db.close();
-            }
-        }
-        return name;
     }
 }

@@ -11,6 +11,7 @@ import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Export;
 import info.lamatricexiste.network.Utils.Help;
 import info.lamatricexiste.network.Utils.Prefs;
+import info.lamatricexiste.network.Utils.Save;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -52,9 +53,9 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     private static final int MENU_EXPORT = 3;
     private static LayoutInflater mInflater;
     private int currentNetwork = 0;
-    private long ip = 0;
-    private long start = 0;
-    private long end = 0;
+    private long network_ip = 0;
+    private long network_start = 0;
+    private long network_end = 0;
     private List<HostBean> hosts = null;
     private HostsAdapter adapter;
     private Button btn_discover;
@@ -205,12 +206,12 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         }
 
         // Get ip information
-        ip = NetInfo.getUnsignedLongFromIp(net.ip);
+        network_ip = NetInfo.getUnsignedLongFromIp(net.ip);
         if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
             // Custom IP
-            start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
+            network_start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
                     Prefs.DEFAULT_IP_START));
-            end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END,
+            network_end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END,
                     Prefs.DEFAULT_IP_END));
         } else {
             // Custom CIDR
@@ -220,19 +221,19 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             // Detected IP
             int shift = (32 - net.cidr);
             if (net.cidr < 31) {
-                start = (ip >> shift << shift) + 1;
-                end = (start | ((1 << shift) - 1)) - 1;
+                network_start = (network_ip >> shift << shift) + 1;
+                network_end = (network_start | ((1 << shift) - 1)) - 1;
             } else {
-                start = (ip >> shift << shift);
-                end = (start | ((1 << shift) - 1));
+                network_start = (network_ip >> shift << shift);
+                network_end = (network_start | ((1 << shift) - 1));
             }
         }
 
         // Reset ip start-end (is it really convenient ?)
         if (!prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
             Editor edit = prefs.edit();
-            edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(start));
-            edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(end));
+            edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(network_start));
+            edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(network_end));
             edit.commit();
         }
     }
@@ -271,7 +272,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     }
 
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-        // Ask for activity
+        final HostBean host = hosts.get(position);
         AlertDialog.Builder dialog = new AlertDialog.Builder(ActivityDiscovery.this);
         dialog.setTitle(R.string.discover_action_title);
         dialog.setItems(new CharSequence[] { getString(R.string.discover_action_scan),
@@ -282,12 +283,37 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                         // Start portscan
                         Intent intent = new Intent(ctxt, ActivityPortscan.class);
                         intent.putExtra(EXTRA_WIFI, NetInfo.isConnected(ctxt));
-                        intent.putExtra(HostBean.EXTRA, hosts.get(position));
+                        intent.putExtra(HostBean.EXTRA, host);
                         startActivityForResult(intent, SCAN_PORT_RESULT);
                         break;
                     case 1:
                         // Change name
                         // FIXME: TODO
+
+                        final View v = mInflater.inflate(R.layout.dialog_edittext, null);
+                        final EditText txt = (EditText) v.findViewById(R.id.edittext);
+                        txt.setText(Save.getCustomName(host.hardwareAddress));
+
+                        final AlertDialog.Builder rename = new AlertDialog.Builder(
+                                ActivityDiscovery.this);
+                        rename.setView(v);
+                        rename.setTitle(R.string.discover_action_rename);
+                        rename.setPositiveButton(R.string.btn_ok, new OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Save.setCustomName(txt.getText().toString(), host.hardwareAddress);
+                                Toast.makeText(ActivityDiscovery.this,
+                                        R.string.discover_action_saved, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        rename.setNegativeButton(R.string.btn_remove, new OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Save.removeCustomName(host.hardwareAddress);
+                                Toast.makeText(ActivityDiscovery.this,
+                                        R.string.discover_action_deleted, Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        });
+                        rename.show();
                         break;
                 }
             }
@@ -324,7 +350,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 holder = (ViewHolder) convertView.getTag();
             }
             final HostBean host = hosts.get(position);
-            if (host.isGateway == 1) {
+            if (host.deviceType == HostBean.TYPE_GATEWAY) {
                 holder.logo.setImageResource(R.drawable.router);
             } else if (host.isAlive == 1 || !host.hardwareAddress.equals(NetInfo.NOMAC)) {
                 holder.logo.setImageResource(R.drawable.computer);
@@ -372,7 +398,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
         mHardwareAddress = new HardwareAddress(this);
-        mDiscoveryTask.setNetwork(ip, start, end);
+        mDiscoveryTask.setNetwork(network_ip, network_start, network_end);
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
         setButton(btn_discover, R.drawable.cancel, false);
@@ -445,8 +471,8 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         final Export e = new Export(ctxt, hosts);
         final String file = e.getFileName();
 
-        View v = mInflater.inflate(R.layout.file, null);
-        final EditText txt = (EditText) v.findViewById(R.id.export_file);
+        View v = mInflater.inflate(R.layout.dialog_edittext, null);
+        final EditText txt = (EditText) v.findViewById(R.id.edittext);
         txt.setText(file);
 
         AlertDialog.Builder getFileName = new AlertDialog.Builder(this);

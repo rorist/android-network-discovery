@@ -103,8 +103,9 @@ final public class ActivityPortscan extends TabActivity {
         cnt_closed = (host.portsClosed == null) ? 0 : host.portsClosed.size();
 
         // Logo
+        // TODO: Support more types (based on what?)
         ImageView logo = (ImageView) findViewById(R.id.logo);
-        if (host.isGateway == 1) {
+        if (host.deviceType == HostBean.TYPE_GATEWAY) {
             logo.setImageResource(R.drawable.router);
         } else {
             logo.setImageResource(R.drawable.computer);

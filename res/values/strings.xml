@@ -8,6 +8,7 @@
     <string name="app_loading">Loading</string>
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
+    <string name="btn_ok">Ok</string>
     <string name="btn_discover">Discover</string>
     <string name="btn_discover_cancel">Cancel</string>
     <string name="btn_export">Export</string>
@@ -17,6 +18,7 @@
     <string name="btn_back">Back</string>
     <string name="btn_info">Info</string>
     <string name="btn_ports">Ports</string>
+    <string name="btn_remove">Remove</string>
     
     <string name="task_nic">Downloading and installing NIC database ...</string>
     <string name="task_services">Creating Services database ...\nThis may take a while ...</string>
@@ -44,6 +46,8 @@
     <string name="discover_action_title">Choose an action</string>
     <string name="discover_action_scan">Scan ports</string>
     <string name="discover_action_rename">Change name</string>
+    <string name="discover_action_saved">Name saved!</string>
+    <string name="discover_action_deleted">Name deleted!</string>
         
     <string name="scan_single_title">Scan IP</string>
     <string name="scan_single_summary">Enter an IP address or FQDN to scan, i.e. scanme.nmap.org</string>

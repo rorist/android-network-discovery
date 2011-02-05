@@ -6,6 +6,8 @@
 // Inspired by http://connectbot.googlecode.com/svn/trunk/connectbot/src/org/connectbot/bean/HostBean.java
 package info.lamatricexiste.network.Network;
 
+import info.lamatricexiste.network.ActivityMain;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -14,18 +16,19 @@ import android.os.Parcelable;
 
 public class HostBean implements Parcelable {
 
-    public static final String PKG = "info.lamatricexiste.network";
-    public static final String EXTRA = PKG + ".extra";
-    public static final String EXTRA_POSITION = PKG + ".extra_position";
-    public static final String EXTRA_HOST = PKG + ".extra_host";
-    public static final String EXTRA_TIMEOUT = PKG + ".network.extra_timeout";
-    public static final String EXTRA_HOSTNAME = PKG + ".extra_hostname";
-    public static final String EXTRA_BANNERS = PKG + ".extra_banners";
-    public static final String EXTRA_PORTSO = PKG + ".extra_ports_o";
-    public static final String EXTRA_PORTSC = PKG + ".extra_ports_c";
-    public static final String EXTRA_SERVICES = PKG + ".extra_services";
+    public static final String EXTRA = ActivityMain.PKG + ".extra";
+    public static final String EXTRA_POSITION = ActivityMain.PKG + ".extra_position";
+    public static final String EXTRA_HOST = ActivityMain.PKG + ".extra_host";
+    public static final String EXTRA_TIMEOUT = ActivityMain.PKG + ".network.extra_timeout";
+    public static final String EXTRA_HOSTNAME = ActivityMain.PKG + ".extra_hostname";
+    public static final String EXTRA_BANNERS = ActivityMain.PKG + ".extra_banners";
+    public static final String EXTRA_PORTSO = ActivityMain.PKG + ".extra_ports_o";
+    public static final String EXTRA_PORTSC = ActivityMain.PKG + ".extra_ports_c";
+    public static final String EXTRA_SERVICES = ActivityMain.PKG + ".extra_services";
+    public static final int TYPE_GATEWAY = 0;
+    public static final int TYPE_COMPUTER = 1;
 
-    public int isGateway = 0;
+    public int deviceType = TYPE_COMPUTER;
     public int isAlive = 1;
     public int position = 0;
     public int responseTime = 0; // ms
@@ -53,7 +56,7 @@ public class HostBean implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(isGateway);
+        dest.writeInt(deviceType);
         dest.writeInt(isAlive);
         dest.writeString(ipAddress);
         dest.writeString(hostname);
@@ -70,7 +73,7 @@ public class HostBean implements Parcelable {
 
     @SuppressWarnings("unchecked")
     private void readFromParcel(Parcel in) {
-        isGateway = in.readInt();
+        deviceType = in.readInt();
         isAlive = in.readInt();
         ipAddress = in.readString();
         hostname = in.readString();

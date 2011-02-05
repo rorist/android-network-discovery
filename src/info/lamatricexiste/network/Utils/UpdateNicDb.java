@@ -5,6 +5,7 @@
 
 package info.lamatricexiste.network.Utils;
 
+import info.lamatricexiste.network.ActivityMain;
 import info.lamatricexiste.network.R;
 import info.lamatricexiste.network.Network.DownloadFile;
 import info.lamatricexiste.network.Network.NetInfo;
@@ -33,6 +34,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     private final static String TAG = "UpdateNicDb";
     private final static String DB_REMOTE = "http://download.lamatricexiste.info/oui.db";
+    private final static String REQ = "select count(mac) from oui";
     private int nb;
     private ProgressDialog progress;
     protected WeakReference<Activity> mActivity;
@@ -100,7 +102,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
         try {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null,
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
-            Cursor c = db.rawQuery("select count(mac) from oui", null);
+            Cursor c = db.rawQuery(REQ, null);
             if (c.moveToFirst()) {
                 nb = c.getInt(0);
             }
@@ -130,7 +132,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
                 try {
                     Editor edit = prefs.edit();
                     edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
-                            "info.lamatricexiste.network", 0).versionCode);
+                            ActivityMain.PKG, 0).versionCode);
                     edit.commit();
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, e.getMessage());

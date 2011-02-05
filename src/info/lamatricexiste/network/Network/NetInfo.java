@@ -31,6 +31,8 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+// TODO: IPv6 support
+
 public class NetInfo {
     private final String TAG = "NetInfo";
     private static final int BUF = 8 * 1024;

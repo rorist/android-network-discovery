@@ -27,7 +27,8 @@ import android.view.Window;
 
 final public class ActivityMain extends Activity {
 
-    public final static String TAG = "info.lamatricexiste.network";
+    public final static String TAG = "ActivityMain";
+    public static final String PKG = "info.lamatricexiste.network";
     public static SharedPreferences prefs = null;
 
     @Override
@@ -115,7 +116,7 @@ final public class ActivityMain extends Activity {
         // CheckNicDb
         try {
             if (prefs.getInt(Prefs.KEY_RESET_NICDB, Prefs.DEFAULT_RESET_NICDB) != getPackageManager()
-                    .getPackageInfo(TAG, 0).versionCode) {
+                    .getPackageInfo(PKG, 0).versionCode) {
                 new UpdateNicDbMain(ActivityMain.this);
             } else {
                 // There is a NIC Db installed
@@ -136,7 +137,7 @@ final public class ActivityMain extends Activity {
 
         try {
             if (prefs.getInt(Prefs.KEY_RESET_SERVICESDB, Prefs.DEFAULT_RESET_SERVICESDB) != getPackageManager()
-                    .getPackageInfo(TAG, 0).versionCode) {
+                    .getPackageInfo(PKG, 0).versionCode) {
                 new CreateServicesDb(ActivityMain.this).execute();
             } else {
                 startDiscoverActivity(ctxt);
@@ -207,7 +208,7 @@ final public class ActivityMain extends Activity {
                 try {
                     Editor edit = prefs.edit();
                     edit.putInt(Prefs.KEY_RESET_SERVICESDB, d.getPackageManager().getPackageInfo(
-                            "info.lamatricexiste.network", 0).versionCode);
+                            PKG, 0).versionCode);
                     edit.commit();
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, e.getMessage());

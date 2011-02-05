@@ -52,7 +52,7 @@ public class DnsDiscovery extends AbstractDiscovery {
                     if (host.hostname != null && !host.hostname.equals(host.ipAddress)) {
                         // Is gateway ?
                         if (discover.net.gatewayIp.equals(host.ipAddress)) {
-                            host.isGateway = 1;
+                            host.deviceType = 1;
                         }
                         // Mac Addr
                         host.hardwareAddress = discover.mHardwareAddress
