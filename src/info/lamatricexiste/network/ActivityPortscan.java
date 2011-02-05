@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -259,7 +261,7 @@ final public class ActivityPortscan extends TabActivity {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             // Views
-            ViewHolder holder;
+            final ViewHolder holder; // WTF
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.list_port, null);
                 holder = new ViewHolder();
@@ -300,6 +302,16 @@ final public class ActivityPortscan extends TabActivity {
             if (host.banners != null && host.banners.get(port) != null) {
                 holder.banner.setText(host.banners.get(port));
                 holder.banner.setVisibility(View.VISIBLE);
+                holder.banner.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        final AlertDialog.Builder dialog = new AlertDialog.Builder(
+                                ActivityPortscan.this);
+                        dialog.setTitle("Port " + port + "/tcp");
+                        dialog.setMessage(holder.banner.getText());
+                        dialog.setNegativeButton(R.string.btn_close, null);
+                        dialog.show();
+                    }
+                });
             } else {
                 holder.banner.setVisibility(View.GONE);
             }

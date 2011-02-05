@@ -47,7 +47,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     private static final String E_TIMEOUT = "The operation timed out";
     // TODO: Probe system to send other stuff than strings
     private static final String[] PROBES = new String[] { "", "\r\n\r\n", "GET / HTTP/1.0\r\n\r\n" };
-    private static final int MAX_READ = 512; // FIXME
+    private static final int MAX_READ = 8 * 1024; // FIXME
     private static final int WRITE_PASS = PROBES.length;
     private static final long WRITE_COOLDOWN = 200 * 1000000; // ns
 
