@@ -306,7 +306,7 @@ final public class ActivityPortscan extends TabActivity {
                     public void onClick(View v) {
                         final AlertDialog.Builder dialog = new AlertDialog.Builder(
                                 ActivityPortscan.this);
-                        dialog.setTitle("Port " + port + "/tcp");
+                        dialog.setTitle(String.format(getString(R.string.scan_banner_title), port));
                         dialog.setMessage(holder.banner.getText());
                         dialog.setNegativeButton(R.string.btn_close, null);
                         dialog.show();

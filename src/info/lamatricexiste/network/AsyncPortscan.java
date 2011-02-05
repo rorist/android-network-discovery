@@ -60,6 +60,8 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     protected int port_end = 0;
     protected int nb_port = 0;
     private boolean getBanner = false;
+    private ByteBuffer byteBuffer = ByteBuffer.allocate(MAX_READ);
+    private Charset charset = Charset.forName("UTF-8");
 
     public final static int OPEN = 0;
     public final static int CLOSED = 1;
@@ -131,7 +133,6 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                         if (getBanner) {
                                             key.interestOps(SelectionKey.OP_READ
                                                     | SelectionKey.OP_WRITE);
-                                            // key.interestOps(SelectionKey.OP_READ);
                                             data.state = OPEN;
                                             data.start = System.nanoTime();
                                             publishProgress(data.port, OPEN, null);
@@ -142,15 +143,14 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
                                 } else if (key.isReadable()) {
                                     String banner = "";
-                                    ByteBuffer bbuf = ByteBuffer.allocate(MAX_READ);
-                                    int numRead = 0;
                                     try {
-                                        // while (numRead > 0) {
-                                        numRead = ((SocketChannel) key.channel()).read(bbuf);
-                                        // }
+                                        Log.v(TAG, "read " + data.port);
+                                        byteBuffer.clear();
+                                        final int numRead = ((SocketChannel) key.channel())
+                                                .read(byteBuffer);
                                         if (numRead > 8) {
-                                            banner = new String(bbuf.array()).substring(0, numRead)
-                                                    .trim();
+                                            banner = new String(byteBuffer.array()).substring(0,
+                                                    numRead).trim();
                                         }
                                     } catch (StringIndexOutOfBoundsException e) {
                                         Log.e(TAG, e.getMessage());
@@ -167,9 +167,10 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                     key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
                                     if (System.nanoTime() - data.start > WRITE_COOLDOWN) {
                                         if (data.pass < WRITE_PASS) {
+                                            Log.v(TAG, "write " + data.port);
                                             // write something (blocking)
-                                            final ByteBuffer bytedata = Charset.forName(
-                                                    "ISO-8859-1").encode(PROBES[data.pass]);
+                                            final ByteBuffer bytedata = charset
+                                                    .encode(PROBES[data.pass]);
                                             final SocketChannel sock = (SocketChannel) key
                                                     .channel();
                                             while (bytedata.hasRemaining()) {

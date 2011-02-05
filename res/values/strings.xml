@@ -56,6 +56,7 @@
     <string name="scan_open">Open (%s)</string>
     <string name="scan_closed">Closed (%s)</string>
     <string name="scan_host_unreachable">Host unreachable !</string>
+    <string name="scan_banner_title">Port %s/tcp</string>
     
     <string name="info_time">Response time:</string>
     <string name="info_mac">MAC Address:</string>

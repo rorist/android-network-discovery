@@ -260,7 +260,9 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                     // Get scanned ports
                     if (data != null && data.hasExtra(HostBean.EXTRA)) {
                         HostBean host = data.getParcelableExtra(HostBean.EXTRA);
-                        hosts.set(host.position, host);
+                        if (host != null) {
+                            hosts.set(host.position, host);
+                        }
                     }
                 }
             default:
