@@ -20,10 +20,10 @@ Build
 -----
 
 # Checkout, build and install
-git clone git://github.com/rorist/android-network-discovery.git
-cd android-network-discovery;
-ant debug
-adb install bin/NetworkDiscovery-debug.apk
+    git clone git://github.com/rorist/android-network-discovery.git
+    cd android-network-discovery;
+    ant debug
+    adb install bin/NetworkDiscovery-debug.apk
 
 Todo
 ----
