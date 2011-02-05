@@ -300,13 +300,16 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                         rename.setTitle(R.string.discover_action_rename);
                         rename.setPositiveButton(R.string.btn_ok, new OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                Save.setCustomName(txt.getText().toString(), host.hardwareAddress);
+                                final String name = txt.getText().toString();
+                                host.hostname = name;
+                                Save.setCustomName(name, host.hardwareAddress);
                                 Toast.makeText(ActivityDiscovery.this,
                                         R.string.discover_action_saved, Toast.LENGTH_SHORT).show();
                             }
                         });
                         rename.setNegativeButton(R.string.btn_remove, new OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
+                                host.hostname = null;
                                 Save.removeCustomName(host.hardwareAddress);
                                 Toast.makeText(ActivityDiscovery.this,
                                         R.string.discover_action_deleted, Toast.LENGTH_SHORT)

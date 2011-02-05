@@ -16,11 +16,6 @@
             android:summary="@string/preferences_intf_summary"
             android:dialogTitle="@string/preferences_intf_title" />
         <CheckBoxPreference
-            android:key="banner"
-            android:title="@string/preferences_banner_title"
-            android:summary="@string/preferences_banner_summary"
-            android:defaultValue="true" />
-        <CheckBoxPreference
             android:key="resolve_name"
             android:title="@string/preferences_resolve_name_title"
             android:summary="@string/preferences_resolve_name_summary"
@@ -102,11 +97,11 @@
     <PreferenceScreen
         android:title="@string/preferences_portscan"
         android:summary="">
-        <EditTextPreference
-            android:key="ssh_user"
-            android:title="@string/preferences_ssh_user_title"
-            android:summary="@string/preferences_ssh_user_summary"
-            android:defaultValue="root" />
+        <CheckBoxPreference
+            android:key="banner"
+            android:title="@string/preferences_banner_title"
+            android:summary="@string/preferences_banner_summary"
+            android:defaultValue="true" />
         <EditTextPreference
             android:key="port_start"
             android:title="@string/preferences_port_start_title"
@@ -119,6 +114,11 @@
             android:summary="@string/preferences_port_end_summary"
             android:defaultValue="1024"
             android:inputType="number" />
+        <EditTextPreference
+            android:key="ssh_user"
+            android:title="@string/preferences_ssh_user_title"
+            android:summary="@string/preferences_ssh_user_summary"
+            android:defaultValue="root" />
         <CheckBoxPreference
             android:key="timeout_force"
             android:title="@string/preferences_timeout_force_title"

@@ -16,14 +16,14 @@ public class Save {
     private static final String SELECT = "select name from nic where mac=?";
     private static final String INSERT = "insert or replace into nic (name,mac) values (?,?)";
     private static final String DELETE = "delete from nic where mac=?";
+    private static SQLiteDatabase db;
 
     public static String getCustomName(String mac) {
+        db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
+                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         String name = null;
         Cursor c = null;
-        SQLiteDatabase db = null;
         try {
-            db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
-                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             if (db.isOpen()) {
                 c = db.rawQuery(SELECT, new String[] { mac.replace(":", "").toUpperCase() });
                 if (c.moveToFirst()) {
@@ -44,10 +44,9 @@ public class Save {
     }
 
     public static void setCustomName(final String name, final String mac) {
-        SQLiteDatabase db = null;
+        db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
+                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         try {
-            db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
-                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             if (db.isOpen()) {
                 db.execSQL(INSERT, new String[] { name, mac.replace(":", "").toUpperCase() });
             }
@@ -61,10 +60,9 @@ public class Save {
     }
 
     public static boolean removeCustomName(String mac) {
-        SQLiteDatabase db = null;
+        db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
+                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         try {
-            db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
-                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             if (db.isOpen()) {
                 db.execSQL(DELETE, new String[] { mac.replace(":", "").toUpperCase() });
                 return true;
