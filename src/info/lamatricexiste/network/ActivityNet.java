@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -98,11 +99,11 @@ public abstract class ActivityNet extends Activity {
                     if (sstate == SupplicantState.SCANNING) {
                         info_in_str = getString(R.string.wifi_scanning);
                     } else if (sstate == SupplicantState.ASSOCIATING) {
-                        info_in_str = String.format(getString(R.string.wifi_associating),
+                        info_in_str = getString(R.string.wifi_associating,
                                 (net.ssid != null ? net.ssid : (net.bssid != null ? net.bssid
                                         : net.macAddress)));
                     } else if (sstate == SupplicantState.COMPLETED) {
-                        info_in_str = String.format(getString(R.string.wifi_dhcp), net.ssid);
+                        info_in_str = getString(R.string.wifi_dhcp, net.ssid);
                     }
                 }
             }
@@ -117,9 +118,10 @@ public abstract class ActivityNet extends Activity {
                         net.getWifiInfo();
                         if (net.ssid != null) {
                             net.getIp();
-                            info_ip_str = "IP: " + net.ip + "/" + net.cidr + " (" + net.intf + ")";
-                            info_in_str = "SSID: " + net.ssid;
-                            info_mo_str = "MODE: WiFi";
+                            info_ip_str = getString(R.string.net_ip, net.ip, net.cidr, net.intf);
+                            info_in_str = getString(R.string.net_ssid, net.ssid);
+                            info_mo_str = getString(R.string.net_mode, getString(
+                                    R.string.net_mode_wifi, net.speed + WifiInfo.LINK_SPEED_UNITS));
                             setButtons(false);
                         }
                     } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
@@ -128,19 +130,21 @@ public abstract class ActivityNet extends Activity {
                             net.getMobileInfo();
                             if (net.carrier != null) {
                                 net.getIp();
-                                info_ip_str = "IP: " + net.ip + "/" + net.cidr + " (" + net.intf
-                                        + ")";
-                                info_in_str = "CARRIER: " + net.carrier;
-                                info_mo_str = "MODE: Mobile";
+                                info_ip_str = getString(R.string.net_ip, net.ip, net.cidr, net.intf);
+                                info_in_str = getString(R.string.net_carrier, net.carrier);
+                                info_mo_str = getString(R.string.net_mode,
+                                        getString(R.string.net_mode_mobile));
                                 setButtons(false);
                             }
                         }
                     } else if (type == 3) { // ETH
                         Log.i(TAG, "Ethernet connectivity detected!");
-                        info_mo_str = "MODE: Ethernet (Not supported yet)";
+                        info_mo_str = getString(R.string.net_mode)
+                                + getString(R.string.net_mode_eth);
                     } else {
                         Log.i(TAG, "Connectivity unknown!");
-                        info_mo_str = "MODE: Connectivity mode unknown!";
+                        info_mo_str = getString(R.string.net_mode)
+                                + getString(R.string.net_mode_unknown);
                     }
                 } else {
                     cancelTasks();

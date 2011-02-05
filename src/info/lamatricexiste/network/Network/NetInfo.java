@@ -46,6 +46,7 @@ public class NetInfo {
     public String ip = NOIP;
     public int cidr = 24;
 
+    public int speed = 0;
     public String ssid = null;
     public String bssid = null;
     public String carrier = null;
@@ -185,6 +186,7 @@ public class NetInfo {
         if (wifi != null) {
             info = wifi.getConnectionInfo();
             // Set wifi variables
+            speed = info.getLinkSpeed();
             ssid = info.getSSID();
             bssid = info.getBSSID();
             macAddress = info.getMacAddress();

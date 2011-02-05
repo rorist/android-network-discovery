@@ -34,6 +34,15 @@
     <string name="wifi_dhcp">Obtaining IP address from %s</string>
     <string name="wifi_unknown">Wifi state unknown</string>
     
+    <string name="net_ip">IP: %1$s/%2$d (%3$s)</string>
+    <string name="net_carrier">CARRIER: %s</string>
+    <string name="net_ssid">SSID: %s</string>
+    <string name="net_mode">MODE: %s</string>
+    <string name="net_mode_wifi">WiFi (%s)</string>
+    <string name="net_mode_mobile">Mobile</string>
+    <string name="net_mode_eth">Ethernet (Not supported yet)</string>
+    <string name="net_mode_unknown">Unknown</string>
+    
     <string name="discover_start">Discovery started ...</string>
     <string name="discover_finished">Discovery finished !</string>
     <string name="discover_canceled">Discovery canceled !</string>

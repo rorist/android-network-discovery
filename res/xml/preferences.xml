@@ -14,7 +14,8 @@
             android:key="interface"
             android:title="@string/preferences_intf_title"
             android:summary="@string/preferences_intf_summary"
-            android:dialogTitle="@string/preferences_intf_title" />
+            android:dialogTitle="@string/preferences_intf_title"
+            android:defaultValue="0" />
         <CheckBoxPreference
             android:key="resolve_name"
             android:title="@string/preferences_resolve_name_title"
@@ -41,7 +42,8 @@
             android:summary="@string/preferences_discover_method_summary"
             android:entries="@array/method_discover_name"
             android:entryValues="@array/method_discover_value"
-            android:dialogTitle="@string/preferences_discover_method_title_dialog"/>
+            android:dialogTitle="@string/preferences_discover_method_title_dialog"
+            android:defaultValue="0"/>
         <CheckBoxPreference
             android:key="ip_custom"
             android:title="@string/preferences_ip_custom_title"

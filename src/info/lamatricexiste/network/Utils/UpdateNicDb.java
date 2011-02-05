@@ -125,10 +125,9 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
                         .getApplication());
                 d.setProgressBarIndeterminateVisibility(false);
-                Toast.makeText(
-                        d.getApplicationContext(),
-                        String.format(d.getString(R.string.preferences_resetdb_ok),
-                                (countEntries() - nb)), Toast.LENGTH_LONG).show();
+                Toast.makeText(d.getApplicationContext(),
+                        d.getString(R.string.preferences_resetdb_ok, (countEntries() - nb)),
+                        Toast.LENGTH_LONG).show();
                 try {
                     Editor edit = prefs.edit();
                     edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(

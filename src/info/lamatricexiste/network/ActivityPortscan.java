@@ -160,10 +160,10 @@ final public class ActivityPortscan extends TabActivity {
         // Tabs
         TabHost tabHost = getTabHost();
         tabHost.addTab(tabHost.newTabSpec("tab_open").setIndicator(
-                String.format(getString(R.string.scan_open), cnt_open),
+                getString(R.string.scan_open, cnt_open),
                 getResources().getDrawable(R.drawable.open)).setContent(R.id.list_open));
         tabHost.addTab(tabHost.newTabSpec("tab_closed").setIndicator(
-                String.format(getString(R.string.scan_closed), cnt_closed),
+                getString(R.string.scan_closed, cnt_closed),
                 getResources().getDrawable(R.drawable.closed)).setContent(R.id.list_closed));
         tabHost.setCurrentTab(0);
         // Ugly hack to have the view holding the tabs
@@ -307,7 +307,7 @@ final public class ActivityPortscan extends TabActivity {
                     public void onClick(View v) {
                         final AlertDialog.Builder dialog = new AlertDialog.Builder(
                                 ActivityPortscan.this);
-                        dialog.setTitle(String.format(getString(R.string.scan_banner_title), port));
+                        dialog.setTitle(getString(R.string.scan_banner_title, port));
                         dialog.setMessage(holder.banner.getText());
                         dialog.setNegativeButton(R.string.btn_close, null);
                         dialog.show();
@@ -374,7 +374,7 @@ final public class ActivityPortscan extends TabActivity {
                 startActivity(intent);
             } catch (ActivityNotFoundException e) {
                 if (search != null) {
-                    makeToast(String.format(getString(R.string.package_missing, pk)));
+                    makeToast(getString(R.string.package_missing, pk));
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(search)));
                     } catch (ActivityNotFoundException e2) {
@@ -423,8 +423,8 @@ final public class ActivityPortscan extends TabActivity {
             host.services = new HashMap<Integer, String>();
             host.portsOpen = new ArrayList<Integer>();
             host.portsClosed = new ArrayList<Integer>();
-            mTabOpen.setText(String.format(getString(R.string.scan_open), 0));
-            mTabClosed.setText(String.format(getString(R.string.scan_closed), 0));
+            mTabOpen.setText(getString(R.string.scan_open, 0));
+            mTabClosed.setText(getString(R.string.scan_closed, 0));
             setProgress(0);
         }
 
@@ -445,8 +445,7 @@ final public class ActivityPortscan extends TabActivity {
                                 host.services.put(port, getPortService(port));
                                 adapter_open.add(PLACEHOLDER);
                                 cnt_open++;
-                                mTabOpen.setText(String.format(getString(R.string.scan_open),
-                                        cnt_open));
+                                mTabOpen.setText(getString(R.string.scan_open, cnt_open));
                             }
                             adapter_open.notifyDataSetChanged();
                         } else if (type == AsyncPortscan.CLOSED) {
@@ -455,8 +454,7 @@ final public class ActivityPortscan extends TabActivity {
                                 host.services.put(port, getPortService(port));
                                 adapter_closed.add(PLACEHOLDER);
                                 cnt_closed++;
-                                mTabClosed.setText(String.format(getString(R.string.scan_closed),
-                                        cnt_closed));
+                                mTabClosed.setText(getString(R.string.scan_closed, cnt_closed));
                             }
                             adapter_closed.notifyDataSetChanged();
                         } else if (type == AsyncPortscan.UNREACHABLE) {
