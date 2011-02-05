@@ -3,3 +3,4 @@ bin
 .settings
 libs
 network.kpf
+scripts/db-to-gz.py

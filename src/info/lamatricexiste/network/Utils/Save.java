@@ -19,8 +19,7 @@ public class Save {
     private static SQLiteDatabase db;
 
     public static String getCustomName(String mac) {
-        db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
-                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        db = Db.openDb(Db.DB_SAVES);
         String name = null;
         Cursor c = null;
         try {
@@ -44,8 +43,7 @@ public class Save {
     }
 
     public static void setCustomName(final String name, final String mac) {
-        db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
-                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        db = Db.openDb(Db.DB_SAVES);
         try {
             if (db.isOpen()) {
                 db.execSQL(INSERT, new String[] { name, mac.replace(":", "").toUpperCase() });
@@ -60,8 +58,7 @@ public class Save {
     }
 
     public static boolean removeCustomName(String mac) {
-        db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_SAVE, null,
-                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        db = Db.openDb(Db.DB_SAVES);
         try {
             if (db.isOpen()) {
                 db.execSQL(DELETE, new String[] { mac.replace(":", "").toUpperCase() });

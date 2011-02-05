@@ -8,11 +8,11 @@ package info.lamatricexiste.network.Utils;
 import info.lamatricexiste.network.Network.DownloadFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.zip.GZIPInputStream;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,7 +21,7 @@ import android.util.Log;
 
 public class Db {
 
-    private final String TAG = "Db";
+    private final static String TAG = "Db";
     private Context ctxt = null;
 
     // Databases information
@@ -29,14 +29,14 @@ public class Db {
     public static final String DB_SERVICES = "services.db";
     public static final String DB_PROBES = "probes.db";
     public static final String DB_NIC = "nic.db";
-    public static final String DB_SAVE = "save.db";
+    public static final String DB_SAVES = "saves.db";
 
     public Db(Context ctxt) {
         this.ctxt = ctxt;
         // new File(PATH).mkdirs();
     }
 
-    public SQLiteDatabase openDb(String db_name) {
+    public static SQLiteDatabase openDb(String db_name) {
         try {
             return SQLiteDatabase.openDatabase(PATH + db_name, null,
                     SQLiteDatabase.NO_LOCALIZED_COLLATORS);
@@ -47,8 +47,8 @@ public class Db {
     }
 
     public void copyDbToDevice(int res, String db_name) throws NullPointerException, IOException {
-        InputStream in = ctxt.getResources().openRawResource(res);
-        // OutputStream out = new FileOutputStream(PATH + db_name);
+        // InputStream in = ctxt.getResources().openRawResource(res);
+        GZIPInputStream in = new GZIPInputStream(ctxt.getResources().openRawResource(res));
         OutputStream out = ctxt.openFileOutput(db_name, Context.MODE_PRIVATE);
         final ReadableByteChannel ic = Channels.newChannel(in);
         final WritableByteChannel oc = Channels.newChannel(out);

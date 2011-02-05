@@ -39,6 +39,7 @@ Credits
 ------
 
 - Design: oblivioncreations.se
+- Icons: Crystal and Oxygen projects
 - Chinese translation: goapk.com
 
 GPLv2 License

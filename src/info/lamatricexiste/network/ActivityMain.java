@@ -183,14 +183,17 @@ final public class ActivityMain extends Activity {
                 try {
                     db.copyDbToDevice(R.raw.services, Db.DB_SERVICES);
                     db.copyDbToDevice(R.raw.probes, Db.DB_PROBES);
-                    db.copyDbToDevice(R.raw.save, Db.DB_SAVE);
+                    db.copyDbToDevice(R.raw.saves, Db.DB_SAVES);
                 } catch (NullPointerException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (IOException e) {
-                    if (e != null && e.getMessage() != null) {
-                        Log.e(TAG, e.getMessage());
-                    } else {
-                        Log.e(TAG, "IOException");
+                    if (e != null) {
+                        if (e.getMessage() != null) {
+                            Log.e(TAG, e.getMessage());
+                        } else {
+                            Log.e(TAG, "Unknown IOException");
+                        }
+                        e.printStackTrace();
                     }
                 }
             }
