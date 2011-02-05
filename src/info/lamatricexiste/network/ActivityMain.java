@@ -163,8 +163,14 @@ final public class ActivityMain extends Activity {
         protected void onPreExecute() {
             final Activity d = mActivity.get();
             if (d != null) {
-                d.setProgressBarIndeterminateVisibility(true);
-                progress = ProgressDialog.show(d, "", d.getString(R.string.task_services));
+                try {
+                    d.setProgressBarIndeterminateVisibility(true);
+                    progress = ProgressDialog.show(d, "", d.getString(R.string.task_services));
+                } catch (Exception e) {
+                    if (e != null) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
             }
         }
 
