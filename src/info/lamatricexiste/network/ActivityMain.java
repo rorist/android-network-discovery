@@ -5,20 +5,23 @@
 
 package info.lamatricexiste.network;
 
+import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Db;
+import info.lamatricexiste.network.Utils.DbUpdate;
 import info.lamatricexiste.network.Utils.Prefs;
-import info.lamatricexiste.network.Utils.UpdateNicDb;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -43,61 +46,54 @@ final public class ActivityMain extends Activity {
         // Reset interface
         Editor edit = prefs.edit();
         edit.putString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
-        edit.commit();
 
-        // Determine the needed installation phases
-        if (prefs.getString(Prefs.KEY_METHOD_DISCOVER, Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-            phase1(ctxt);
-        } else {
-            phase2(ctxt);
-        }
-    }
-
-    private void phase1(final Context ctxt) {
         phase2(ctxt);
-        // Check Root and Install Daemon
-        // final RootDaemon rootDaemon = new RootDaemon(this);
-        // if (rootDaemon.hasRoot) {
-        // if (prefs.getInt(Prefs.KEY_ROOT_INSTALLED,
-        // Prefs.DEFAULT_ROOT_INSTALLED) == 0) {
-        // // Install
-        // AlertDialog.Builder d = new AlertDialog.Builder(this);
-        // d.setTitle(R.string.discover_root_title);
-        // d.setMessage(R.string.discover_root_install);
-        // d.setPositiveButton(R.string.btn_yes, new
-        // DialogInterface.OnClickListener() {
-        // public void onClick(DialogInterface dlg, int sumthin) {
-        // rootDaemon.install();
-        // rootDaemon.permission();
-        // Editor edit = prefs.edit();
-        // edit.putInt(Prefs.KEY_ROOT_INSTALLED, 1);
-        // edit.commit();
-        // // rootDaemon.restartActivity();
-        // phase2(ctxt);
-        // }
-        // });
-        // d.setNegativeButton(R.string.btn_no, new
-        // DialogInterface.OnClickListener() {
-        // public void onClick(DialogInterface dlg, int sumthin) {
-        // phase2(ctxt);
-        // }
-        // });
-        // d.show();
-        // } else {
-        // // Root daemon already installed
-        // phase2(ctxt);
-        // }
-        // } else {
-        // // Don't have root
-        // phase2(ctxt);
-        // }
     }
+
+    // private void phase1(final Context ctxt) {
+    // Check Root and Install Daemon
+    // final RootDaemon rootDaemon = new RootDaemon(this);
+    // if (rootDaemon.hasRoot) {
+    // if (prefs.getInt(Prefs.KEY_ROOT_INSTALLED,
+    // Prefs.DEFAULT_ROOT_INSTALLED) == 0) {
+    // // Install
+    // AlertDialog.Builder d = new AlertDialog.Builder(this);
+    // d.setTitle(R.string.discover_root_title);
+    // d.setMessage(R.string.discover_root_install);
+    // d.setPositiveButton(R.string.btn_yes, new
+    // DialogInterface.OnClickListener() {
+    // public void onClick(DialogInterface dlg, int sumthin) {
+    // rootDaemon.install();
+    // rootDaemon.permission();
+    // Editor edit = prefs.edit();
+    // edit.putInt(Prefs.KEY_ROOT_INSTALLED, 1);
+    // edit.commit();
+    // // rootDaemon.restartActivity();
+    // phase2(ctxt);
+    // }
+    // });
+    // d.setNegativeButton(R.string.btn_no, new
+    // DialogInterface.OnClickListener() {
+    // public void onClick(DialogInterface dlg, int sumthin) {
+    // phase2(ctxt);
+    // }
+    // });
+    // d.show();
+    // } else {
+    // // Root daemon already installed
+    // phase2(ctxt);
+    // }
+    // } else {
+    // // Don't have root
+    // phase2(ctxt);
+    // }
+    // }
 
     private void phase2(final Context ctxt) {
 
-        class UpdateNicDbMain extends UpdateNicDb {
-            public UpdateNicDbMain(Activity activity) {
-                super(activity);
+        class DbUpdateProbes extends DbUpdate {
+            public DbUpdateProbes() {
+                super(ActivityMain.this, Db.DB_PROBES, "probes", "regex", 298);
             }
 
             protected void onPostExecute(Void unused) {
@@ -113,11 +109,29 @@ final public class ActivityMain extends Activity {
             }
         }
 
+        class DbUpdateNic extends DbUpdate {
+            public DbUpdateNic() {
+                super(ActivityMain.this, Db.DB_NIC, "oui", "mac", 253);
+            }
+
+            protected void onPostExecute(Void unused) {
+                super.onPostExecute(unused);
+                final Activity d = mActivity.get();
+                new DbUpdateProbes();
+            }
+
+            protected void onCancelled() {
+                super.onCancelled();
+                final Activity d = mActivity.get();
+                new DbUpdateProbes();
+            }
+        }
+
         // CheckNicDb
         try {
             if (prefs.getInt(Prefs.KEY_RESET_NICDB, Prefs.DEFAULT_RESET_NICDB) != getPackageManager()
                     .getPackageInfo(PKG, 0).versionCode) {
-                new UpdateNicDbMain(ActivityMain.this);
+                new DbUpdateNic();
             } else {
                 // There is a NIC Db installed
                 phase3(ctxt);
@@ -181,9 +195,18 @@ final public class ActivityMain extends Activity {
             if (d != null) {
                 Db db = new Db(d.getApplicationContext());
                 try {
+                    // db.copyDbToDevice(R.raw.probes, Db.DB_PROBES);
                     db.copyDbToDevice(R.raw.services, Db.DB_SERVICES);
-                    db.copyDbToDevice(R.raw.probes, Db.DB_PROBES);
                     db.copyDbToDevice(R.raw.saves, Db.DB_SAVES);
+                    // Save this device in db
+                    NetInfo net = new NetInfo(d.getApplicationContext());
+                    ContentValues values = new ContentValues();
+                    values.put("_id", 0);
+                    values.put("mac", net.macAddress.replace(":", "").toUpperCase());
+                    values.put("name", d.getString(R.string.discover_myphone_name));
+                    SQLiteDatabase data = Db.openDb(Db.DB_SAVES);
+                    data.insert("nic", null, values);
+                    data.close();
                 } catch (NullPointerException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (IOException e) {

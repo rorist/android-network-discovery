@@ -104,7 +104,7 @@
     <string name="preferences_threads_summary">發掘主機的最大執行緒數(1-256)</string>
     <string name="preferences_resetdb_title">更新信用卡资料库</string>
     <string name="preferences_resetdb_summary">獲取並更新MAC位址資料庫</string>
-    <string name="preferences_resetdb_action">是否需要下載網卡資料庫？ (~500k)</string>
+    <string name="preferences_resetdb_action">是否需要下載網卡資料庫？ (~%sk)</string>
     <string name="preferences_resetdb_ok">已升級資料庫！更新 %s 個新項目 ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Website</string>

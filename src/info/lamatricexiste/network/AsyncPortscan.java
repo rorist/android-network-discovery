@@ -47,7 +47,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     private static final String E_TIMEOUT = "The operation timed out";
     // TODO: Probe system to send other stuff than strings
     private static final String[] PROBES = new String[] { "", "\r\n\r\n", "GET / HTTP/1.0\r\n\r\n" };
-    private static final int MAX_READ = 8 * 1024; // FIXME
+    private static final int MAX_READ = 8 * 1024;
     private static final int WRITE_PASS = PROBES.length;
     private static final long WRITE_COOLDOWN = 200 * 1000000; // ns
 
@@ -108,7 +108,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
         return null;
     }
 
-    private void start(InetAddress ina, final int PORT_START, final int PORT_END) {
+    private void start(final InetAddress ina, final int PORT_START, final int PORT_END) {
         select = true;
         try {
             selector = Selector.open();
@@ -142,26 +142,21 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                                     }
 
                                 } else if (key.isReadable()) {
-                                    String banner = "";
                                     try {
-                                        // Log.v(TAG, "read " + data.port);
                                         byteBuffer.clear();
                                         final int numRead = ((SocketChannel) key.channel())
                                                 .read(byteBuffer);
-                                        if (numRead > 8) {
-                                            banner = new String(byteBuffer.array()).substring(0,
-                                                    numRead).trim();
-                                        }
-                                    } catch (StringIndexOutOfBoundsException e) {
-                                        Log.e(TAG, e.getMessage());
-                                    } catch (IOException e) {
-                                        Log.e(TAG, e.getMessage());
-                                    } finally {
-                                        if (banner.length() > 0) {
+                                        if (numRead > 0) {
+                                            String banner = new String(byteBuffer.array())
+                                                    .substring(0, numRead).trim();
+                                            // Log.v(TAG, "read " + data.port +
+                                            // " data=" + banner);
                                             finishKey(key, OPEN, banner);
                                         } else {
                                             key.interestOps(SelectionKey.OP_WRITE);
                                         }
+                                    } catch (IOException e) {
+                                        Log.e(TAG, e.getMessage());
                                     }
                                 } else if (key.isWritable()) {
                                     key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
@@ -217,6 +212,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
                         final SelectionKey key = (SelectionKey) iterator.next();
                         final Data data = (Data) key.attachment();
                         if (data.state == OPEN && now - data.start > TIMEOUT_RW) {
+                            Log.e(TAG, "TIMEOUT=" + data.port);
                             finishKey(key, TIMEOUT);
                         } else if (data.state != OPEN && now - data.start > TIMEOUT_CONNECT) {
                             finishKey(key, TIMEOUT);
@@ -290,7 +286,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     // Port private object
     private static class Data {
-        protected int state;
+        protected int state = FILTERED;
         protected int port;
         protected long start;
         protected int pass = 0;

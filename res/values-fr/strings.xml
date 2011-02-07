@@ -18,7 +18,7 @@
     <string name="btn_info">Info</string>
     <string name="btn_ports">Ports</string>
     
-    <string name="task_nic">Téléchargement de la base des adresses MAC ...</string>
+    <string name="task_db">Téléchargement de la base %s ...</string>
     <string name="task_services">Création de la base de données des Services ... Veuillez patienter ...</string>
     
     <string name="package_missing">%s doit être installée depuis le Market !</string>
@@ -107,7 +107,7 @@
     <string name="preferences_threads_summary">Nombre maximum de threads à utiliser lors de la découverte de machines (1-256)</string>
     <string name="preferences_resetdb_title">Mettre à jour la base des NIC</string>
     <string name="preferences_resetdb_summary">Syncroniser la base des adresses MAC et des constructeurs de NIC</string>
-    <string name="preferences_resetdb_action">Voulez-vous télécharger la BDD de cartes réseaux ? (~500k)</string>
+    <string name="preferences_resetdb_action">Voulez-vous télécharger la BDD ? (~%sk)</string>
     <string name="preferences_resetdb_ok">Base de donnée mise à jour ! %S nouveaux éléments ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Site internet</string>

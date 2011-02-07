@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.SSLException;
 
@@ -94,7 +95,7 @@ public class DownloadFile {
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
-                return entity.getContent();
+                return new GZIPInputStream(entity.getContent());
             }
         } catch (ClientProtocolException e) {
             Log.e(TAG, "There was a protocol based error", e);

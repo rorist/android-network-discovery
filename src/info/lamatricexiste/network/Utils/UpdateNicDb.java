@@ -69,7 +69,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
             final Activity d = mActivity.get();
             if (d != null) {
                 d.setProgressBarIndeterminateVisibility(true);
-                progress = ProgressDialog.show(d, "", d.getString(R.string.task_nic));
+                progress = ProgressDialog.show(d, "", d.getString(R.string.task_db));
             }
         }
     }

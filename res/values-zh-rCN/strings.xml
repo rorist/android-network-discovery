@@ -104,7 +104,7 @@
     <string name="preferences_threads_summary">发掘主机的最大线程数(1-256)</string>
     <string name="preferences_resetdb_title">更新信用卡資料庫</string>
     <string name="preferences_resetdb_summary">获取并更新MAC地址数据库</string>
-    <string name="preferences_resetdb_action">是否需要下载网卡数据库？ (~500k)</string>
+    <string name="preferences_resetdb_action">是否需要下载网卡数据库？ (~%sk)</string>
     <string name="preferences_resetdb_ok">已升级数据库！更新 %s 个新条目 ...</string>
     <string name="preferences_version_title">Version</string>
     <string name="preferences_website_title">Website</string>
