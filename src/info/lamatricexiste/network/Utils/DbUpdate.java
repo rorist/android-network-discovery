@@ -92,13 +92,13 @@ public class DbUpdate extends AsyncTask<Void, String, Void> {
                     remoteCopy(d);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             cancel(true);
         }
         return null;
     }
 
-    private void remoteCopy(final Context ctxt) throws IOException {
+    private void remoteCopy(final Context ctxt) throws IOException, NullPointerException {
         Log.v(TAG, "Copying " + file + " remotly");
         if (NetInfo.isConnected(ctxt)) {
             new DownloadFile(ctxt, String.format(DB_REMOTE, file), ctxt.openFileOutput(file,

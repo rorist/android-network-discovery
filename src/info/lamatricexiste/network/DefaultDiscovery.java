@@ -27,6 +27,7 @@ import android.util.Log;
 public class DefaultDiscovery extends AbstractDiscovery {
 
     private final String TAG = "DefaultDiscovery";
+    private final static long TIMEOUT_SHUTDOWN = 10;
     private final int mRateMult = 5; // Number of alive hosts between Rate
     private int pt_move = 2; // 1=backward 2=forward
     private ExecutorService mPool;
@@ -97,7 +98,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         }
                     }
                     mPool.shutdown();
-                    if (!mPool.awaitTermination(3600L, TimeUnit.SECONDS)) {
+                    if (!mPool.awaitTermination(TIMEOUT_SHUTDOWN, TimeUnit.SECONDS)) {
                         mPool.shutdownNow();
                     }
                 } catch (InterruptedException e) {

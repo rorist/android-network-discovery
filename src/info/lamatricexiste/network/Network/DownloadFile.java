@@ -12,6 +12,7 @@ import info.lamatricexiste.network.ActivityMain;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -39,7 +40,7 @@ public class DownloadFile {
             + android.os.Build.MODEL + ") NetworkDiscovery/";
     private HttpClient httpclient;
 
-    public DownloadFile(final Context ctxt, String url, FileOutputStream out) throws IOException {
+    public DownloadFile(final Context ctxt, String url, FileOutputStream out) throws IOException, NullPointerException {
         String version = "0.3.x";
         try {
             version = ctxt.getPackageManager().getPackageInfo(ActivityMain.TAG, 0).versionName;
@@ -55,10 +56,6 @@ public class DownloadFile {
         try {
             Log.i(TAG, "Downloading " + url);
             fastChannelCopy(inputChannel, outputChannel);
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
-        } catch (NullPointerException e) {
-            Log.e(TAG, e.getMessage());
         } finally {
             try {
                 if (inputChannel != null) {
@@ -74,8 +71,10 @@ public class DownloadFile {
                     out.close();
                 }
             } catch (Exception e) {
-                if (e != null) {
+                if (e != null && e.getMessage() != null) {
                     Log.e(TAG, e.getMessage());
+                } else {
+                    Log.e(TAG, "fastChannelCopy() unknown error");
                 }
             }
         }
@@ -99,6 +98,8 @@ public class DownloadFile {
             }
         } catch (ClientProtocolException e) {
             Log.e(TAG, "There was a protocol based error", e);
+        } catch (UnknownHostException e) {
+            Log.e(TAG, e.getMessage());
         } catch (IOException e) {
             Log.e(TAG, "There was an IO Stream related error", e);
         }
