@@ -5,6 +5,7 @@
 
 package info.lamatricexiste.network;
 
+import info.lamatricexiste.network.Network.HardwareAddress;
 import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Network.RateControl;
@@ -151,8 +152,15 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 if (doRateControl && mRateControl.indicator != null && hosts_done % mRateMult == 0) {
                     mRateControl.adaptRate();
                 }
+                // Arp Check #1 //FIXME: need to do a req to the host before ?
+                if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
+                    Log.e(TAG, "found using arp #1 "+host);
+                    publish(host);
+                    return;
+                }
                 // Native InetAddress check
                 if (h.isReachable(getRate())) {
+                    Log.e(TAG, "found using InetAddress ping "+host);
                     publish(host);
                     // Set indicator and get a rate
                     if (doRateControl && mRateControl.indicator == null) {
@@ -165,7 +173,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 int port;
                 // TODO: Get ports from options
                 if ((port = Reachable.isReachable(h, getRate())) > -1) {
-                    Log.v(TAG, "used Network.Reachable object, port=" + port);
+                    Log.v(TAG, "used Network.Reachable object, "+host+" port=" + port);
                     publish(host);
                     return;
                 }
@@ -194,7 +202,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
             final ActivityDiscovery discover = mDiscover.get();
             if (discover != null) {
                 // Mac Addr
-                host.hardwareAddress = discover.mHardwareAddress.getHardwareAddress(addr);
+                host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
 
                 // NIC vendor
                 try {

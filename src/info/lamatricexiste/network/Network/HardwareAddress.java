@@ -32,6 +32,9 @@ public class HardwareAddress {
 
     private final static String TAG = "HardwareAddress";
     private final static String REQ = "select vendor from oui where mac=?";
+    // 0x1 is HW Type:  Ethernet (10Mb) [JBP]
+    // 0x2 is ARP Flag: completed entry (ha valid)
+    private final static String MAC_RE = "^%s\\s+0x1\\s+0x2\\s+([:0-9a-fA-F]+)\\s+\\*\\s+\\w+$";
     private final static int BUF = 8 * 1024;
     private SQLiteDatabase db = null;
     private WeakReference<Activity> mActivity;
@@ -59,28 +62,26 @@ public class HardwareAddress {
         }
     }
 
-    public String getHardwareAddress(String ip) {
+    public static String getHardwareAddress(String ip) {
         // Get intf
-        String intf = "(tiwlan0|eth0)";
-        if (mActivity != null) {
-            final Activity a = mActivity.get();
-            if (a != null) {
-                NetInfo net = new NetInfo(a.getApplicationContext());
-                intf = net.intf;
-                if (net.ip.equals(ip)) {
-                    return net.macAddress;
-                }
-            }
-        }
+        //String intf = "(tiwlan0|eth0)";
+        //if (mActivity != null) {
+        //    final Activity a = mActivity.get();
+        //    if (a != null) {
+        //        NetInfo net = new NetInfo(a.getApplicationContext());
+        //        intf = net.intf;
+        //        if (net.ip.equals(ip)) {
+        //            return net.macAddress;
+        //        }
+        //    }
+        //}
         // Get HW Addr
         String hw = NetInfo.NOMAC;
         try {
             if (ip != null) {
-                String ptrn = "^" + ip.replace(".", "\\.")
-                        + "\\s+0x1\\s+0x2\\s+([:0-9a-fA-F]+)\\s+\\*\\s+" + intf + "$";
+                String ptrn = String.format(MAC_RE, ip.replace(".", "\\."));
                 Pattern pattern = Pattern.compile(ptrn);
-                BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/net/arp"),
-                        BUF);
+                BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/net/arp"), BUF);
                 String line;
                 Matcher matcher;
                 while ((line = bufferedReader.readLine()) != null) {

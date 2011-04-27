@@ -23,7 +23,7 @@ public class Save {
         String name = null;
         Cursor c = null;
         try {
-            if (db.isOpen()) {
+            if (db != null && db.isOpen()) {
                 c = db.rawQuery(SELECT, new String[] { mac.replace(":", "").toUpperCase() });
                 if (c.moveToFirst()) {
                     name = c.getString(0);

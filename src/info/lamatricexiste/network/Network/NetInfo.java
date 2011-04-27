@@ -145,7 +145,7 @@ public class NetInfo {
                 Log.i(TAG, "cannot find cidr, using default /24");
             }
         } catch (NumberFormatException e) {
-            Log.i(TAG, "cannot find cidr, using default /24");
+            Log.i(TAG, e.getMessage()+ " -> cannot find cidr, using default /24");
         }
     }
 
