@@ -60,7 +60,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     private HostsAdapter adapter;
     private Button btn_discover;
     private AbstractDiscovery mDiscoveryTask = null;
-    public HardwareAddress mHardwareAddress;
 
     // private SlidingDrawer mDrawer;
     // private RootDaemon mRootDaemon = null;
@@ -404,7 +403,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             default:
                 mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
         }
-        mHardwareAddress = new HardwareAddress(this);
         mDiscoveryTask.setNetwork(network_ip, network_start, network_end);
         mDiscoveryTask.execute();
         btn_discover.setText(R.string.btn_discover_cancel);
@@ -421,7 +419,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     }
 
     public void stopDiscovering() {
-        mHardwareAddress.dbClose();
         mDiscoveryTask = null;
         setButtonOn(btn_discover, R.drawable.discover);
         btn_discover.setOnClickListener(new View.OnClickListener() {

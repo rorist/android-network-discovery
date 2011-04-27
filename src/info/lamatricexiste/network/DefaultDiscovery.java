@@ -205,14 +205,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
 
                 // NIC vendor
-                try {
-                    host.nicVendor = discover.mHardwareAddress.getNicVendor(host.hardwareAddress);
-                } catch (SQLiteDatabaseCorruptException e) {
-                    Log.e(TAG, e.getMessage());
-                    Editor edit = discover.prefs.edit();
-                    edit.putInt(Prefs.KEY_RESET_NICDB, Prefs.DEFAULT_RESET_NICDB);
-                    edit.commit();
-                }
+                host.nicVendor = HardwareAddress.getNicVendor(host.hardwareAddress);
 
                 // Is gateway ?
                 if (discover.net.gatewayIp.equals(host.ipAddress)) {

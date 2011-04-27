@@ -36,30 +36,9 @@ public class HardwareAddress {
     // 0x2 is ARP Flag: completed entry (ha valid)
     private final static String MAC_RE = "^%s\\s+0x1\\s+0x2\\s+([:0-9a-fA-F]+)\\s+\\*\\s+\\w+$";
     private final static int BUF = 8 * 1024;
-    private SQLiteDatabase db = null;
     private WeakReference<Activity> mActivity;
 
     public HardwareAddress(Activity activity) {
-        mActivity = new WeakReference<Activity>(activity);
-        try {
-            db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null,
-                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
-        } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
-            final Activity d = mActivity.get();
-            if (d != null) {
-                Context ctxt = d.getApplicationContext();
-                Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-                edit.putInt(Prefs.KEY_RESET_NICDB, 1);
-                edit.commit();
-            }
-        }
-    }
-
-    public void dbClose() {
-        if (db != null) {
-            db.close();
-        }
     }
 
     public static String getHardwareAddress(String ip) {
@@ -88,27 +67,30 @@ public class HardwareAddress {
         return hw;
     }
 
-    public String getNicVendor(String hw) throws SQLiteDatabaseCorruptException {
+    public static String getNicVendor(String hw) throws SQLiteDatabaseCorruptException {
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null, SQLiteDatabase.OPEN_READONLY | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         String ni = null;
         if (db != null) {
             // Db request
             try {
-                synchronized (db) {
-                    if (db.isOpen()) {
-                        Cursor c = db.rawQuery(REQ, new String[] { hw.replace(":", "")
-                                .substring(0, 6).toUpperCase() });
-                        if (c.moveToFirst()) {
-                            ni = c.getString(0);
-                        }
-                        c.close();
+                if (db.isOpen()) {
+                    Cursor c = db.rawQuery(REQ, new String[] { hw.replace(":", "")
+                            .substring(0, 6).toUpperCase() });
+                    if (c.moveToFirst()) {
+                        ni = c.getString(0);
                     }
-
+                    c.close();
                 }
+                db.close();
             } catch (IllegalStateException e) {
                 Log.e(TAG, e.getMessage());
             } catch (SQLiteException e) {
                 Log.e(TAG, e.getMessage());
                 // FIXME: Reset db
+                //Context ctxt = d.getApplicationContext();
+                //Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+                //edit.putInt(Prefs.KEY_RESET_NICDB, 1);
+                //edit.commit();
             }
         }
         return ni;
