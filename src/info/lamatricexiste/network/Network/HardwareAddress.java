@@ -63,19 +63,6 @@ public class HardwareAddress {
     }
 
     public static String getHardwareAddress(String ip) {
-        // Get intf
-        //String intf = "(tiwlan0|eth0)";
-        //if (mActivity != null) {
-        //    final Activity a = mActivity.get();
-        //    if (a != null) {
-        //        NetInfo net = new NetInfo(a.getApplicationContext());
-        //        intf = net.intf;
-        //        if (net.ip.equals(ip)) {
-        //            return net.macAddress;
-        //        }
-        //    }
-        //}
-        // Get HW Addr
         String hw = NetInfo.NOMAC;
         try {
             if (ip != null) {
@@ -102,37 +89,28 @@ public class HardwareAddress {
     }
 
     public String getNicVendor(String hw) throws SQLiteDatabaseCorruptException {
-        if (mActivity != null) {
-            final Activity a = mActivity.get();
-            if (a != null) {
-                final Context ctxt = a.getApplicationContext();
-                String ni = ctxt.getString(R.string.info_unknown);
-                if (db != null) {
-                    // Db request
-                    try {
-                        synchronized (db) {
-                            if (db.isOpen()) {
-                                Cursor c = db.rawQuery(REQ, new String[] { hw.replace(":", "")
-                                        .substring(0, 6).toUpperCase() });
-                                if (c.moveToFirst()) {
-                                    ni = c.getString(0);
-                                }
-                                c.close();
-                            }
-
+        String ni = null;
+        if (db != null) {
+            // Db request
+            try {
+                synchronized (db) {
+                    if (db.isOpen()) {
+                        Cursor c = db.rawQuery(REQ, new String[] { hw.replace(":", "")
+                                .substring(0, 6).toUpperCase() });
+                        if (c.moveToFirst()) {
+                            ni = c.getString(0);
                         }
-                    } catch (IllegalStateException e) {
-                        Log.e(TAG, e.getMessage());
-                    } catch (SQLiteException e) {
-                        Log.e(TAG, e.getMessage());
-                        Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-                        edit.putInt(Prefs.KEY_RESET_NICDB, 1);
-                        edit.commit();
+                        c.close();
                     }
+
                 }
-                return ni;
+            } catch (IllegalStateException e) {
+                Log.e(TAG, e.getMessage());
+            } catch (SQLiteException e) {
+                Log.e(TAG, e.getMessage());
+                // FIXME: Reset db
             }
         }
-        return "Unknown";
+        return ni;
     }
 }
