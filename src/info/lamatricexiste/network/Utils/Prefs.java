@@ -60,8 +60,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_SSH_USER = "ssh_user";
     public static final String DEFAULT_SSH_USER = "root";
 
-    public static final String KEY_NTHREADS = "nthreads";
-    public static final String DEFAULT_NTHREADS = "8";
+    //public static final String KEY_NTHREADS = "nthreads";
+    //public static final String DEFAULT_NTHREADS = "8";
 
     public static final String KEY_RESET_NICDB = "resetdb";
     public static final int DEFAULT_RESET_NICDB = 1;
@@ -262,8 +262,8 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
             checkPortRange();
         } else if (key.equals(KEY_IP_START) || key.equals(KEY_IP_END)) {
             checkIpRange();
-        } else if (key.equals(KEY_NTHREADS)) {
-            checkMaxThreads();
+        //} else if (key.equals(KEY_NTHREADS)) {
+        //    checkMaxThreads();
         } else if (key.equals(KEY_RATECTRL_ENABLE)) {
             checkTimeout(KEY_TIMEOUT_DISCOVER, KEY_RATECTRL_ENABLE, false);
         } else if (key.equals(KEY_CIDR_CUSTOM)) {
@@ -343,19 +343,19 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         }
     }
 
-    private void checkMaxThreads() {
-        // Check if nthreads is numeric and between 1-256
-        EditTextPreference threads = (EditTextPreference) ps.findPreference(KEY_NTHREADS);
-        int nthreads = 0;
-        try {
-            nthreads = Integer.parseInt(threads.getText());
-        } catch (NumberFormatException e) {
-            threads.setText(DEFAULT_NTHREADS);
-            Toast.makeText(ctxt, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-        }
-        if (nthreads < 1 || nthreads > 256) {
-            threads.setText(DEFAULT_NTHREADS);
-            Toast.makeText(ctxt, R.string.preferences_error2, Toast.LENGTH_LONG).show();
-        }
-    }
+    //private void checkMaxThreads() {
+    //    // Check if nthreads is numeric and between 1-256
+    //    EditTextPreference threads = (EditTextPreference) ps.findPreference(KEY_NTHREADS);
+    //    int nthreads = 0;
+    //    try {
+    //        nthreads = Integer.parseInt(threads.getText());
+    //    } catch (NumberFormatException e) {
+    //        threads.setText(DEFAULT_NTHREADS);
+    //        Toast.makeText(ctxt, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+    //    }
+    //    if (nthreads < 1 || nthreads > 256) {
+    //        threads.setText(DEFAULT_NTHREADS);
+    //        Toast.makeText(ctxt, R.string.preferences_error2, Toast.LENGTH_LONG).show();
+    //    }
+    //}
 }

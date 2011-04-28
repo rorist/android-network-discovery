@@ -88,12 +88,12 @@
             android:title="@string/preferences_allow_mobile_title"
             android:summary="@string/preferences_allow_mobile_summary"
             android:defaultValue="false" />
-        <EditTextPreference
+        <!--<EditTextPreference
             android:key="nthreads"
             android:title="@string/preferences_threads_title"
             android:summary="@string/preferences_threads_summary"
             android:defaultValue="8"
-            android:inputType="number" />
+            android:inputType="number" />-->
     </PreferenceScreen>
 
     <PreferenceScreen
