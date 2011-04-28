@@ -60,10 +60,9 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start
                         + "), end=" + NetInfo.getIpFromLongUnsigned(end) + " (" + end
                         + "), length=" + size);
-                mPool = Executors.newFixedThreadPool(Integer.parseInt(discover.prefs.getString(
-                        Prefs.KEY_NTHREADS, Prefs.DEFAULT_NTHREADS)));
+                mPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-                try {
+                //try {
                     if (ip <= end && ip >= start) {
                         Log.i(TAG, "Back and forth scanning");
                         // gateway
@@ -98,14 +97,15 @@ public class DefaultDiscovery extends AbstractDiscovery {
                             launch(i);
                         }
                     }
-                    mPool.shutdown();
-                    if (!mPool.awaitTermination(TIMEOUT_SHUTDOWN, TimeUnit.SECONDS)) {
-                        mPool.shutdownNow();
-                    }
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "Got Interrupted");
-                    Thread.currentThread().interrupt();
-                }
+                    // FIXME: Test
+                    //mPool.shutdown();
+                    //if (!mPool.awaitTermination(TIMEOUT_SHUTDOWN, TimeUnit.SECONDS)) {
+                    //    mPool.shutdownNow();
+                    //}
+                //} catch (InterruptedException e) {
+                //    Log.e(TAG, "Got Interrupted");
+                //    Thread.currentThread().interrupt();
+                //}
             }
         }
         return null;
@@ -120,7 +120,8 @@ public class DefaultDiscovery extends AbstractDiscovery {
     }
 
     private void launch(long i) {
-        mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
+        //mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
+        mPool.submit(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
     }
 
     private int getRate() {
@@ -194,7 +195,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
             return;
         }
 
-        HostBean host = new HostBean();
+        final HostBean host = new HostBean();
         host.ipAddress = addr;
         host.responseTime = getRate();
 
@@ -207,7 +208,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 // NIC vendor
                 host.nicVendor = HardwareAddress.getNicVendor(host.hardwareAddress);
 
-                // Is gateway ?
+                // Is gateway ? FIXME: Put this direclty in onProgress() -> UI Thread
                 if (discover.net.gatewayIp.equals(host.ipAddress)) {
                     host.deviceType = HostBean.TYPE_GATEWAY;
                 }

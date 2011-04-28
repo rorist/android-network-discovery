@@ -63,6 +63,7 @@ public class HardwareAddress {
             }
         } catch (IOException e) {
             Log.e(TAG, "Can't open/read file ARP: " + e.getMessage());
+            return hw;
         }
         return hw;
     }
