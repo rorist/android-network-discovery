@@ -194,7 +194,7 @@ public class NetInfo {
             gatewayIp = getIpFromIntSigned(wifi.getDhcpInfo().gateway);
             // broadcastIp = getIpFromIntSigned((dhcp.ipAddress & dhcp.netmask)
             // | ~dhcp.netmask);
-            netmaskIp = getIpFromIntSigned(dhcp.netmask);
+            netmaskIp = getIpFromIntSigned(wifi.getDhcpInfo().netmask);
             return true;
         }
         return false;
