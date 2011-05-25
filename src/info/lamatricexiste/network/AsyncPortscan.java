@@ -22,9 +22,11 @@ import java.lang.ref.WeakReference;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -272,15 +274,37 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
 
     private void finishKey(SelectionKey key, int state, String banner) {
         synchronized (key) {
-            try {
-                ((SocketChannel) key.channel()).close();
-            } catch (IOException e) {
-                Log.e(TAG, e.getMessage());
-            } finally {
-                Data data = (Data) key.attachment();
-                publishProgress(data.port, state, banner);
-                key.cancel();
+            if(key == null || !key.isValid()){
+                return;
             }
+            closeChannel(key.channel());
+            Data data = (Data) key.attachment();
+            publishProgress(data.port, state, banner);
+            key.attach(null);
+            key.cancel();
+            key = null;
+        }
+    }
+
+    private void closeChannel(SelectableChannel channel) {
+        if (channel instanceof SocketChannel) {
+            Socket socket = ((SocketChannel) channel).socket();
+            try{
+                if (!socket.isInputShutdown()) socket.shutdownInput();
+            } catch (IOException ex){
+            }
+            try{
+                if (!socket.isOutputShutdown()) socket.shutdownOutput();
+            } catch (IOException ex){
+            }
+            try{
+                socket.close();
+            } catch (IOException ex){
+            }
+        }
+        try{
+            channel.close();
+        } catch (IOException ex){
         }
     }
 
