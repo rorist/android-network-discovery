@@ -37,6 +37,7 @@ public class NetInfo {
     private final String TAG = "NetInfo";
     private static final int BUF = 8 * 1024;
     public static final String NOIP = "0.0.0.0";
+    public static final String NOMASK = "255.255.255.255";
     public static final String NOMAC = "00:00:00:00:00:00";
     private Context ctxt;
     private WifiInfo info;
@@ -51,6 +52,7 @@ public class NetInfo {
     public String bssid = null;
     public String carrier = null;
     public String macAddress = NOMAC;
+    public String netmaskIp = NOMASK;
     public String gatewayIp = NOIP;
 
     public NetInfo(final Context ctxt) {
@@ -120,32 +122,31 @@ public class NetInfo {
     }
 
     private void getCidr() {
-        String match;
-        // Running ip tools
-        try {
-            if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show " + intf,
-                    "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) != null) {
-                cidr = Integer.parseInt(match);
-                return;
-            } else if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show "
-                    + intf, "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global " + intf
-                    + "$")) != null) {
-                cidr = Integer.parseInt(match);
-                return;
-            } else if ((match = runCommand("/system/bin/ifconfig", "/system/bin/ifconfig " + intf,
-                    "^" + intf + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags.*")) != null) {
-                double sum = -2;
-                String[] part = match.split("\\.");
-                for (String p : part) {
-                    sum += 256D - Double.parseDouble(p);
+        if (netmaskIp != NOMASK) {
+            cidr = IpToCidr(netmaskIp);
+        } else {
+            String match;
+            // Running ip tools
+            try {
+                if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show " + intf,
+                        "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) != null) {
+                    cidr = Integer.parseInt(match);
+                    return;
+                } else if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show "
+                        + intf, "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global " + intf
+                        + "$")) != null) {
+                    cidr = Integer.parseInt(match);
+                    return;
+                } else if ((match = runCommand("/system/bin/ifconfig", "/system/bin/ifconfig " + intf,
+                        "^" + intf + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags.*")) != null) {
+                    cidr = IpToCidr(match);
+                    return;
+                } else {
+                    Log.i(TAG, "cannot find cidr, using default /24");
                 }
-                cidr = 32 - (int) (Math.log(sum) / Math.log(2d));
-                return;
-            } else {
-                Log.i(TAG, "cannot find cidr, using default /24");
+            } catch (NumberFormatException e) {
+                Log.i(TAG, e.getMessage()+ " -> cannot find cidr, using default /24");
             }
-        } catch (NumberFormatException e) {
-            Log.i(TAG, e.getMessage()+ " -> cannot find cidr, using default /24");
         }
     }
 
@@ -193,7 +194,7 @@ public class NetInfo {
             gatewayIp = getIpFromIntSigned(wifi.getDhcpInfo().gateway);
             // broadcastIp = getIpFromIntSigned((dhcp.ipAddress & dhcp.netmask)
             // | ~dhcp.netmask);
-            // netmaskIp = getIpFromIntSigned(dhcp.netmask);
+            netmaskIp = getIpFromIntSigned(dhcp.netmask);
             return true;
         }
         return false;
@@ -258,6 +259,15 @@ public class NetInfo {
             ip = ip + ((ip_long >> k * 8) & 0xFF) + ".";
         }
         return ip.substring(0, ip.length() - 1);
+    }
+
+    private int IpToCidr(String ip) {
+        double sum = -2;
+        String[] part = ip.split("\\.");
+        for (String p : part) {
+            sum += 256D - Double.parseDouble(p);
+        }
+        return 32 - (int) (Math.log(sum) / Math.log(2d));
     }
 
     // public int getIntFromInet(InetAddress ip_addr) {
