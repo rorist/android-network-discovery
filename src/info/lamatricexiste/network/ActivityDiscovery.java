@@ -314,6 +314,7 @@ final public class ActivityDiscovery extends ActivityNet
                                 final String name = txt.getText().toString();
                                 host.hostname = name;
                                 Save.setCustomName(name, host.hardwareAddress);
+                                adapter.notifyDataSetChanged();
                                 Toast.makeText(ActivityDiscovery.this,
                                         R.string.discover_action_saved, Toast.LENGTH_SHORT).show();
                             }
@@ -322,6 +323,7 @@ final public class ActivityDiscovery extends ActivityNet
                             public void onClick(DialogInterface dialog, int which) {
                                 host.hostname = null;
                                 Save.removeCustomName(host.hardwareAddress);
+                                adapter.notifyDataSetChanged();
                                 Toast.makeText(ActivityDiscovery.this,
                                         R.string.discover_action_deleted, Toast.LENGTH_SHORT)
                                         .show();
