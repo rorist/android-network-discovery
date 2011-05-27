@@ -41,8 +41,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
-final public class ActivityDiscovery extends ActivityNet implements OnItemClickListener {
+final public class ActivityDiscovery extends ActivityNet
+	implements OnItemClickListener, OnItemLongClickListener {
 
     private final String TAG = "ActivityDiscovery";
     public final static long VIBRATE = (long) 250;
@@ -95,6 +97,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         list.setAdapter(adapter);
         list.setItemsCanFocus(false);
         list.setOnItemClickListener(this);
+        list.setOnItemLongClickListener(this);
         list.setEmptyView(findViewById(R.id.list_empty));
 
         // Drawer
@@ -273,6 +276,14 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
 
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         final HostBean host = hosts.get(position);
+        Intent intent = new Intent(ctxt, ActivityPortscan.class);
+        intent.putExtra(EXTRA_WIFI, NetInfo.isConnected(ctxt));
+        intent.putExtra(HostBean.EXTRA, host);
+        startActivityForResult(intent, SCAN_PORT_RESULT);
+    }
+
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+        final HostBean host = hosts.get(position);
         AlertDialog.Builder dialog = new AlertDialog.Builder(ActivityDiscovery.this);
         dialog.setTitle(R.string.discover_action_title);
         dialog.setItems(new CharSequence[] { getString(R.string.discover_action_scan),
@@ -323,6 +334,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
         });
         dialog.setNegativeButton(R.string.btn_discover_cancel, null);
         dialog.show();
+        return true;
     }
 
     static class ViewHolder {
