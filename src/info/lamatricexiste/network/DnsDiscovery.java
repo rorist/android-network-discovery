@@ -5,6 +5,7 @@
 
 package info.lamatricexiste.network;
 
+import info.lamatricexiste.network.Network.HardwareAddress;
 import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Utils.Prefs;
@@ -55,12 +56,10 @@ public class DnsDiscovery extends AbstractDiscovery {
                             host.deviceType = 1;
                         }
                         // Mac Addr
-                        host.hardwareAddress = discover.mHardwareAddress
-                                .getHardwareAddress(host.ipAddress);
+                        host.hardwareAddress = HardwareAddress.getHardwareAddress(host.ipAddress);
                         // NIC vendor
                         try {
-                            host.nicVendor = discover.mHardwareAddress
-                                    .getNicVendor(host.hardwareAddress);
+                            host.nicVendor = HardwareAddress.getNicVendor(host.hardwareAddress);
                         } catch (SQLiteDatabaseCorruptException e) {
                             Log.e(TAG, e.getMessage());
                         }
