@@ -8,6 +8,7 @@ package info.lamatricexiste.network;
 import info.lamatricexiste.network.Network.HardwareAddress;
 import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
+import info.lamatricexiste.network.Network.Ping;
 import info.lamatricexiste.network.Network.RateControl;
 import info.lamatricexiste.network.Network.Reachable;
 import info.lamatricexiste.network.Utils.Prefs;
@@ -154,6 +155,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                     mRateControl.adaptRate();
                 }
                 // Arp Check #1 //FIXME: need to do a req to the host before ?
+                Ping.doPing(host);
                 if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
                     Log.e(TAG, "found using arp #1 "+host);
                     publish(host);
@@ -203,7 +205,9 @@ public class DefaultDiscovery extends AbstractDiscovery {
             final ActivityDiscovery discover = mDiscover.get();
             if (discover != null) {
                 // Mac Addr
-                host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
+                if(!NetInfo.NOMAC.equals(host.hardwareAddress)){
+                    host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
+                }
 
                 // NIC vendor
                 host.nicVendor = HardwareAddress.getNicVendor(host.hardwareAddress);
