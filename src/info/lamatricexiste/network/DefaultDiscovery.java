@@ -30,6 +30,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
 
     private final String TAG = "DefaultDiscovery";
     private final static long TIMEOUT_SHUTDOWN = 10;
+    private final static int THREADS = 10;
     private final int mRateMult = 5; // Number of alive hosts between Rate
     private int pt_move = 2; // 1=backward 2=forward
     private ExecutorService mPool;
@@ -61,52 +62,42 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start
                         + "), end=" + NetInfo.getIpFromLongUnsigned(end) + " (" + end
                         + "), length=" + size);
-                mPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+                mPool = Executors.newFixedThreadPool(THREADS);
+                if (ip <= end && ip >= start) {
+                    Log.i(TAG, "Back and forth scanning");
+                    // gateway
+                    launch(start);
 
-                //try {
-                    if (ip <= end && ip >= start) {
-                        Log.i(TAG, "Back and forth scanning");
-                        // gateway
-                        launch(start);
+                    // hosts
+                    long pt_backward = ip;
+                    long pt_forward = ip + 1;
+                    long size_hosts = size - 1;
 
-                        // hosts
-                        long pt_backward = ip;
-                        long pt_forward = ip + 1;
-                        long size_hosts = size - 1;
-
-                        for (int i = 0; i < size_hosts; i++) {
-                            // Set pointer if of limits
-                            if (pt_backward <= start) {
-                                pt_move = 2;
-                            } else if (pt_forward > end) {
-                                pt_move = 1;
-                            }
-                            // Move back and forth
-                            if (pt_move == 1) {
-                                launch(pt_backward);
-                                pt_backward--;
-                                pt_move = 2;
-                            } else if (pt_move == 2) {
-                                launch(pt_forward);
-                                pt_forward++;
-                                pt_move = 1;
-                            }
+                    for (int i = 0; i < size_hosts; i++) {
+                        // Set pointer if of limits
+                        if (pt_backward <= start) {
+                            pt_move = 2;
+                        } else if (pt_forward > end) {
+                            pt_move = 1;
                         }
-                    } else {
-                        Log.i(TAG, "Sequencial scanning");
-                        for (long i = start; i <= end; i++) {
-                            launch(i);
+                        // Move back and forth
+                        if (pt_move == 1) {
+                            launch(pt_backward);
+                            pt_backward--;
+                            pt_move = 2;
+                        } else if (pt_move == 2) {
+                            launch(pt_forward);
+                            pt_forward++;
+                            pt_move = 1;
                         }
                     }
-                    // FIXME: Test
-                    //mPool.shutdown();
-                    //if (!mPool.awaitTermination(TIMEOUT_SHUTDOWN, TimeUnit.SECONDS)) {
-                    //    mPool.shutdownNow();
-                    //}
-                //} catch (InterruptedException e) {
-                //    Log.e(TAG, "Got Interrupted");
-                //    Thread.currentThread().interrupt();
-                //}
+                } else {
+                    Log.i(TAG, "Sequencial scanning");
+                    for (long i = start; i <= end; i++) {
+                        launch(i);
+                    }
+                }
+                mPool.shutdown(); // Prevent new tasks to be added
             }
         }
         return null;
@@ -230,11 +221,11 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         }
                     }
                     // TODO: NETBIOS
-                    try {
-                        host.hostname = NbtAddress.getByName(addr).getHostName();
-                    } catch (UnknownHostException e) {
-                        Log.i(TAG, e.getMessage());
-                    }
+                    //try {
+                    //    host.hostname = NbtAddress.getByName(addr).getHostName();
+                    //} catch (UnknownHostException e) {
+                    //    Log.i(TAG, e.getMessage());
+                    //}
                 }
             }
         }
