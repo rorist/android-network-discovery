@@ -36,6 +36,7 @@ import android.util.Log;
 public class NetInfo {
     private final String TAG = "NetInfo";
     private static final int BUF = 8 * 1024;
+    private static final String NOIF = "0";
     public static final String NOIP = "0.0.0.0";
     public static final String NOMASK = "255.255.255.255";
     public static final String NOMAC = "00:00:00:00:00:00";
@@ -80,8 +81,9 @@ public class NetInfo {
 
     public void getIp() {
         intf = prefs.getString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
+        Log.e(TAG, "test="+(intf == NOIF));
         try {
-            if (intf == null) {
+            if (intf == Prefs.DEFAULT_INTF || NOIF.equals(intf)) {
                 // Automatic interface selection
                 for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
                         .hasMoreElements();) {
@@ -98,9 +100,9 @@ public class NetInfo {
             }
         } catch (SocketException e) {
             Log.e(TAG, e.getMessage());
-            Editor edit = prefs.edit();
-            edit.putString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
-            edit.commit();
+            //Editor edit = prefs.edit();
+            //edit.putString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
+            //edit.commit();
         }
         getCidr();
     }

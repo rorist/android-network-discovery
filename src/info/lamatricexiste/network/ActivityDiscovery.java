@@ -178,10 +178,14 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             if (mDiscoveryTask != null) {
                 mDiscoveryTask.cancel(true);
             }
+        } else {
+            return;
         }
 
         // Get ip information
         network_ip = NetInfo.getUnsignedLongFromIp(net.ip);
+        Log.e(TAG, "ip="+net.ip);
+        Log.e(TAG, "cidr="+net.cidr);
         if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
             // Custom IP
             network_start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,

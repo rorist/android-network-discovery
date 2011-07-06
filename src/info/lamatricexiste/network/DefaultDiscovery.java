@@ -219,7 +219,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 // NIC vendor
                 host.nicVendor = HardwareAddress.getNicVendor(host.hardwareAddress);
 
-                // Is gateway ? FIXME: Put this direclty in onProgress() -> UI Thread
+                // Is gateway ?
                 if (discover.net.gatewayIp.equals(host.ipAddress)) {
                     host.deviceType = HostBean.TYPE_GATEWAY;
                 }

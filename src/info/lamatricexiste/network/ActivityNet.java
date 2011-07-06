@@ -74,7 +74,7 @@ public abstract class ActivityNet extends Activity {
             if (action != null) {
                 if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                     int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-                    // Log.d(TAG, "WifiState=" + WifiState);
+                    //Log.d(TAG, "WifiState=" + WifiState);
                     switch (WifiState) {
                         case WifiManager.WIFI_STATE_ENABLING:
                             info_in_str = getString(R.string.wifi_enabling);
@@ -95,7 +95,7 @@ public abstract class ActivityNet extends Activity {
 
                 if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) && net.getWifiInfo()) {
                     SupplicantState sstate = net.getSupplicantState();
-                    // Log.d(TAG, "SupplicantState=" + sstate);
+                    //Log.d(TAG, "SupplicantState=" + sstate);
                     if (sstate == SupplicantState.SCANNING) {
                         info_in_str = getString(R.string.wifi_scanning);
                     } else if (sstate == SupplicantState.ASSOCIATING) {
@@ -112,8 +112,10 @@ public abstract class ActivityNet extends Activity {
             // Support Ethernet, with ConnectivityManager.TYPE_ETHER=3
             final NetworkInfo ni = connMgr.getActiveNetworkInfo();
             if (ni != null) {
-                if (ni.getState() == NetworkInfo.State.CONNECTED) {
+                //Log.i(TAG, "NetworkState="+ni.getDetailedState());
+                if (ni.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
                     int type = ni.getType();
+                    //Log.i(TAG, "NetworkType="+type);
                     if (type == ConnectivityManager.TYPE_WIFI) { // WIFI
                         net.getWifiInfo();
                         if (net.ssid != null) {
