@@ -40,6 +40,7 @@ Credits
 
 - Design: oblivioncreations.se
 - Icons: Crystal and Oxygen projects
+- Spanish translation: ghiki
 - Chinese translation: goapk.com
 
 GPLv2 License
