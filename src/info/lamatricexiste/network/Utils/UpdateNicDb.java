@@ -11,6 +11,7 @@ import info.lamatricexiste.network.Network.DownloadFile;
 import info.lamatricexiste.network.Network.NetInfo;
 
 import java.io.IOException;
+import java.lang.NullPointerException;
 import java.lang.ref.WeakReference;
 
 import android.app.Activity;
@@ -85,6 +86,8 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
                 }
             }
         } catch (IOException e) {
+            cancel(true);
+        } catch (NullPointerException e) {
             cancel(true);
         }
         return null;

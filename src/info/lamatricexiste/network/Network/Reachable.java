@@ -7,8 +7,8 @@
 
 package info.lamatricexiste.network.Network;
 
-import java.io.IllegalArgumentException;
 import java.io.IOException;
+import java.lang.IllegalArgumentException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
