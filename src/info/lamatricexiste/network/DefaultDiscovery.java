@@ -29,8 +29,8 @@ import android.util.Log;
 public class DefaultDiscovery extends AbstractDiscovery {
 
     private final String TAG = "DefaultDiscovery";
-    private final static long TIMEOUT_SHUTDOWN = 10;
-    private final static int THREADS = 10;
+    private final static int TIMEOUT_SCAN = 3600; // seconds
+    private final static int THREADS = 10; //FIXME: Test, plz set in options again ?
     private final int mRateMult = 5; // Number of alive hosts between Rate
     private int pt_move = 2; // 1=backward 2=forward
     private ExecutorService mPool;
@@ -97,7 +97,13 @@ public class DefaultDiscovery extends AbstractDiscovery {
                         launch(i);
                     }
                 }
-                mPool.shutdown(); // Prevent new tasks to be added
+                mPool.shutdown();
+                try {
+                    mPool.awaitTermination(TIMEOUT_SCAN, TimeUnit.SECONDS);
+                } catch (InterruptedException e){
+                    Log.e(TAG, e.getMessage());
+                    mPool.shutdownNow();
+                }
             }
         }
         return null;
@@ -146,7 +152,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                     mRateControl.adaptRate();
                 }
                 // Arp Check #1 //FIXME: need to do a req to the host before ?
-                Ping.doPing(host);
+                //Ping.doPing(host);
                 if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
                     Log.e(TAG, "found using arp #1 "+host);
                     publish(host);
