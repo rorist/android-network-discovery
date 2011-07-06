@@ -238,7 +238,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         // Version
         Preference version = (Preference) ps.findPreference(KEY_VERSION);
         try {
-            version.setSummary(getPackageManager().getPackageInfo(ActivityMain.TAG, 0).versionName);
+            version.setSummary(getPackageManager().getPackageInfo(ActivityMain.PKG, 0).versionName);
         } catch (NameNotFoundException e) {
             version.setSummary("0.3.x");
         }
