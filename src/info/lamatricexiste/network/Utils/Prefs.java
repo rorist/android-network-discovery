@@ -69,9 +69,6 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
     public static final String KEY_RESET_SERVICESDB = "resetservicesdb";
     public static final int DEFAULT_RESET_SERVICESDB = 1;
 
-    public static final String KEY_ROOT_INSTALLED = "root_installed";
-    public static final int DEFAULT_ROOT_INSTALLED = 0;
-
     public static final String KEY_METHOD_DISCOVER = "discovery_method";
     public static final String DEFAULT_METHOD_DISCOVER = "0";
 
@@ -159,15 +156,6 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         before_ip_end = prefs.getString(KEY_IP_END, DEFAULT_IP_END);
         before_port_start = prefs.getString(KEY_PORT_START, DEFAULT_PORT_START);
         before_port_end = prefs.getString(KEY_PORT_END, DEFAULT_PORT_END);
-
-        // Root check
-        // if (!AbstractRoot.checkRoot()) {
-        // ListPreference md = (ListPreference)
-        // ps.findPreference(KEY_METHOD_DISCOVER);
-        // if (md != null) {
-        // md.setEnabled(false);
-        // }
-        // }
 
         // Interfaces list
         ListPreference intf = (ListPreference) ps.findPreference(KEY_INTF);

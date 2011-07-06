@@ -62,7 +62,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     private AbstractDiscovery mDiscoveryTask = null;
 
     // private SlidingDrawer mDrawer;
-    // private RootDaemon mRootDaemon = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -121,29 +120,6 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     public void onResume() {
         super.onResume();
     }
-
-    // @Override
-    // public void onStart() {
-    // super.onStart();
-    // // Root Daemon
-    // if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
-    // Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-    // mRootDaemon = new RootDaemon(ActivityDiscovery.this);
-    // mRootDaemon.start();
-    // }
-    // }
-    //
-    // @Override
-    // protected void onStop() {
-    // super.onStop();
-    // // Root Daemon
-    // if (prefs.getString(Prefs.KEY_METHOD_DISCOVER,
-    // Prefs.DEFAULT_METHOD_DISCOVER) == "1") {
-    // if (mRootDaemon != null) {
-    // mRootDaemon.kill();
-    // }
-    // }
-    // }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -399,7 +375,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
                 break;
             case 2:
-                mDiscoveryTask = new RootDiscovery(ActivityDiscovery.this);
+                // Root
                 break;
             case 0:
             default:

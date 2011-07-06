@@ -50,45 +50,6 @@ final public class ActivityMain extends Activity {
         phase2(ctxt);
     }
 
-    // private void phase1(final Context ctxt) {
-    // Check Root and Install Daemon
-    // final RootDaemon rootDaemon = new RootDaemon(this);
-    // if (rootDaemon.hasRoot) {
-    // if (prefs.getInt(Prefs.KEY_ROOT_INSTALLED,
-    // Prefs.DEFAULT_ROOT_INSTALLED) == 0) {
-    // // Install
-    // AlertDialog.Builder d = new AlertDialog.Builder(this);
-    // d.setTitle(R.string.discover_root_title);
-    // d.setMessage(R.string.discover_root_install);
-    // d.setPositiveButton(R.string.btn_yes, new
-    // DialogInterface.OnClickListener() {
-    // public void onClick(DialogInterface dlg, int sumthin) {
-    // rootDaemon.install();
-    // rootDaemon.permission();
-    // Editor edit = prefs.edit();
-    // edit.putInt(Prefs.KEY_ROOT_INSTALLED, 1);
-    // edit.commit();
-    // // rootDaemon.restartActivity();
-    // phase2(ctxt);
-    // }
-    // });
-    // d.setNegativeButton(R.string.btn_no, new
-    // DialogInterface.OnClickListener() {
-    // public void onClick(DialogInterface dlg, int sumthin) {
-    // phase2(ctxt);
-    // }
-    // });
-    // d.show();
-    // } else {
-    // // Root daemon already installed
-    // phase2(ctxt);
-    // }
-    // } else {
-    // // Don't have root
-    // phase2(ctxt);
-    // }
-    // }
-
     private void phase2(final Context ctxt) {
 
         class DbUpdateProbes extends DbUpdate {
