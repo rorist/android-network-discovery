@@ -20,16 +20,22 @@ public class Reachable {
     }
 
     public static int isReachable(int[] ports, InetAddress host, int timeout) {
+        Socket s = new Socket();
+        try {
+            s.bind(null);
+        } catch (Exception  e){
+        }
         for (int i = 0; i < ports.length; i++) {
             try {
-                Socket s = new Socket();
-                s.bind(null);
                 s.connect(new InetSocketAddress(host, ports[i]), timeout);
-                s.close();
                 return ports[i];
             } catch (IOException e) {
             } catch (IllegalArgumentException e) {
             }
+        }
+        try {
+            s.close();
+        } catch (Exception e){
         }
         return -1;
     }
