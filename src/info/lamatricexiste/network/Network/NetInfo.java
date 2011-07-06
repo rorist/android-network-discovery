@@ -81,7 +81,6 @@ public class NetInfo {
 
     public void getIp() {
         intf = prefs.getString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
-        Log.e(TAG, "test="+(intf == NOIF));
         try {
             if (intf == Prefs.DEFAULT_INTF || NOIF.equals(intf)) {
                 // Automatic interface selection
