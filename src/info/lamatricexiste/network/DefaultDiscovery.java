@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import jcifs.netbios.NbtAddress;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Log;
