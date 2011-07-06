@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2009-2011 Aubort Jean-Baptiste (Rorist)
+ Copyright (C) 2011 Dani Mediavilla (ghiki)
+ Licensed under GNU's GPL 2, see README
+-->
+<resources>
+    <string name="app_name">Network Discovery</string>
+    <string name="app_loading">Cargando</string>
+    <string name="btn_yes">Si</string>
+    <string name="btn_no">No</string>
+    <string name="btn_ok">Ok</string>
+    <string name="btn_discover">Descubrir</string>
+    <string name="btn_discover_cancel">Cancelar</string>
+    <string name="btn_export">Exportar</string>
+    <string name="btn_close">Cerrar</string>
+    <string name="btn_scan">Escanear</string>
+    <string name="btn_options">Opciones</string>
+    <string name="btn_back">Atras</string>
+    <string name="btn_info">Info</string>
+    <string name="btn_ports">Puertos</string>
+    <string name="btn_remove">Eliminar</string>
+    
+    <string name="task_db">Descargando y instalando la base de datos %s ...</string>
+    <string name="task_services">Creando base de datos de servicios...\nEsto puede tardar un poco...</string>
+ 
+    <string name="package_missing">%s necesita ser instalado desde el Market!</string>
+    
+    <string name="wifi_enabled">El WiFi está activado</string>
+    <string name="wifi_enabling">El WiFi se está activando</string>
+    <string name="wifi_disabling">El WiFi se está desactivando</string>
+    <string name="wifi_disabled">El WiFi está desactivado</string>
+    <string name="wifi_scanning">El WiFi está escaneando</string>
+    <string name="wifi_associating">El WiFi se está asocuando con %s</string>
+    <string name="wifi_dhcp">Obteniendo dirección IP de %s</string>
+    <string name="wifi_unknown">Estado de WiFi desconocido</string>
+    
+    <string name="net_ip">IP: %1$s/%2$d (%3$s)</string>
+    <string name="net_carrier">PROVEEDOR: %s</string>
+    <string name="net_ssid">SSID: %s</string>
+    <string name="net_mode">MODO: %s</string>
+    <string name="net_mode_wifi">WiFi (%1$s %2$s)</string>
+    <string name="net_mode_mobile">Movil</string>
+    <string name="net_mode_eth">Ethernet (No soportado aún)</string>
+    <string name="net_mode_unknown">Desconocido</string>
+    
+    <string name="discover_start">Descubrimiento iniciado...</string>
+    <string name="discover_finished">Descubrimiento terminado!</string>
+    <string name="discover_canceled">Descubrimiento cancelado!</string>
+    <string name="discover_proxy_title">Error de Proxy</string>
+    <string name="discover_proxy_msg">El descubrimiento ha sido cancelado porque una dirección MAC ha aparecido en múltiples ocasiones, probablemente se encuentre detrás de un proxy.\n\nvaya a su Puerta de Enlace desde su navegador : http://%s</string>
+    <string name="discover_root_title">Instalacion: Root</string>
+    <string name="discover_root_install">Quiere instalar el demonio de escaneo para root?</string>
+    <string name="discover_root_restart">Reiniciando aplicación...</string>
+    <string name="discover_empty">Pulse "Descubrir" para empezar</string>
+    <string name="discover_action_title">Elija una acción</string>
+    <string name="discover_action_scan">Escanear puertos</string>
+    <string name="discover_action_rename">Cambiar nombre</string>
+    <string name="discover_action_saved">Nombre guardado!</string>
+    <string name="discover_action_deleted">Nombre borrado!</string>
+    <string name="discover_myphone_name">MiTelefono</string>
+        
+    <string name="scan_single_title">Escanear IP</string>
+    <string name="scan_single_summary">Introduzca una dirección IP o FQDN para escanear, p.ej. scanme.nmap.org</string>
+    <string name="scan_noport">Ningún puerto abierto encontrado!</string>
+    <string name="scan_noaction">Ninguna acción asociada!</string>
+    <string name="scan_connect">Conectar</string>
+    <string name="scan_start">Escaneo iniciado...</string>
+    <string name="scan_finished">Escaneo terminado!</string>
+    <string name="scan_canceled">Escaneo cancelado!</string>
+    <string name="scan_open">Abierto (%s)</string>
+    <string name="scan_closed">Cerrado (%s)</string>
+    <string name="scan_host_unreachable">Host inaccesible!</string>
+    <string name="scan_banner_title">Puerto %s/tcp</string>
+    
+    <string name="info_time">Tiempo de respuesta:</string>
+    <string name="info_mac">Dirección MAC:</string>
+    <string name="info_nic">Proveedor NIC:</string>
+    <string name="info_ports_open">Puertos abiertos:</string>
+    <string name="info_ports_closed">Puertos cerrados:</string>
+    <string name="info_unknown">Desconocido</string>
+    
+    <string name="export_finished">Archivo guardado!</string>
+    <string name="export_choose">Seleccione destino de archivo</string>
+    <string name="export_save">Guardar</string>
+    <string name="export_exists_title">El archivo ya existe</string>
+    <string name="export_exists_msg">Quiere sobrescribirlo?</string>
+    
+    <string name="help_discovery_title">Descubrimiento de Hosts</string>
+    <string name="help_discovery_content">El método que se utiliza, no necesita tener privilegios de root. En futuras versiones habrá técnicas más avanzadas, una vez que los root estén pulidos.\n\nAquie está su funcionamiento: \n1. Calcula el rango de subred\n2. Iterar a través de IP y consultarlos\n3. En primer lugar, envía un ping ICMP echo a tcp/7 (mediante InetAddress.isReachable())\n4. Si esto no funciona, prueba a conectar() en puertos conocidos, como: 135, 139, 22, 111, 80\n5. Si nada de lo anterior funciona, el host no se descubrirá</string>
+    <string name="help_portscan_title">Escaner de puertos</string>
+    <string name="help_portscan_content">El escaneo de puertos está orientado a eventos, usando el "Selector" de Java y "SocketChannel".\nHay un tiempo de espera de falso al registrar el tiempo en ms en la creación de sockets y comprobar regularmente este valor.\nEl método de escaneo de puertos, como el descubrimiento, utiliza comprobación completa de conexión TCP. (será más detallado en el futuro con características de usuario root.)\n\nUn máximo de 127 sockets son abiertos a la vez, así que esto no siempre es preciso, pero es bastante rápido. Una vez más, una nueva característica está llegando que será adaptar los tiempos entre las solicitudes para organizarlas según el tiempo de respuesta (tipo de software de control de congestión de la red)\n\nUn puerto se considera abierto cuando tcp connect() se efectúa correctamente, cerrado cuando no hay servicio de escucha en el otro extremo, o filtrado cuando el tiempo límite se alcance.</string>
+    <string name="help_links_title">Links</string>
+    <string name="help_links_content">- Escaneo TCP connect: http://nmap.org/book/man-port-scanning-techniques.html#id421401\n\n- Host discovery: http://nmap.org/book/man-host-discovery.html</string>
+    
+    <string name="preferences_help">Ayuda</string>
+    <string name="preferences_export">Exportar</string>
+    <string name="preferences_credits">Créditos</string>
+    <string name="preferences_discover">Descubrimiento</string>
+    <string name="preferences_portscan">Escaner de puertos</string>
+    <string name="preferences_advanced">General</string>
+    
+    <string name="preferences_donate">Donar: Si te gusta esta app, puedes invitarme a una cerveza ;) .</string>
+    <string name="preferences_resolve_name_title">Resolver Hostname</string>
+    <string name="preferences_resolve_name_summary">Usar DNS del sistema para resolver direcciones IP</string>
+    <string name="preferences_vibrate_title">Vibrar</string>
+    <string name="preferences_vibrate_summary">Vibrar cuando el Escaneo se haya completado</string>
+    <string name="preferences_ratecontrol_enable_title">Control de velocidad</string>
+    <string name="preferences_ratecontrol_enable_summary">Activar la detección automática de velocidad</string>
+    <string name="preferences_timeout_discover_title">Velocidad personalizada</string>
+    <string name="preferences_timeout_discover_summary">Velocidad de descubrimiento en milisegundos</string>
+    <string name="preferences_port_start_title">Primer puerto</string>
+    <string name="preferences_port_start_summary">Primer puerto TCP a escanear. 1-65535</string>
+    <string name="preferences_port_end_title">Último puerto</string>
+    <string name="preferences_port_end_summary">Último puerto TCP a escanear. 1-65535</string>
+    <string name="preferences_banner_title">Banners de servicios</string>
+    <string name="preferences_banner_summary">Leer banner desde un socket conectado (ex.: SSH-2.0-OpenSSH_5.1p1)</string>
+    <string name="preferences_timeout_force_title">Tiempo de espera personalizado</string>
+    <string name="preferences_timeout_force_summary">Configurar manualmente tiempo de espera de connect</string>
+    <string name="preferences_timeout_title">Tiempo de espera de connect</string>
+    <string name="preferences_timeout_summary">Tiempo de espera de una conexión a un puerto en milisegundos</string>
+    <string name="preferences_allow_mobile_title">Permitir la detección móvil</string>
+    <string name="preferences_allow_mobile_summary">Escanear a través de EDGE/3G ... por lo general conduce a resultados extraños, si hay alguno</string>
+    <string name="preferences_ssh_user_title">Usuario SSH</string>
+    <string name="preferences_ssh_user_summary">Usuario para la conexión SSH</string>
+    <string name="preferences_threads_title">Subprocesos</string>
+    <string name="preferences_threads_summary">Número máximo de subprocesos a utilizar en el descubrimiento de hosts (1-256)</string>
+    <string name="preferences_resetdb_title">Actualizar base de datos NIC</string>
+    <string name="preferences_resetdb_summary">Vaciar y actualizar la base de datos las direcciones MAC</string>
+    <string name="preferences_resetdb_action">Quiere descargar %1$s ? (~%2$sk)</string>
+    <string name="preferences_resetdb_ok">base de datos actualizada! %s entradas nuevas...</string>
+    <string name="preferences_version_title">Versión</string>
+    <string name="preferences_website_title">Página Web</string>
+    <string name="preferences_email_title">Contacto</string>
+    <string name="preferences_intf_title">Interfaz de red</string>
+    <string name="preferences_intf_summary">Seleccione la interfaz a usar</string>
+    <string name="preferences_discover_method_title">Método de descubrimiento</string>
+    <string name="preferences_discover_method_summary">Cambiar el método de descubrimiento de hosts</string>
+    <string name="preferences_discover_method_title_dialog">Seleccione un método</string>
+    <string name="preferences_ip_start_title">Primera IP</string>
+    <string name="preferences_ip_start_summary">Primera dirección IP a escanear</string>
+    <string name="preferences_ip_end_title">Última IP</string>
+    <string name="preferences_ip_end_summary">Última dirección IP a escanear</string>
+    <string name="preferences_ip_custom_title">Rango de direcciones IP personalizadas</string>
+    <string name="preferences_ip_custom_summary">Configurar manualmente primera/última IP</string>
+    <string name="preferences_cidr_custom_title">CIDR personalizado</string>
+    <string name="preferences_cidr_custom_summary">Configurar el CIDR manualmente (define la subred)</string>
+    <string name="preferences_cidr">Cambiar CIDR</string>
+    
+    <string name="preferences_error1">Error: El primero es mayor que el último!</string>
+    <string name="preferences_error2">Error: El número de subprocesos debe ser entre 1 y 256!</string>
+    <string name="preferences_error3">Error: Transferencia de archivos interrumpida!</string>
+    <string name="preferences_error4">Error: El valor no es una dirección IP válida!</string>
+    
+    <string-array name="method_discover_name">
+        <item>Ping/connect (default)</item>
+        <item>DNS requests</item>
+    </string-array>
+    
+</resources>
