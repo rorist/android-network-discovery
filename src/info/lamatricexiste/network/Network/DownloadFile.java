@@ -50,6 +50,11 @@ public class DownloadFile {
         httpclient = new DefaultHttpClient();
         httpclient.getParams().setParameter("http.useragent", USERAGENT + version);
         InputStream in = openURL(url);
+        if(in == null){
+            Log.e(TAG, "Unable to download: " + url);
+            return;
+        }
+
         final ReadableByteChannel inputChannel = Channels.newChannel(in);
         final WritableByteChannel outputChannel = Channels.newChannel(out);
 
