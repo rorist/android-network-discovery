@@ -69,30 +69,30 @@ public class HardwareAddress {
     }
 
     public static String getNicVendor(String hw) throws SQLiteDatabaseCorruptException {
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null, SQLiteDatabase.OPEN_READONLY | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         String ni = null;
-        if (db != null) {
-            // Db request
-            try {
-                if (db.isOpen()) {
-                    Cursor c = db.rawQuery(REQ, new String[] { hw.replace(":", "")
-                            .substring(0, 6).toUpperCase() });
-                    if (c.moveToFirst()) {
-                        ni = c.getString(0);
+        try {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(Db.PATH + Db.DB_NIC, null, SQLiteDatabase.OPEN_READONLY | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+            if (db != null) {
+                // Db request
+                    if (db.isOpen()) {
+                        Cursor c = db.rawQuery(REQ, new String[] { hw.replace(":", "")
+                                .substring(0, 6).toUpperCase() });
+                        if (c.moveToFirst()) {
+                            ni = c.getString(0);
+                        }
+                        c.close();
                     }
-                    c.close();
+                    db.close();
                 }
-                db.close();
-            } catch (IllegalStateException e) {
-                Log.e(TAG, e.getMessage());
-            } catch (SQLiteException e) {
-                Log.e(TAG, e.getMessage());
-                // FIXME: Reset db
-                //Context ctxt = d.getApplicationContext();
-                //Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-                //edit.putInt(Prefs.KEY_RESET_NICDB, 1);
-                //edit.commit();
-            }
+        } catch (IllegalStateException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (SQLiteException e) {
+            Log.e(TAG, e.getMessage());
+            // FIXME: Reset db
+            //Context ctxt = d.getApplicationContext();
+            //Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
+            //edit.putInt(Prefs.KEY_RESET_NICDB, 1);
+            //edit.commit();
         }
         return ni;
     }
