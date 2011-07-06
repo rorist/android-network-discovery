@@ -267,7 +267,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
 
                         final View v = mInflater.inflate(R.layout.dialog_edittext, null);
                         final EditText txt = (EditText) v.findViewById(R.id.edittext);
-                        txt.setText(Save.getCustomName(host.hardwareAddress));
+                        txt.setText(Save.getCustomName(host));
 
                         final AlertDialog.Builder rename = new AlertDialog.Builder(
                                 ActivityDiscovery.this);

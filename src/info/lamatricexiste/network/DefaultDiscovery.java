@@ -118,8 +118,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
     }
 
     private void launch(long i) {
-        //mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
-        mPool.submit(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
+        mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
     }
 
     private int getRate() {
@@ -151,8 +150,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 if (doRateControl && mRateControl.indicator != null && hosts_done % mRateMult == 0) {
                     mRateControl.adaptRate();
                 }
-                // Arp Check #1 //FIXME: need to do a req to the host before ?
-                //Ping.doPing(host);
+                // Arp Check #1
                 if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
                     Log.e(TAG, "found using arp #1 "+host);
                     publish(host);
@@ -169,11 +167,23 @@ public class DefaultDiscovery extends AbstractDiscovery {
                     }
                     return;
                 }
+                // Arp Check #2
+                if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
+                    Log.e(TAG, "found using arp #2 "+host);
+                    publish(host);
+                    return;
+                }
                 // Custom check
                 int port;
                 // TODO: Get ports from options
                 if ((port = Reachable.isReachable(h, getRate())) > -1) {
                     Log.v(TAG, "used Network.Reachable object, "+host+" port=" + port);
+                    publish(host);
+                    return;
+                }
+                // Arp Check #3
+                if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
+                    Log.e(TAG, "found using arp #3 "+host);
                     publish(host);
                     return;
                 }
@@ -216,7 +226,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
 
                 // FQDN
                 // Static
-                if ((host.hostname = Save.getCustomName(host.hardwareAddress)) == null) {
+                if ((host.hostname = Save.getCustomName(host)) == null) {
                     // DNS
                     if (discover.prefs.getBoolean(Prefs.KEY_RESOLVE_NAME,
                             Prefs.DEFAULT_RESOLVE_NAME) == true) {
