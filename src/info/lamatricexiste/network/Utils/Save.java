@@ -5,6 +5,8 @@
 
 package info.lamatricexiste.network.Utils;
 
+import info.lamatricexiste.network.Network.HostBean;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -18,15 +20,17 @@ public class Save {
     private static final String DELETE = "delete from nic where mac=?";
     private static SQLiteDatabase db;
 
-    public static String getCustomName(String mac) {
+    public static String getCustomName(HostBean host) {
         db = Db.openDb(Db.DB_SAVES);
         String name = null;
         Cursor c = null;
         try {
             if (db != null && db.isOpen()) {
-                c = db.rawQuery(SELECT, new String[] { mac.replace(":", "").toUpperCase() });
+                c = db.rawQuery(SELECT, new String[] { host.hardwareAddress.replace(":", "").toUpperCase() });
                 if (c.moveToFirst()) {
                     name = c.getString(0);
+                } else if(host.hostname != null) {
+                    name = host.hostname;
                 }
             }
         } catch (SQLiteException e) {
