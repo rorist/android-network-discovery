@@ -7,6 +7,7 @@
 
 package info.lamatricexiste.network.Network;
 
+import java.io.IllegalArgumentException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -27,6 +28,7 @@ public class Reachable {
                 s.close();
                 return ports[i];
             } catch (IOException e) {
+            } catch (IllegalArgumentException e) {
             }
         }
         return -1;
