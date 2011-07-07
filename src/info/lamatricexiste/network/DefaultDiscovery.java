@@ -10,13 +10,15 @@ import info.lamatricexiste.network.Network.HostBean;
 import info.lamatricexiste.network.Network.NetInfo;
 import info.lamatricexiste.network.Network.Ping;
 import info.lamatricexiste.network.Network.RateControl;
-import info.lamatricexiste.network.Network.Reachable;
 import info.lamatricexiste.network.Utils.Prefs;
 import info.lamatricexiste.network.Utils.Save;
 
 import java.io.IOException;
+import java.lang.IllegalArgumentException;
+import java.net.InetSocketAddress;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +30,7 @@ import android.util.Log;
 public class DefaultDiscovery extends AbstractDiscovery {
 
     private final String TAG = "DefaultDiscovery";
+    private final static int[] DPORTS = { 139, 445, 22, 80 };
     private final static int TIMEOUT_SCAN = 3600; // seconds
     private final static int THREADS = 10; //FIXME: Test, plz set in options again ?
     private final int mRateMult = 5; // Number of alive hosts between Rate
@@ -175,11 +178,29 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 // Custom check
                 int port;
                 // TODO: Get ports from options
+                Socket s = new Socket();
+                for (int i = 0; i < DPORTS.length; i++) {
+                    try {
+                        s.bind(null);
+                        s.connect(new InetSocketAddress(host, DPORTS[i]), getRate());
+                        Log.v(TAG, "found using TCP connect "+host+" on port=" + DPORTS[i]);
+                    } catch (IOException e) {
+                    } catch (IllegalArgumentException e) {
+                    } finally {
+                        try {
+                            s.close();
+                        } catch (Exception e){
+                        }
+                    }
+                }
+
+                /*
                 if ((port = Reachable.isReachable(h, getRate())) > -1) {
                     Log.v(TAG, "used Network.Reachable object, "+host+" port=" + port);
                     publish(host);
                     return;
                 }
+                */
                 // Arp Check #3
                 if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
                     Log.e(TAG, "found using arp #3 "+host);
