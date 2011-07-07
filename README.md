@@ -40,6 +40,7 @@ Credits
 
 - Design: oblivioncreations.se
 - Icons: Crystal and Oxygen projects
+- German translation, bugfixes: SubOptimal
 - Spanish translation: ghiki
 - Chinese translation: goapk.com
 
