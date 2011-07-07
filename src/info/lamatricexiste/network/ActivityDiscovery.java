@@ -127,7 +127,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 android.R.drawable.ic_menu_mylocation);
         menu.add(0, ActivityDiscovery.MENU_EXPORT, 0, R.string.preferences_export).setIcon(
                 android.R.drawable.ic_menu_save);
-        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, "Options").setIcon(
+        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, R.string.preferences_options).setIcon(
                 android.R.drawable.ic_menu_preferences);
         menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
