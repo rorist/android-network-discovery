@@ -216,6 +216,10 @@ public class DefaultDiscovery extends AbstractDiscovery {
     }
 
     private void publish(final String addr) {
+        if(isCancelled()){
+            return;
+        }
+
         hosts_done++;
 
         if (addr == null) {

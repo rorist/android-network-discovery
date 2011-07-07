@@ -37,9 +37,12 @@ public class Db {
     }
 
     public static SQLiteDatabase openDb(String db_name) {
+        return openDb(db_name, SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+    }
+
+    public static SQLiteDatabase openDb(String db_name, int flags) {
         try {
-            return SQLiteDatabase.openDatabase(PATH + db_name, null,
-                    SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+            return SQLiteDatabase.openDatabase(PATH + db_name, null, flags);
         } catch (SQLiteException e) {
             Log.e(TAG, e.getMessage());
         }

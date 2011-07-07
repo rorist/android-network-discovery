@@ -7,6 +7,8 @@ package info.lamatricexiste.network.Utils;
 
 import info.lamatricexiste.network.Network.HostBean;
 
+import java.lang.IllegalStateException;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -21,10 +23,10 @@ public class Save {
     private static SQLiteDatabase db;
 
     public static String getCustomName(HostBean host) {
-        db = Db.openDb(Db.DB_SAVES);
         String name = null;
         Cursor c = null;
         try {
+            db = Db.openDb(Db.DB_SAVES, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
             if (db != null && db.isOpen()) {
                 c = db.rawQuery(SELECT, new String[] { host.hardwareAddress.replace(":", "").toUpperCase() });
                 if (c.moveToFirst()) {
@@ -34,6 +36,8 @@ public class Save {
                 }
             }
         } catch (SQLiteException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (IllegalStateException e) {
             Log.e(TAG, e.getMessage());
         } finally {
             if (c != null) {
@@ -47,7 +51,7 @@ public class Save {
     }
 
     public static void setCustomName(final String name, final String mac) {
-        db = Db.openDb(Db.DB_SAVES);
+        db = Db.openDb(Db.DB_SAVES, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READWRITE);
         try {
             if (db.isOpen()) {
                 db.execSQL(INSERT, new String[] { name, mac.replace(":", "").toUpperCase() });
@@ -62,7 +66,7 @@ public class Save {
     }
 
     public static boolean removeCustomName(String mac) {
-        db = Db.openDb(Db.DB_SAVES);
+        db = Db.openDb(Db.DB_SAVES, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READWRITE);
         try {
             if (db.isOpen()) {
                 db.execSQL(DELETE, new String[] { mac.replace(":", "").toUpperCase() });
