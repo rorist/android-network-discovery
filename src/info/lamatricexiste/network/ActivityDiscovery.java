@@ -175,9 +175,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             currentNetwork = net.hashCode();
 
             // Cancel running tasks
-            if (mDiscoveryTask != null) {
-                mDiscoveryTask.cancel(true);
-            }
+            cancelTasks();
         } else {
             return;
         }

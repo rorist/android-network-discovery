@@ -113,13 +113,18 @@ public class DefaultDiscovery extends AbstractDiscovery {
     @Override
     protected void onCancelled() {
         if (mPool != null) {
-            mPool.shutdownNow();
+            synchronized (mPool) {
+                mPool.shutdownNow();
+                // FIXME: Prevents some task to end (and close the Save DB)
+            }
         }
         super.onCancelled();
     }
 
     private void launch(long i) {
-        mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
+        if(!mPool.isShutdown()) {
+            mPool.execute(new CheckRunnable(NetInfo.getIpFromLongUnsigned(i)));
+        }
     }
 
     private int getRate() {
@@ -216,10 +221,6 @@ public class DefaultDiscovery extends AbstractDiscovery {
     }
 
     private void publish(final String addr) {
-        if(isCancelled()){
-            return;
-        }
-
         hosts_done++;
 
         if (addr == null) {
