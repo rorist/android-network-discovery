@@ -46,7 +46,7 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
             final Activity d = mActivity.get();
             if (d != null) {
                 final AlertDialog.Builder dialog = new AlertDialog.Builder(d);
-                dialog.setMessage(R.string.preferences_resetdb_action);
+                dialog.setMessage(d.getString(R.string.preferences_resetdb_action, Db.DB_NIC, 253));
                 dialog.setPositiveButton(R.string.btn_yes, new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         if (!getStatus().equals(Status.RUNNING)) {
