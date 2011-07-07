@@ -163,6 +163,9 @@ final public class ActivityMain extends Activity {
                     NetInfo net = new NetInfo(d.getApplicationContext());
                     ContentValues values = new ContentValues();
                     values.put("_id", 0);
+                    if (net.macAddress == null) {
+                        net.macAddress = NetInfo.NOMAC;
+                    }
                     values.put("mac", net.macAddress.replace(":", "").toUpperCase());
                     values.put("name", d.getString(R.string.discover_myphone_name));
                     SQLiteDatabase data = Db.openDb(Db.DB_SAVES);
