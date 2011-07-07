@@ -34,7 +34,7 @@ import android.widget.Toast;
 public class UpdateNicDb extends AsyncTask<Void, String, Void> {
 
     private final static String TAG = "UpdateNicDb";
-    private final static String DB_REMOTE = "http://download.lamatricexiste.info/oui.db";
+    private final static String DB_REMOTE = "http://download.lamatricexiste.info/nic.db.gz";
     private final static String REQ = "select count(mac) from oui";
     private int nb;
     private ProgressDialog progress;
