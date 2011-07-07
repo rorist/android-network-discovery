@@ -104,7 +104,6 @@ public class DefaultDiscovery extends AbstractDiscovery {
                     mPool.awaitTermination(TIMEOUT_SCAN, TimeUnit.SECONDS);
                 } catch (InterruptedException e){
                     Log.e(TAG, e.getMessage());
-                    mPool.shutdownNow();
                 }
             }
         }
@@ -212,7 +211,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
             } catch (IOException e) {
                 publish((String) null);
                 Log.e(TAG, e.getMessage());
-            }
+            } 
         }
     }
 
