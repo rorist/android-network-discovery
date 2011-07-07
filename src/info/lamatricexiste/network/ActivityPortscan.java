@@ -221,7 +221,7 @@ final public class ActivityPortscan extends TabActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
-        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, "Options").setIcon(
+        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, R.string.btn_options).setIcon(
                 android.R.drawable.ic_menu_preferences);
         menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
