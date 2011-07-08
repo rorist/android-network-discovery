@@ -15,12 +15,10 @@ import android.util.Log;
 
 public class RateControl {
 
-    // TODO: Calculate a rounded up value from experiments in different networks
     private final String TAG = "RateControl";
-    private static final int BUF = 8 * 1024;
+    private static final int BUF = 512;
     private final int REACH_TIMEOUT = 5000;
-    private final String CMD = "/system/bin/ping";
-    private final String ARG = " -A -q -n -w 3 -W 2 -c 3";
+    private final String CMD = "/system/bin/ping -A -q -n -w 3 -W 2 -c 3 ";
     private final String PTN = "^rtt min\\/avg\\/max\\/mdev = [0-9\\.]+\\/[0-9\\.]+\\/([0-9\\.]+)\\/[0-9\\.]+ ms.*";
     private Pattern mPattern;
     private String line;
@@ -50,7 +48,7 @@ public class RateControl {
         Matcher matcher;
         try {
             // TODO: Reduce allocation
-            Process proc = Runtime.getRuntime().exec(CMD + ARG + " " + host);
+            final Process proc = Runtime.getRuntime().exec(CMD + host);
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()), BUF);
             while ((line = reader.readLine()) != null) {
                 matcher = mPattern.matcher(line);
