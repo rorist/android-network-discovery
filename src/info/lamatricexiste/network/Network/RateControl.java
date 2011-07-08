@@ -6,6 +6,7 @@
 package info.lamatricexiste.network.Network;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.regex.Matcher;
@@ -44,10 +45,10 @@ public class RateControl {
     }
 
     private int getAvgResponseTime(String host) {
+        // TODO: Reduce allocation
         BufferedReader reader = null;
         Matcher matcher;
         try {
-            // TODO: Reduce allocation
             final Process proc = Runtime.getRuntime().exec(CMD + host);
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()), BUF);
             while ((line = reader.readLine()) != null) {
@@ -61,9 +62,6 @@ public class RateControl {
         } catch (Exception e) {
             Log.e(TAG, "Can't use native ping: " + e.getMessage());
             try {
-                if (reader != null) {
-                    reader.close();
-                }
                 final long start = System.nanoTime();
                 if (InetAddress.getByName(host).isReachable(REACH_TIMEOUT)) {
                     Log.i(TAG, "Using Java ICMP request instead ...");
@@ -71,6 +69,13 @@ public class RateControl {
                 }
             } catch (Exception e1) {
                 Log.e(TAG, e1.getMessage());
+            }
+        } finally {
+            try {
+            if (reader != null) {
+                reader.close();
+            }
+            } catch(IOException e){
             }
         }
         return rate;
