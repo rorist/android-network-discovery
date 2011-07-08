@@ -16,7 +16,6 @@ public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> 
     protected int hosts_done = 0;
     final protected WeakReference<ActivityDiscovery> mDiscover;
 
-    // TODO: Adaptiv value or changeable by Prefs
     protected long ip;
     protected long start = 0;
     protected long end = 0;
