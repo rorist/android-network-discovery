@@ -36,6 +36,10 @@ import android.util.Log;
 public class NetInfo {
     private final String TAG = "NetInfo";
     private static final int BUF = 8 * 1024;
+    private static final String CMD_IP = " -f inet addr show %s";
+    private static final String PTN_IP1 = "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global %s$";
+    private static final String PTN_IP2 = "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global %s$"; // FIXME: Merge with PTN_IP1
+    private static final String PTN_IF = "^%s: ip [0-9\\.]+ mask ([0-9\\.]+) flags.*";
     private static final String NOIF = "0";
     public static final String NOIP = "0.0.0.0";
     public static final String NOMASK = "255.255.255.255";
@@ -129,17 +133,13 @@ public class NetInfo {
             String match;
             // Running ip tools
             try {
-                if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show " + intf,
-                        "\\s*inet [0-9\\.]+\\/([0-9]+) brd [0-9\\.]+ scope global " + intf + "$")) != null) {
+                if ((match = runCommand("/system/xbin/ip", String.format(CMD_IP, intf), String.format(PTN_IP1, intf))) != null) {
                     cidr = Integer.parseInt(match);
                     return;
-                } else if ((match = runCommand("/system/xbin/ip", "/system/xbin/ip -f inet addr show "
-                        + intf, "\\s*inet [0-9\\.]+ peer [0-9\\.]+\\/([0-9]+) scope global " + intf
-                        + "$")) != null) {
+                } else if ((match = runCommand("/system/xbin/ip", String.format(CMD_IP, intf), String.format(PTN_IP2, intf))) != null) {
                     cidr = Integer.parseInt(match);
                     return;
-                } else if ((match = runCommand("/system/bin/ifconfig", "/system/bin/ifconfig " + intf,
-                        "^" + intf + ": ip [0-9\\.]+ mask ([0-9\\.]+) flags.*")) != null) {
+                } else if ((match = runCommand("/system/bin/ifconfig", " " + intf, String.format(PTN_IF, intf))) != null) {
                     cidr = IpToCidr(match);
                     return;
                 } else {
@@ -152,17 +152,16 @@ public class NetInfo {
     }
 
     // FIXME: Factorize, this isn't a generic runCommand()
-    private String runCommand(String path, String cmd, String ptrn) {
-        final File file = new File(path);
+    private String runCommand(String path, String cmd, String ptn) {
         try {
-            if (file.exists() == true) {
+            if (new File(path).exists() == true) {
                 String line;
                 Matcher matcher;
-                Process p = Runtime.getRuntime().exec(cmd);
-                BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()),
-                        BUF);
+                Pattern ptrn = Pattern.compile(ptn);
+                Process p = Runtime.getRuntime().exec(path + cmd);
+                BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()), BUF);
                 while ((line = r.readLine()) != null) {
-                    matcher = Pattern.compile(ptrn).matcher(line);
+                    matcher = ptrn.matcher(line);
                     if (matcher.matches()) {
                         return matcher.group(1);
                     }
