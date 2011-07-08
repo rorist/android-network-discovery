@@ -143,39 +143,45 @@ public class DefaultDiscovery extends AbstractDiscovery {
     }
 
     private class CheckRunnable implements Runnable {
-        private String host;
+        private String addr;
 
-        CheckRunnable(String host) {
-            this.host = host;
+        CheckRunnable(String addr) {
+            this.addr = addr;
         }
 
         public void run() {
+            // Create host object
+            final HostBean host = new HostBean();
+            host.responseTime = getRate();
+            host.ipAddress = addr;
             try {
-                InetAddress h = InetAddress.getByName(host);
+                InetAddress h = InetAddress.getByName(addr);
                 // Rate control check
                 if (doRateControl && mRateControl.indicator != null && hosts_done % mRateMult == 0) {
                     mRateControl.adaptRate();
                 }
                 // Arp Check #1
-                if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
-                    Log.e(TAG, "found using arp #1 "+host);
+                host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
+                if(!NetInfo.NOMAC.equals(host.hardwareAddress)){
+                    Log.e(TAG, "found using arp #1 "+addr);
                     publish(host);
                     return;
                 }
                 // Native InetAddress check
                 if (h.isReachable(getRate())) {
-                    Log.e(TAG, "found using InetAddress ping "+host);
+                    Log.e(TAG, "found using InetAddress ping "+addr);
                     publish(host);
                     // Set indicator and get a rate
                     if (doRateControl && mRateControl.indicator == null) {
-                        mRateControl.indicator = host;
+                        mRateControl.indicator = addr;
                         mRateControl.adaptRate();
                     }
                     return;
                 }
                 // Arp Check #2
-                if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
-                    Log.e(TAG, "found using arp #2 "+host);
+                host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
+                if(!NetInfo.NOMAC.equals(host.hardwareAddress)){
+                    Log.e(TAG, "found using arp #2 "+addr);
                     publish(host);
                     return;
                 }
@@ -186,8 +192,8 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 for (int i = 0; i < DPORTS.length; i++) {
                     try {
                         s.bind(null);
-                        s.connect(new InetSocketAddress(host, DPORTS[i]), getRate());
-                        Log.v(TAG, "found using TCP connect "+host+" on port=" + DPORTS[i]);
+                        s.connect(new InetSocketAddress(addr, DPORTS[i]), getRate());
+                        Log.v(TAG, "found using TCP connect "+addr+" on port=" + DPORTS[i]);
                     } catch (IOException e) {
                     } catch (IllegalArgumentException e) {
                     } finally {
@@ -200,44 +206,40 @@ public class DefaultDiscovery extends AbstractDiscovery {
 
                 /*
                 if ((port = Reachable.isReachable(h, getRate())) > -1) {
-                    Log.v(TAG, "used Network.Reachable object, "+host+" port=" + port);
+                    Log.v(TAG, "used Network.Reachable object, "+addr+" port=" + port);
                     publish(host);
                     return;
                 }
                 */
                 // Arp Check #3
-                if(!NetInfo.NOMAC.equals(HardwareAddress.getHardwareAddress(host))){
-                    Log.e(TAG, "found using arp #3 "+host);
+                host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
+                if(!NetInfo.NOMAC.equals(host.hardwareAddress)){
+                    Log.e(TAG, "found using arp #3 "+addr);
                     publish(host);
                     return;
                 }
-                publish((String) null);
+                publish(null);
 
             } catch (IOException e) {
-                publish((String) null);
+                publish(null);
                 Log.e(TAG, e.getMessage());
             } 
         }
     }
 
-    private void publish(final String addr) {
+    private void publish(final HostBean host) {
         hosts_done++;
-
-        if (addr == null) {
+        if(host == null){
             publishProgress((HostBean) null);
-            return;
+            return; 
         }
-
-        final HostBean host = new HostBean();
-        host.ipAddress = addr;
-        host.responseTime = getRate();
 
         if (mDiscover != null) {
             final ActivityDiscovery discover = mDiscover.get();
             if (discover != null) {
-                // Mac Addr
-                if(!NetInfo.NOMAC.equals(host.hardwareAddress)){
-                    host.hardwareAddress = HardwareAddress.getHardwareAddress(addr);
+                // Mac Addr not already detected
+                if(NetInfo.NOMAC.equals(host.hardwareAddress)){
+                    host.hardwareAddress = HardwareAddress.getHardwareAddress(host.ipAddress);
                 }
 
                 // NIC vendor
@@ -255,7 +257,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
                     if (discover.prefs.getBoolean(Prefs.KEY_RESOLVE_NAME,
                             Prefs.DEFAULT_RESOLVE_NAME) == true) {
                         try {
-                            host.hostname = (InetAddress.getByName(addr)).getCanonicalHostName();
+                            host.hostname = (InetAddress.getByName(host.ipAddress)).getCanonicalHostName();
                         } catch (UnknownHostException e) {
                             Log.e(TAG, e.getMessage());
                         }

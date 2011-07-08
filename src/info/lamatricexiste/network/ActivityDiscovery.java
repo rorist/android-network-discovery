@@ -342,6 +342,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
             } else {
                 holder.host.setText(host.ipAddress);
             }
+            Log.e(TAG, "vendor="+host.nicVendor);
             if (!host.hardwareAddress.equals(NetInfo.NOMAC)) {
                 holder.mac.setText(host.hardwareAddress);
                 if(host.nicVendor != null){
