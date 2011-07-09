@@ -80,7 +80,12 @@ public class NetInfo {
 
     @Override
     public int hashCode() {
-        return 42 + intf.hashCode() + ip.hashCode() + cidr;
+        int ip_custom = prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM) ? 1:0;
+        int ip_start = prefs.getString(Prefs.KEY_IP_START, Prefs.DEFAULT_IP_START).hashCode();
+        int ip_end = prefs.getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END).hashCode();
+        int cidr_custom = prefs.getBoolean(Prefs.KEY_CIDR_CUSTOM, Prefs.DEFAULT_CIDR_CUSTOM) ? 1:0;
+        int cidr = prefs.getString(Prefs.KEY_CIDR, Prefs.DEFAULT_CIDR).hashCode();
+        return 42 + intf.hashCode() + ip.hashCode() + cidr + ip_custom + ip_start + ip_end + cidr_custom + cidr;
     }
 
     public void getIp() {

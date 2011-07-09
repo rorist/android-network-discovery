@@ -11,7 +11,7 @@ import android.os.Vibrator;
 
 public abstract class AbstractDiscovery extends AsyncTask<Void, HostBean, Void> {
 
-    // private final String TAG = "DnsDiscovery";
+    //private final String TAG = "AbstractDiscovery";
 
     protected int hosts_done = 0;
     final protected WeakReference<ActivityDiscovery> mDiscover;
