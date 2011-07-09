@@ -202,10 +202,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                 network_start = (network_ip >> shift << shift);
                 network_end = (network_start | ((1 << shift) - 1));
             }
-        }
-
-        // Reset ip start-end (is it really convenient ?)
-        if (!prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
+            // Reset ip start-end (is it really convenient ?)
             Editor edit = prefs.edit();
             edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(network_start));
             edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(network_end));
