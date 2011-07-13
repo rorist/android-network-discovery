@@ -52,8 +52,9 @@ import android.widget.Toast;
 
 final public class ActivityPortscan extends TabActivity {
 
-    public static final String REQ_SERVICE = "select service from services where port=? limit 1";
-    public static final String REQ_PROBES = "select service, regex from probes";
+    private static final String REQ_SERVICE = "select service from services where port=? limit 1";
+    private static final String REQ_PROBES = "select service, regex from probes";
+    private static final int PROGRESS_MAX = 10000;
     private final String TAG = "ActivityPortscan";
     private final String PLACEHOLDER = "placeholder";
     private Context ctxt;
@@ -357,13 +358,9 @@ final public class ActivityPortscan extends TabActivity {
             search = "market://search?q=pname:org.connectbot";
             intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("telnet://" + host.ipAddress + ":" + port));
-        } else if (service.equals("http")) {
+        } else if (service.equals("http") || service.equals("https")) {
             intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://"
-                    + (host.hostname != null ? host.hostname : host.ipAddress) + ":" + port));
-        } else if (service.equals("https")) {
-            intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://"
+            intent.setData(Uri.parse(service + "://"
                     + (host.hostname != null ? host.hostname : host.ipAddress) + ":" + port));
         } else {
             makeToast(R.string.scan_noaction);
@@ -473,7 +470,7 @@ final public class ActivityPortscan extends TabActivity {
                     }
                 }
                 progress_current++;
-                setProgress(progress_current * 10000 / nb_port);
+                setProgress(progress_current * PROGRESS_MAX / nb_port);
             }
         }
 
@@ -607,7 +604,7 @@ final public class ActivityPortscan extends TabActivity {
         // Reset scan
         setProgressBarVisibility(false);
         setProgressBarIndeterminateVisibility(false);
-        setProgress(10000);
+        setProgress(PROGRESS_MAX);
         btn_scan.setText(R.string.btn_scan);
         btn_scan.setCompoundDrawablesWithIntrinsicBounds(R.drawable.discover, 0, 0, 0);
         btn_scan.setOnClickListener(new View.OnClickListener() {

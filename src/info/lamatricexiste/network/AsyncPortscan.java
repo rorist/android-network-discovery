@@ -74,7 +74,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
     protected AsyncPortscan(Activity activity, String host, int _rate) {
         ipAddr = host;
         rate = _rate;
-        TIMEOUT_CONNECT = rate * 1000000;
+        TIMEOUT_CONNECT = rate * 1000000; // ms to ns
 
         // Preferences
         WeakReference<Activity> mActivity = new WeakReference<Activity>(activity);
