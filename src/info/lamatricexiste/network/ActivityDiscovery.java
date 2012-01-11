@@ -394,6 +394,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
     }
 
     public void stopDiscovering() {
+        Log.e(TAG, "stopDiscovering()");
         mDiscoveryTask = null;
         setButtonOn(btn_discover, R.drawable.discover);
         btn_discover.setOnClickListener(new View.OnClickListener() {
