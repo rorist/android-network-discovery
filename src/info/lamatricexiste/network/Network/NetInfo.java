@@ -99,10 +99,11 @@ public class NetInfo {
         if (ni != null) {
             for (Enumeration<InetAddress> nis = ni.getInetAddresses(); nis.hasMoreElements();) {
                 InetAddress ia = nis.nextElement();
+                Log.e(TAG, "if="+ni.getName()+", ip="+ia.getHostAddress());
                 if (!ia.isLoopbackAddress()) {
                     if (ia instanceof Inet6Address) {
                         Log.i(TAG, "IPv6 detected and not supported yet!");
-                        return NOIP;
+                        continue;
                     }
                     return ia.getHostAddress();
                 }
