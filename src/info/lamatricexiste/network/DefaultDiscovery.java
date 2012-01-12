@@ -100,6 +100,18 @@ public class DefaultDiscovery extends AbstractDiscovery {
                     }
                 }
                 mPool.shutdown();
+                try {
+                    if(!mPool.awaitTermination(TIMEOUT_SCAN, TimeUnit.SECONDS)){
+                        mPool.shutdownNow();
+                        if(!mPool.awaitTermination(TIMEOUT_SCAN, TimeUnit.SECONDS)){
+                            Log.e(TAG, "Pool did not terminate");
+                        }
+                    }
+                } catch (InterruptedException e){
+                    Log.e(TAG, e.getMessage());
+                    mPool.shutdownNow();
+                    Thread.currentThread().interrupt();
+                }
             }
         }
         return null;
