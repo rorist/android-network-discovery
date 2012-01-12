@@ -22,18 +22,22 @@ public class Save {
     private static final String DELETE = "delete from nic where mac=?";
     private static SQLiteDatabase db;
 
-    public static String getCustomName(HostBean host) {
+    public void closeDb(){
+        if(db != null && db.isOpen()){
+            db.close();
+        }
+    }
+
+    public synchronized String getCustomName(HostBean host) {
         String name = null;
         Cursor c = null;
         try {
-            db = Db.openDb(Db.DB_SAVES, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
-            if (db != null && db.isOpen()) {
-                c = db.rawQuery(SELECT, new String[] { host.hardwareAddress.replace(":", "").toUpperCase() });
-                if (c.moveToFirst()) {
-                    name = c.getString(0);
-                } else if(host.hostname != null) {
-                    name = host.hostname;
-                }
+            db = getDb();
+            c = db.rawQuery(SELECT, new String[] { host.hardwareAddress.replace(":", "").toUpperCase() });
+            if (c.moveToFirst()) {
+                name = c.getString(0);
+            } else if(host.hostname != null) {
+                name = host.hostname;
             }
         } catch (SQLiteException e) {
             Log.e(TAG, e.getMessage());
@@ -43,14 +47,11 @@ public class Save {
             if (c != null) {
                 c.close();
             }
-            if (db != null) {
-                db.close();
-            }
         }
         return name;
     }
 
-    public static void setCustomName(final String name, final String mac) {
+    public void setCustomName(final String name, final String mac) {
         db = Db.openDb(Db.DB_SAVES, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READWRITE);
         try {
             if (db.isOpen()) {
@@ -59,13 +60,11 @@ public class Save {
         } catch (SQLiteException e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            if (db != null) {
-                db.close();
-            }
+            closeDb();
         }
     }
 
-    public static boolean removeCustomName(String mac) {
+    public boolean removeCustomName(String mac) {
         db = Db.openDb(Db.DB_SAVES, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READWRITE);
         try {
             if (db.isOpen()) {
@@ -77,9 +76,15 @@ public class Save {
             Log.e(TAG, e.getMessage());
             return false;
         } finally {
-            if (db != null) {
-                db.close();
-            }
+            closeDb();
         }
+    }
+
+    private static synchronized SQLiteDatabase getDb(){
+        if(db == null || !db.isOpen()) {
+            // FIXME: read only ?
+            db = Db.openDb(Db.DB_SAVES, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
+        }
+        return db;
     }
 }

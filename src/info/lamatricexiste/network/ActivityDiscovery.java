@@ -264,7 +264,8 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
 
                         final View v = mInflater.inflate(R.layout.dialog_edittext, null);
                         final EditText txt = (EditText) v.findViewById(R.id.edittext);
-                        txt.setText(Save.getCustomName(host));
+                        final Save s = new Save();
+                        txt.setText(s.getCustomName(host));
 
                         final AlertDialog.Builder rename = new AlertDialog.Builder(
                                 ActivityDiscovery.this);
@@ -274,7 +275,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                             public void onClick(DialogInterface dialog, int which) {
                                 final String name = txt.getText().toString();
                                 host.hostname = name;
-                                Save.setCustomName(name, host.hardwareAddress);
+                                s.setCustomName(name, host.hardwareAddress);
                                 adapter.notifyDataSetChanged();
                                 Toast.makeText(ActivityDiscovery.this,
                                         R.string.discover_action_saved, Toast.LENGTH_SHORT).show();
@@ -283,7 +284,7 @@ final public class ActivityDiscovery extends ActivityNet implements OnItemClickL
                         rename.setNegativeButton(R.string.btn_remove, new OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 host.hostname = null;
-                                Save.removeCustomName(host.hardwareAddress);
+                                s.removeCustomName(host.hardwareAddress);
                                 adapter.notifyDataSetChanged();
                                 Toast.makeText(ActivityDiscovery.this,
                                         R.string.discover_action_deleted, Toast.LENGTH_SHORT)

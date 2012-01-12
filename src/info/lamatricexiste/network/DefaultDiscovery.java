@@ -32,16 +32,19 @@ public class DefaultDiscovery extends AbstractDiscovery {
     private final String TAG = "DefaultDiscovery";
     private final static int[] DPORTS = { 139, 445, 22, 80 };
     private final static int TIMEOUT_SCAN = 3600; // seconds
+    private final static int TIMEOUT_SHUTDOWN = 10; // seconds
     private final static int THREADS = 10; //FIXME: Test, plz set in options again ?
     private final int mRateMult = 5; // Number of alive hosts between Rate
     private int pt_move = 2; // 1=backward 2=forward
     private ExecutorService mPool;
     private boolean doRateControl;
     private RateControl mRateControl;
+    private Save mSave;
 
     public DefaultDiscovery(ActivityDiscovery discover) {
         super(discover);
         mRateControl = new RateControl();
+        mSave = new Save();
     }
 
     @Override
@@ -103,7 +106,8 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 try {
                     if(!mPool.awaitTermination(TIMEOUT_SCAN, TimeUnit.SECONDS)){
                         mPool.shutdownNow();
-                        if(!mPool.awaitTermination(TIMEOUT_SCAN, TimeUnit.SECONDS)){
+                        Log.e(TAG, "Shutting down pool");
+                        if(!mPool.awaitTermination(TIMEOUT_SHUTDOWN, TimeUnit.SECONDS)){
                             Log.e(TAG, "Pool did not terminate");
                         }
                     }
@@ -111,6 +115,8 @@ public class DefaultDiscovery extends AbstractDiscovery {
                     Log.e(TAG, e.getMessage());
                     mPool.shutdownNow();
                     Thread.currentThread().interrupt();
+                } finally {
+                    mSave.closeDb();
                 }
             }
         }
@@ -157,6 +163,10 @@ public class DefaultDiscovery extends AbstractDiscovery {
         }
 
         public void run() {
+            if(isCancelled()) {
+                publish(null);
+            }
+            Log.e(TAG, "run="+addr);
             // Create host object
             final HostBean host = new HostBean();
             host.responseTime = getRate();
@@ -259,7 +269,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
 
                 // FQDN
                 // Static
-                if ((host.hostname = Save.getCustomName(host)) == null) {
+                if ((host.hostname = mSave.getCustomName(host)) == null) {
                     // DNS
                     if (discover.prefs.getBoolean(Prefs.KEY_RESOLVE_NAME,
                             Prefs.DEFAULT_RESOLVE_NAME) == true) {
