@@ -20,7 +20,7 @@ Build
     cp local.properties-example local.properties
     vim local.properties #add path to the Android SDK
     # Checkout, build and install
-    git clone git://github.com/rorist/android-network-discovery.git
+    git clone https://github.com/rorist/android-network-discovery.git
     cd android-network-discovery;
     ant debug
     adb install bin/NetworkDiscovery-debug.apk
