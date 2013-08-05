@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 '''
- Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ Copyright (C) 2009-2013 Aubort Jean-Baptiste (Rorist)
  Licensed under GNU's GPL 2, see README
 '''
 
-import sqlite3, os, urllib
+import sqlite3, os, urllib, re
 
-db = '/var/www/lamatricexiste.info/htdocs/oui.db'
+db = 'oui.db'
 url = 'http://standards.ieee.org/regauth/oui/oui.txt'
 
 #Download the file
@@ -26,16 +26,15 @@ conn = sqlite3.connect(db)
 c = conn.cursor()
 c.execute("create table oui (mac text, vendor text)")
 
-i=0
 for line in open("oui.txt"):
-  if "base 16" in line:
-    i+=1
-    mac = line[:6]
-    vendor = line[22:].replace("'", "`").strip()
+  r = re.search('^\s*([0-9A-Fa-f]*)\s*\(base 16\)\s*(.*)$', line)
+  if r:
+    mac = r.group(1)
+    vendor = r.group(2).replace("'", "`").strip()
     try:
       c.execute("insert into oui values ('%s', '%s')"%(mac, vendor))
     except sqlite3.OperationalError, err:
-      print err 
+      print err
 
 #print "%s records"%i
 
