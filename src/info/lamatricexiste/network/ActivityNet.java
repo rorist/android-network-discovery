@@ -139,10 +139,13 @@ public abstract class ActivityNet extends Activity {
                                 setButtons(false);
                             }
                         }
-                    } else if (type == 3) { // ETH
+                    } else if (type == 3 || type == 9) { // ETH
+                        net.getIp();
+                        info_ip_str = getString(R.string.net_ip, net.ip, net.cidr, net.intf);
+                        info_in_str = "";
+                        info_mo_str = getString(R.string.net_mode) + getString(R.string.net_mode_eth);
+                        setButtons(false);
                         Log.i(TAG, "Ethernet connectivity detected!");
-                        info_mo_str = getString(R.string.net_mode)
-                                + getString(R.string.net_mode_eth);
                     } else {
                         Log.i(TAG, "Connectivity unknown!");
                         info_mo_str = getString(R.string.net_mode)
