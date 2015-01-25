@@ -43,11 +43,12 @@ public class HardwareAddress {
 
     public static String getHardwareAddress(String ip) {
         String hw = NetInfo.NOMAC;
+        BufferedReader bufferedReader = null;
         try {
             if (ip != null) {
                 String ptrn = String.format(MAC_RE, ip.replace(".", "\\."));
                 Pattern pattern = Pattern.compile(ptrn);
-                BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/net/arp"), BUF);
+                bufferedReader = new BufferedReader(new FileReader("/proc/net/arp"), BUF);
                 String line;
                 Matcher matcher;
                 while ((line = bufferedReader.readLine()) != null) {
@@ -57,13 +58,20 @@ public class HardwareAddress {
                         break;
                     }
                 }
-                bufferedReader.close();
             } else {
                 Log.e(TAG, "ip is null");
             }
         } catch (IOException e) {
             Log.e(TAG, "Can't open/read file ARP: " + e.getMessage());
             return hw;
+        } finally {
+            try {
+                if(bufferedReader != null) {
+                    bufferedReader.close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
         return hw;
     }
