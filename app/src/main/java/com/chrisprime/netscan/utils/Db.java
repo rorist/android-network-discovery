@@ -5,6 +5,7 @@
 
 package com.chrisprime.netscan.utils;
 
+import com.chrisprime.netscan.BuildConfig;
 import com.chrisprime.netscan.network.DownloadFile;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class Db {
     private Context ctxt = null;
 
     // Databases information
-    public static final String PATH = "/data/data/info.lamatricexiste.network/files/";
+    public static final String PATH = "/data/data/" + BuildConfig.APPLICATION_ID + "/files/";
     public static final String DB_SERVICES = "services.db";
     public static final String DB_PROBES = "probes.db";
     public static final String DB_NIC = "nic.db";

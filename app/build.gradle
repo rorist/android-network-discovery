@@ -12,7 +12,7 @@ android {
     useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
-        applicationId "info.lamatricexiste.network"
+        applicationId "com.chrisprime.netscan"
         minSdkVersion 3
         targetSdkVersion 23
     }

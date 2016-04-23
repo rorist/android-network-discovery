@@ -31,7 +31,7 @@ import android.view.Window;
 final public class ActivityMain extends Activity {
 
     public final static String TAG = "ActivityMain";
-    public static final String PKG = "info.lamatricexiste.network";
+    public static final String PKG = BuildConfig.APPLICATION_ID;
     public static SharedPreferences prefs = null;
 
     @Override
