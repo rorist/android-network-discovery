@@ -1,0 +1,36 @@
+apply plugin: 'com.android.application'
+
+android {
+
+/*
+    dependencies {
+
+    }
+*/
+    compileSdkVersion 23
+    buildToolsVersion "24.0.0 rc2"
+    useLibrary  'org.apache.http.legacy'
+
+    defaultConfig {
+        applicationId "info.lamatricexiste.network"
+        minSdkVersion 3
+        targetSdkVersion 23
+    }
+
+    lintOptions {
+        checkReleaseBuilds true
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            debuggable true
+        }
+    }
+}
