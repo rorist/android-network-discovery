@@ -1,0 +1,27 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+    useLibrary  'org.apache.http.legacy'
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 23
+    }
+
+    lintOptions {
+        checkReleaseBuilds true
+        abortOnError false
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            debuggable true
+        }
+    }
+}
