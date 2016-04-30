@@ -7,7 +7,15 @@
 
 package com.chrisprime.netscan.network;
 
-import com.chrisprime.netscan.ActivityMain;
+import android.content.Context;
+import android.util.Log;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,17 +29,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.SSLException;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.util.Log;
-
 public class DownloadFile {
 
     private static String TAG = "DownloadFile";
@@ -41,15 +38,11 @@ public class DownloadFile {
 
     public DownloadFile(final Context ctxt, String url, FileOutputStream out) throws IOException, NullPointerException {
         String version = "0.3.x";
-        try {
-            version = ctxt.getPackageManager().getPackageInfo(ActivityMain.TAG, 0).versionName;
-        } catch (NameNotFoundException e) {
-        }
 
         httpclient = new DefaultHttpClient();
         httpclient.getParams().setParameter("http.useragent", USERAGENT + version);
         InputStream in = openURL(url);
-        if(in == null){
+        if (in == null) {
             Log.e(TAG, "Unable to download: " + url);
             return;
         }
