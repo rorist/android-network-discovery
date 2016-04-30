@@ -1,3 +1,7 @@
+# android-network-discovery
+Android network tool: Discover hosts and scan their ports, in your Wifi/3G network.
+Now a Gradle library project with example simple usage module.
+
 Network Discovery
 =================
 
@@ -12,16 +16,14 @@ Features
 -  Export results to your sdcard in XML
 -  Fast access to Wifi Settings
 -  Adaptive scanning rate (slow start, then adaptive to network latency)
--  Open Source, available at http://github.com/rorist/android-network-discovery
+-  Open Source, available at http://github.com/free5ty1e/android-network-discovery
 
 Build
 -----
-    git clone https://github.com/rorist/android-network-discovery.git
-    cd android-network-discovery;
-    cp local.properties-example local.properties
-    vim local.properties #add path to the Android SDK
-    ant debug install
-
+    git clone https://github.com/free5ty1e/android-network-discovery.git
+    cd android-network-discovery
+    ./gradlew clean build
+    
 Todo
 ----
 
