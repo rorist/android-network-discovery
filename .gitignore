@@ -40,3 +40,5 @@ captures/
 *.jks
 
 # Created by .ignore support plugin (hsz.mobi)
+netscanlib.iml
+android-network-discovery.iml
