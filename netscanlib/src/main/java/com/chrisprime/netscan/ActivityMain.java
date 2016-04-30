@@ -5,32 +5,24 @@
 
 package com.chrisprime.netscan;
 
-import com.chrisprime.netscan.network.NetInfo;
-import com.chrisprime.netscan.utils.Db;
-import com.chrisprime.netscan.utils.DbUpdate;
-import com.chrisprime.netscan.utils.Prefs;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Window;
+
+import com.chrisprime.netscan.utils.CreateServicesDb;
+import com.chrisprime.netscan.utils.Db;
+import com.chrisprime.netscan.utils.DbUpdate;
+import com.chrisprime.netscan.utils.Prefs;
 
 public class ActivityMain extends Activity {
 
-    public final static String TAG = "ActivityMain";
     public static final String PKG = BuildConfig.APPLICATION_ID;
     public static SharedPreferences prefs = null;
 
@@ -45,13 +37,13 @@ public class ActivityMain extends Activity {
         prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
 
         // Reset interface
-        Editor edit = prefs.edit();
+        @SuppressLint("CommitPrefEdits") Editor edit = prefs.edit();    //Happens further down in a later init phase
         edit.putString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
 
         phase2(ctxt);
     }
 
-    private void phase2(final Context ctxt) {
+    protected void phase2(final Context ctxt) {
 
         class DbUpdateProbes extends DbUpdate {
             public DbUpdateProbes() {
@@ -103,12 +95,12 @@ public class ActivityMain extends Activity {
         } catch (ClassCastException e) {
             Editor edit = prefs.edit();
             edit.putInt(Prefs.KEY_RESET_NICDB, 1);
-            edit.commit();
+            edit.apply();
             phase3(ctxt);
         }
     }
 
-    private void phase3(final Context ctxt) {
+    protected void phase3(final Context ctxt) {
         // Install Services DB
 
         try {
@@ -123,90 +115,9 @@ public class ActivityMain extends Activity {
         }
     }
 
-    private void startDiscoverActivity(final Context ctxt) {
+    public void startDiscoverActivity(final Context ctxt) {
         startActivity(new Intent(ctxt, ActivityDiscovery.class));
         finish();
     }
 
-    static class CreateServicesDb extends AsyncTask<Void, String, Void> {
-        private WeakReference<Activity> mActivity;
-        private ProgressDialog progress;
-
-        public CreateServicesDb(Activity activity) {
-            mActivity = new WeakReference<Activity>(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            final Activity d = mActivity.get();
-            if (d != null) {
-                try {
-                    d.setProgressBarIndeterminateVisibility(true);
-                    progress = ProgressDialog.show(d, "", d.getString(R.string.task_services));
-                } catch (Exception e) {
-                    if (e != null) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            final Activity d = mActivity.get();
-            if (d != null) {
-                Db db = new Db(d.getApplicationContext());
-                try {
-                    // db.copyDbToDevice(R.raw.probes, Db.DB_PROBES);
-                    db.copyDbToDevice(R.raw.services, Db.DB_SERVICES);
-                    db.copyDbToDevice(R.raw.saves, Db.DB_SAVES);
-                    // Save this device in db
-                    NetInfo net = new NetInfo(d.getApplicationContext());
-                    ContentValues values = new ContentValues();
-                    values.put("_id", 0);
-                    if (net.macAddress == null) {
-                        net.macAddress = NetInfo.NOMAC;
-                    }
-                    values.put("mac", net.macAddress.replace(":", "").toUpperCase());
-                    values.put("name", d.getString(R.string.discover_myphone_name));
-                    SQLiteDatabase data = Db.openDb(Db.DB_SAVES);
-                    data.insert("nic", null, values);
-                    data.close();
-                } catch (NullPointerException e) {
-                    Log.e(TAG, e.getMessage());
-                } catch (IOException e) {
-                    if (e != null) {
-                        if (e.getMessage() != null) {
-                            Log.e(TAG, e.getMessage());
-                        } else {
-                            Log.e(TAG, "Unknown IOException");
-                        }
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void unused) {
-            final ActivityMain d = (ActivityMain) mActivity.get();
-            if (d != null) {
-                d.setProgressBarIndeterminateVisibility(true);
-                if (progress.isShowing()) {
-                    progress.dismiss();
-                }
-                try {
-                    Editor edit = prefs.edit();
-                    edit.putInt(Prefs.KEY_RESET_SERVICESDB, d.getPackageManager().getPackageInfo(
-                            PKG, 0).versionCode);
-                    edit.commit();
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, e.getMessage());
-                } finally {
-                    d.startDiscoverActivity(d);
-                }
-            }
-        }
-    }
 }
