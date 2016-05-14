@@ -1,7 +1,7 @@
-package com.chrisprime.netscan;
+package com.chrisprime.netscan.activities;
 
+import com.chrisprime.netscan.R;
 import com.chrisprime.netscan.network.NetInfo;
-import com.chrisprime.netscan.utils.Prefs;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -18,15 +18,15 @@ import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-public abstract class ActivityNet extends Activity {
+public abstract class CannedNetActivity extends Activity {
 
     private final String TAG = "NetState";
     private ConnectivityManager connMgr;
 
     protected final static String EXTRA_WIFI = "wifiDisabled";
     protected Context ctxt;
-    protected SharedPreferences prefs = null;
-    protected NetInfo net = null;
+    public SharedPreferences prefs = null;
+    public NetInfo net = null;
     protected String info_ip_str = "";
     protected String info_in_str = "";
     protected String info_mo_str = "";
@@ -127,8 +127,8 @@ public abstract class ActivityNet extends Activity {
                             setButtons(false);
                         }
                     } else if (type == ConnectivityManager.TYPE_MOBILE) { // 3G
-                        if (prefs.getBoolean(Prefs.KEY_MOBILE, Prefs.DEFAULT_MOBILE)
-                                || prefs.getString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF) != null) {
+                        if (prefs.getBoolean(CannedPrefsActivity.KEY_MOBILE, CannedPrefsActivity.DEFAULT_MOBILE)
+                                || prefs.getString(CannedPrefsActivity.KEY_INTF, CannedPrefsActivity.DEFAULT_INTF) != null) {
                             net.getMobileInfo();
                             if (net.carrier != null) {
                                 net.getIp();

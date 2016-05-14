@@ -7,7 +7,7 @@
 
 package com.chrisprime.netscan.network;
 
-import com.chrisprime.netscan.utils.Db;
+import com.chrisprime.netscan.utilities.Db;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -94,7 +94,7 @@ public class HardwareAddress {
             // FIXME: Reset db
             //Context ctxt = d.getApplicationContext();
             //Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-            //edit.putInt(Prefs.KEY_RESET_NICDB, 1);
+            //edit.putInt(CannedPrefsActivity.KEY_RESET_NICDB, 1);
             //edit.commit();
         }
         return ni;

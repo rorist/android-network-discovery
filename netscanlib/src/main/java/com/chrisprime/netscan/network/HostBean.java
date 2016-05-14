@@ -6,7 +6,7 @@
 // Inspired by http://connectbot.googlecode.com/svn/trunk/connectbot/src/org/connectbot/bean/HostBean.java
 package com.chrisprime.netscan.network;
 
-import com.chrisprime.netscan.ActivityMain;
+import com.chrisprime.netscan.activities.CannedScanActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,15 +16,15 @@ import android.os.Parcelable;
 
 public class HostBean implements Parcelable {
 
-    public static final String EXTRA = ActivityMain.PKG + ".extra";
-    public static final String EXTRA_POSITION = ActivityMain.PKG + ".extra_position";
-    public static final String EXTRA_HOST = ActivityMain.PKG + ".extra_host";
-    public static final String EXTRA_TIMEOUT = ActivityMain.PKG + ".network.extra_timeout";
-    public static final String EXTRA_HOSTNAME = ActivityMain.PKG + ".extra_hostname";
-    public static final String EXTRA_BANNERS = ActivityMain.PKG + ".extra_banners";
-    public static final String EXTRA_PORTSO = ActivityMain.PKG + ".extra_ports_o";
-    public static final String EXTRA_PORTSC = ActivityMain.PKG + ".extra_ports_c";
-    public static final String EXTRA_SERVICES = ActivityMain.PKG + ".extra_services";
+    public static final String EXTRA = CannedScanActivity.PKG + ".extra";
+    public static final String EXTRA_POSITION = CannedScanActivity.PKG + ".extra_position";
+    public static final String EXTRA_HOST = CannedScanActivity.PKG + ".extra_host";
+    public static final String EXTRA_TIMEOUT = CannedScanActivity.PKG + ".network.extra_timeout";
+    public static final String EXTRA_HOSTNAME = CannedScanActivity.PKG + ".extra_hostname";
+    public static final String EXTRA_BANNERS = CannedScanActivity.PKG + ".extra_banners";
+    public static final String EXTRA_PORTSO = CannedScanActivity.PKG + ".extra_ports_o";
+    public static final String EXTRA_PORTSC = CannedScanActivity.PKG + ".extra_ports_c";
+    public static final String EXTRA_SERVICES = CannedScanActivity.PKG + ".extra_services";
     public static final int TYPE_GATEWAY = 0;
     public static final int TYPE_COMPUTER = 1;
 

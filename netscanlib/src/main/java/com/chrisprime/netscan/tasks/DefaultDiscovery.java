@@ -3,14 +3,15 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan;
+package com.chrisprime.netscan.tasks;
 
+import com.chrisprime.netscan.activities.CannedDiscoveryActivity;
+import com.chrisprime.netscan.activities.CannedPrefsActivity;
 import com.chrisprime.netscan.network.HardwareAddress;
 import com.chrisprime.netscan.network.HostBean;
 import com.chrisprime.netscan.network.NetInfo;
 import com.chrisprime.netscan.network.RateControl;
-import com.chrisprime.netscan.utils.Prefs;
-import com.chrisprime.netscan.utils.Save;
+import com.chrisprime.netscan.utilities.Save;
 
 import java.io.IOException;
 import java.lang.IllegalArgumentException;
@@ -38,7 +39,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
     private RateControl mRateControl;
     private Save mSave;
 
-    public DefaultDiscovery(ActivityDiscovery discover) {
+    public DefaultDiscovery(CannedDiscoveryActivity discover) {
         super(discover);
         mRateControl = new RateControl();
         mSave = new Save();
@@ -48,10 +49,10 @@ public class DefaultDiscovery extends AbstractDiscovery {
     protected void onPreExecute() {
         super.onPreExecute();
         if (mDiscover != null) {
-            final ActivityDiscovery discover = mDiscover.get();
+            final CannedDiscoveryActivity discover = mDiscover.get();
             if (discover != null) {
-                doRateControl = discover.prefs.getBoolean(Prefs.KEY_RATECTRL_ENABLE,
-                        Prefs.DEFAULT_RATECTRL_ENABLE);
+                doRateControl = discover.prefs.getBoolean(CannedPrefsActivity.KEY_RATECTRL_ENABLE,
+                        CannedPrefsActivity.DEFAULT_RATECTRL_ENABLE);
             }
         }
     }
@@ -59,7 +60,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
     @Override
     protected Void doInBackground(Void... params) {
         if (mDiscover != null) {
-            final ActivityDiscovery discover = mDiscover.get();
+            final CannedDiscoveryActivity discover = mDiscover.get();
             if (discover != null) {
                 Log.v(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start
                         + "), end=" + NetInfo.getIpFromLongUnsigned(end) + " (" + end
@@ -143,10 +144,10 @@ public class DefaultDiscovery extends AbstractDiscovery {
         }
 
         if (mDiscover != null) {
-            final ActivityDiscovery discover = mDiscover.get();
+            final CannedDiscoveryActivity discover = mDiscover.get();
             if (discover != null) {
-                return Integer.parseInt(discover.prefs.getString(Prefs.KEY_TIMEOUT_DISCOVER,
-                        Prefs.DEFAULT_TIMEOUT_DISCOVER));
+                return Integer.parseInt(discover.prefs.getString(CannedPrefsActivity.KEY_TIMEOUT_DISCOVER,
+                        CannedPrefsActivity.DEFAULT_TIMEOUT_DISCOVER));
             }
         }
         return 1;
@@ -249,7 +250,7 @@ public class DefaultDiscovery extends AbstractDiscovery {
         }
 
         if (mDiscover != null) {
-            final ActivityDiscovery discover = mDiscover.get();
+            final CannedDiscoveryActivity discover = mDiscover.get();
             if (discover != null) {
                 // Mac Addr not already detected
                 if(NetInfo.NOMAC.equals(host.hardwareAddress)){
@@ -268,8 +269,8 @@ public class DefaultDiscovery extends AbstractDiscovery {
                 // Static
                 if ((host.hostname = mSave.getCustomName(host)) == null) {
                     // DNS
-                    if (discover.prefs.getBoolean(Prefs.KEY_RESOLVE_NAME,
-                            Prefs.DEFAULT_RESOLVE_NAME) == true) {
+                    if (discover.prefs.getBoolean(CannedPrefsActivity.KEY_RESOLVE_NAME,
+                            CannedPrefsActivity.DEFAULT_RESOLVE_NAME) == true) {
                         try {
                             host.hostname = (InetAddress.getByName(host.ipAddress)).getCanonicalHostName();
                         } catch (UnknownHostException e) {

@@ -3,12 +3,13 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan;
+package com.chrisprime.netscan.tasks;
 
+import com.chrisprime.netscan.activities.CannedDiscoveryActivity;
+import com.chrisprime.netscan.activities.CannedPrefsActivity;
 import com.chrisprime.netscan.network.HardwareAddress;
 import com.chrisprime.netscan.network.HostBean;
 import com.chrisprime.netscan.network.NetInfo;
-import com.chrisprime.netscan.utils.Prefs;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -20,21 +21,21 @@ public class DnsDiscovery extends AbstractDiscovery {
 
     private final String TAG = "DnsDiscovery";
 
-    public DnsDiscovery(ActivityDiscovery discover) {
+    public DnsDiscovery(CannedDiscoveryActivity discover) {
         super(discover);
     }
 
     @Override
     protected Void doInBackground(Void... params) {
         if (mDiscover != null) {
-            final ActivityDiscovery discover = mDiscover.get();
+            final CannedDiscoveryActivity discover = mDiscover.get();
             if (discover != null) {
                 Log.i(TAG, "start=" + NetInfo.getIpFromLongUnsigned(start) + " (" + start
                         + "), end=" + NetInfo.getIpFromLongUnsigned(end) + " (" + end
                         + "), length=" + size);
 
-                int timeout = Integer.parseInt(discover.prefs.getString(Prefs.KEY_TIMEOUT_DISCOVER,
-                        Prefs.DEFAULT_TIMEOUT_DISCOVER));
+                int timeout = Integer.parseInt(discover.prefs.getString(CannedPrefsActivity.KEY_TIMEOUT_DISCOVER,
+                        CannedPrefsActivity.DEFAULT_TIMEOUT_DISCOVER));
                 Log.i(TAG, "timeout=" + timeout + "ms");
 
                 for (long i = start; i < end + 1; i++) {

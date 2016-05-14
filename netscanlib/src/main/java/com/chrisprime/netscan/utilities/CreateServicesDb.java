@@ -1,4 +1,4 @@
-package com.chrisprime.netscan.utils;
+package com.chrisprime.netscan.utilities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -8,7 +8,8 @@ import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
-import com.chrisprime.netscan.ActivityMain;
+import com.chrisprime.netscan.activities.CannedPrefsActivity;
+import com.chrisprime.netscan.activities.CannedScanActivity;
 import com.chrisprime.netscan.R;
 import com.chrisprime.netscan.network.NetInfo;
 
@@ -71,21 +72,21 @@ public class CreateServicesDb extends AsyncTask<Void, String, Void> {
 
     @Override
     protected void onPostExecute(Void unused) {
-        final ActivityMain d = (ActivityMain) mActivity.get();
+        final CannedScanActivity d = (CannedScanActivity) mActivity.get();
         if (d != null) {
             d.setProgressBarIndeterminateVisibility(true);
             if (progress.isShowing()) {
                 progress.dismiss();
             }
             try {
-                SharedPreferences.Editor edit = ActivityMain.prefs.edit();
-                edit.putInt(Prefs.KEY_RESET_SERVICESDB, d.getPackageManager().getPackageInfo(
-                        ActivityMain.PKG, 0).versionCode);
+                SharedPreferences.Editor edit = NetScanInitHelper.sPreferences.edit();
+                edit.putInt(CannedPrefsActivity.KEY_RESET_SERVICESDB, d.getPackageManager().getPackageInfo(
+                        CannedScanActivity.PKG, 0).versionCode);
                 edit.apply();
             } catch (PackageManager.NameNotFoundException e) {
                 Timber.e(e, e.getMessage());
             } finally {
-                d.startDiscoverActivity(d);
+                NetScanInitHelper.startScanningActivity(d);
             }
         }
     }

@@ -6,7 +6,7 @@
 //am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
 package com.chrisprime.netscan.network;
 
-import com.chrisprime.netscan.utils.Prefs;
+import com.chrisprime.netscan.activities.CannedPrefsActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -79,18 +79,18 @@ public class NetInfo {
 
     @Override
     public int hashCode() {
-        int ip_custom = prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM) ? 1:0;
-        int ip_start = prefs.getString(Prefs.KEY_IP_START, Prefs.DEFAULT_IP_START).hashCode();
-        int ip_end = prefs.getString(Prefs.KEY_IP_END, Prefs.DEFAULT_IP_END).hashCode();
-        int cidr_custom = prefs.getBoolean(Prefs.KEY_CIDR_CUSTOM, Prefs.DEFAULT_CIDR_CUSTOM) ? 1:0;
-        int cidr = prefs.getString(Prefs.KEY_CIDR, Prefs.DEFAULT_CIDR).hashCode();
+        int ip_custom = prefs.getBoolean(CannedPrefsActivity.KEY_IP_CUSTOM, CannedPrefsActivity.DEFAULT_IP_CUSTOM) ? 1:0;
+        int ip_start = prefs.getString(CannedPrefsActivity.KEY_IP_START, CannedPrefsActivity.DEFAULT_IP_START).hashCode();
+        int ip_end = prefs.getString(CannedPrefsActivity.KEY_IP_END, CannedPrefsActivity.DEFAULT_IP_END).hashCode();
+        int cidr_custom = prefs.getBoolean(CannedPrefsActivity.KEY_CIDR_CUSTOM, CannedPrefsActivity.DEFAULT_CIDR_CUSTOM) ? 1:0;
+        int cidr = prefs.getString(CannedPrefsActivity.KEY_CIDR, CannedPrefsActivity.DEFAULT_CIDR).hashCode();
         return 42 + intf.hashCode() + ip.hashCode() + cidr + ip_custom + ip_start + ip_end + cidr_custom + cidr;
     }
 
     public void getIp() {
-        intf = prefs.getString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
+        intf = prefs.getString(CannedPrefsActivity.KEY_INTF, CannedPrefsActivity.DEFAULT_INTF);
         try {
-            if (intf == Prefs.DEFAULT_INTF || NOIF.equals(intf)) {
+            if (intf == CannedPrefsActivity.DEFAULT_INTF || NOIF.equals(intf)) {
                 // Automatic interface selection
                 for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
                         .hasMoreElements();) {
@@ -102,13 +102,13 @@ public class NetInfo {
                     }
                 }
             } else {
-                // Defined interface from Prefs
+                // Defined interface from CannedPrefsActivity
                 ip = getInterfaceFirstIp(NetworkInterface.getByName(intf));
             }
         } catch (SocketException e) {
             Log.e(TAG, e.getMessage());
-            //Editor edit = prefs.edit();
-            //edit.putString(Prefs.KEY_INTF, Prefs.DEFAULT_INTF);
+            //Editor edit = sPreferences.edit();
+            //edit.putString(CannedPrefsActivity.KEY_INTF, CannedPrefsActivity.DEFAULT_INTF);
             //edit.commit();
         }
         getCidr();

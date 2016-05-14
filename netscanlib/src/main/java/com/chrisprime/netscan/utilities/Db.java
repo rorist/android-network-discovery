@@ -3,7 +3,7 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan.utils;
+package com.chrisprime.netscan.utilities;
 
 import com.chrisprime.netscan.network.DownloadFile;
 
@@ -18,7 +18,6 @@ import java.util.zip.GZIPInputStream;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.os.Environment;
 import android.util.Log;
 
 public class Db {
@@ -43,7 +42,7 @@ public class Db {
         new File(sPath, DB_SAVES);
 
         //noinspection ResultOfMethodCallIgnored
-//        new File(getDbPath()).mkdirs();
+        new File(getDbPath()).mkdirs();
     }
 
     public static String getDbPath() {
@@ -53,13 +52,13 @@ public class Db {
 
     public static String getDbPath(Context context) {
         if (sPath == null || sPath.length() == 0) {
-            sPath = context.getFilesDir() + File.separator;
+            sPath = context.getApplicationInfo().dataDir + File.separator + "databases" + File.separator;
         }
         return sPath;
     }
 
-    public static SQLiteDatabase openDb(String db_name) {
-        return openDb(db_name, SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+    public static SQLiteDatabase openDb(String dbName) {
+        return openDb(dbName, SQLiteDatabase.NO_LOCALIZED_COLLATORS);
     }
 
     public static SQLiteDatabase openDb(String db_name, int flags) {

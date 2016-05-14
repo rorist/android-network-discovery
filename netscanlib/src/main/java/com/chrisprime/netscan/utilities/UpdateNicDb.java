@@ -3,9 +3,10 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan.utils;
+package com.chrisprime.netscan.utilities;
 
-import com.chrisprime.netscan.ActivityMain;
+import com.chrisprime.netscan.activities.CannedPrefsActivity;
+import com.chrisprime.netscan.activities.CannedScanActivity;
 import com.chrisprime.netscan.R;
 import com.chrisprime.netscan.network.DownloadFile;
 import com.chrisprime.netscan.network.NetInfo;
@@ -135,8 +136,8 @@ public class UpdateNicDb extends AsyncTask<Void, String, Void> {
                         Toast.LENGTH_LONG).show();
                 try {
                     Editor edit = prefs.edit();
-                    edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
-                            ActivityMain.PKG, 0).versionCode);
+                    edit.putInt(CannedPrefsActivity.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
+                            CannedScanActivity.PKG, 0).versionCode);
                     edit.commit();
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, e.getMessage());

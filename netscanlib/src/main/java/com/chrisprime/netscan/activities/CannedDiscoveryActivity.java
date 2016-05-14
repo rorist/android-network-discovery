@@ -3,14 +3,17 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan;
+package com.chrisprime.netscan.activities;
 
+import com.chrisprime.netscan.tasks.AbstractDiscovery;
+import com.chrisprime.netscan.tasks.DefaultDiscovery;
+import com.chrisprime.netscan.tasks.DnsDiscovery;
+import com.chrisprime.netscan.R;
 import com.chrisprime.netscan.network.HostBean;
 import com.chrisprime.netscan.network.NetInfo;
-import com.chrisprime.netscan.utils.Export;
-import com.chrisprime.netscan.utils.Help;
-import com.chrisprime.netscan.utils.Prefs;
-import com.chrisprime.netscan.utils.Save;
+import com.chrisprime.netscan.utilities.Export;
+import com.chrisprime.netscan.utilities.Help;
+import com.chrisprime.netscan.utilities.Save;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -41,9 +44,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class ActivityDiscovery extends ActivityNet implements OnItemClickListener {
+public class CannedDiscoveryActivity extends CannedNetActivity implements OnItemClickListener {
 
-    private final String TAG = "ActivityDiscovery";
+    private final String TAG = "CannedDiscoveryActivity";
     public final static long VIBRATE = (long) 250;
     public final static int SCAN_PORT_RESULT = 1;
     public static final int MENU_SCAN_SINGLE = 0;
@@ -82,7 +85,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
         Button btn_options = (Button) findViewById(R.id.btn_options);
         btn_options.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                startActivity(new Intent(ctxt, Prefs.class));
+                startActivity(new Intent(ctxt, CannedPrefsActivity.class));
             }
         });
 
@@ -122,13 +125,13 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+        menu.add(0, CannedDiscoveryActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
-        menu.add(0, ActivityDiscovery.MENU_EXPORT, 0, R.string.preferences_export).setIcon(
+        menu.add(0, CannedDiscoveryActivity.MENU_EXPORT, 0, R.string.preferences_export).setIcon(
                 android.R.drawable.ic_menu_save);
-        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, R.string.btn_options).setIcon(
+        menu.add(0, CannedDiscoveryActivity.MENU_OPTIONS, 0, R.string.btn_options).setIcon(
                 android.R.drawable.ic_menu_preferences);
-        menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
+        menu.add(0, CannedDiscoveryActivity.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
         return true;
     }
@@ -136,16 +139,16 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case ActivityDiscovery.MENU_SCAN_SINGLE:
+            case CannedDiscoveryActivity.MENU_SCAN_SINGLE:
                 scanSingle(this, null);
                 return true;
-            case ActivityDiscovery.MENU_OPTIONS:
-                startActivity(new Intent(ctxt, Prefs.class));
+            case CannedDiscoveryActivity.MENU_OPTIONS:
+                startActivity(new Intent(ctxt, CannedPrefsActivity.class));
                 return true;
-            case ActivityDiscovery.MENU_HELP:
+            case CannedDiscoveryActivity.MENU_HELP:
                 startActivity(new Intent(ctxt, Help.class));
                 return true;
-            case ActivityDiscovery.MENU_EXPORT:
+            case CannedDiscoveryActivity.MENU_EXPORT:
                 export();
                 return true;
         }
@@ -181,16 +184,16 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
 
         // Get ip information
         network_ip = NetInfo.getUnsignedLongFromIp(net.ip);
-        if (prefs.getBoolean(Prefs.KEY_IP_CUSTOM, Prefs.DEFAULT_IP_CUSTOM)) {
+        if (prefs.getBoolean(CannedPrefsActivity.KEY_IP_CUSTOM, CannedPrefsActivity.DEFAULT_IP_CUSTOM)) {
             // Custom IP
-            network_start = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_START,
-                    Prefs.DEFAULT_IP_START));
-            network_end = NetInfo.getUnsignedLongFromIp(prefs.getString(Prefs.KEY_IP_END,
-                    Prefs.DEFAULT_IP_END));
+            network_start = NetInfo.getUnsignedLongFromIp(prefs.getString(CannedPrefsActivity.KEY_IP_START,
+                    CannedPrefsActivity.DEFAULT_IP_START));
+            network_end = NetInfo.getUnsignedLongFromIp(prefs.getString(CannedPrefsActivity.KEY_IP_END,
+                    CannedPrefsActivity.DEFAULT_IP_END));
         } else {
             // Custom CIDR
-            if (prefs.getBoolean(Prefs.KEY_CIDR_CUSTOM, Prefs.DEFAULT_CIDR_CUSTOM)) {
-                net.cidr = Integer.parseInt(prefs.getString(Prefs.KEY_CIDR, Prefs.DEFAULT_CIDR));
+            if (prefs.getBoolean(CannedPrefsActivity.KEY_CIDR_CUSTOM, CannedPrefsActivity.DEFAULT_CIDR_CUSTOM)) {
+                net.cidr = Integer.parseInt(prefs.getString(CannedPrefsActivity.KEY_CIDR, CannedPrefsActivity.DEFAULT_CIDR));
             }
             // Detected IP
             int shift = (32 - net.cidr);
@@ -203,8 +206,8 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
             }
             // Reset ip start-end (is it really convenient ?)
             Editor edit = prefs.edit();
-            edit.putString(Prefs.KEY_IP_START, NetInfo.getIpFromLongUnsigned(network_start));
-            edit.putString(Prefs.KEY_IP_END, NetInfo.getIpFromLongUnsigned(network_end));
+            edit.putString(CannedPrefsActivity.KEY_IP_START, NetInfo.getIpFromLongUnsigned(network_start));
+            edit.putString(CannedPrefsActivity.KEY_IP_END, NetInfo.getIpFromLongUnsigned(network_end));
             edit.commit();
         }
     }
@@ -244,7 +247,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
 
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         final HostBean host = hosts.get(position);
-        AlertDialog.Builder dialog = new AlertDialog.Builder(ActivityDiscovery.this);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(CannedDiscoveryActivity.this);
         dialog.setTitle(R.string.discover_action_title);
         dialog.setItems(new CharSequence[] { getString(R.string.discover_action_scan),
                 getString(R.string.discover_action_rename) }, new OnClickListener() {
@@ -252,7 +255,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
                 switch (which) {
                     case 0:
                         // Start portscan
-                        Intent intent = new Intent(ctxt, ActivityPortscan.class);
+                        Intent intent = new Intent(ctxt, CannedPortscanActivity.class);
                         intent.putExtra(EXTRA_WIFI, NetInfo.isConnected(ctxt));
                         intent.putExtra(HostBean.EXTRA, host);
                         startActivityForResult(intent, SCAN_PORT_RESULT);
@@ -267,7 +270,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
                         txt.setText(s.getCustomName(host));
 
                         final AlertDialog.Builder rename = new AlertDialog.Builder(
-                                ActivityDiscovery.this);
+                                CannedDiscoveryActivity.this);
                         rename.setView(v);
                         rename.setTitle(R.string.discover_action_rename);
                         rename.setPositiveButton(R.string.btn_ok, new OnClickListener() {
@@ -276,7 +279,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
                                 host.hostname = name;
                                 s.setCustomName(name, host.hardwareAddress);
                                 adapter.notifyDataSetChanged();
-                                Toast.makeText(ActivityDiscovery.this,
+                                Toast.makeText(CannedDiscoveryActivity.this,
                                         R.string.discover_action_saved, Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -285,7 +288,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
                                 host.hostname = null;
                                 s.removeCustomName(host.hardwareAddress);
                                 adapter.notifyDataSetChanged();
-                                Toast.makeText(ActivityDiscovery.this,
+                                Toast.makeText(CannedDiscoveryActivity.this,
                                         R.string.discover_action_deleted, Toast.LENGTH_SHORT)
                                         .show();
                             }
@@ -362,21 +365,21 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
     private void startDiscovering() {
         int method = 0;
         try {
-            method = Integer.parseInt(prefs.getString(Prefs.KEY_METHOD_DISCOVER,
-                    Prefs.DEFAULT_METHOD_DISCOVER));
+            method = Integer.parseInt(prefs.getString(CannedPrefsActivity.KEY_METHOD_DISCOVER,
+                    CannedPrefsActivity.DEFAULT_METHOD_DISCOVER));
         } catch (NumberFormatException e) {
             Log.e(TAG, e.getMessage());
         }
         switch (method) {
             case 1:
-                mDiscoveryTask = new DnsDiscovery(ActivityDiscovery.this);
+                mDiscoveryTask = new DnsDiscovery(CannedDiscoveryActivity.this);
                 break;
             case 2:
                 // Root
                 break;
             case 0:
             default:
-                mDiscoveryTask = new DefaultDiscovery(ActivityDiscovery.this);
+                mDiscoveryTask = new DefaultDiscovery(CannedDiscoveryActivity.this);
         }
         mDiscoveryTask.setNetwork(network_ip, network_start, network_end);
         mDiscoveryTask.execute();
@@ -432,7 +435,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
         dialogIp.setPositiveButton(R.string.btn_scan, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dlg, int sumthin) {
                 // start scanportactivity
-                Intent intent = new Intent(ctxt, ActivityPortscan.class);
+                Intent intent = new Intent(ctxt, CannedPortscanActivity.class);
                 intent.putExtra(HostBean.EXTRA_HOST, txt.getText().toString());
                 try {
                     intent.putExtra(HostBean.EXTRA_HOSTNAME, (InetAddress.getByName(txt.getText()
@@ -462,7 +465,7 @@ public class ActivityDiscovery extends ActivityNet implements OnItemClickListene
             public void onClick(DialogInterface dlg, int sumthin) {
                 final String fileEdit = txt.getText().toString();
                 if (e.fileExists(fileEdit)) {
-                    AlertDialog.Builder fileExists = new AlertDialog.Builder(ActivityDiscovery.this);
+                    AlertDialog.Builder fileExists = new AlertDialog.Builder(CannedDiscoveryActivity.this);
                     fileExists.setTitle(R.string.export_exists_title);
                     fileExists.setMessage(R.string.export_exists_msg);
                     fileExists.setPositiveButton(R.string.btn_yes,

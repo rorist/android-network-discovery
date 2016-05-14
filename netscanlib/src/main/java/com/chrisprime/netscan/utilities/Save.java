@@ -3,7 +3,7 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan.utils;
+package com.chrisprime.netscan.utilities;
 
 import com.chrisprime.netscan.network.HostBean;
 
@@ -39,9 +39,7 @@ public class Save {
             } else if(host.hostname != null) {
                 name = host.hostname;
             }
-        } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
-        } catch (IllegalStateException e) {
+        } catch (NullPointerException | SQLiteException | IllegalStateException e) {
             Log.e(TAG, e.getMessage());
         } finally {
             if (c != null) {

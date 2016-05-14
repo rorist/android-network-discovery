@@ -3,13 +3,14 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan;
+package com.chrisprime.netscan.activities;
 
+import com.chrisprime.netscan.tasks.AsyncPortscan;
+import com.chrisprime.netscan.R;
 import com.chrisprime.netscan.network.HostBean;
 import com.chrisprime.netscan.network.NetInfo;
-import com.chrisprime.netscan.utils.Db;
-import com.chrisprime.netscan.utils.Help;
-import com.chrisprime.netscan.utils.Prefs;
+import com.chrisprime.netscan.utilities.Db;
+import com.chrisprime.netscan.utilities.Help;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -50,12 +51,12 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ActivityPortscan extends TabActivity {
+public class CannedPortscanActivity extends TabActivity {
 
     private static final String REQ_SERVICE = "select service from services where port=? limit 1";
     private static final String REQ_PROBES = "select service, regex from probes";
     private static final int PROGRESS_MAX = 10000;
-    private final String TAG = "ActivityPortscan";
+    private final String TAG = "CannedPortscanActivity";
     private final String PLACEHOLDER = "placeholder";
     private Context ctxt;
     private SharedPreferences prefs;
@@ -96,7 +97,7 @@ public class ActivityPortscan extends TabActivity {
                 host.portsOpen = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSO));
                 host.portsClosed = intArrayToArrayList(extras.getIntArray(HostBean.EXTRA_PORTSC));
                 host.responseTime = extras.getInt(HostBean.EXTRA_TIMEOUT, Integer
-                        .parseInt(Prefs.DEFAULT_TIMEOUT_PORTSCAN));
+                        .parseInt(CannedPrefsActivity.DEFAULT_TIMEOUT_PORTSCAN));
                 // FIXME: banners and services not supported (HashMap's)
             }
         }
@@ -139,7 +140,7 @@ public class ActivityPortscan extends TabActivity {
 
         // Scan
         btn_scan = (Button) findViewById(R.id.btn_scan);
-        if (extras.getBoolean(ActivityNet.EXTRA_WIFI) == false) {
+        if (extras.getBoolean(CannedNetActivity.EXTRA_WIFI) == false) {
             btn_scan.setClickable(false);
             btn_scan.setEnabled(false);
             btn_scan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.disabled, 0, 0);
@@ -220,11 +221,11 @@ public class ActivityPortscan extends TabActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, ActivityDiscovery.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
+        menu.add(0, CannedDiscoveryActivity.MENU_SCAN_SINGLE, 0, R.string.scan_single_title).setIcon(
                 android.R.drawable.ic_menu_mylocation);
-        menu.add(0, ActivityDiscovery.MENU_OPTIONS, 0, R.string.btn_options).setIcon(
+        menu.add(0, CannedDiscoveryActivity.MENU_OPTIONS, 0, R.string.btn_options).setIcon(
                 android.R.drawable.ic_menu_preferences);
-        menu.add(0, ActivityDiscovery.MENU_HELP, 0, R.string.preferences_help).setIcon(
+        menu.add(0, CannedDiscoveryActivity.MENU_HELP, 0, R.string.preferences_help).setIcon(
                 android.R.drawable.ic_menu_help);
         return true;
     }
@@ -232,13 +233,13 @@ public class ActivityPortscan extends TabActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case ActivityDiscovery.MENU_SCAN_SINGLE:
-                ActivityDiscovery.scanSingle(this, host.ipAddress);
+            case CannedDiscoveryActivity.MENU_SCAN_SINGLE:
+                CannedDiscoveryActivity.scanSingle(this, host.ipAddress);
                 return true;
-            case ActivityDiscovery.MENU_OPTIONS:
-                startActivity(new Intent(ctxt, Prefs.class));
+            case CannedDiscoveryActivity.MENU_OPTIONS:
+                startActivity(new Intent(ctxt, CannedPrefsActivity.class));
                 return true;
-            case ActivityDiscovery.MENU_HELP:
+            case CannedDiscoveryActivity.MENU_HELP:
                 startActivity(new Intent(ctxt, Help.class));
                 return true;
         }
@@ -307,7 +308,7 @@ public class ActivityPortscan extends TabActivity {
                 holder.banner.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
                         final AlertDialog.Builder dialog = new AlertDialog.Builder(
-                                ActivityPortscan.this);
+                                CannedPortscanActivity.this);
                         dialog.setTitle(getString(R.string.scan_banner_title, port));
                         dialog.setMessage(holder.banner.getText());
                         dialog.setNegativeButton(R.string.btn_close, null);
@@ -349,7 +350,7 @@ public class ActivityPortscan extends TabActivity {
         if (service.equals("ssh")) {
             pk = "ConnectBot (ssh)";
             search = "market://search?q=pname:org.connectbot";
-            String user = prefs.getString(Prefs.KEY_SSH_USER, Prefs.DEFAULT_SSH_USER);
+            String user = prefs.getString(CannedPrefsActivity.KEY_SSH_USER, CannedPrefsActivity.DEFAULT_SSH_USER);
             intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("ssh://" + user + "@" + host.ipAddress + ":" + port + "/#"
                     + user + "@" + host.ipAddress + ":" + port));
@@ -406,13 +407,13 @@ public class ActivityPortscan extends TabActivity {
         protected void onPreExecute() {
             // Get start/end ports
             try {
-                port_start = Integer.parseInt(prefs.getString(Prefs.KEY_PORT_START,
-                        Prefs.DEFAULT_PORT_START));
-                port_end = Integer.parseInt(prefs.getString(Prefs.KEY_PORT_END,
-                        Prefs.DEFAULT_PORT_END));
+                port_start = Integer.parseInt(prefs.getString(CannedPrefsActivity.KEY_PORT_START,
+                        CannedPrefsActivity.DEFAULT_PORT_START));
+                port_end = Integer.parseInt(prefs.getString(CannedPrefsActivity.KEY_PORT_END,
+                        CannedPrefsActivity.DEFAULT_PORT_END));
             } catch (NumberFormatException e) {
-                port_start = Integer.parseInt(Prefs.DEFAULT_PORT_START);
-                port_end = Integer.parseInt(Prefs.DEFAULT_PORT_END);
+                port_start = Integer.parseInt(CannedPrefsActivity.DEFAULT_PORT_START);
+                port_end = Integer.parseInt(CannedPrefsActivity.DEFAULT_PORT_END);
             }
             nb_port = port_end - port_start + 2;
             // Initialize arrays and views
@@ -477,9 +478,9 @@ public class ActivityPortscan extends TabActivity {
         @Override
         protected void onPostExecute(Void unused) {
             // Finishing
-            if (prefs.getBoolean(Prefs.KEY_VIBRATE_FINISH, Prefs.DEFAULT_VIBRATE_FINISH) == true) {
+            if (prefs.getBoolean(CannedPrefsActivity.KEY_VIBRATE_FINISH, CannedPrefsActivity.DEFAULT_VIBRATE_FINISH) == true) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(ActivityDiscovery.VIBRATE);
+                v.vibrate(CannedDiscoveryActivity.VIBRATE);
             }
             if (host.portsOpen.size() == 0) {
                 makeToast(R.string.scan_noport);
@@ -531,7 +532,7 @@ public class ActivityPortscan extends TabActivity {
                 } catch (SQLiteException e) {
                     Log.e(TAG, e.getMessage());
                     Editor edit = PreferenceManager.getDefaultSharedPreferences(ctxt).edit();
-                    edit.putInt(Prefs.KEY_RESET_SERVICESDB, 1);
+                    edit.putInt(CannedPrefsActivity.KEY_RESET_SERVICESDB, 1);
                     edit.commit();
                 }
             }
@@ -615,9 +616,9 @@ public class ActivityPortscan extends TabActivity {
     }
 
     private int getTimeout() {
-        if (prefs.getBoolean(Prefs.KEY_TIMEOUT_FORCE, Prefs.DEFAULT_TIMEOUT_FORCE)) {
-            return Integer.parseInt(prefs.getString(Prefs.KEY_TIMEOUT_PORTSCAN,
-                    Prefs.DEFAULT_TIMEOUT_PORTSCAN));
+        if (prefs.getBoolean(CannedPrefsActivity.KEY_TIMEOUT_FORCE, CannedPrefsActivity.DEFAULT_TIMEOUT_FORCE)) {
+            return Integer.parseInt(prefs.getString(CannedPrefsActivity.KEY_TIMEOUT_PORTSCAN,
+                    CannedPrefsActivity.DEFAULT_TIMEOUT_PORTSCAN));
         }
         return host.responseTime;
     }

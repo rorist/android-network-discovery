@@ -13,9 +13,9 @@
  * http://svn.apache.org/viewvc/mina/trunk/core/src/main/java/org/apache/mina/transport/socket/nio/
  */
 
-package com.chrisprime.netscan;
+package com.chrisprime.netscan.tasks;
 
-import com.chrisprime.netscan.utils.Prefs;
+import com.chrisprime.netscan.activities.CannedPrefsActivity;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -82,7 +82,7 @@ public class AsyncPortscan extends AsyncTask<Void, Object, Void> {
         if (d != null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(d
                     .getApplicationContext());
-            getBanner = prefs.getBoolean(Prefs.KEY_BANNER, Prefs.DEFAULT_BANNER);
+            getBanner = prefs.getBoolean(CannedPrefsActivity.KEY_BANNER, CannedPrefsActivity.DEFAULT_BANNER);
         }
     }
 

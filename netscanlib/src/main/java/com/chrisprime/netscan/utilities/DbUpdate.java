@@ -3,10 +3,11 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan.utils;
+package com.chrisprime.netscan.utilities;
 
-import com.chrisprime.netscan.ActivityMain;
+import com.chrisprime.netscan.activities.CannedScanActivity;
 import com.chrisprime.netscan.R;
+import com.chrisprime.netscan.activities.CannedPrefsActivity;
 import com.chrisprime.netscan.network.DownloadFile;
 import com.chrisprime.netscan.network.NetInfo;
 
@@ -46,7 +47,7 @@ public class DbUpdate extends AsyncTask<Void, String, Void> {
         this.file = file;
         this.database = database;
         this.field = field;
-        mActivity = new WeakReference<Activity>(activity);
+        mActivity = new WeakReference<>(activity);
         if (mActivity != null) {
             final Activity d = mActivity.get();
             if (d != null) {
@@ -143,8 +144,8 @@ public class DbUpdate extends AsyncTask<Void, String, Void> {
                         Toast.LENGTH_LONG).show();
                 try {
                     Editor edit = prefs.edit();
-                    edit.putInt(Prefs.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
-                            ActivityMain.PKG, 0).versionCode);
+                    edit.putInt(CannedPrefsActivity.KEY_RESET_NICDB, d.getPackageManager().getPackageInfo(
+                            CannedScanActivity.PKG, 0).versionCode);
                     edit.commit();
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, e.getMessage());

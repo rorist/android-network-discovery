@@ -3,7 +3,7 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan.utils;
+package com.chrisprime.netscan.utilities;
 
 import com.chrisprime.netscan.network.HostBean;
 import com.chrisprime.netscan.network.NetInfo;

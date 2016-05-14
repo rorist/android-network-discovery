@@ -3,11 +3,11 @@
  * Licensed under GNU's GPL 2, see README
  */
 
-package com.chrisprime.netscan.utils;
+package com.chrisprime.netscan.activities;
 
-import com.chrisprime.netscan.ActivityMain;
 import com.chrisprime.netscan.R;
 import com.chrisprime.netscan.network.NetInfo;
+import com.chrisprime.netscan.utilities.UpdateNicDb;
 
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -38,11 +38,11 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
-public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+public class CannedPrefsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
     // TODO: Show values in summary
 
-    private final String TAG = "Prefs";
+    private final String TAG = "CannedPrefsActivity";
 
     public final static String KEY_RESOLVE_NAME = "resolve_name";
     public final static boolean DEFAULT_RESOLVE_NAME = true;
@@ -145,7 +145,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         Preference resetdb = (Preference) ps.findPreference(KEY_RESET_NICDB);
         resetdb.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                new UpdateNicDb(Prefs.this);
+                new UpdateNicDb(CannedPrefsActivity.this);
                 return false;
             }
         });
@@ -238,7 +238,7 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
         // Version
         Preference version = (Preference) ps.findPreference(KEY_VERSION);
         try {
-            version.setSummary(getPackageManager().getPackageInfo(ActivityMain.PKG, 0).versionName);
+            version.setSummary(getPackageManager().getPackageInfo(CannedScanActivity.PKG, 0).versionName);
         } catch (NameNotFoundException e) {
             version.setSummary("0.3.x");
         }
