@@ -2,26 +2,34 @@
 buildscript {
     repositories {
         jcenter()
-        mavenCentral()
         //Backup http source for dependencies just in case certificates get updated and builds start failing again
-        jcenter {
-            //noinspection GroovyAssignabilityCheck
+        jcenter {//noinspection GroovyAssignabilityCheck
             url "http://jcenter.bintray.com/"
+        }
+
+        mavenCentral()
+        maven {
+            url "http://repo1.maven.org/maven2"
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.android.tools.build:gradle:2.2.2'
     }
 }
 
+/*
 allprojects {
     repositories {
         jcenter()
-        mavenCentral()
         //Backup http source for dependencies just in case certificates get updated and builds start failing again
-        jcenter {
-            //noinspection GroovyAssignabilityCheck
+        jcenter {//noinspection GroovyAssignabilityCheck
             url "http://jcenter.bintray.com/"
+        }
+
+        mavenCentral()
+        maven {
+            url "http://repo1.maven.org/maven2"
         }
     }
 }
+*/

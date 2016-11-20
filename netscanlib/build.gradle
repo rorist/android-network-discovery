@@ -1,13 +1,26 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    repositories {
+        jcenter()
+        //Backup http source for dependencies just in case certificates get updated and builds start failing again
+        jcenter {//noinspection GroovyAssignabilityCheck
+            url "http://jcenter.bintray.com/"
+        }
+
+        mavenCentral()
+        maven {
+            url "http://repo1.maven.org/maven2"
+        }
+    }
+
+    compileSdkVersion 25
+    buildToolsVersion "25"
     useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 23
+        targetSdkVersion 25
     }
 
     lintOptions {
