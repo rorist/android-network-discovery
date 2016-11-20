@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2009-2010 Aubort Jean-Baptiste (Rorist)
+ Licensed under GNU's GPL 2, see README
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="15dip">
+
+        <TextView
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:typeface="monospace"
+            android:text="@string/preferences_help" />
+    
+        <TextView
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"
+            android:text="@string/help_discovery_title"
+            style="@style/help_title" />
+        <TextView
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"
+            android:text="@string/help_discovery_content"
+            style="@style/help_content" />
+    
+        <TextView
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"
+            android:text="@string/help_portscan_title"
+            style="@style/help_title" />
+        <TextView
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"
+            android:text="@string/help_portscan_content"
+            style="@style/help_content" />
+    
+        <TextView
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"
+            android:text="@string/help_links_title"
+            style="@style/help_title" />
+        <TextView
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"
+            android:text="@string/help_links_content"
+            style="@style/help_content"
+            android:autoLink="web" />
+
+    </LinearLayout>
+        
+</ScrollView>

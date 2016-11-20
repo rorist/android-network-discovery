@@ -1,0 +1,45 @@
+apply plugin: 'com.android.library'
+
+android {
+    repositories {
+        jcenter()
+        //Backup http source for dependencies just in case certificates get updated and builds start failing again
+        jcenter {//noinspection GroovyAssignabilityCheck
+            url "http://jcenter.bintray.com/"
+        }
+
+        mavenCentral()
+        maven {
+            url "http://repo1.maven.org/maven2"
+        }
+    }
+
+    compileSdkVersion 25
+    buildToolsVersion "25"
+    useLibrary  'org.apache.http.legacy'
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 25
+    }
+
+    lintOptions {
+        checkReleaseBuilds true
+        abortOnError false
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            debuggable true
+        }
+    }
+
+}
+
+dependencies {
+    compile 'com.jakewharton.timber:timber:3.1.0'
+}
