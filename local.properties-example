@@ -2,3 +2,5 @@ sdk-location=/opt/android-sdk
 sdk.dir=/opt/android-sdk
 target=android-17
 
+key.store=/home/<user>/.android/my-release-key.keystore
+key.alias=<Alias name>
