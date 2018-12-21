@@ -1,7 +1,6 @@
 gen
 bin
 .settings
-libs
 network.kpf
 scripts/db-to-gz.py
 local.properties
