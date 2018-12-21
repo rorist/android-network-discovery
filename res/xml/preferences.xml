@@ -144,9 +144,6 @@
 <PreferenceCategory
     android:title="@string/preferences_credits">
     <Preference
-        android:key="donate"
-        android:layout="@layout/donate" />
-    <Preference
         android:key="website"
         android:title="@string/preferences_website_title"/>
     <Preference

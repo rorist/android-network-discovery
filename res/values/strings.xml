@@ -99,7 +99,6 @@
     <string name="preferences_portscan">Port Scan</string>
     <string name="preferences_advanced">General</string>
     
-    <string name="preferences_donate">Donate: If you like this app, you can buy me a beer.</string>
     <string name="preferences_resolve_name_title">Resolve Hostname</string>
     <string name="preferences_resolve_name_summary">Use system DNS to resolve ip addresses</string>
     <string name="preferences_vibrate_title">Vibrate</string>

@@ -100,7 +100,6 @@
     <string name="preferences_portscan">Escaner de puertos</string>
     <string name="preferences_advanced">General</string>
     
-    <string name="preferences_donate">Donar: Si te gusta esta app, puedes invitarme a una cerveza ;) .</string>
     <string name="preferences_resolve_name_title">Resolver Hostname</string>
     <string name="preferences_resolve_name_summary">Usar DNS del sistema para resolver direcciones IP</string>
     <string name="preferences_vibrate_title">Vibrar</string>
