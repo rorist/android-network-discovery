@@ -66,7 +66,7 @@
     
     <supports-screens />
     <!-- FIXME: Isn't the app compatible with API Level 1 ? -->
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="26" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
